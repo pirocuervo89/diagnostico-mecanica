@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import apiRouter from './src/routes/api.js';
+import sintomasRouter from './src/routes/sintomas.js';
 
 dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api', apiRouter);
+app.use('/api/sintomas', sintomasRouter);
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
   extensions: ['html']
