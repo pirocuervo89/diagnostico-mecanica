@@ -1,0 +1,1645 @@
+[
+  {
+    "id": "maletin-108-eco",
+    "name": "Maletín de Llaves de Vaso y Carraca (108 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Juego completo de vasos hexagonales cortos, largos y puntas Torx en cromo vanadio. El número 1 en ventas para aficionados.",
+    "tags": [
+      "herramientas",
+      "carraca",
+      "barato"
+    ],
+    "price": "Económico",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "maletin-facom-pro",
+    "name": "Estuche Técnico de Vasos 1/4\" R.360NANO Premium",
+    "manufacturer": "Facom",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Maletín profesional ultra compacto. Incluye carraca con mango giratorio de alta velocidad para espacios reducidos.",
+    "tags": [
+      "herramientas",
+      "facom",
+      "premium"
+    ],
+    "price": "Profesional",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "dinamometrica-clic-eco",
+    "name": "Llave Dinamométrica Micrométrica de Clic 1/2\"",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Llaves Dinamométricas",
+    "description": "Llave manual con escala grabada a láser. Sistema de clic sonoro para un apriete seguro de llantas y suspensiones.",
+    "tags": [
+      "herramientas",
+      "dinamometrica",
+      "barato"
+    ],
+    "price": "Económico",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "dinamometrica-digital-pro",
+    "name": "Llave Dinamométrica Digital de Precisión 1/2\"",
+    "manufacturer": "Profesional",
+    "category": "Herramientas",
+    "subcategory": "Llaves Dinamométricas",
+    "description": "Pantalla LCD con avisador acústico de torque. Diseñada para mecánicos que requieren precisión exacta en culatas.",
+    "tags": [
+      "herramientas",
+      "dinamometrica",
+      "premium"
+    ],
+    "price": "Profesional",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "elevador-2c-4t",
+    "name": "Elevador Electrohidráulico de 2 Columnas (4.000 Kg)",
+    "manufacturer": "Equipos de Taller",
+    "category": "Maquinaria",
+    "subcategory": "Elevación Pesada",
+    "description": "Elevador profesional homologado con brazos extensibles y desbloqueo magnético automático. Máxima comisión.",
+    "tags": [
+      "maquinaria",
+      "elevador",
+      "premium"
+    ],
+    "price": "Maquinaria Taller",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "compresor-200l-pro",
+    "name": "Compresor de Aire Bicilíndrico de Correa (200 Litros)",
+    "manufacturer": "Mecánica Pro",
+    "category": "Maquinaria",
+    "subcategory": "Aire Comprimido",
+    "description": "Calderín industrial trifásico de alta presión. Flujo constante para pistolas de impacto pesadas y cabinas.",
+    "tags": [
+      "maquinaria",
+      "compresor",
+      "premium"
+    ],
+    "price": "Maquinaria Taller",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "estacion-fap-pro",
+    "name": "Estación Neumática Avanzada de Limpieza DPF / FAP",
+    "manufacturer": "Técnico Especializado",
+    "category": "Maquinaria",
+    "subcategory": "Limpieza de Filtros",
+    "description": "Máquina profesional automática para lavar y descarbonizar filtros de partículas obstruidos. Alta rentabilidad.",
+    "tags": [
+      "maquinaria",
+      "dpf",
+      "limpieza",
+      "premium"
+    ],
+    "price": "Maquinaria Taller",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "obd-pocket-eco",
+    "name": "Lector OBD2 Inalámbrico Bluetooth de Bolsillo",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Escáner básico multimarca. Borra la luz de Check Engine y lee sensores del motor en vivo desde el smartphone.",
+    "tags": [
+      "diagnosis",
+      "obd",
+      "barato"
+    ],
+    "price": "Económico",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "launch-cpr-pro",
+    "name": "Máquina de Diagnosis Multimarca Profesional CPR129X",
+    "manufacturer": "Launch",
+    "category": "Diagnosis",
+    "subcategory": "Consolas Profesionales",
+    "description": "Consola táctil para Motor, Transmisión, ABS y SRS. Incluye 8 resets avanzados y actualizaciones Wi-Fi.",
+    "tags": [
+      "diagnosis",
+      "scanner",
+      "launch",
+      "premium"
+    ],
+    "price": "Profesional",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "castrol-5w30-5l",
+    "name": "Aceite Sintético Castrol EDGE 5W-30 C3 (5 Litros)",
+    "manufacturer": "Castrol",
+    "category": "Líquidos y Químicos",
+    "subcategory": "Aceites de Motor",
+    "description": "Lubricante de alta gama con tecnología Fluid Titanium. Reduce la fricción y protege sistemas con DPF/FAP.",
+    "tags": [
+      "quimicos",
+      "aceite",
+      "motor"
+    ],
+    "price": "Consumible",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "liqui-moly-egr",
+    "name": "Spray Técnico Limpiador de Admisión y Válvulas EGR",
+    "manufacturer": "Liqui Moly",
+    "category": "Líquidos y Químicos",
+    "subcategory": "Productos de Limpieza",
+    "description": "Disolvente activo en aerosol de alta potencia. Elimina hollín y carbonilla en la admisión sin desmontar.",
+    "tags": [
+      "quimicos",
+      "limpieza",
+      "egr"
+    ],
+    "price": "Consumible",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "egr-valeo-oe",
+    "name": "Válvula EGR Eléctrica de Emisiones Original",
+    "manufacturer": "Valeo",
+    "category": "Repuestos",
+    "subcategory": "Válvulas EGR",
+    "description": "Recambio original homologado. Resuelve tirones, caídas de potencia y códigos de avería de flujo DTC P0401.",
+    "tags": [
+      "repuestos",
+      "egr",
+      "motor"
+    ],
+    "price": "Recambio Técnico",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "alternador-bosch-140a",
+    "name": "Alternador Automotriz Reforzado 12V (140 Amperios)",
+    "manufacturer": "Bosch",
+    "category": "Repuestos",
+    "subcategory": "Alternadores",
+    "description": "Alternador de alta capacidad diseñado para garantizar una carga de batería óptima y suministro eléctrico estable.",
+    "tags": [
+      "repuestos",
+      "alternador",
+      "electricidad"
+    ],
+    "price": "Recambio Técnico",
+    "image": "https://media-amazon.com",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "man-108",
+    "name": "Maletín de Llaves de Vaso y Carraca (108 Piezas)",
+    "manufacturer": "Mannesmann",
+    "category": "Herramientas",
+    "subcategory": "Maletines",
+    "description": "Juego de carracas de 1/2 y 1/4 con vasos hexagonales. El superventas en Amazon para aficionados.",
+    "price": "Económico",
+    "affiliateUrl": "#",
+    "image": "https://m.media-://amazon.com81B-8Z0lScL._AC_SL1500_.jpg"
+  },
+  {
+    "id": "fac-nano",
+    "name": "Estuche Técnico de Vasos 1/4\" R.360NANO",
+    "manufacturer": "Facom",
+    "category": "Herramientas",
+    "subcategory": "Maletines",
+    "description": "Maletín profesional ultra compacto con carraca de mango giratorio de alta velocidad.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "dina-clic",
+    "name": "Llave Dinamométrica de Clic 1/2\" (40-210 Nm)",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Dinamométricas",
+    "description": "Llave clásica de acero templado. Sistema de clic sonoro para apriete controlado de llantas.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "dina-digi",
+    "name": "Llave Dinamométrica Digital de Precisión 1/2\"",
+    "manufacturer": "Profesional",
+    "category": "Herramientas",
+    "subcategory": "Dinamométricas",
+    "description": "Pantalla LCD con avisador acústico. Calibrada para aprietes críticos en culatas.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "dew-dcf900",
+    "name": "Llave de Impacto XR 18V Brushless (1.898 Nm)",
+    "manufacturer": "DeWalt",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Pistola inalámbrica de alto torque sin escobillas. Par masivo ideal para palieres.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-fijas",
+    "name": "Juego de Llaves Fijas Combinadas (12 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Llaves Manuales",
+    "description": "Llaves de acero al carbono con pulido satinado. Medidas de 6 a 22 mm, ideales para mantenimientos caseros.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-destor",
+    "name": "Kit de Destornilladores de Golpe Magnéticos (6 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Destornilladores",
+    "description": "Puntas imantadas de cromo vanadio con mango antideslizante. Estructura apta para pequeños impactos.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-extractor",
+    "name": "Llave de Cadenas Universal para Filtros de Aceite",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Herramienta ajustable con cadena de alta resistencia para aflojar filtros encastrados en turismos.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-alicates",
+    "name": "Alicates para Abrazaderas de Manguitos y Radiadores",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Alicates",
+    "description": "Mordaza con cable flexible a distancia para abrir abrazaderas elásticas en zonas difíciles del vano motor.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-puntas",
+    "name": "Estuche de Puntas Especiales Torx, Allen y XZN (40 Piezas)",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Maletines",
+    "description": "Puntas de acero S2 de alta dureza con adaptadores para carraca de 1/2 y 3/8. Imprescindible para mecánica europea.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-extractor",
+    "name": "Kit Extractor Hidráulico de Rodamientos y Bujes (10T)",
+    "manufacturer": "Profesional",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Chasis",
+    "description": "Maletín extractor con husillo hidráulico de 10 toneladas de fuerza. Extrae bujes agarrotados sin dañar manguetas.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-neumatica",
+    "name": "Llave de Carraca Neumática de Alta Resistencia 1/2\"",
+    "manufacturer": "Hazet / Facom",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Herramienta neumática de par regulable con cabezal compacto para aflojar tuercas de motor a gran velocidad.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-calado",
+    "name": "Conjunto Universal de Calado de Distribuciones Multimarca",
+    "manufacturer": "Ks Tools",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Maletín con pasadores y bloqueadores de árboles de levas/cigüeñal para motores diésel y gasolina del grupo VAG, PSA y Ford.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-impactoneu",
+    "name": "Pistola de Impacto Neumática de Composite (1.600 Nm)",
+    "manufacturer": "Chicago Pneumatic",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Llave de impacto neumática ultra ligera con cuerpo de composite. Mecanismo de doble maza para un desapriete masivo en camiones.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-fijasfacom",
+    "name": "Juego de Llaves Combinadas OGV Premium (14 Piezas)",
+    "manufacturer": "Facom",
+    "category": "Herramientas",
+    "subcategory": "Llaves Manuales",
+    "description": "Llaves de perfil OGV que evitan el redondeo de las tuercas transmitiendo la fuerza a las caras. Acero forjado indestructible.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-allen",
+    "name": "Juego de Llaves Allen de Bola Extralargas (9 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Llaves Manuales",
+    "description": "Llaves hexagonales de punta de bola para trabajar en ángulos de hasta 25 grados. Fabricadas en cromo vanadio.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-corte",
+    "name": "Alicates de Corte Diagonal para Electricidad",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Alicates",
+    "description": "Alicates de corte para cables eléctricos y bridas. Mango aislado ergonómico antideslizante para un agarre cómodo.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-pistones",
+    "name": "Kit Reposicionador de Pistones de Freno Universal",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Frenos",
+    "description": "Estuche con adaptadores magnéticos para retraer los pistones de pinzas traseras y delanteras al cambiar pastillas.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-iman",
+    "name": "Imán Telescópico con Luz LED Recoge-Tornillos",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Accesorios",
+    "description": "Varilla extensible imantada con iluminación en la punta. Ideal para rescatar tornillos o vasos caídos en el vano motor.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-tester",
+    "name": "Lápiz Comprobador Digital de Líquido de Frenos",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Medición",
+    "description": "Lápiz de diagnóstico rápido por conductividad. Mide el porcentaje de agua en el líquido de frenos (DOT3/DOT4/DOT5).",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-compacta",
+    "name": "Llave de Impacto a Batería XR 18V Ultra Compacta",
+    "manufacturer": "DeWalt",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Pistola miniatura de 300 Nm de par. Diseñada para trabajar en pasos de rueda y vanos motor estrechos sin cables.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-destorfacom",
+    "name": "Juego de Destornilladores Protwist Pro (8 Piezas)",
+    "manufacturer": "Facom",
+    "category": "Herramientas",
+    "subcategory": "Destornilladores",
+    "description": "Destornilladores de punta negra con tratamiento térmico de alta precisión y mango de máxima transmisión de torque.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-muelles",
+    "name": "Compresor Profesional de Muelles de Amortiguador McPherson",
+    "manufacturer": "Ks Tools",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Chasis",
+    "description": "Garras reforzadas con bloqueo de seguridad para comprimir muelles de suspensión pesados de forma segura.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-endoscopio",
+    "name": "Cámara Endoscópica Automotriz con Pantalla HD",
+    "manufacturer": "Profesional",
+    "category": "Herramientas",
+    "subcategory": "Diagnosis",
+    "description": "Sonda flexible resistente al aceite con doble cámara para inspeccionar el interior de cilindros, válvulas y catalizadores.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-foso",
+    "name": "Gato Hidráulico de Foso / Transmisiones (500 Kg)",
+    "manufacturer": "Mega / Jomafa",
+    "category": "Herramientas",
+    "subcategory": "Elevación Pesada",
+    "description": "Elevador de columna móvil con pedal hidráulico. Diseñado para bajar cajas de cambios, transmisiones y depósitos.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-1",
+    "name": "Bruñidor de Cilindros de Motor (3 Piedras Intercambiables)",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Herramienta acoplable al taladro para eliminar el vitrificado de las camisas de cilindro y asentar segmentos.",
+    "price": "Económico",
+    "affiliateUrl": "#",
+    "image": "https://m.media-amazon.com/images/I/81B-8Z0lScL._AC_SL1500_.jpg"
+  },
+  {
+    "id": "eco-add-2",
+    "name": "Compresor de Segmentos de Pistón Ajustable",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Banda de acero templado con trinquete para comprimir los segmentos al introducir los pistones en el bloque.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-3",
+    "name": "Cepillo Limpiador de Bornes y Terminales de Batería",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Accesorios",
+    "description": "Herramienta con cerdas de acero internas y externas para eliminar el sulfato y asegurar un buen contacto eléctrico.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-4",
+    "name": "Bandeja Magnética Inoxidable Rectangular Doble",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Accesorios",
+    "description": "Plato imantado doble de gran superficie. Evita la pérdida de tornillos, tuercas y vasos al desmontar culatas.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-5",
+    "name": "Ganchos Extractores de Juntas Tóricas y Retenes (4 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Accesorios",
+    "description": "Puntas de acero afiladas con varios ángulos para extraer retenes de aceite, juntas y guardapolvos con comodidad.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-6",
+    "name": "Estetoscopio Mecánico de Diagnóstico para Motores",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Diagnosis",
+    "description": "Sonda metálica con auriculares acústicos para aislar y localizar ruidos internos de taqués, cojinetes o poleas.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-7",
+    "name": "Llave de Filtro de Aceite de 3 Patas Autoajustable",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Garras bidireccionales de acero que se cierran solas al aplicar fuerza con la carraca. Para filtros muy duros.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-8",
+    "name": "Juego de Botadores y Cinceles de Acero (12 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Herramientas de Golpe",
+    "description": "Herramientas de acero forjado con tratamiento térmico para extraer pasadores, remaches y marcar puntos de taladrado.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-9",
+    "name": "Extractor de Brazos de Limpiaparabrisas y Bornes",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Carrocería",
+    "description": "Mini extractor mecánico de dos patas reforzadas para desclavar los brazos del limpia u oxidaciones en los bornes.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-10",
+    "name": "Kit de Palancas de Nailon para Desmontar Molduras (11 Pzs)",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Carrocería",
+    "description": "Herramientas plásticas antirayaduras para quitar paneles de puertas, grapas y radios sin dañar tapizados.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-11",
+    "name": "Juego de Llaves Torx en L Inviolables (9 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Llaves Manuales",
+    "description": "Llaves de perfil Torx con perforación central de seguridad (T10 a T50). Necesarias para sensores modernos.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-12",
+    "name": "Kit de Reparación de Roscas de Cárter de Aceite",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Machos de roscar y tapones sobredimensionados con juntas de cobre para solucionar roscas pasadas de cárter.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-13",
+    "name": "Densímetro Comprobador de Ácido de Baterías",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Medición",
+    "description": "Pipeta con flotador graduado para medir la gravedad específica del electrolito en baterías con mantenimiento.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-14",
+    "name": "Juego de Alicates para Arandelas Segeer (4 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Alicates",
+    "description": "Incluye alicates rectos y curvos tanto para abrir como para cerrar anillos de retención interiores y exteriores.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-15",
+    "name": "Kit Centrador de Embragues Universal Manual",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Transmisión",
+    "description": "Conos guía de plástico rígido para alinear perfectamente el disco de embrague antes de apretar la maza.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-16",
+    "name": "Llave de Bujías Articulada con Mango en T (16 y 21mm)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Llaves Manuales",
+    "description": "Llave larga con junta cardan flexible e interior de goma para sujetar y extraer bujías profundamente encastradas.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-17",
+    "name": "Prensa Manual para Retraer Pistones de Freno Simples",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Frenos",
+    "description": "Husillo metálico con pletina plana para empujar pistones delanteros rectos de forma rápida al cambiar pastillas.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-18",
+    "name": "Cortatubos de Cadena para Tubos de Escape",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Chasis",
+    "description": "Cadena equipada con múltiples discos de corte de aleación para seccionar líneas de escape en espacios muy reducidos.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-19",
+    "name": "Garras Compresoras de Muelles de Amortiguador (2 Pzs)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Chasis",
+    "description": "Varillas roscadas con garras dobles de seguridad para comprimir muelles de suspensión básicos particulares.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-20",
+    "name": "Kit de Reparación de Pinchazos por Mechas Neumáticas",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Neumáticos",
+    "description": "Maletín con punzón, aguja e hilos de caucho vulcanizado para reparar pinchazos en la banda de rodadura.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-21",
+    "name": "Pie de Rey / Calibre Digital de Acero Inoxidable",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Medición",
+    "description": "Pantalla LCD con resolución de 0,01mm para medir espesores de pastillas, diámetros de ejes o profundidades.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-22",
+    "name": "Embudo de Llenado con Manguera Flexible y Filtro",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Accesorios",
+    "description": "Embudo de boca ancha con tamiz metálico interior para retener impurezas al rellenar combustibles o fluidos.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-23",
+    "name": "Destornillador Sacagrapas y Palanca de Tapizados",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Carrocería",
+    "description": "Varilla forjada con punta en U bifurcada para hacer palanca y extraer grapas plásticas de paneles sin romperlas.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-24",
+    "name": "Llave en Cruz Cuadrada y Hexagonal para Tapones de Cárter",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Llaves Manuales",
+    "description": "Herramienta maciza de cuatro puntas con las medidas más habituales de tapones de vaciado de aceite motor y cambio.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-add-25",
+    "name": "Buscapolos / Tester de Corriente 12V con Pinza Cocodrilo",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Medición",
+    "description": "Lápiz de comprobación eléctrica con lámpara interior para localizar fusibles fundidos o cables con corriente de 12V.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-imp-1",
+    "name": "Llave de Impacto Eléctrica 220V con Cable (450 Nm)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Alternativa económica conectada a la red eléctrica. Ofrece un torque constante ideal para aficionados en garajes.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-imp-2",
+    "name": "Pistola de Impacto Inalámbrica 20V (350 Nm)",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Llave de impacto compacta a batería. Incluye vasos de impacto y maletín, perfecta para bricolaje del automóvil.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-imp-3",
+    "name": "Pistola de Impacto Neumática 1/2\" Básica (550 Nm)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Llave de impacto para compresores estándar. Cuerpo metálico clásico, robusta y económica para tuercas generales.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-imp-4",
+    "name": "Llave de Impacto Eléctrica 12V para Toma de Mechero",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Herramienta portátil de emergencia que se conecta directamente al coche. Diseñada para aflojar ruedas en carretera.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-imp-5",
+    "name": "Atornillador de Impacto Hexagonal de 1/4\" a Batería",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Herramienta ligera de alto régimen de giros por minuto. Ideal para quitar tornillos de tapas de motor y plásticos.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-mal-1",
+    "name": "Juego de Llaves de Vaso y Carracas (216 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Gran estuche con 3 carracas (1/2, 3/8, 1/4), vasos cortos, vasos largos, llaves combinadas fijas y cientos de puntas.",
+    "price": "Económico",
+    "affiliateUrl": "#",
+    "image": "https://m.media-://amazon.com81B-8Z0lScL._AC_SL1500_.jpg"
+  },
+  {
+    "id": "eco-mal-2",
+    "name": "Estuche de Herramientas Mecánicas Completo (172 Piezas)",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Set de cromo vanadio satinado con vasos Torx hembra (E-Torx), vasos de bujía articulados y extensiones de extensión de barra.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-mal-3",
+    "name": "Maletín de Herramientas de Taller Masivo (242 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Kit ultra completo diseñado para cubrir cualquier reparación doméstica del coche. Incluye puntas XZN e inviolables.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-mal-4",
+    "name": "Juego de Carracas Profesionales de Garaje (192 Piezas)",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Juego de vasos robusto en estuche de transporte con cierres metálicos reforzados para evitar aperturas accidentales.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "eco-mal-5",
+    "name": "Maletín de Mecánica Integral y Suministros (300 Piezas)",
+    "manufacturer": "Línea Económica",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "El mega kit definitivo. Combina carracas, destornilladores intercambiables, puntas especiales y llaves combinadas.",
+    "price": "Económico",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-imp-1",
+    "name": "Pistola de Impacto Neumática Premium (2.100 Nm)",
+    "manufacturer": "DeWalt / Chicago Pneumatic",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Llave de impacto neumática con cuerpo de composite ligero y doble maza. Diseñada para desapriete masivo en suspensiones de furgones.",
+    "price": "Gama Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-imp-2",
+    "name": "Llave de Impacto a Batería M18 FUEL de Alto Par (1/2\")",
+    "manufacturer": "Milwaukee",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Herramienta inalámbrica profesional con motor sin escobillas y par de apriete superior a 1400 Nm. El estándar en talleres de competición.",
+    "price": "Gama Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-imp-3",
+    "name": "Pistola de Impacto de 3/4\" con Motor Brushless 40V",
+    "manufacturer": "Makita",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Especial para tuercas de palieres grandes y vehículos industriales. 4 velocidades de impacto ajustables eléctricamente.",
+    "price": "Gama Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-imp-4",
+    "name": "Carraca Neumática de Impacto Mini de 1/2\" Pro",
+    "manufacturer": "Facom",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Cabezal ultra compacto de titanio. Evita el contragolpe en la muñeca del mecánico y cabe en cualquier hueco del vano motor.",
+    "price": "Gama Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-imp-5",
+    "name": "Llave de Impacto Neumática Industrial de 1\" Extrema",
+    "manufacturer": "Ingersoll Rand",
+    "category": "Herramientas",
+    "subcategory": "Pistolas de Impacto",
+    "description": "Maquinaria pesada para tuercas de camión, autobuses y vehículos agrícolas. Máximo retorno de inversión y comisión masiva.",
+    "price": "Gama Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-mal-1",
+    "name": "Maletín de Herramientas de Taller Premium Facom",
+    "manufacturer": "Facom",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Caja modular ultra resistente con carracas de estanqueidad total al polvo y líquidos. Acero de aleación de por vida.",
+    "price": "Gama Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-mal-2",
+    "name": "Estuche Técnico de Vasos y Carraca Especial de Taller",
+    "manufacturer": "Hazet",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Fabricado íntegramente en Alemania. Herramientas con grabado profundo de medidas y carracas de dientes finos para ángulos mínimos.",
+    "price": "Gama Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-mal-3",
+    "name": "Juego de Vasos de Impacto y Carracas Reforzadas CHROME plus",
+    "manufacturer": "KS Tools",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Estuche masivo con recubrimiento de cromo espejo de alta resistencia. Incluye todas las variantes de vasos largos y articulados.",
+    "price": "Gama Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-mal-4",
+    "name": "Maletín de Llaves de Vaso de Alta Precisión QuickRelease",
+    "manufacturer": "Stahlwille",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Sistema de bloqueo de seguridad QuickRelease que impide que los vasos se caigan dentro del motor de forma accidental.",
+    "price": "Gama Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-mal-5",
+    "name": "Mega Maletín de Herramientas de Taller con Maleta Rígida",
+    "manufacturer": "Gedore",
+    "category": "Herramientas",
+    "subcategory": "Maletines Completos",
+    "description": "Set masivo profesional con bandejas de foam azul para comprobar la falta de cualquier herramienta al instante.",
+    "price": "Gama Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-1",
+    "name": "Extractor Hidráulico de Rodamientos y Bujes de Rueda (10T)",
+    "manufacturer": "Ks Tools / Jomafa",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Chasis",
+    "description": "Husillo hidráulico de alta presión que genera 10 toneladas de fuerza para desclavar bujes oxidados sin esfuerzo.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-2",
+    "name": "Conjunto Universal de Calado de Distribuciones Multimarca",
+    "manufacturer": "Ks Tools",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Maletín completo con pasadores y bloqueadores de árboles de levas y cigüeñal para motores VAG, PSA, BMW y Ford.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-3",
+    "name": "Juego de Llaves Combinadas con Perfil OGV (14 Piezas)",
+    "manufacturer": "Facom",
+    "category": "Herramientas",
+    "subcategory": "Llaves Manuales",
+    "description": "Llaves de perfil patentado que ejerce la fuerza sobre las caras de las tuercas evitando redondearlas. Acero forjado.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-4",
+    "name": "Cámara Endoscópica de Automoción HD con Doble Lente",
+    "manufacturer": "Profesional",
+    "category": "Herramientas",
+    "subcategory": "Diagnosis",
+    "description": "Sonda flexible resistente a aceites y combustibles para inspeccionar cilindros, válvulas y catalizadores desde la pantalla.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-5",
+    "name": "Gato Hidráulico de Foso y Fosos de Transmisión (500 Kg)",
+    "manufacturer": "Mega",
+    "category": "Herramientas",
+    "subcategory": "Elevación Pesada",
+    "description": "Elevador vertical de columna con accionamiento por pedal. Crucial para bajar cajas de cambios y transmisiones.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-6",
+    "name": "Juego de Destornilladores Técnicos Protwist Pro (8 Piezas)",
+    "manufacturer": "Facom",
+    "category": "Herramientas",
+    "subcategory": "Destornilladores",
+    "description": "Puntas de acero templado tratadas con zinc negro de altísima precisión. Mango ergonómico de máxima transmisión.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-7",
+    "name": "Compresor Profesional de Muelles de Suspensión McPherson",
+    "manufacturer": "Ks Tools",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Chasis",
+    "description": "Garras macizas reforzadas con pasadores de seguridad anticaída para comprimir muelles de furgonetas y berlinas pesadas.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-8",
+    "name": "Multímetro Digital Automotriz Pro con Pinza Amperimétrica",
+    "manufacturer": "Fluke / Profesional",
+    "category": "Herramientas",
+    "subcategory": "Medición",
+    "description": "Equipo de precisión para buscar consumos parásitos de batería en reposo, caídas de tensión y señales de sensores.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-9",
+    "name": "Amoladora Angular Inalámbrica 18V Brushless XR",
+    "manufacturer": "DeWalt",
+    "category": "Herramientas",
+    "subcategory": "Herramientas Eléctricas",
+    "description": "Radial a batería de alta potencia con freno de disco electrónico y embrague de seguridad para cortes limpios en escapes.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-10",
+    "name": "Lámparas de Inspección LED de Taller Recargables",
+    "manufacturer": "Philips",
+    "category": "Herramientas",
+    "subcategory": "Iluminación LED",
+    "description": "Conjunto de linternas resistentes a golpes, grasas y disolventes con bases imantadas y ganchos de sujeción 360.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-11",
+    "name": "Destornillador de Impacto Mecánico con Juego de Puntas",
+    "manufacturer": "Facom",
+    "category": "Herramientas",
+    "subcategory": "Herramientas de Golpe",
+    "description": "Herramienta pesada que transforma un golpe seco de martillo en un giro de torsión masivo para tornillos gripados.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-12",
+    "name": "Extractor Mecánico de Inyectores Common Rail por Inercia",
+    "manufacturer": "Ks Tools",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Barra extractora pesada con maza de impacto para desclavar inyectores diésel pegados por el chapapote de culata.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-13",
+    "name": "Estación Grapadora Térmica para Reparación de Plásticos",
+    "manufacturer": "Técnico Especializado",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Carrocería",
+    "description": "Equipo profesional para fundir grapas de acero en plásticos rajados. Ideal para salvar defensas, faros y molduras.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-14",
+    "name": "Kit de Extracción de Calentadores Rotos en Culata",
+    "manufacturer": "Ks Tools",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Herramientas guía de altísima precisión para taladrar y extraer la punta rota de calentadores diésel sin desmontar culata.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-15",
+    "name": "Manómetro Comprobador de Presión de Aceite de Motor",
+    "manufacturer": "Profesional",
+    "category": "Herramientas",
+    "subcategory": "Medición",
+    "description": "Reloj graduado de precisión con manguera flexible reforzada y racores roscados para medir la salud de la bomba de aceite.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-16",
+    "name": "Kit Comprobador de Fugas y Presión en Radiadores (28 Pzs)",
+    "manufacturer": "Ks Tools",
+    "category": "Herramientas",
+    "subcategory": "Medición",
+    "description": "Bomba manual de vacío y presión con tapones de aluminio anodizado para localizar poros en culatas y manguitos.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-17",
+    "name": "Banco de Trabajo de Acero Reforzado con Cajoneras",
+    "manufacturer": "Equipos Taller",
+    "category": "Herramientas",
+    "subcategory": "Almacenamiento",
+    "description": "Mesa robusta de estructura pesada con panel metálico perforado superior para organizar herramientas de mano fijas.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-18",
+    "name": "Bomba Neumática de Purga y Sangrado de Frenos y Embragues",
+    "manufacturer": "Profesional",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Frenos",
+    "description": "Extractor por vacío conectado a aire comprimido para cambiar el líquido de frenos del circuito un solo operario.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-19",
+    "name": "Alicates para Abrazaderas Clic y Clic-R Profesionales",
+    "manufacturer": "Facom",
+    "category": "Herramientas",
+    "subcategory": "Alicates",
+    "description": "Útil forjado con cabezal giratorio para soltar y cerrar abrazaderas elásticas reutilizables de manguitos de combustible.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-20",
+    "name": "Soldador Inverter de Hilo Continuo sin Gas MIG/MAG",
+    "manufacturer": "Profesional",
+    "category": "Herramientas",
+    "subcategory": "Equipos de Soldadura",
+    "description": "Equipo de soldadura de arco compacto y regulable para reparaciones de líneas de escape, chapas y soportes.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-21",
+    "name": "Vasos de Impacto Largos de Cromo Molibdeno (Estuche 1/2\")",
+    "manufacturer": "Ks Tools",
+    "category": "Herramientas",
+    "subcategory": "Vasos de Impacto",
+    "description": "Estuche de vasos de pared reforzada para pistolas de impacto de alto torque. Evitan aperturas o roturas por tensión.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-22",
+    "name": "Comprobador de Compresión para Motores Diésel Pro",
+    "manufacturer": "Ks Tools",
+    "category": "Herramientas",
+    "subcategory": "Medición",
+    "description": "Manómetro de alta presión con falsos calentadores e inyectores adaptadores para verificar pérdidas en cilindros.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-23",
+    "name": "Reposicionador Neumático de Pistones de Freno de Taller",
+    "manufacturer": "Jomafa / Profesional",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Frenos",
+    "description": "Husillo con asistencia neumática para retraer y girar pistones de freno traseros izquierdos y derechos sin esfuerzo.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-24",
+    "name": "Juego de Reparación de Roscas Dañadas tipo Helicoil",
+    "manufacturer": "Genérico Profesional",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Estuche con machos, brocas e insertos de acero inoxidable para reconstruir roscas pasadas de culatas o pinzas.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "pro-add-25",
+    "name": "Estuche de Extractores para Poleas Libres de Alternador",
+    "manufacturer": "Ks Tools",
+    "category": "Herramientas",
+    "subcategory": "Útiles de Motor",
+    "description": "Vasos y puntas especiales estriadas de dos piezas para bloquear el eje y sustituir la polea libre del alternador.",
+    "price": "Profesional",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-1",
+    "name": "Lector OBD2 Inalámbrico Bluetooth de Bolsillo Mini",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Escáner multimarca ultracompacto. Permite borrar el testigo de avería de motor Check Engine desde el móvil.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-2",
+    "name": "Escáner de Diagnosis OBD2 con Cable y Pantalla LCD",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Lector de códigos DTC autónomo. Lee flujos de datos en vivo del motor sin necesidad de usar baterías ni smartphones.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-3",
+    "name": "Interface de Diagnosis OBD2 Wi-Fi para iPhone y Android",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Conector inalámbrico por Wi-Fi de alta velocidad. Compatible con aplicaciones de monitorización en tiempo real.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-4",
+    "name": "Analizador Comprobador de Baterías Digital 12V Básica",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Mide el estado de salud (SOH), carga (SOC) y la capacidad de arranque en frío de baterías de plomo-ácido.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-5",
+    "name": "Escáner OBD2 de Mano con Librería de Códigos en Español",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Lector básico con definiciones de códigos DTC integradas directamente en castellano para facilitar el diagnóstico.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-6",
+    "name": "Lápiz Comprobador Digital de Humedad en Líquido de Frenos",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Mide el porcentaje de agua en el líquido de frenos mediante LED de colores para determinar cuándo sustituirlo.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-7",
+    "name": "Probador de Circuito Eléctrico de Coche 12V/24V Digital",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Punta de prueba buscapolos con pantalla LCD que muestra el voltaje exacto del cable o fusible medido.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-8",
+    "name": "Herramienta OBD2 de Reset de Servicio e Inspección",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Dispositivo básico autónomo para apagar la luz de cambio de aceite y de inspección en el cuadro de mandos.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-9",
+    "name": "Termómetro Infrarrojo Láser Digital sin Contacto para Motor",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Mide al instante la temperatura de radiadores, manguitos y discos de freno para localizar atascos u sobrecalentamientos.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-11",
+    "name": "Manómetro Comprobador de Presión de Inyección de Gasolina",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Kit básico con manguera y acoples para medir los bares de presión que envía la bomba de combustible a la rampa.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-12",
+    "name": "Reloj Vacuómetro Medidor de Vacío en Admisión y Motor",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Permite diagnosticar fugas en válvulas, reglajes incorrectos o entradas de aire pirata midiendo la depresión.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-13",
+    "name": "Cable de Diagnosis OBD2 a USB con Chip FTDI para PC",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Interfaz estable por cable para conectar el coche al ordenador portátil y usar programas avanzados de diagnosis.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-14",
+    "name": "Probador en Línea de Chispa de Bujías y Bobinas de Encendido",
+    "manufacturer": "Genérico",
+    "category": "Herramientas",
+    "subcategory": "Equipos Baratos",
+    "description": "Se conecta entre la bobina y la bujía para verificar visualmente si llega corriente de alta tensión al cilindro.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-15",
+    "name": "Refractómetro Óptico para Anticongelante y AdBlue",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Dispositivo de medición óptica para comprobar el punto de congelación del refrigerante y la pureza del AdBlue.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-16",
+    "name": "Comprobador Medidor de Compresión para Motores Gasolina",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Manómetro con acople de rosca para colocar en el hueco de la bujía y verificar la compresión por cilindro.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-17",
+    "name": "Medidor Digital de Espesor de Pintura de Carrocería",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Detecta si un coche usado ha sufrido accidentes o golpes midiendo capas ocultas de masilla bajo la pintura.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-18",
+    "name": "Líquido Reactivo Detector de Fugas de CO2 en Junta de Culata",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Kit químico que cambia de color si detecta gases de escape combustionados dentro del vaso de expansión.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-19",
+    "name": "Estetoscopio Mecánico de Escucha para Cojinetes y Motores",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Auriculares mecánicos con varilla de acero para amplificar ruidos metálicos internos y localizar rodamientos rotos.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-20",
+    "name": "Buscador Rastreador de Cables y Cortocircuitos Automotriz",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Generador de tonos por inducción para seguir el recorrido de cables eléctricos ocultos y localizar roturas.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-21",
+    "name": "Tacómetro Digital Láser de Medición de RPM sin Contacto",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Mide las revoluciones por minuto de poleas, correas o ventiladores del motor usando tiras reflectantes.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-22",
+    "name": "Manómetro Digital de Precisión para Presión de Neumáticos",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Lector de bolsillo con pantalla LCD retroiluminada. Muestra la presión exacta de las ruedas en PSI o Bares.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-23",
+    "name": "Voltímetro Comprobador de Carga de Alternador para Mechero",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Mini pantalla digital de inserción directa para verificar la tensión del alternador en marcha (12V-24V).",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-24",
+    "name": "Mini Pinza Amperimétrica Digital Básica de Corriente Continua",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Herramienta básica para medir amperios sin cortar cables y comprobar si hay fugas de corriente parásitas.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-26",
+    "name": "Escáner OBD2 Multimarca de Mano Plug & Play Universal",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "El número 1 en ventas de Amazon. Se conecta directo al puerto del coche, lee y borra fallos al instante sin configuraciones.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-27",
+    "name": "Probador Analizador de Baterías Digital 12V Automotriz",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Súper vendido para particulares. Mide el estado de carga y salud de la batería con pinzas directo a los bornes.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-28",
+    "name": "Interface OBD2 Bluetooth Inalámbrico con Interruptor de Encendido",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Muy vendido porque tiene un botón físico para apagarlo y dejarlo conectado al coche sin gastar batería.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-29",
+    "name": "Lápiz Buscapolos de Coche 6V-24V con Cable de Masa",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Herramienta básica líder en ventas. Ideal para buscar fusibles fundidos o cables sin corriente en un segundo.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-30",
+    "name": "Escáner OBD2 Inalámbrico Wi-Fi para Aplicaciones Móviles",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Top ventas para usuarios de iPhone. Conexión limpia y rápida compatible con Torque, Torque Pro y Car Scanner.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-31",
+    "name": "Multímetro Digital de Bolsillo con Puntas de Prueba",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "El polímetro más vendido para brico-mecánica. Mide voltios de batería, alternador y continuidad de cables.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-32",
+    "name": "Manómetro de Aguja para Presión de Ruedas de Alta Rotación",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Súper vendido por su fiabilidad mecánica. No necesita pilas y mide los bares y PSI exactos de los neumáticos.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-33",
+    "name": "Lápiz Tester Detector de Humedad en Líquido de Frenos",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Un éxito de ventas por su precio. Indica con 5 luces LED el porcentaje exacto de agua en el líquido DOT3/DOT4.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-34",
+    "name": "Lector de Códigos OBD2 con Pantalla Gráfica a Color",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Muy vendido porque muestra las gráficas de los sensores de motor en vivo a un precio imbatible.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-35",
+    "name": "Termómetro Láser Infrarrojo Digital con Pantalla LCD",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Superventas. Mide la temperatura de los discos de freno o manguitos del radiador sin peligro de quemaduras.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-36",
+    "name": "Punta de Prueba Eléctrica Automotriz 3V-36V Digital",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Buscado constantemente. Su pantalla muestra el número exacto del voltaje del cable testeado al instante.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-37",
+    "name": "Cable de Diagnosis OBD2 a USB Estable para PC",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Súper vendido para programadores aficionados que quieren conectar el portátil al coche de forma estable.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-38",
+    "name": "Probador de Chispa de Bujía y Sistema de Encendido",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "De alta rotación en Amazon. Permite ver la intensidad de la chispa a través de su visor transparente.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-39",
+    "name": "Medidor Digital de Profundidad de Banda de Rodadura",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Regalo ideal y superventas. Mide los milímetros de dibujo que le quedan a la rueda para evitar multas.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-40",
+    "name": "Reloj Vacuómetro Medidor de Vacío en Admisión Económico",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Muy vendido para detectar válvulas pisadas o entradas de aire falsas en coches y motos clásicas.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-41",
+    "name": "Refractómetro Óptico para Medición de Refrigerante y AdBlue",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Buscado por profesionales independientes. Mide con precisión exacta los grados de congelación del líquido.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-42",
+    "name": "Kit Medidor de Compresión para Motores Gasolina de Taller",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Top ventas en herramientas de motor. Inclues manguera flexible y adaptadores para las roscas de bujía.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-43",
+    "name": "Medidor de Espesor de Pintura de Carrocería Portátil",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Muy vendido para compraventa de vehículos. Descubre si un coche está repintado o tiene masilla oculta.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-44",
+    "name": "Kit Líquido Reactivo Detector de Fugas de CO2 en Radiador",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Superventas técnico. El líquido cambia de azul a amarillo si hay gases de escape en el anticongelante.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-45",
+    "name": "Estetoscopio Mecánico de Diagnóstico de Ruidos de Motor",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Muy comprado para aislar sonidos extraños en poleas, alternadores, bombas de agua o taqués hidráulicos.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-46",
+    "name": "Buscador Rastreador de Cables y Cortocircuitos de Coche",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "De alta demanda eléctrica. Sigue cables sin pelarlos y localiza roturas ocultas tras los guarnecidos.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-47",
+    "name": "Tacómetro Digital Láser de Medición de RPM sin Contacto",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Buscado para verificar revoluciones exactas en poleas de alternador, motores de motos y ventiladores.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-48",
+    "name": "Voltímetro Comprobador de Alternador y Carga para Mechero",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Superventas directo. Muestra el voltaje en tiempo real del habitáculo para saber si carga el alternador.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-49",
+    "name": "Mini Pinza Amperimétrica Digital de Corriente Continua",
+    "manufacturer": "Línea Económica",
+    "category": "Diagnosis",
+    "subcategory": "Medición",
+    "description": "Buscada para cazar consumos de batería misteriosos con el coche apagado de forma cómoda sin soltar bornes.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  },
+  {
+    "id": "diag-eco-50",
+    "name": "Escáner OBD2 de Diagnóstico de Motor con Botones Físicos",
+    "manufacturer": "Genérico",
+    "category": "Diagnosis",
+    "subcategory": "Equipos Baratos",
+    "description": "Éxito de ventas en Amazon. Perfecto para llevar en la guantera y borrar fallos de motor en cualquier viaje.",
+    "price": "Mejor Precio",
+    "affiliateUrl": "#"
+  }
+]

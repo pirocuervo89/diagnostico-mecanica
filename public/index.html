@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="Diagnóstico y Mecánica: síntomas, códigos DTC, comprobaciones y herramientas.">
+  <title>Diagnóstico y Mecánica</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">🔧</div>
+    <div><strong>DIAGNÓSTICO</strong><span>Y MECÁNICA</span></div>
+  </div>
+  <button id="menuBtn" class="icon-btn" aria-label="Abrir menú">☰</button>
+  <nav id="nav">
+    <button data-view="home">Inicio</button>
+    <button data-view="diagnostico">Diagnóstico</button>
+    <button data-view="dtc">Códigos DTC</button>
+    <button data-view="productos">Productos</button>
+    <button data-view="chat">Chat IA</button>
+    <button data-view="informe">Informe</button>
+  </nav>
+</header>
+
+<main>
+  <section id="view-home" class="view active">
+    <div class="hero">
+      <div>
+        <span class="eyebrow">PLATAFORMA DE DIAGNÓSTICO AUTOMOTRIZ</span>
+        <h1>Encuentra la causa.<br><em>Comprueba antes de cambiar.</em></h1>
+        <p>Consulta síntomas, códigos OBD/DTC y procedimientos de comprobación en una interfaz pensada para móvil.</p>
+        <div class="actions">
+          <button class="btn primary" data-view="diagnostico">Empezar diagnóstico</button>
+          <button class="btn ghost" data-view="dtc">Buscar DTC</button>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="scanner">OBD</div>
+        <div><b>Diagnóstico orientativo</b><small>Datos + síntomas + comprobaciones</small></div>
+      </div>
+    </div>
+    <div class="grid stats">
+      <article><strong id="statDtc">—</strong><span>códigos DTC</span></article>
+      <article><strong id="statSymptoms">—</strong><span>síntomas</span></article>
+      <article><strong id="statProducts">—</strong><span>herramientas</span></article>
+    </div>
+    <div class="notice"><b>⚠️ Importante:</b> esta plataforma ofrece orientación. Una pieza no debe sustituirse únicamente por un código o síntoma; confirma con mediciones y pruebas.</div>
+  </section>
+
+  <section id="view-diagnostico" class="view">
+    <div class="section-head"><div><span class="eyebrow">PASO 1</span><h2>¿Qué le pasa al vehículo?</h2></div></div>
+    <div id="symptomGrid" class="symptom-grid"></div>
+    <div id="symptomDetail" class="detail hidden"></div>
+  </section>
+
+  <section id="view-dtc" class="view">
+    <div class="section-head"><div><span class="eyebrow">OBD / EOBD</span><h2>Códigos DTC</h2></div></div>
+    <div class="search-row">
+      <input id="dtcSearch" placeholder="Ej.: P0299, turbo, ABS..." autocomplete="off">
+      <button id="dtcSearchBtn" class="btn primary">Buscar</button>
+    </div>
+    <div id="dtcResults" class="results"></div>
+  </section>
+
+  
+  <section id="view-productos" class="view">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">CATÁLOGO ESTILO AUTODOC</span>
+        <h2>Recambios y Herramientas Profesionales</h2>
+      </div>
+    </div>
+
+    <!-- SELECTOR DE MODELO DE COCHE -->
+    <div class="notice" style="background: var(--panel2); border-color: var(--accent2); margin-bottom: 20px; padding: 20px;">
+      <h4 style="margin: 0 0 10px 0; color: var(--accent2);">🚗 Selecciona tu Vehículo para filtrar piezas exactas:</h4>
+      <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+        <select id="catBrand" style="background:#081524; border:1px solid var(--line); padding:10px; color:var(--text); border-radius:8px;">
+          <option value="">-- Selecciona Marca --</option>
+          <option value="audi">Audi</option>
+          <option value="bmw">BMW</option>
+          <option value="citroen">Citroën</option>
+          <option value="ford">Ford</option>
+          <option value="peugeot">Peugeot</option>
+          <option value="renault">Renault</option>
+          <option value="seat">SEAT</option>
+          <option value="volkswagen">Volkswagen</option>
+        </select>
+        <select id="catModel" style="background:#081524; border:1px solid var(--line); padding:10px; color:var(--text); border-radius:8px;">
+          <option value="">-- Selecciona Modelo --</option>
+        </select>
+        <select id="catEngine" style="background:#081524; border:1px solid var(--line); padding:10px; color:var(--text); border-radius:8px;">
+          <option value="">-- Motorización --</option>
+        </select>
+        <button id="btnFiltrarCoche" class="btn primary" style="padding: 10px;">Buscar Piezas</button>
+      </div>
+    </div>
+
+    <!-- PESTAÑAS DE DEPARTAMENTOS -->
+    <div class="chips" style="margin-bottom: 25px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; display: flex; justify-content: center; gap: 10px;">
+      <button class="btn cat-tab active" data-cat="Todos" style="padding: 8px 15px; font-size: 13px;">📦 Todos</button>
+      <button class="btn cat-tab" data-cat="Herramientas" style="padding: 8px 15px; font-size: 13px;">🧰 Herramientas</button>
+      <button class="btn cat-tab" data-cat="Maquinaria" style="padding: 8px 15px; font-size: 13px;">🏗️ Maquinaria</button>
+      <button class="btn cat-tab" data-cat="Diagnosis" style="padding: 8px 15px; font-size: 13px;">💻 Diagnosis</button>
+      <button class="btn cat-tab" data-cat="Líquidos y Químicos" style="padding: 8px 15px; font-size: 13px;">🧪 Aceites y Líquidos</button>
+      <button class="btn cat-tab" data-cat="Repuestos" style="padding: 8px 15px; font-size: 13px;">⚙️ Repuestos / Piezas</button>
+    </div>
+
+    <div id="subTabsContainer" class="chips hidden" style="margin-bottom:20px; display:flex; gap:10px; justify-content:center;"><button class="btn sub-tab active" data-sub="Todas">🛠️ Todas</button><button class="btn sub-tab" data-sub="Maletines">💼 Maletines</button><button class="btn sub-tab" data-sub="Pistolas">⚡ Pistolas</button><button class="btn sub-tab" data-sub="Utiles">🔧 Útiles</button></div><div id="productGrid" class="product-grid"></div>
+  </section>
+
+
+  <section id="view-chat" class="view">
+    <div class="section-head"><div><span class="eyebrow">ASISTENTE</span><h2>Chat de diagnóstico</h2></div></div>
+    <div id="chatBox" class="chat-box">
+      <div class="bubble assistant">Cuéntame qué le ocurre al coche. Si puedes, incluye marca, modelo, año, motor, síntomas y código DTC.</div>
+    </div>
+    <form id="chatForm" class="chat-form">
+      <input id="chatInput" placeholder="Ej.: Golf 2.0 TDI pierde potencia y marca P0299..." maxlength="4000">
+      <button class="btn primary">Enviar</button>
+    </form>
+  </section>
+
+  <section id="view-informe" class="view">
+    <div class="section-head"><div><span class="eyebrow">DOCUMENTACIÓN</span><h2>Informe de diagnóstico</h2></div></div>
+    <div class="form-grid">
+      <label>Marca<input id="fBrand" placeholder="Volkswagen"></label>
+      <label>Modelo<input id="fModel" placeholder="Golf"></label>
+      <label>Año<input id="fYear" placeholder="2003"></label>
+      <label>Motor<input id="fEngine" placeholder="2.0 TDI"></label>
+      <label>Kilómetros<input id="fKm" placeholder="320000"></label>
+      <label>Código DTC<input id="fDtc" placeholder="P0299"></label>
+      <label class="full">Síntomas<textarea id="fSymptoms" rows="5" placeholder="Describe los síntomas, cuándo aparecen y qué se ha comprobado..."></textarea></label>
+    </div>
+    <div class="actions"><button id="generateReport" class="btn primary">Generar informe</button><button id="printReport" class="btn ghost">Imprimir / PDF</button></div>
+    <article id="report" class="report"></article>
+  </section>
+</main>
+
+<footer><span>Diagnóstico y Mecánica</span><span>Herramienta informativa · Comprueba antes de sustituir</span></footer>
+<script src="/js/app.js"></script>
+</body>
+</html>
