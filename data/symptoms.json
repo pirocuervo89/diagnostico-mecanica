@@ -1,19 +1,2694 @@
 [
-  {"id":"no-arranca","name":"No arranca","icon":"🔑","group":"Arranque y motor","description":"El motor gira pero no arranca, o no gira en absoluto.","systems":["Arranque","Alimentación","Encendido","Inmovilizador"],"relatedDtc":["P0335","P0340","P0087","U0100"],"commonCauses":["Batería descargada","Bornes o masas deficientes","Motor de arranque","Sensor de cigüeñal/árbol de levas","Alimentación de combustible","Inmovilizador"],"quickChecks":["Medir batería","Comprobar masas","Determinar si el motor gira","Comprobar inmovilizador"],"urgency":"alta","driveRisk":"No apto para circular hasta localizar la causa."},
-  {"id":"pierde-potencia","name":"Pérdida de potencia","icon":"📉","group":"Prestaciones","description":"El vehículo no responde o entra en modo protección.","systems":["Admisión","Turbo","Combustible","Escape"],"relatedDtc":["P0299","P0234","P0087","P0101","P2002","P0401"],"commonCauses":["Fuga de admisión/intercooler","Turbo o geometría variable","Filtro obstruido","MAF/MAP","DPF/FAP","EGR"],"quickChecks":["Presión turbo real/objetivo","Manguitos","Filtros","Datos en vivo"],"urgency":"media","driveRisk":"Circular con precaución y sin exigir el motor."},
-  {"id":"tirones","name":"Tirones","icon":"〰️","group":"Motor","description":"Sacudidas o pérdidas momentáneas de potencia.","systems":["Encendido","Inyección","Admisión"],"relatedDtc":["P0300","P0301","P0171"],"commonCauses":["Bujías","Bobinas","Inyectores","Entrada de aire","Presión de combustible","EGR"],"quickChecks":["Leer fallos por cilindro","Comprobar encendido","Revisar bujías","Buscar fugas"],"urgency":"media","driveRisk":"Si el testigo parpadea, evitar circular."},
-  {"id":"humo-negro","name":"Humo negro","icon":"⚫","group":"Escape","description":"Humo negro visible por el escape.","systems":["Inyección","Turbo","Admisión","EGR"],"relatedDtc":["P0299","P0234","P0101","P0401"],"commonCauses":["Exceso de combustible","Fuga de sobrealimentación","EGR","Inyectores","Filtro de aire"],"quickChecks":["MAF","Presión turbo","EGR","Filtro de aire"],"urgency":"media","driveRisk":"Puede afectar al DPF/catalizador."},
-  {"id":"humo-azul","name":"Humo azul","icon":"🔵","group":"Escape","description":"Humo azulado asociado a consumo de aceite.","systems":["Motor","Lubricación","Turbo"],"relatedDtc":["P0299","P0420"],"commonCauses":["Segmentos","Guías de válvula","Turbo","Exceso de aceite","PCV"],"quickChecks":["Medir consumo de aceite","Observar cuándo aparece","Revisar admisión/turbo","PCV"],"urgency":"alta","driveRisk":"Requiere diagnosis antes de continuar usando el vehículo normalmente."},
-  {"id":"humo-blanco","name":"Humo blanco","icon":"⚪","group":"Escape","description":"Humo blanco persistente por el escape.","systems":["Refrigeración","Motor"],"relatedDtc":["P0128","P0300"],"commonCauses":["Entrada de refrigerante","Culata","Junta","Inyectores","Condensación en frío"],"quickChecks":["Nivel de refrigerante","Persistencia en caliente","Olor del escape","Prueba de gases"],"urgency":"alta","driveRisk":"Riesgo si existe sobrecalentamiento o pérdida de refrigerante."},
-  {"id":"se-calienta","name":"Se calienta","icon":"🌡️","group":"Refrigeración","description":"Temperatura superior a la normal.","systems":["Refrigeración"],"relatedDtc":["P0128","P0480"],"commonCauses":["Refrigerante bajo","Termostato","Electroventilador","Radiador","Bomba de agua","Sensor"],"quickChecks":["Nivel en frío","Fugas","Electroventilador","Circulación"],"urgency":"crítica","driveRisk":"Detener el vehículo si la temperatura entra en zona roja."},
-  {"id":"consume-demasiado","name":"Consume demasiado","icon":"⛽","group":"Prestaciones","description":"Aumento anormal del consumo.","systems":["Inyección","Admisión","Escape","Encendido"],"relatedDtc":["P0171","P0101","P0135","P0420"],"commonCauses":["Sonda lambda","MAF","Presión neumáticos","Frenos rozando","Termostato","Filtro"],"quickChecks":["Presiones","Temperatura de servicio","Correcciones de mezcla","Ruedas/frenos"],"urgency":"baja","driveRisk":"Normalmente sin riesgo inmediato, pero conviene diagnosticar."},
-  {"id":"ruido-al-frenar","name":"Ruido al frenar","icon":"🛑","group":"Frenos","description":"Chirridos, rozamientos o golpes al frenar.","systems":["Frenos"],"relatedDtc":["C0035"],"commonCauses":["Pastillas","Discos","Pinza","Rodamiento","Elementos antivibración"],"quickChecks":["Grosor de pastillas","Estado de discos","Vibración","Rozamiento"],"urgency":"alta","driveRisk":"Si hay pérdida de frenada o metal contra metal, no circular."},
-  {"id":"vibracion","name":"Vibración","icon":"📳","group":"Chasis","description":"Vibración en volante, carrocería o pedales.","systems":["Ruedas","Suspensión","Transmisión","Frenos"],"relatedDtc":["P0300"],"commonCauses":["Desequilibrado","Neumático deformado","Discos","Silentblocks","Palieres","Fallos de encendido"],"quickChecks":["Velocidad a la que aparece","Si cambia al frenar","Neumáticos","Holguras"],"urgency":"media","driveRisk":"Una vibración fuerte puede comprometer el control."},
-  {"id":"problemas-direccion","name":"Problemas de dirección","icon":"🔄","group":"Chasis","description":"Dirección dura, con holgura o ruidos.","systems":["Dirección","Suspensión"],"relatedDtc":["U0121"],"commonCauses":["Nivel bajo","Bomba","Cremallera","Rótulas","Dirección eléctrica","Alineación"],"quickChecks":["Nivel","Ruidos","Holguras","Testigo de dirección"],"urgency":"alta","driveRisk":"Puede comprometer el control del vehículo."},
-  {"id":"problemas-suspension","name":"Problemas de suspensión","icon":"🔧","group":"Chasis","description":"Golpes, rebotes o desgaste irregular.","systems":["Suspensión"],"relatedDtc":[],"commonCauses":["Amortiguadores","Muelles","Silentblocks","Rótulas","Copelas"],"quickChecks":["Prueba de rebote","Fugas","Holguras","Neumáticos"],"urgency":"media","driveRisk":"Puede aumentar la distancia de frenado."},
-  {"id":"problemas-electricos","name":"Problemas eléctricos","icon":"⚡","group":"Eléctrico","description":"Fallos intermitentes, luces o testigos aleatorios.","systems":["Eléctrico","Electrónica"],"relatedDtc":["U0100","B1000"],"commonCauses":["Batería","Masas","Alternador","Fusibles","Conectores"],"quickChecks":["Tensión","Caídas de tensión","Fusibles","Carga"],"urgency":"media","driveRisk":"Puede afectar a sistemas de seguridad."},
-  {"id":"luz-motor","name":"Luz de motor","icon":"🔴","group":"Electrónica","description":"Testigo de gestión del motor encendido.","systems":["Gestión del motor"],"relatedDtc":["P0300","P0171","P0420","P0401"],"commonCauses":["Fallo registrado en ECU","Encendido","Lambda/catalizador","Admisión/escape","EVAP"],"quickChecks":["Leer DTC","Guardar datos","Comprobar si parpadea","Revisar datos en vivo"],"urgency":"media","driveRisk":"Si parpadea, detener y diagnosticar."},
-  {"id":"abs","name":"ABS / ESP","icon":"🅰️","group":"Seguridad","description":"Testigo ABS o ESP encendido.","systems":["Frenos","ABS/ESP"],"relatedDtc":["C0035","U0121"],"commonCauses":["Sensor de rueda","Corona magnética","Cableado","Centralita ABS","Alimentación"],"quickChecks":["Leer módulo ABS","Comparar velocidades de rueda","Inspeccionar sensores","Revisar cableado"],"urgency":"alta","driveRisk":"La frenada de emergencia y estabilidad pueden verse afectadas."},
-  {"id":"airbag","name":"Airbag","icon":"🎈","group":"Seguridad","description":"Testigo de airbag encendido.","systems":["Seguridad pasiva"],"relatedDtc":["B1000"],"commonCauses":["Conector","Anillo de volante","Sensor","Módulo"],"quickChecks":["Leer módulo SRS","Inspección visual sin manipular pirotecnia","Revisar cableado según procedimiento"],"urgency":"alta","driveRisk":"Puede impedir el funcionamiento correcto del sistema SRS."},
-  {"id":"aire-acondicionado","name":"Aire acondicionado","icon":"❄️","group":"Climatización","description":"El A/C no enfría o enfría poco.","systems":["Climatización"],"relatedDtc":["P0530","P0532"],"commonCauses":["Fuga de refrigerante","Compresor","Presostato/sensor","Electroventilador","Filtro de habitáculo","Válvula de expansión"],"quickChecks":["Funcionamiento del compresor","Presiones con equipo adecuado","Electroventilador","Filtro de habitáculo"],"urgency":"baja","driveRisk":"Normalmente no afecta a la conducción."}
+  {
+    "id": "tirones",
+    "n": "Tirones / Falta potencia",
+    "w": [
+      "inyeccion",
+      "encendido",
+      "p030",
+      "combustible",
+      "bujia",
+      "maf"
+    ]
+  },
+  {
+    "id": "humo",
+    "n": "Humo negro",
+    "w": [
+      "gases",
+      "mezcla",
+      "rico",
+      "p017",
+      "maf",
+      "lambda"
+    ]
+  },
+  {
+    "id": "turbo",
+    "n": "Turbo no sopla",
+    "w": [
+      "sobrealimentacion",
+      "turbo",
+      "presion"
+    ]
+  },
+  {
+    "id": "bateria",
+    "n": "No arranca / Alternador",
+    "w": [
+      "bateria",
+      "arranque",
+      "alternador",
+      "tension",
+      "voltaje"
+    ]
+  },
+  {
+    "id": "calentamiento",
+    "n": "Temperatura alta / Agua",
+    "w": [
+      "temperatura",
+      "refrigerante",
+      "radiador",
+      "termostato"
+    ]
+  },
+  {
+    "id": "direccion",
+    "n": "Direccion dura / Volante",
+    "w": [
+      "direccion",
+      "asistida",
+      "volante",
+      "cremallera"
+    ]
+  },
+  {
+    "id": "ruido",
+    "n": "Ruido metalico motor",
+    "w": [
+      "biela",
+      "cigüeñal",
+      "taque",
+      "valvula",
+      "distribucion"
+    ]
+  },
+  {
+    "id": "clima",
+    "n": "Aire no enfria",
+    "w": [
+      "climatizador",
+      "compresor",
+      "gas",
+      "ventilador"
+    ]
+  },
+  {
+    "id": "suspension",
+    "n": "Coche inestable / Baches",
+    "w": [
+      "amortiguador",
+      "suspension",
+      "muelle",
+      "silentblock"
+    ]
+  },
+  {
+    "id": "consumo",
+    "n": "Consumo excesivo",
+    "w": [
+      "consumo",
+      "sonda",
+      "lambda",
+      "inyector",
+      "maf"
+    ]
+  },
+  {
+    "id": "aceite",
+    "n": "Presion aceite baja",
+    "w": [
+      "aceite",
+      "presion",
+      "bomba",
+      "filtro"
+    ]
+  },
+  {
+    "id": "fap",
+    "n": "Fallo Filtro Antiparticulas",
+    "w": [
+      "fap",
+      "dpf",
+      "particulas",
+      "regeneracion"
+    ]
+  },
+  {
+    "id": "adblue",
+    "n": "Fallo AdBlue / Anti-contamina",
+    "w": [
+      "adblue",
+      "nox",
+      "urea",
+      "catalizador"
+    ]
+  },
+  {
+    "id": "airbag",
+    "n": "Testigo Airbag",
+    "w": [
+      "airbag",
+      "pretensor",
+      "asiento"
+    ]
+  },
+  {
+    "id": "luces",
+    "n": "Fallos electricos / Cuadro",
+    "w": [
+      "confort",
+      "elevalunas",
+      "cierre",
+      "fusible"
+    ]
+  },
+  {
+    "id": "fugas",
+    "n": "Manchas de liquido / Fuga",
+    "w": [
+      "goteo",
+      "fuga",
+      "mancha",
+      "anticongelante",
+      "valvulina"
+    ]
+  },
+  {
+    "id": "ruedas",
+    "n": "Desgaste ruedas / Ruidos",
+    "w": [
+      "neumatico",
+      "rueda",
+      "rodamiento",
+      "paralelo",
+      "cojinete"
+    ]
+  },
+  {
+    "id": "llave",
+    "n": "Fallo llave / Inmovilizador",
+    "w": [
+      "llave",
+      "mando",
+      "transponder",
+      "bloqueo",
+      "antirrobo"
+    ]
+  },
+  {
+    "id": "freno-blando",
+    "n": "Pedal de freno blando o esponjoso",
+    "w": [
+      "bomba",
+      "aire",
+      "liquido",
+      "freno",
+      "blando",
+      "esponjoso"
+    ]
+  },
+  {
+    "id": "freno-vibracion",
+    "n": "Vibracion en el pedal al frenar",
+    "w": [
+      "disco",
+      "alabeado",
+      "alabeo",
+      "freno",
+      "vibracion",
+      "pedal"
+    ]
+  },
+  {
+    "id": "freno-mano-electrico",
+    "n": "Freno de mano electrico bloqueado",
+    "w": [
+      "estacionamiento",
+      "freno",
+      "mano",
+      "electrico",
+      "motor",
+      "pinza",
+      "epb"
+    ]
+  },
+  {
+    "id": "freno-chirrido",
+    "n": "Chirrido metalico al frenar",
+    "w": [
+      "pastillas",
+      "desgaste",
+      "testigo",
+      "freno",
+      "chirrido",
+      "avisador"
+    ]
+  },
+  {
+    "id": "humo-blanco",
+    "n": "Humo blanco denso por el escape",
+    "w": [
+      "culata",
+      "junta",
+      "refrigerante",
+      "anticongelante",
+      "humo",
+      "blanco",
+      "consumo"
+    ]
+  },
+  {
+    "id": "humo-azul",
+    "n": "Humo azulado (Quema aceite)",
+    "w": [
+      "aceite",
+      "segmentos",
+      "guias",
+      "valvula",
+      "humo",
+      "azul",
+      "segmento",
+      "reten"
+    ]
+  },
+  {
+    "id": "turbo-silbido",
+    "n": "Silbido fuerte del turbo al acelerar",
+    "w": [
+      "manguito",
+      "intercooler",
+      "fuga",
+      "presion",
+      "turbo",
+      "silbido",
+      "raja"
+    ]
+  },
+  {
+    "id": "motor-se-para",
+    "n": "El coche se para en marcha solo",
+    "w": [
+      "parada",
+      "calado",
+      "marcha",
+      "repentinamente",
+      "cigueñal",
+      "sensor",
+      "rpm",
+      "p0335"
+    ]
+  },
+  {
+    "id": "tirones-bajas",
+    "n": "Tirones solo a bajas revoluciones",
+    "w": [
+      "tirones",
+      "bajas",
+      "rpm",
+      "egr",
+      "valvula",
+      "sucia",
+      "atascada",
+      "carbonilla"
+    ]
+  },
+  {
+    "id": "arranque-frio",
+    "n": "Tarda mucho en arrancar en frio",
+    "w": [
+      "calentadores",
+      "bujias",
+      "precalentamiento",
+      "arranque",
+      "frio",
+      "rele"
+    ]
+  },
+  {
+    "id": "arranque-caliente",
+    "n": "Tarda mucho en arrancar en caliente",
+    "w": [
+      "sensor",
+      "arbol",
+      "levas",
+      "arranque",
+      "caliente",
+      "presion",
+      "rampa"
+    ]
+  },
+  {
+    "id": "ralenti-inestable",
+    "n": "Ralenti inestable (Motor cabecea)",
+    "w": [
+      "ralenti",
+      "inestable",
+      "vibracion",
+      "tiembla",
+      "parado",
+      "mariposa",
+      "cuerpo"
+    ]
+  },
+  {
+    "id": "olor-combustible",
+    "n": "Olor fuerte a gasolina/diesel dentro",
+    "w": [
+      "olor",
+      "combustible",
+      "gasolina",
+      "diesel",
+      "fuga",
+      "rampa",
+      "retorno",
+      "tubo"
+    ]
+  },
+  {
+    "id": "clima-bizona-fallo",
+    "n": "Clima echa aire caliente por un lado",
+    "w": [
+      "trampilla",
+      "servomotor",
+      "bizona",
+      "climatizador",
+      "mezcla",
+      "aire",
+      "calefaccion"
+    ]
+  },
+  {
+    "id": "refrigerante-fuga-invisible",
+    "n": "Pierde refrigerante sin fuga visible",
+    "w": [
+      "enfriador",
+      "egr",
+      "poroso",
+      "refrigerante",
+      "anticongelante",
+      "consumo"
+    ]
+  },
+  {
+    "id": "ruido-distribucion",
+    "n": "Ruido de seseo en la distribucion",
+    "w": [
+      "cadena",
+      "estirada",
+      "tensor",
+      "distribucion",
+      "seseo",
+      "patin",
+      "holgura"
+    ]
+  },
+  {
+    "id": "direccion-un-lado",
+    "n": "Direccion dura hacia un solo lado",
+    "w": [
+      "cremallera",
+      "valvula",
+      "rotativa",
+      "direccion",
+      "dura",
+      "lado"
+    ]
+  },
+  {
+    "id": "volante-vibracion-alta",
+    "n": "Vibracion volante a alta velocidad",
+    "w": [
+      "equilibrado",
+      "llanta",
+      "neumatico",
+      "vibracion",
+      "volante",
+      "carretera"
+    ]
+  },
+  {
+    "id": "crujido-giro-parado",
+    "n": "Crujido al girar volante en parado",
+    "w": [
+      "copela",
+      "amortiguador",
+      "rotula",
+      "direccion",
+      "crujido",
+      "clonk",
+      "girar"
+    ]
+  },
+  {
+    "id": "embrague-patina",
+    "n": "El coche patina al acelerar (Sube RPM)",
+    "w": [
+      "embrague",
+      "patina",
+      "desgaste",
+      "bifasico",
+      "volante",
+      "bimasa",
+      "marcha"
+    ]
+  },
+  {
+    "id": "palanca-vibracion",
+    "n": "Vibracion fuerte palanca de cambios",
+    "w": [
+      "taco",
+      "motor",
+      "soporte",
+      "caja",
+      "vibracion",
+      "palanca",
+      "silentblock"
+    ]
+  },
+  {
+    "id": "zumbido-rueda",
+    "n": "Ruido zumbido constante al rodar",
+    "w": [
+      "rodamiento",
+      "cojinete",
+      "rueda",
+      "zumbido",
+      "buje",
+      "velocidad"
+    ]
+  },
+  {
+    "id": "golpe-bache-suspension",
+    "n": "Golpe seco (Clonk) al pasar baches",
+    "w": [
+      "silentblock",
+      "brazo",
+      "suspension",
+      "bieleta",
+      "estabilizadora",
+      "clonk"
+    ]
+  },
+  {
+    "id": "airbag-asiento",
+    "n": "Luz Airbag salta al mover el asiento",
+    "w": [
+      "conector",
+      "clema",
+      "asiento",
+      "airbag",
+      "pretensor",
+      "resistencia",
+      "p001"
+    ]
+  },
+  {
+    "id": "elevalunas-fallo",
+    "n": "Elevalunas falla o sube mal",
+    "w": [
+      "elevalunas",
+      "motor",
+      "confort",
+      "botas",
+      "mando",
+      "desprogramado",
+      "conmutador"
+    ]
+  },
+  {
+    "id": "cierre-loco",
+    "n": "El cierre centralizado falla o va loco",
+    "w": [
+      "cerradura",
+      "microruptor",
+      "cierre",
+      "centralizado",
+      "módulo",
+      "puerta"
+    ]
+  },
+  {
+    "id": "cuadro-apagado",
+    "n": "El cuadro de instrumentos se apaga solo",
+    "w": [
+      "cuadro",
+      "instrumentos",
+      "pantalla",
+      "soldadura",
+      "alimentacion",
+      "cuadro",
+      "rele"
+    ]
+  },
+  {
+    "id": "fap-saturado",
+    "n": "Aviso constante de Filtro Particulas",
+    "w": [
+      "fap",
+      "dpf",
+      "saturado",
+      "hollin",
+      "presion",
+      "diferencial",
+      "sensor",
+      "p242f"
+    ]
+  },
+  {
+    "id": "limp-mode",
+    "n": "Motor en modo emergencia (Sin fuerza)",
+    "w": [
+      "emergencia",
+      "limp",
+      "mode",
+      "proteccion",
+      "rpm",
+      "limitado",
+      "potencia"
+    ]
+  },
+  {
+    "id": "palier-ruido",
+    "n": "Chasquido continuo (Clac-clac) al girar",
+    "w": [
+      "palier",
+      "transmision",
+      "homocinetica",
+      "junta",
+      "goma",
+      "fuelle",
+      "clac"
+    ]
+  },
+  {
+    "id": "cama-vieja",
+    "n": "Ruido a cama vieja en badenes o baches",
+    "w": [
+      "silentblock",
+      "barra",
+      "estabilizadora",
+      "reseco",
+      "crujido",
+      "suspension"
+    ]
+  },
+  {
+    "id": "desgaste-interior",
+    "n": "Neumaticos gastados por dentro o fuera",
+    "w": [
+      "alineacion",
+      "paralelo",
+      "caida",
+      "convergencia",
+      "desgaste",
+      "rueda"
+    ]
+  },
+  {
+    "id": "coche-se-desvia",
+    "n": "El coche se va hacia un lado solo",
+    "w": [
+      "alineacion",
+      "desvia",
+      "tirada",
+      "lado",
+      "direccion",
+      "geometria"
+    ]
+  },
+  {
+    "id": "electro-fijo",
+    "n": "Ventilador no se apaga al quitar contacto",
+    "w": [
+      "electroventilador",
+      "rele",
+      "temperatura",
+      "sensor",
+      "fijo",
+      "encendido"
+    ]
+  },
+  {
+    "id": "calentadores-parpadeo",
+    "n": "Testigo de calentadores parpadea",
+    "w": [
+      "parpadea",
+      "calentadores",
+      "gestion",
+      "motor",
+      "diesel",
+      "freno",
+      "conmutador"
+    ]
+  },
+  {
+    "id": "olor-azufre",
+    "n": "Olor a huevo podrido por el escape",
+    "w": [
+      "catalizador",
+      "sulfuro",
+      "azufre",
+      "escape",
+      "olor",
+      "huevo",
+      "podrido"
+    ]
+  },
+  {
+    "id": "caudal-aire-cero",
+    "n": "No sale aire por las rejillas",
+    "w": [
+      "soplador",
+      "resistencia",
+      "ventilador",
+      "clima",
+      "erizo",
+      "caudal",
+      "aire"
+    ]
+  },
+  {
+    "id": "limpias-fallo",
+    "n": "Limpiaparabrisas no funcionan",
+    "w": [
+      "motor",
+      "limpia",
+      "varillaje",
+      "rele",
+      "mando",
+      "parabrisas",
+      "lento"
+    ]
+  },
+  {
+    "id": "puerta-no-abre",
+    "n": "Una puerta se queda bloqueada y no abre",
+    "w": [
+      "cerradura",
+      "motor",
+      "puerta",
+      "cierre",
+      "centralizado",
+      "cable"
+    ]
+  },
+  {
+    "id": "recirculacion-ruido",
+    "n": "Ruido tac-tac en el salpicadero",
+    "w": [
+      "recirculacion",
+      "trampilla",
+      "servomotor",
+      "motor",
+      "clima",
+      "engranaje"
+    ]
+  },
+  {
+    "id": "embrague-hundido",
+    "n": "Pedal de embrague abajo o sin presion",
+    "w": [
+      "bombin",
+      "bomba",
+      "embrague",
+      "hidraulico",
+      "liquido",
+      "hundido",
+      "pedal"
+    ]
+  },
+  {
+    "id": "luces-freno-fijas",
+    "n": "Luces de freno fijas encendidas",
+    "w": [
+      "conmutador",
+      "interruptor",
+      "pedal",
+      "freno",
+      "luces",
+      "fijas"
+    ]
+  },
+  {
+    "id": "maletero-no-abre",
+    "n": "El maletero no abre",
+    "w": [
+      "cerradura",
+      "pulsador",
+      "maletero",
+      "porton",
+      "cableado",
+      "cierre"
+    ]
+  },
+  {
+    "id": "vibracion-primera",
+    "n": "Vibracion fuerte al salir en primera",
+    "w": [
+      "bimasa",
+      "volante",
+      "embrague",
+      "retiembla",
+      "vibracion",
+      "primera"
+    ]
+  },
+  {
+    "id": "claxon-fallo",
+    "n": "El claxon o pito no suena",
+    "w": [
+      "claxon",
+      "pito",
+      "fusible",
+      "anillo",
+      "airbag",
+      "volante",
+      "bocina"
+    ]
+  },
+  {
+    "id": "chirrido-correa",
+    "n": "Chirrido fuerte de correas en frio",
+    "w": [
+      "correa",
+      "accesorios",
+      "alternador",
+      "tensor",
+      "polea",
+      "chirrido",
+      "frio"
+    ]
+  },
+  {
+    "id": "tiron-cambio",
+    "n": "Tiron brusco al meter o cambiar marcha",
+    "w": [
+      "caja",
+      "automatica",
+      "valvulas",
+      "cuerpo",
+      "solenoide",
+      "tiron",
+      "cambio"
+    ]
+  },
+  {
+    "id": "acelerador-muerto",
+    "n": "Pedal del acelerador no responde",
+    "w": [
+      "potenciometro",
+      "acelerador",
+      "pedal",
+      "sensor",
+      "p2138",
+      "mariposa"
+    ]
+  },
+  {
+    "id": "pvc-consumo",
+    "n": "Consume mucho aceite sin fugas",
+    "w": [
+      "pcv",
+      "valvula",
+      "decantador",
+      "aceite",
+      "consumo",
+      "membrana"
+    ]
+  },
+  {
+    "id": "fogonazo-inyector",
+    "n": "Ruido de escape de aire en motor",
+    "w": [
+      "arandela",
+      "fuego",
+      "inyector",
+      "fuga",
+      "fogonazo",
+      "carbonilla",
+      "asiento"
+    ]
+  },
+  {
+    "id": "fading-frenos",
+    "n": "Pierde eficacia de frenado al usarlo mucho",
+    "w": [
+      "liquido",
+      "frenos",
+      "pastillas",
+      "calentamiento",
+      "fading",
+      "ebullicion"
+    ]
+  },
+  {
+    "id": "agujas-cero",
+    "n": "Agujas del cuadro o velocimetro no van",
+    "w": [
+      "sensor",
+      "velocidad",
+      "cuadro",
+      "abs",
+      "agujas",
+      "velocimetro",
+      "vss"
+    ]
+  },
+  {
+    "id": "consumo-bateria",
+    "n": "Bateria se descarga en dos dias parado",
+    "w": [
+      "consumo",
+      "reposo",
+      "amperios",
+      "parasito",
+      "bateria",
+      "alternador",
+      "fuga"
+    ]
+  },
+  {
+    "id": "regulador-alternador",
+    "n": "Intensidad de luces varia sola",
+    "w": [
+      "regulador",
+      "alternador",
+      "voltaje",
+      "tension",
+      "parpadeo",
+      "luces"
+    ]
+  },
+  {
+    "id": "radiador-calefaccion",
+    "n": "Olor dulce a anticongelante dentro",
+    "w": [
+      "radiador",
+      "calefaccion",
+      "fuga",
+      "anticongelante",
+      "olor",
+      "moqueta",
+      "dulce"
+    ]
+  },
+  {
+    "id": "pinza-gripada",
+    "n": "Pastilla de freno gastada mas de un lado",
+    "w": [
+      "pinza",
+      "gripada",
+      "freno",
+      "pastilla",
+      "desgaste",
+      "irregular"
+    ]
+  },
+  {
+    "id": "potencia-cuestas",
+    "n": "Falta de potencia solo en cuestas",
+    "w": [
+      "caudalimetro",
+      "maf",
+      "presion",
+      "combustible",
+      "filtro",
+      "atascado"
+    ]
+  },
+  {
+    "id": "tiron-soltar",
+    "n": "Tirones bruscos al soltar el acelerador",
+    "w": [
+      "taco",
+      "motor",
+      "soporte",
+      "mariposa",
+      "potenciometro",
+      "transmision"
+    ]
+  },
+  {
+    "id": "soplido-pies",
+    "n": "Ruido de soplido en los pies al acelerar",
+    "w": [
+      "servofreno",
+      "fuga",
+      "vacio",
+      "pedal",
+      "freno",
+      "membrana"
+    ]
+  },
+  {
+    "id": "vibracion-transmision",
+    "n": "Vibracion en el asiento al acelerar",
+    "w": [
+      "palier",
+      "transmision",
+      "homocinetica",
+      "transmision",
+      "cardan",
+      "flector"
+    ]
+  },
+  {
+    "id": "direccion-flota",
+    "n": "Direccion demasiado blanda o imprecisa",
+    "w": [
+      "rotula",
+      "axial",
+      "direccion",
+      "cremallera",
+      "holgura",
+      "convergencia"
+    ]
+  },
+  {
+    "id": "esp-loco",
+    "n": "Testigo ESP parpadea en curvas normales",
+    "w": [
+      "sensor",
+      "angulo",
+      "giro",
+      "giral",
+      "abs",
+      "rueda",
+      "rodamiento"
+    ]
+  },
+  {
+    "id": "traqueteo-parado",
+    "n": "Ruido tipo muelle al girar en parado",
+    "w": [
+      "copela",
+      "amortiguador",
+      "cojinete",
+      "goma",
+      "columna"
+    ]
+  },
+  {
+    "id": "olor-humedad",
+    "n": "Mal olor al poner el aire acondicionado",
+    "w": [
+      "filtro",
+      "habitaculo",
+      "polen",
+      "evaporador",
+      "bacterias",
+      "humedad"
+    ]
+  },
+  {
+    "id": "elevalunas-rebote",
+    "n": "Ventanilla rebota y se baja sola",
+    "w": [
+      "guia",
+      "elevalunas",
+      "motor",
+      "confort",
+      "atrapamiento",
+      "desprogramado"
+    ]
+  },
+  {
+    "id": "marcha-atras-luz",
+    "n": "No van las luces de marcha atras",
+    "w": [
+      "conmutador",
+      "interruptor",
+      "caja",
+      "marcha",
+      "atras",
+      "bulbo"
+    ]
+  },
+  {
+    "id": "pantalla-baches",
+    "n": "Radio o GPS se resetea con los baches",
+    "w": [
+      "conector",
+      "masa",
+      "cableado",
+      "pantalla",
+      "radio",
+      "suelto"
+    ]
+  },
+  {
+    "id": "evap-repostar",
+    "n": "Fallo motor justo despues de echar gasolina",
+    "w": [
+      "evap",
+      "canister",
+      "purga",
+      "valvula",
+      "tapor",
+      "deposito",
+      "p0441"
+    ]
+  },
+  {
+    "id": "hill-holder",
+    "n": "Asistente de pendiente se queda enganchado",
+    "w": [
+      "abs",
+      "hill",
+      "holder",
+      "pendiente",
+      "sensor",
+      "longitudinal",
+      "embrague"
+    ]
+  },
+  {
+    "id": "fuga-bloque",
+    "n": "Consume agua pero el aceite esta limpio",
+    "w": [
+      "enfriador",
+      "egr",
+      "tapor",
+      "bloque",
+      "fisura",
+      "colector",
+      "admision"
+    ]
+  },
+  {
+    "id": "crucero-tirones",
+    "n": "Tirones leves con el control de velocidad",
+    "w": [
+      "crucero",
+      "velocidad",
+      "pedal",
+      "freno",
+      "embrague",
+      "potenciometro",
+      "maf"
+    ]
+  },
+  {
+    "id": "taques-frio",
+    "n": "Claqueteo metalico unos segundos en frio",
+    "w": [
+      "taques",
+      "hidraulicos",
+      "aceite",
+      "viscosidad",
+      "bomba",
+      "presion"
+    ]
+  },
+  {
+    "id": "embrague-roce",
+    "n": "Crujido o roce al pisar el pedal de embrague",
+    "w": [
+      "cojinete",
+      "empuje",
+      "collarin",
+      "maza",
+      "embrague",
+      "pedal"
+    ]
+  },
+  {
+    "id": "clima-lento",
+    "n": "Aire acondicionado tarda en salir frio",
+    "w": [
+      "valvula",
+      "expansion",
+      "compresor",
+      "variable",
+      "gas",
+      "carga"
+    ]
+  },
+  {
+    "id": "masa-limpia",
+    "n": "Fallo electrico al activar los limpias",
+    "w": [
+      "masa",
+      "chasis",
+      "borne",
+      "bateria",
+      "caida",
+      "tension",
+      "cortocircuito"
+    ]
+  },
+  {
+    "id": "goteo-ac",
+    "n": "Gotea agua clara debajo del salpicadero",
+    "w": [
+      "condensacion",
+      "climatizador",
+      "desague",
+      "atascado",
+      "evaporador",
+      "agua"
+    ]
+  },
+  {
+    "id": "humo-gris-frio",
+    "n": "Humo gris y olor a gasoil al arrancar",
+    "w": [
+      "inyector",
+      "goteo",
+      "calentador",
+      "compresion",
+      "frio",
+      "humo",
+      "gris"
+    ]
+  },
+  {
+    "id": "intermitente-rapido",
+    "n": "Intermitentes van demasiado rapido",
+    "w": [
+      "bombilla",
+      "fundida",
+      "rele",
+      "intermitencia",
+      "luces",
+      "consumo"
+    ]
+  },
+  {
+    "id": "silbido-hidraulico",
+    "n": "Silbido de direccion al girar a tope",
+    "w": [
+      "bomba",
+      "hidraulica",
+      "liquido",
+      "nivel",
+      "baja",
+      "direccion",
+      "silbido"
+    ]
+  },
+  {
+    "id": "pedal-duro-parado",
+    "n": "Pedal de freno duro con motor parado",
+    "w": [
+      "valvula",
+      "antirretorno",
+      "servofreno",
+      "vacio",
+      "depresor",
+      "fuga"
+    ]
+  },
+  {
+    "id": "tirones-carga",
+    "n": "Tirones en autopista al pisar a fondo",
+    "w": [
+      "bobina",
+      "bujia",
+      "fallo",
+      "encendido",
+      "presion",
+      "turbo",
+      "p0300"
+    ]
+  },
+  {
+    "id": "ruido-caja-ralenti",
+    "n": "Ruido metalico en punto muerto",
+    "w": [
+      "volante",
+      "bimasa",
+      "caja",
+      "primario",
+      "rodamiento",
+      "embrague"
+    ]
+  },
+  {
+    "id": "motor-acelera-solo",
+    "n": "El motor se sube de vueltas solo",
+    "w": [
+      "entrada",
+      "aire",
+      "admision",
+      "vacio",
+      "mariposa",
+      "valvula",
+      "iac"
+    ]
+  },
+  {
+    "id": "electro-seguridad",
+    "n": "Ventilador a tope con motor frio",
+    "w": [
+      "sensor",
+      "temperatura",
+      "refrigerante",
+      "ect",
+      "circuito",
+      "abierto",
+      "p0117"
+    ]
+  },
+  {
+    "id": "humo-negro-fuerza",
+    "n": "Falta potencia y mucho humo negro",
+    "w": [
+      "egr",
+      "atascada",
+      "manguito",
+      "turbo",
+      "raja",
+      "geometria",
+      "bloqueada"
+    ]
+  },
+  {
+    "id": "tpms-fallo",
+    "n": "Luz de neumaticos no se quita",
+    "w": [
+      "sensor",
+      "tpms",
+      "valvula",
+      "bateria",
+      "pila",
+      "inicializacion",
+      "rueda"
+    ]
+  },
+  {
+    "id": "chapa-freno-roce",
+    "n": "Ruido a chapa rozando en la rueda",
+    "w": [
+      "chapa",
+      "protectora",
+      "disco",
+      "roce",
+      "pastillas",
+      "freno",
+      "doblada"
+    ]
+  },
+  {
+    "id": "abs-falso-salto",
+    "n": "El ABS salta despacio sin resbalar",
+    "w": [
+      "captador",
+      "abs",
+      "sensor",
+      "rueda",
+      "sucio",
+      "corona",
+      "dentada"
+    ]
+  },
+  {
+    "id": "polea-alternador",
+    "n": "Olor a goma o plastico quemado en motor",
+    "w": [
+      "polea",
+      "libre",
+      "alternador",
+      "correa",
+      "accesorios",
+      "gripada"
+    ]
+  },
+  {
+    "id": "calado-embrague",
+    "n": "El coche se cala al reducir marchas",
+    "w": [
+      "valvula",
+      "iac",
+      "paso",
+      "pasos",
+      "mariposa",
+      "sucia",
+      "ralenti"
+    ]
+  },
+  {
+    "id": "tirones-reserva",
+    "n": "Tirones solo con poca gasolina",
+    "w": [
+      "bomba",
+      "combustible",
+      "aforador",
+      "prefiltro",
+      "suciedad",
+      "deposito"
+    ]
+  },
+  {
+    "id": "vacio-deposito",
+    "n": "Sonido de vacio al quitar tapon gasolina",
+    "w": [
+      "canister",
+      "valvula",
+      "ventilacion",
+      "deposito",
+      "vacio",
+      "respiradero"
+    ]
+  },
+  {
+    "id": "calefaccion-fria",
+    "n": "La calefaccion no calienta nada",
+    "w": [
+      "radiador",
+      "calefaccion",
+      "atascado",
+      "termostato",
+      "abierto",
+      "trampilla"
+    ]
+  },
+  {
+    "id": "ventanillas-locas",
+    "n": "Ventanillas se abren solas al cerrar",
+    "w": [
+      "modulo",
+      "confort",
+      "cerradura",
+      "corto",
+      "bcm",
+      "humedad"
+    ]
+  },
+  {
+    "id": "limpia-atras-marcha",
+    "n": "Limpia trasero va loco al ir hacia atras",
+    "w": [
+      "modulo",
+      "confort",
+      "bcm",
+      "porton",
+      "cables",
+      "cortados",
+      "pasacables"
+    ]
+  },
+  {
+    "id": "termostato-abierto",
+    "n": "Temperatura baja al ir por autopista",
+    "w": [
+      "termostato",
+      "abierto",
+      "fijo",
+      "temperatura",
+      "baja",
+      "refrigerante"
+    ]
+  },
+  {
+    "id": "grapas-pastillas",
+    "n": "Chirrido en la rueda que para al pisar freno",
+    "w": [
+      "grapas",
+      "pastillas",
+      "holgura",
+      "pinza",
+      "freno",
+      "antivibracion"
+    ]
+  },
+  {
+    "id": "direccion-charco",
+    "n": "Direccion dura unos segundos con lluvia",
+    "w": [
+      "correa",
+      "accesorios",
+      "patina",
+      "bomba",
+      "agua",
+      "charco",
+      "hidraulica"
+    ]
+  },
+  {
+    "id": "picado-bielas",
+    "n": "Ruido de tableteo metalico al acelerar",
+    "w": [
+      "biela",
+      "casquillos",
+      "picado",
+      "bielas",
+      "holgura",
+      "cigueñal"
+    ]
+  },
+  {
+    "id": "culata-ralenti",
+    "n": "Fallo de cilindro y humo blanco dulce",
+    "w": [
+      "junta",
+      "culata",
+      "refrigerante",
+      "agua",
+      "cilindro",
+      "p0300"
+    ]
+  },
+  {
+    "id": "bimasa-vibracion",
+    "n": "Pedal de embrague pulsa o vibra",
+    "w": [
+      "volante",
+      "bimasa",
+      "holgura",
+      "muelles",
+      "embrague",
+      "vibracion"
+    ]
+  },
+  {
+    "id": "primario-caja",
+    "n": "Zumbido en la caja de cambios parado",
+    "w": [
+      "rodamiento",
+      "primario",
+      "caja",
+      "cambios",
+      "valvulina",
+      "nivel"
+    ]
+  },
+  {
+    "id": "amortiguador-reventado",
+    "n": "Coche rebota demasiado en baches",
+    "w": [
+      "amortiguador",
+      "reventado",
+      "aceite",
+      "fuga",
+      "muelle",
+      "rebota"
+    ]
+  },
+  {
+    "id": "anillo-airbag",
+    "n": "Luz Airbag se enciende al girar el volante",
+    "w": [
+      "anillo",
+      "airbag",
+      "carrete",
+      "volante",
+      "claxon",
+      "p002"
+    ]
+  },
+  {
+    "id": "retrovisores-fallo",
+    "n": "Espejos electricos no responden",
+    "w": [
+      "retrovisor",
+      "mando",
+      "espejo",
+      "fusible",
+      "motor",
+      "confort",
+      "bcm"
+    ]
+  },
+  {
+    "id": "fuga-valvulina",
+    "n": "Goteo de valvulina o liquido direccion",
+    "w": [
+      "valvulina",
+      "caja",
+      "fuga",
+      "reten",
+      "direccion",
+      "asistida",
+      "rojo"
+    ]
+  },
+  {
+    "id": "masa-piloto",
+    "n": "Limpia trasero se activa al pisar el freno",
+    "w": [
+      "masa",
+      "piloto",
+      "derivacion",
+      "cortocircuito",
+      "optica",
+      "trasera"
+    ]
+  },
+  {
+    "id": "retenes-valvula",
+    "n": "Humo azulado solo al soltar gas en bajadas",
+    "w": [
+      "retenes",
+      "valvula",
+      "guias",
+      "aceite",
+      "consumo",
+      "retencion"
+    ]
+  },
+  {
+    "id": "cabeceo-frio",
+    "n": "Motor tiembla mucho justo al arrancar en frio",
+    "w": [
+      "calentador",
+      "inyector",
+      "compresion",
+      "frio",
+      "cabeceo",
+      "ralenti"
+    ]
+  },
+  {
+    "id": "olor-escape",
+    "n": "Olor a humo de escape dentro del coche",
+    "w": [
+      "colector",
+      "escape",
+      "junta",
+      "flexible",
+      "fuga",
+      "fisura",
+      "olor"
+    ]
+  },
+  {
+    "id": "clima-congelado",
+    "n": "El aire acondicionado deja de enfriar al rato",
+    "w": [
+      "congelacion",
+      "evaporador",
+      "sonda",
+      "temperatura",
+      "presostato",
+      "gas"
+    ]
+  },
+  {
+    "id": "luz-techo-fallo",
+    "n": "Luz de cortesia del techo no se apaga",
+    "w": [
+      "microruptor",
+      "cerradura",
+      "puerta",
+      "confort",
+      "bcm",
+      "pulsador"
+    ]
+  },
+  {
+    "id": "clonk-automatica",
+    "n": "Golpe brusco al meter la marcha atras",
+    "w": [
+      "caja",
+      "automatica",
+      "convertidor",
+      "grupo",
+      "holgura",
+      "silentblock",
+      "taco"
+    ]
+  },
+  {
+    "id": "zumbido-direccion",
+    "n": "Zumbido de direccion asistida al acelerar",
+    "w": [
+      "bomba",
+      "hidraulica",
+      "liquido",
+      "nivel",
+      "aire",
+      "cremallera",
+      "zumbido"
+    ]
+  },
+  {
+    "id": "silbido-deposito",
+    "n": "Silbido continuo en los asientos traseros",
+    "w": [
+      "bomba",
+      "combustible",
+      "deposito",
+      "aforador",
+      "presion",
+      "silbido"
+    ]
+  },
+  {
+    "id": "freno-mano-destensado",
+    "n": "Palanca de freno de mano sube demasiado",
+    "w": [
+      "cable",
+      "destensado",
+      "freno",
+      "mano",
+      "tensor",
+      "pastillas",
+      "zapata"
+    ]
+  },
+  {
+    "id": "frenado-asimétrico",
+    "n": "El coche da un taponazo de una rueda al frenar",
+    "w": [
+      "pinza",
+      "gripada",
+      "latiguillo",
+      "atascado",
+      "abs",
+      "bloque",
+      "valvula"
+    ]
+  },
+  {
+    "id": "termostato-bloqueado-abierto",
+    "n": "El coche va siempre frio en carretera",
+    "w": [
+      "termostato",
+      "abierto",
+      "frio",
+      "temperatura",
+      "refrigerante",
+      "p0128"
+    ]
+  },
+  {
+    "id": "limpias-ruido",
+    "n": "Escobillas del limpia rascan o saltan",
+    "w": [
+      "escobillas",
+      "goma",
+      "limparabrisas",
+      "brazo",
+      "cristal",
+      "ruido"
+    ]
+  },
+  {
+    "id": "campanilleo-escape",
+    "n": "Ruido a chapa suelta debajo del coche",
+    "w": [
+      "catalizador",
+      "ceramica",
+      "suelta",
+      "protector",
+      "termico",
+      "escape",
+      "silenciador"
+    ]
+  },
+  {
+    "id": "direccion-dura-bajas",
+    "n": "Direccion pesada solo en maniobras",
+    "w": [
+      "bomba",
+      "hidraulica",
+      "caudal",
+      "insuficiente",
+      "direccion",
+      "dura",
+      "aparcar"
+    ]
+  },
+  {
+    "id": "marchas-rascan",
+    "n": "Rascan las marchas al meterlas en parado",
+    "w": [
+      "embrague",
+      "maza",
+      "bomba",
+      "bombin",
+      "malo",
+      "arrastre",
+      "sincronizador"
+    ]
+  },
+  {
+    "id": "maletero-loco",
+    "n": "Porton del maletero se abre solo",
+    "w": [
+      "cables",
+      "pasacables",
+      "porton",
+      "cortocircuito",
+      "maletero",
+      "cierre"
+    ]
+  },
+  {
+    "id": "luz-matricula",
+    "n": "Testigo de bombilla fundida solo al poner la marcha atras",
+    "w": [
+      "matricula",
+      "bombilla",
+      "corto",
+      "plafond",
+      "oxido",
+      "luces"
+    ]
+  },
+  {
+    "id": "tirones-clima",
+    "n": "El coche da un tiron fuerte justo al encender el aire acondicionado",
+    "w": [
+      "compresor",
+      "climatizador",
+      "tiron",
+      "polea",
+      "potencia",
+      "rele"
+    ]
+  },
+  {
+    "id": "limpias-no-paran",
+    "n": "Los limpiaparabrisas no se apagan nunca al quitar la palanca",
+    "w": [
+      "limpia",
+      "parar",
+      "rele",
+      "mando",
+      "conmutador",
+      "bcm"
+    ]
+  },
+  {
+    "id": "humo-azul-ralenti",
+    "n": "Humo azulado por el escape solo tras estar 10 minutos a ralenti",
+    "w": [
+      "turbo",
+      "reten",
+      "aceite",
+      "ralenti",
+      "quema",
+      "escape"
+    ]
+  },
+  {
+    "id": "freno-duro-vacio",
+    "n": "El pedal de freno se vuelve duro al frenar varias veces seguidas",
+    "w": [
+      "depresor",
+      "vacio",
+      "servofreno",
+      "bomba",
+      "latiguillo",
+      "duro"
+    ]
+  },
+  {
+    "id": "clonck-direccion",
+    "n": "Ruido de clonck seco al cambiar de sentido de giro en marcha",
+    "w": [
+      "cremallera",
+      "holgura",
+      "rotula",
+      "direccion",
+      "axial",
+      "clonck"
+    ]
+  },
+  {
+    "id": "silbido-alternador",
+    "n": "Silbido electrico que se escucha por los altavoces al acelerar",
+    "w": [
+      "alternador",
+      "parasitos",
+      "filtro",
+      "radio",
+      "masa",
+      "interferencia"
+    ]
+  },
+  {
+    "id": "agua-maletero",
+    "n": "Moqueta del maletero empapada de agua despues de llover",
+    "w": [
+      "filtracion",
+      "maletero",
+      "goma",
+      "piloto",
+      "agua",
+      "moqueta"
+    ]
+  },
+  {
+    "id": "asiento-electrico",
+    "n": "El asiento electrico no se mueve hacia delante o detras",
+    "w": [
+      "asiento",
+      "motor",
+      "fusible",
+      "mando",
+      "conmutador",
+      "guia"
+    ]
+  },
+  {
+    "id": "clima-ruido-gas",
+    "n": "Ruido de liquido fluyendo detras del salpicadero al poner el aire",
+    "w": [
+      "carga",
+      "gas",
+      "baja",
+      "climatizador",
+      "fluido",
+      "expansion"
+    ]
+  },
+  {
+    "id": "llave-no-gira",
+    "n": "La llave de contacto esta atascada y no gira en el bombin",
+    "w": [
+      "bombin",
+      "clausor",
+      "llave",
+      "bloqueo",
+      "volante",
+      "atascado"
+    ]
+  },
+  {
+    "id": "freno-mano-asimetrico",
+    "n": "El freno de mano frena mucho mas de una rueda trasera que de otra",
+    "w": [
+      "cable",
+      "pinza",
+      "mecanismo",
+      "freno",
+      "mano",
+      "destensado"
+    ]
+  },
+  {
+    "id": "electro-nunca-salta",
+    "n": "El motor se calienta pero el ventilador del radiador no arranca",
+    "w": [
+      "electroventilador",
+      "rele",
+      "termocontacto",
+      "sensor",
+      "temperatura"
+    ]
+  },
+  {
+    "id": "limpias-lentos",
+    "n": "Los limpiaparabrisas van extremadamente lentos en todas las velocidades",
+    "w": [
+      "varillaje",
+      "oxido",
+      "motor",
+      "limpia",
+      "parabrisas",
+      "lento"
+    ]
+  },
+  {
+    "id": "olor-anticongelante-motor",
+    "n": "Olor a anticongelante en el motor pero el suelo siempre esta seco",
+    "w": [
+      "bomba",
+      "agua",
+      "evaporacion",
+      "fuga",
+      "anticongelante",
+      "radiador"
+    ]
+  },
+  {
+    "id": "espejo-termico",
+    "n": "El espejo retrovisor no se desempaña al encender el boton",
+    "w": [
+      "cristal",
+      "termico",
+      "retrovisor",
+      "resistencia",
+      "fusible",
+      "mando"
+    ]
+  },
+  {
+    "id": "cierre-rebota",
+    "n": "El coche se cierra con el mando pero se vuelve a abrir solo al segundo",
+    "w": [
+      "cerradura",
+      "puerta",
+      "maletero",
+      "abierto",
+      "sensor",
+      "cierre",
+      "rebota"
+    ]
+  },
+  {
+    "id": "pedal-embrague-ruido",
+    "n": "Ruido de grillo en el motor que desaparece al rozar el pedal de embrague",
+    "w": [
+      "collarin",
+      "empuje",
+      "cojinete",
+      "embrague",
+      "grillo",
+      "ruido"
+    ]
+  },
+  {
+    "id": "luces-cuadro-bajan",
+    "n": "La pantalla de la radio parpadea al ritmo de la musica con volumen alto",
+    "w": [
+      "bateria",
+      "alternador",
+      "caida",
+      "tension",
+      "capacitador",
+      "masa"
+    ]
+  },
+  {
+    "id": "tapon-aceite-presion",
+    "n": "Al quitar el tapon del aceite con el motor en marcha sopla mucho aire",
+    "w": [
+      "pcv",
+      "valvula",
+      "presion",
+      "carter",
+      "compresion",
+      "segmentos"
+    ]
+  },
+  {
+    "id": "silbido-admision",
+    "n": "Silbido agudo en el motor al acelerar en vacio (Toma de aire)",
+    "w": [
+      "admision",
+      "colector",
+      "fuga",
+      "vacio",
+      "junta",
+      "raja",
+      "silbido"
+    ]
+  },
+  {
+    "id": "testigo-pastillas",
+    "n": "Testigo de pastillas de freno encendido de forma intermitente",
+    "w": [
+      "pastillas",
+      "desgaste",
+      "cable",
+      "masa",
+      "testigo",
+      "freno",
+      "roce"
+    ]
+  },
+  {
+    "id": "liquido-direccion-negro",
+    "n": "El liquido de la direccion asistida esta muy negro o huele a quemado",
+    "w": [
+      "liquido",
+      "direccion",
+      "bomba",
+      "desgaste",
+      "hidraulica",
+      "atf"
+    ]
+  },
+  {
+    "id": "freno-asistencia-fria",
+    "n": "El pedal de freno esta durisimo solo la primera frenada de la mañana",
+    "w": [
+      "valvula",
+      "antirretorno",
+      "servofreno",
+      "vacio",
+      "tubería",
+      "duro"
+    ]
+  },
+  {
+    "id": "holgura-volante",
+    "n": "Holgura en el volante (Hay que moverlo un poco para que gire)",
+    "w": [
+      "cremallera",
+      "holgura",
+      "flector",
+      "columna",
+      "rotula",
+      "axial"
+    ]
+  },
+  {
+    "id": "abs-freno-mano",
+    "n": "Testigos de ABS y Freno de mano encendidos a la vez",
+    "w": [
+      "liquido",
+      "frenos",
+      "nivel",
+      "bajo",
+      "abs",
+      "bloque",
+      "repartidor"
+    ]
+  },
+  {
+    "id": "ruido-polea-alternador",
+    "n": "Ruido de grillo continuo en la zona de las correas",
+    "w": [
+      "correa",
+      "accesorios",
+      "alternador",
+      "polea",
+      "grillo",
+      "tensor"
+    ]
+  },
+  {
+    "id": "agua-copiloto",
+    "n": "Moqueta del suelo del copiloto empapada de refrigerante",
+    "w": [
+      "radiador",
+      "calefaccion",
+      "fuga",
+      "anticongelante",
+      "moqueta"
+    ]
+  },
+  {
+    "id": "elevalunas-caido",
+    "n": "Se escucha el motor del elevalunas pero el cristal se cae",
+    "w": [
+      "elevalunas",
+      "grapas",
+      "plastico",
+      "cable",
+      "roto",
+      "cristal"
+    ]
+  },
+  {
+    "id": "cierre-puerta-trasera",
+    "n": "El coche cierra todas las puertas menos una trasera",
+    "w": [
+      "cerradura",
+      "motor",
+      "puerta",
+      "trasera",
+      "cierre",
+      "centralizado"
+    ]
+  },
+  {
+    "id": "tirones-egr-frio",
+    "n": "El motor pega tirones leves a bajas vueltas en frio",
+    "w": [
+      "egr",
+      "valvula",
+      "carbonilla",
+      "tirones",
+      "frio",
+      "atascada"
+    ]
+  },
+  {
+    "id": "aceite-cambio-sucio",
+    "n": "Las marchas entran duras o rascan en caliente",
+    "w": [
+      "valvulina",
+      "caja",
+      "aceite",
+      "degradado",
+      "viscosidad",
+      "caliente"
+    ]
+  },
+  {
+    "id": "luces-matricula-fias",
+    "n": "Las luces de la matricula parpadean al mover el porton",
+    "w": [
+      "pasacables",
+      "porton",
+      "maletero",
+      "cables",
+      "pelados",
+      "corto"
+    ]
+  },
+  {
+    "id": "claxon-suena-solo",
+    "n": "El claxon se queda pegado sonando solo al girar",
+    "w": [
+      "anillo",
+      "airbag",
+      "claxon",
+      "pito",
+      "pegado",
+      "volante",
+      "corto"
+    ]
+  },
+  {
+    "id": "motor-gotea-anticongelante",
+    "n": "Manchas de liquido rosa o verde en el suelo",
+    "w": [
+      "fuga",
+      "anticongelante",
+      "radiador",
+      "manguito",
+      "bomba",
+      "goteo"
+    ]
+  },
+  {
+    "id": "espejos-plegables",
+    "n": "Los retrovisores electricos no se pliegan al cerrar",
+    "w": [
+      "retrovisor",
+      "plegable",
+      "motor",
+      "engranaje",
+      "modulo",
+      "confort"
+    ]
+  },
+  {
+    "id": "cierre-mando-no-va",
+    "n": "El coche abre con la llave pero no responde al mando",
+    "w": [
+      "mando",
+      "frecuencia",
+      "pila",
+      "llave",
+      "receptor",
+      "bcm"
+    ]
+  },
+  {
+    "id": "pedal-embrague-blando",
+    "n": "El pedal de embrague se va al fondo sin resistencia",
+    "w": [
+      "bomba",
+      "bombin",
+      "hidraulico",
+      "liquido",
+      "embrague",
+      "fuga"
+    ]
+  },
+  {
+    "id": "cuadro-luces-tenues",
+    "n": "Las luces del cuadro brillan muy poco de noche",
+    "w": [
+      "reostato",
+      "potenciometro",
+      "regulador",
+      "brillo",
+      "cuadro"
+    ]
+  },
+  {
+    "id": "humo-blanco-aceite",
+    "n": "Humo blanco-azul con olor a aceite al acelerar",
+    "w": [
+      "turbo",
+      "holgura",
+      "eje",
+      "aceite",
+      "quema",
+      "escape",
+      "retenes"
+    ]
+  },
+  {
+    "id": "ruido-caja",
+    "n": "Ruido de rodamiento en la caja de cambios",
+    "w": [
+      "caja",
+      "cambios",
+      "rodamiento",
+      "valvulina",
+      "zumbido"
+    ]
+  },
+  {
+    "id": "esp-seco",
+    "n": "Testigo de ESP salta en seco sin motivo",
+    "w": [
+      "esp",
+      "traccion",
+      "sensor",
+      "angulo",
+      "giro",
+      "abs",
+      "p013"
+    ]
+  },
+  {
+    "id": "luz-techo",
+    "n": "Luz de cortesia del techo parpadea sola",
+    "w": [
+      "luz",
+      "techo",
+      "cortesia",
+      "puerta",
+      "microruptor",
+      "bcm"
+    ]
+  },
+  {
+    "id": "crucero-tiron",
+    "n": "Tirones leves con el control de crucero",
+    "w": [
+      "crucero",
+      "velocidad",
+      "tirones",
+      "pedal",
+      "freno",
+      "maf"
+    ]
+  },
+  {
+    "id": "abs-freno-mano",
+    "n": "Testigos de ABS y Freno de mano encendidos a la vez",
+    "w": [
+      "liquido",
+      "frenos",
+      "nivel",
+      "bajo",
+      "abs",
+      "bloque",
+      "repartidor"
+    ]
+  },
+  {
+    "id": "ruido-polea-alternador",
+    "n": "Ruido de grillo continuo en la zona de las correas",
+    "w": [
+      "correa",
+      "accesorios",
+      "alternador",
+      "polea",
+      "grillo",
+      "tensor"
+    ]
+  },
+  {
+    "id": "agua-copiloto",
+    "n": "Moqueta del suelo del copiloto empapada de refrigerante",
+    "w": [
+      "radiador",
+      "calefaccion",
+      "fuga",
+      "anticongelante",
+      "moqueta"
+    ]
+  },
+  {
+    "id": "elevalunas-caido",
+    "n": "Se escucha el motor del elevalunas pero el cristal se cae",
+    "w": [
+      "elevalunas",
+      "grapas",
+      "plastico",
+      "cable",
+      "roto",
+      "cristal"
+    ]
+  },
+  {
+    "id": "cierre-puerta-trasera",
+    "n": "El coche cierra todas las puertas menos una trasera",
+    "w": [
+      "cerradura",
+      "motor",
+      "puerta",
+      "trasera",
+      "cierre",
+      "centralizado"
+    ]
+  },
+  {
+    "id": "tirones-egr-frio",
+    "n": "El motor pega tirones leves a bajas vueltas en frio",
+    "w": [
+      "egr",
+      "valvula",
+      "carbonilla",
+      "tirones",
+      "frio",
+      "atascada"
+    ]
+  },
+  {
+    "id": "aceite-cambio-sucio",
+    "n": "Las marchas entran duras o rascan en caliente",
+    "w": [
+      "valvulina",
+      "caja",
+      "aceite",
+      "degradado",
+      "viscosidad",
+      "caliente"
+    ]
+  },
+  {
+    "id": "luces-matricula-fias",
+    "n": "Las luces de la matricula parpadean al mover el porton",
+    "w": [
+      "pasacables",
+      "porton",
+      "maletero",
+      "cables",
+      "pelados",
+      "corto"
+    ]
+  },
+  {
+    "id": "claxon-suena-solo",
+    "n": "El claxon se queda pegado sonando solo al girar",
+    "w": [
+      "anillo",
+      "airbag",
+      "claxon",
+      "pito",
+      "pegado",
+      "volante",
+      "corto"
+    ]
+  },
+  {
+    "id": "motor-gotea-anticongelante",
+    "n": "Manchas de liquido rosa o verde en el suelo",
+    "w": [
+      "fuga",
+      "anticongelante",
+      "radiador",
+      "manguito",
+      "bomba",
+      "goteo"
+    ]
+  },
+  {
+    "id": "espejos-plegables",
+    "n": "Los retrovisores electricos no se pliegan al cerrar",
+    "w": [
+      "retrovisor",
+      "plegable",
+      "motor",
+      "engranaje",
+      "modulo",
+      "confort"
+    ]
+  },
+  {
+    "id": "cierre-mando-no-va",
+    "n": "El coche abre con la llave pero no responde al mando",
+    "w": [
+      "mando",
+      "frecuencia",
+      "pila",
+      "llave",
+      "receptor",
+      "bcm"
+    ]
+  },
+  {
+    "id": "pedal-embrague-blando",
+    "n": "El pedal de embrague se va al fondo sin resistencia",
+    "w": [
+      "bomba",
+      "bombin",
+      "hidraulico",
+      "liquido",
+      "embrague",
+      "fuga"
+    ]
+  },
+  {
+    "id": "cuadro-luces-tenues",
+    "n": "Las luces del cuadro brillan muy poco de noche",
+    "w": [
+      "reostato",
+      "potenciometro",
+      "regulador",
+      "brillo",
+      "cuadro"
+    ]
+  },
+  {
+    "id": "humo-blanco-aceite",
+    "n": "Humo blanco-azul con olor a aceite al acelerar",
+    "w": [
+      "turbo",
+      "holgura",
+      "eje",
+      "aceite",
+      "quema",
+      "escape",
+      "retenes"
+    ]
+  },
+  {
+    "id": "fap-olor-gasoil",
+    "n": "Olor fuerte a gasoil quemado y ralenti alto en ciudad",
+    "w": [
+      "fap",
+      "dpf",
+      "regeneracion",
+      "ciclo",
+      "ralenti",
+      "gasoil",
+      "postinyeccion"
+    ]
+  },
+  {
+    "id": "fap-aceite-sube",
+    "n": "El nivel de aceite del motor sube solo por encima del maximo",
+    "w": [
+      "fap",
+      "dpf",
+      "regeneracion",
+      "fallida",
+      "aceite",
+      "gasoil",
+      "dilucion",
+      "p253f"
+    ]
+  },
+  {
+    "id": "fap-sensor-diferencial",
+    "n": "Fallo de motor tras lavar los bajos del coche",
+    "w": [
+      "sensor",
+      "presion",
+      "diferencial",
+      "fap",
+      "dpf",
+      "tubos",
+      "humedad",
+      "p2452"
+    ]
+  },
+  {
+    "id": "fap-tubos-rotos",
+    "n": "Tirones y testigo de filtro de particulas tras un bache",
+    "w": [
+      "manguito",
+      "presion",
+      "fap",
+      "dpf",
+      "roto",
+      "derretido",
+      "tubo",
+      "sensor"
+    ]
+  },
+  {
+    "id": "fap-aditivo-bajo",
+    "n": "Mensaje de nivel de aditivo de combustible bajo (FAP/Eolys)",
+    "w": [
+      "eolys",
+      "aditivo",
+      "cerina",
+      "deposito",
+      "fap",
+      "bajo",
+      "p1445"
+    ]
+  },
+  {
+    "id": "fap-humo-blanco-ciudad",
+    "n": "Humo blanco denso que sale solo al circular despacio por ciudad",
+    "w": [
+      "fap",
+      "dpf",
+      "regeneracion",
+      "hollin",
+      "humo",
+      "blanco",
+      "retencion"
+    ]
+  },
+  {
+    "id": "fap-silenciador-hollin",
+    "n": "Tubo de escape negro de hollin en un coche moderno con FAP",
+    "w": [
+      "fap",
+      "dpf",
+      "roto",
+      "fissura",
+      "hollin",
+      "escape",
+      "negro",
+      "p2002"
+    ]
+  },
+  {
+    "id": "fap-modo-emergencia",
+    "n": "El coche no pasa de 80 km/h por saturacion extrema de carbonilla",
+    "w": [
+      "fap",
+      "dpf",
+      "saturacion",
+      "emergencia",
+      "limp",
+      "mode",
+      "bloqueado",
+      "p2463"
+    ]
+  },
+  {
+    "id": "fap-regeneracion-infinita",
+    "n": "Los ventiladores del motor se quedan encendidos siempre al aparcar",
+    "w": [
+      "fap",
+      "dpf",
+      "regeneracion",
+      "incompleta",
+      "ventilador",
+      "fijo",
+      "calor"
+    ]
+  },
+  {
+    "id": "scr-cuenta-atras",
+    "n": "Aviso de arranque imposible en 800 km en el cuadro",
+    "w": [
+      "adblue",
+      "urea",
+      "scr",
+      "arranque",
+      "imposible",
+      "cuenta",
+      "atras",
+      "p20ee"
+    ]
+  },
+  {
+    "id": "scr-cristales-blancos",
+    "n": "Manchas de polvo blanco cristalizado alrededor del tapon de AdBlue",
+    "w": [
+      "adblue",
+      "urea",
+      "cristalizacion",
+      "blanco",
+      "tapon",
+      "respiradero",
+      "vacio"
+    ]
+  },
+  {
+    "id": "scr-inyector-atascado",
+    "n": "Testigo de fallo anticontaminacion justo despues de acelerar a fondo",
+    "w": [
+      "adblue",
+      "inyector",
+      "scr",
+      "atascado",
+      "cristal",
+      "urea",
+      "p218c"
+    ]
+  },
+  {
+    "id": "scr-sensor-nox",
+    "n": "Luz de averia de motor encendida intermitente los dias de mucha autopista",
+    "w": [
+      "nox",
+      "sensor",
+      "adblue",
+      "scr",
+      "catalizador",
+      "sonda",
+      "p2201"
+    ]
+  },
+  {
+    "id": "scr-bomba-defectuosa",
+    "n": "Fallo de AdBlue que no se borra ni llenando el deposito a tope",
+    "w": [
+      "adblue",
+      "bomba",
+      "deposito",
+      "presion",
+      "modulo",
+      "defectuoso",
+      "p208e"
+    ]
+  },
+  {
+    "id": "scr-calentador-roto",
+    "n": "Luz de fallo de AdBlue que salta solo en invierno en dias de heladas",
+    "w": [
+      "adblue",
+      "calentador",
+      "resistencia",
+      "congelacion",
+      "deposito",
+      "p205b"
+    ]
+  },
+  {
+    "id": "scr-sensor-nivel",
+    "n": "El cuadro marca deposito de AdBlue vacio estando completamente lleno",
+    "w": [
+      "adblue",
+      "sensor",
+      "nivel",
+      "aforador",
+      "boya",
+      "atascada",
+      "deposito"
+    ]
+  },
+  {
+    "id": "scr-tapon-vacio",
+    "n": "El deposito de AdBlue se deforma o se deprime hacia dentro",
+    "w": [
+      "adblue",
+      "tapon",
+      "vacio",
+      "deformado",
+      "respiradero",
+      "atascado",
+      "deposito"
+    ]
+  },
+  {
+    "id": "scr-catalizador-sucio",
+    "n": "Humo blanco intermitente por el escape con olor a amoniaco puro",
+    "w": [
+      "adblue",
+      "amoniaco",
+      "olor",
+      "catalizador",
+      "scr",
+      "humo",
+      "blanco"
+    ]
+  },
+  {
+    "id": "scr-calidad-liquido",
+    "n": "Aviso de liquido de AdBlue incorrecto o adulterado en el cuadro",
+    "w": [
+      "adblue",
+      "calidad",
+      "sensor",
+      "adulterado",
+      "agua",
+      "concentracion",
+      "p207f"
+    ]
+  }
 ]
