@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-10-25T00:46:15.522Z",
+  "verificationDate": "2026-10-25",
+  "totalActive": 500,
+  "uniqueIds": 500,
+  "uniqueNames": 500,
+  "uniqueAsins": 500,
+  "imageVerified": 500,
+  "imagePending": 0,
+  "linkVerified": 500,
+  "linkPending": 0,
+  "compatibilityKnown": 235,
+  "compatibilityUnknown": 265,
+  "categories": {
+    "Repuestos": 135,
+    "Herramientas": 115,
+    "Líquidos y Químicos": 110,
+    "Diagnosis": 75,
+    "Tuning": 40,
+    "Maquinaria": 25
+  },
+  "productTypes": {
+    "herramienta": 115,
+    "maquinaria": 25,
+    "limpieza_quimico": 87,
+    "diagnostico": 48,
+    "repuesto": 135,
+    "consumible": 23,
+    "equipo": 27,
+    "tuning": 40
+  },
+  "errors": []
+}

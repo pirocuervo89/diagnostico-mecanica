@@ -2,4 +2,23 @@ node_modules/
 .env
 .env.local
 *.log
+
+# Copias de seguridad completas (binarias, ya cubiertas por Git)
+backups/
+*.tar.gz
+
+# Biblioteca técnica generada (132 MB): se reconstruye con `npm run technical:build`
+data/technical-library.json
+
+# Datos de idioma del OCR (58 MB descargables de Tesseract)
+data/ocr/*.traineddata
+data/ocr/*.traineddata.gz
 .DS_Store
+data/contact_messages.json
+data/forum.sqlite
+data/forum.sqlite-shm
+data/forum.sqlite-wal
+data/forum/uploads/
+data/tutorials.sqlite
+data/tutorials.sqlite-shm
+data/tutorials.sqlite-wal

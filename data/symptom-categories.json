@@ -1,0 +1,56 @@
+[
+  {
+    "id": "motor",
+    "label": "Motor y funcionamiento",
+    "icon": "engine",
+    "description": "Arranque, ralentí, potencia, ruidos, humos, lubricación y distribución."
+  },
+  {
+    "id": "combustible",
+    "label": "Combustible e inyección",
+    "icon": "oil",
+    "description": "Alimentación, presión, inyectores, mezcla y fallos de encendido."
+  },
+  {
+    "id": "turbo-admision",
+    "label": "Turbo y admisión",
+    "icon": "pulse",
+    "description": "Presión de sobrealimentación, fugas, caudal de aire y geometría variable."
+  },
+  {
+    "id": "anticontaminacion",
+    "label": "Anticontaminación",
+    "icon": "cloud",
+    "description": "EGR, DPF/FAP, catalizador, NOx, AdBlue y emisiones."
+  },
+  {
+    "id": "electricidad",
+    "label": "Electricidad y electrónica",
+    "icon": "zap",
+    "description": "Batería, carga, alimentación, sensores, comunicación y módulos."
+  },
+  {
+    "id": "transmision",
+    "label": "Transmisión",
+    "icon": "cpu",
+    "description": "Embrague, caja de cambios, palieres, bimasa y accionamientos."
+  },
+  {
+    "id": "frenos-chasis",
+    "label": "Frenos y chasis",
+    "icon": "brake",
+    "description": "Frenado, ABS/ESP, dirección, suspensión, neumáticos y estabilidad."
+  },
+  {
+    "id": "refrigeracion-clima",
+    "label": "Refrigeración y climatización",
+    "icon": "thermo",
+    "description": "Temperatura, refrigerante, calefacción, ventiladores y aire acondicionado."
+  },
+  {
+    "id": "carroceria-confort",
+    "label": "Carrocería y confort",
+    "icon": "car",
+    "description": "Puertas, cierres, cristales, asientos, iluminación y módulos de confort."
+  }
+]

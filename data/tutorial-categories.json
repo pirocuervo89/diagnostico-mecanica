@@ -1,0 +1,1878 @@
+[
+  {
+    "id": "mantenimientos",
+    "name": "Mantenimientos",
+    "icon": "check",
+    "description": "Revisiones, fluidos, filtros y mantenimiento preventivo.",
+    "children": [
+      {
+        "id": "mantenimiento-basico",
+        "name": "Mantenimiento básico"
+      },
+      {
+        "id": "revisiones-periodicas",
+        "name": "Revisiones periódicas"
+      },
+      {
+        "id": "cambio-de-aceite-y-filtro",
+        "name": "Cambio de aceite y filtro"
+      },
+      {
+        "id": "filtro-de-aire",
+        "name": "Filtro de aire"
+      },
+      {
+        "id": "filtro-de-habitaculo",
+        "name": "Filtro de habitáculo"
+      },
+      {
+        "id": "filtro-de-combustible",
+        "name": "Filtro de combustible"
+      },
+      {
+        "id": "filtros-de-particulas-y-sistemas-asociados",
+        "name": "Filtros de partículas y sistemas asociados"
+      },
+      {
+        "id": "cambio-y-comprobacion-de-liquidos",
+        "name": "Cambio y comprobación de líquidos"
+      },
+      {
+        "id": "refrigerante-y-anticongelante",
+        "name": "Refrigerante y anticongelante"
+      },
+      {
+        "id": "liquido-de-frenos",
+        "name": "Líquido de frenos"
+      },
+      {
+        "id": "aceites-de-transmision",
+        "name": "Aceites de transmisión"
+      },
+      {
+        "id": "aceites-de-diferencial",
+        "name": "Aceites de diferencial"
+      },
+      {
+        "id": "mantenimiento-de-cajas-automaticas",
+        "name": "Mantenimiento de cajas automáticas"
+      },
+      {
+        "id": "bateria-de-12-v",
+        "name": "Batería de 12 V"
+      },
+      {
+        "id": "baterias-auxiliares",
+        "name": "Baterías auxiliares"
+      },
+      {
+        "id": "bujias",
+        "name": "Bujías"
+      },
+      {
+        "id": "calentadores-diesel",
+        "name": "Calentadores diésel"
+      },
+      {
+        "id": "correas-auxiliares",
+        "name": "Correas auxiliares"
+      },
+      {
+        "id": "tensores-y-poleas",
+        "name": "Tensores y poleas"
+      },
+      {
+        "id": "bomba-de-agua",
+        "name": "Bomba de agua"
+      },
+      {
+        "id": "sistema-de-refrigeracion",
+        "name": "Sistema de refrigeración"
+      },
+      {
+        "id": "termostato",
+        "name": "Termostato"
+      },
+      {
+        "id": "radiador",
+        "name": "Radiador"
+      },
+      {
+        "id": "manguitos",
+        "name": "Manguitos"
+      },
+      {
+        "id": "limpieza-y-mantenimiento-de-admision",
+        "name": "Limpieza y mantenimiento de admisión"
+      },
+      {
+        "id": "mantenimiento-preventivo",
+        "name": "Mantenimiento preventivo"
+      },
+      {
+        "id": "preparacion-para-itv",
+        "name": "Preparación para ITV"
+      },
+      {
+        "id": "inspeccion-antes-de-comprar-un-vehiculo",
+        "name": "Inspección antes de comprar un vehículo"
+      },
+      {
+        "id": "mantenimiento-de-alto-kilometraje",
+        "name": "Mantenimiento de alto kilometraje"
+      },
+      {
+        "id": "planes-de-mantenimiento",
+        "name": "Planes de mantenimiento"
+      }
+    ]
+  },
+  {
+    "id": "distribuciones",
+    "name": "Distribuciones",
+    "icon": "clock",
+    "description": "Correa, cadena, calado, útiles y comprobación.",
+    "children": [
+      {
+        "id": "correa-de-distribucion",
+        "name": "Correa de distribución"
+      },
+      {
+        "id": "cadena-de-distribucion",
+        "name": "Cadena de distribución"
+      },
+      {
+        "id": "distribucion-por-engranajes",
+        "name": "Distribución por engranajes"
+      },
+      {
+        "id": "motores-con-sistemas-mixtos",
+        "name": "Motores con sistemas mixtos"
+      },
+      {
+        "id": "correa-humeda-o-banada-en-aceite",
+        "name": "Correa húmeda o bañada en aceite"
+      },
+      {
+        "id": "correas-auxiliares-y-accesorios",
+        "name": "Correas auxiliares y accesorios"
+      },
+      {
+        "id": "tensores",
+        "name": "Tensores"
+      },
+      {
+        "id": "rodillos-guia",
+        "name": "Rodillos guía"
+      },
+      {
+        "id": "poleas",
+        "name": "Poleas"
+      },
+      {
+        "id": "variadores-de-fase",
+        "name": "Variadores de fase"
+      },
+      {
+        "id": "sistemas-vvt",
+        "name": "Sistemas VVT"
+      },
+      {
+        "id": "arboles-de-levas",
+        "name": "Árboles de levas"
+      },
+      {
+        "id": "reglaje-de-valvulas",
+        "name": "Reglaje de válvulas"
+      },
+      {
+        "id": "calado-del-ciguenal",
+        "name": "Calado del cigüeñal"
+      },
+      {
+        "id": "calado-de-arboles-de-levas",
+        "name": "Calado de árboles de levas"
+      },
+      {
+        "id": "bloqueo-de-distribucion",
+        "name": "Bloqueo de distribución"
+      },
+      {
+        "id": "utiles-especificos-de-calado",
+        "name": "Útiles específicos de calado"
+      },
+      {
+        "id": "sustitucion-de-bomba-de-agua-asociada",
+        "name": "Sustitución de bomba de agua asociada"
+      },
+      {
+        "id": "sustitucion-de-retenes",
+        "name": "Sustitución de retenes"
+      },
+      {
+        "id": "comprobacion-del-calado",
+        "name": "Comprobación del calado"
+      },
+      {
+        "id": "comprobacion-despues-del-montaje",
+        "name": "Comprobación después del montaje"
+      },
+      {
+        "id": "distribuciones-diesel",
+        "name": "Distribuciones diésel"
+      },
+      {
+        "id": "distribuciones-gasolina",
+        "name": "Distribuciones gasolina"
+      },
+      {
+        "id": "distribuciones-por-cilindros",
+        "name": "Distribuciones por cilindros"
+      },
+      {
+        "id": "atmosfericos-y-turboalimentados",
+        "name": "Atmosféricos y turboalimentados"
+      },
+      {
+        "id": "distribuciones-por-marca-y-motor",
+        "name": "Distribuciones por marca y motor"
+      },
+      {
+        "id": "errores-habituales-de-montaje",
+        "name": "Errores habituales de montaje"
+      },
+      {
+        "id": "consecuencias-de-un-salto",
+        "name": "Consecuencias de un salto"
+      },
+      {
+        "id": "ruidos-de-distribucion",
+        "name": "Ruidos de distribución"
+      },
+      {
+        "id": "sincronizacion-con-osciloscopio",
+        "name": "Sincronización con osciloscopio"
+      }
+    ]
+  },
+  {
+    "id": "averias-genericas",
+    "name": "Averías genéricas",
+    "icon": "alert",
+    "description": "Diagnóstico por síntoma, sin sustituir piezas a ciegas.",
+    "children": [
+      {
+        "id": "el-motor-no-arranca",
+        "name": "El motor no arranca"
+      },
+      {
+        "id": "arranque-dificil-en-frio",
+        "name": "Arranque difícil en frío"
+      },
+      {
+        "id": "arranque-dificil-en-caliente",
+        "name": "Arranque difícil en caliente"
+      },
+      {
+        "id": "gira-pero-no-arranca",
+        "name": "Gira pero no arranca"
+      },
+      {
+        "id": "arranca-y-se-para",
+        "name": "Arranca y se para"
+      },
+      {
+        "id": "fallos-de-combustion",
+        "name": "Fallos de combustión"
+      },
+      {
+        "id": "tirones",
+        "name": "Tirones"
+      },
+      {
+        "id": "perdida-de-potencia",
+        "name": "Pérdida de potencia"
+      },
+      {
+        "id": "modo-emergencia",
+        "name": "Modo emergencia"
+      },
+      {
+        "id": "humo-negro",
+        "name": "Humo negro"
+      },
+      {
+        "id": "humo-azul",
+        "name": "Humo azul"
+      },
+      {
+        "id": "humo-blanco",
+        "name": "Humo blanco"
+      },
+      {
+        "id": "consumo-excesivo-de-combustible",
+        "name": "Consumo excesivo de combustible"
+      },
+      {
+        "id": "consumo-de-aceite",
+        "name": "Consumo de aceite"
+      },
+      {
+        "id": "sobrecalentamiento",
+        "name": "Sobrecalentamiento"
+      },
+      {
+        "id": "no-alcanza-temperatura",
+        "name": "No alcanza temperatura"
+      },
+      {
+        "id": "ralenti-inestable",
+        "name": "Ralentí inestable"
+      },
+      {
+        "id": "vibraciones",
+        "name": "Vibraciones"
+      },
+      {
+        "id": "ruidos-mecanicos",
+        "name": "Ruidos mecánicos"
+      },
+      {
+        "id": "golpeteos",
+        "name": "Golpeteos"
+      },
+      {
+        "id": "silbidos",
+        "name": "Silbidos"
+      },
+      {
+        "id": "perdidas-de-refrigerante",
+        "name": "Pérdidas de refrigerante"
+      },
+      {
+        "id": "fugas-de-aceite",
+        "name": "Fugas de aceite"
+      },
+      {
+        "id": "fugas-de-combustible",
+        "name": "Fugas de combustible"
+      },
+      {
+        "id": "perdidas-de-vacio",
+        "name": "Pérdidas de vacío"
+      },
+      {
+        "id": "perdida-de-presion-de-turbo",
+        "name": "Pérdida de presión de turbo"
+      },
+      {
+        "id": "presion-de-combustible-insuficiente",
+        "name": "Presión de combustible insuficiente"
+      },
+      {
+        "id": "presion-de-aceite-insuficiente",
+        "name": "Presión de aceite insuficiente"
+      },
+      {
+        "id": "problemas-de-carga-de-bateria",
+        "name": "Problemas de carga de batería"
+      },
+      {
+        "id": "descargas-de-bateria",
+        "name": "Descargas de batería"
+      },
+      {
+        "id": "fallos-electricos-intermitentes",
+        "name": "Fallos eléctricos intermitentes"
+      },
+      {
+        "id": "testigos-encendidos",
+        "name": "Testigos encendidos"
+      },
+      {
+        "id": "falta-de-comunicacion-con-la-centralita",
+        "name": "Falta de comunicación con la centralita"
+      },
+      {
+        "id": "averias-recurrentes",
+        "name": "Averías recurrentes"
+      },
+      {
+        "id": "fallos-bajo-carga",
+        "name": "Fallos bajo carga"
+      },
+      {
+        "id": "fallos-al-enfriarse",
+        "name": "Fallos al enfriarse"
+      },
+      {
+        "id": "fallos-por-humedad-o-temperatura",
+        "name": "Fallos por humedad o temperatura"
+      }
+    ]
+  },
+  {
+    "id": "motor-mecanico",
+    "name": "Motor mecánico",
+    "icon": "engine",
+    "description": "Culata, bloque, distribución interna, compresión y reconstrucción.",
+    "children": [
+      {
+        "id": "culata",
+        "name": "Culata"
+      },
+      {
+        "id": "junta-de-culata",
+        "name": "Junta de culata"
+      },
+      {
+        "id": "bloque-motor",
+        "name": "Bloque motor"
+      },
+      {
+        "id": "pistones",
+        "name": "Pistones"
+      },
+      {
+        "id": "segmentos",
+        "name": "Segmentos"
+      },
+      {
+        "id": "bielas",
+        "name": "Bielas"
+      },
+      {
+        "id": "ciguenal",
+        "name": "Cigüeñal"
+      },
+      {
+        "id": "cojinetes",
+        "name": "Cojinetes"
+      },
+      {
+        "id": "arboles-de-levas",
+        "name": "Árboles de levas"
+      },
+      {
+        "id": "taques",
+        "name": "Taqués"
+      },
+      {
+        "id": "valvulas",
+        "name": "Válvulas"
+      },
+      {
+        "id": "muelles",
+        "name": "Muelles"
+      },
+      {
+        "id": "guias-y-asientos-de-valvula",
+        "name": "Guías y asientos de válvula"
+      },
+      {
+        "id": "compresion",
+        "name": "Compresión"
+      },
+      {
+        "id": "prueba-de-fugas-de-cilindros",
+        "name": "Prueba de fugas de cilindros"
+      },
+      {
+        "id": "consumo-de-aceite",
+        "name": "Consumo de aceite"
+      },
+      {
+        "id": "desgaste-interno",
+        "name": "Desgaste interno"
+      },
+      {
+        "id": "medicion-de-tolerancias",
+        "name": "Medición de tolerancias"
+      },
+      {
+        "id": "metrologia-de-taller",
+        "name": "Metrología de taller"
+      },
+      {
+        "id": "rectificacion",
+        "name": "Rectificación"
+      },
+      {
+        "id": "montaje-y-desmontaje",
+        "name": "Montaje y desmontaje"
+      },
+      {
+        "id": "reconstruccion-de-motores",
+        "name": "Reconstrucción de motores"
+      },
+      {
+        "id": "diagnostico-de-ruidos",
+        "name": "Diagnóstico de ruidos"
+      },
+      {
+        "id": "danos-por-lubricacion",
+        "name": "Daños por lubricación"
+      },
+      {
+        "id": "danos-por-sobrecalentamiento",
+        "name": "Daños por sobrecalentamiento"
+      }
+    ]
+  },
+  {
+    "id": "inyeccion-diesel",
+    "name": "Inyección diésel",
+    "icon": "oil",
+    "description": "Common rail, inyectores, bombas, presión y diagnosis.",
+    "children": [
+      {
+        "id": "bombas-de-inyeccion",
+        "name": "Bombas de inyección"
+      },
+      {
+        "id": "sistemas-common-rail",
+        "name": "Sistemas common rail"
+      },
+      {
+        "id": "bombas-de-alta-presion",
+        "name": "Bombas de alta presión"
+      },
+      {
+        "id": "bombas-de-baja-presion",
+        "name": "Bombas de baja presión"
+      },
+      {
+        "id": "inyectores-electromagneticos",
+        "name": "Inyectores electromagnéticos"
+      },
+      {
+        "id": "inyectores-piezoelectricos",
+        "name": "Inyectores piezoeléctricos"
+      },
+      {
+        "id": "retorno-de-inyectores",
+        "name": "Retorno de inyectores"
+      },
+      {
+        "id": "prueba-de-equilibrado",
+        "name": "Prueba de equilibrado"
+      },
+      {
+        "id": "presion-de-rail",
+        "name": "Presión de rail"
+      },
+      {
+        "id": "reguladores-y-valvulas-de-control",
+        "name": "Reguladores y válvulas de control"
+      },
+      {
+        "id": "sensores-de-presion",
+        "name": "Sensores de presión"
+      },
+      {
+        "id": "diagnostico-de-arranque",
+        "name": "Diagnóstico de arranque"
+      },
+      {
+        "id": "aire-en-el-circuito",
+        "name": "Aire en el circuito"
+      },
+      {
+        "id": "sistemas-de-alimentacion",
+        "name": "Sistemas de alimentación"
+      },
+      {
+        "id": "sistemas-de-generaciones-anteriores",
+        "name": "Sistemas de generaciones anteriores"
+      },
+      {
+        "id": "unidades-inyector-bomba",
+        "name": "Unidades inyector-bomba"
+      },
+      {
+        "id": "inyeccion-electronica-diesel",
+        "name": "Inyección electrónica diésel"
+      },
+      {
+        "id": "comprobaciones-electricas",
+        "name": "Comprobaciones eléctricas"
+      },
+      {
+        "id": "diagnosis-con-datos-en-vivo",
+        "name": "Diagnosis con datos en vivo"
+      },
+      {
+        "id": "contaminacion-del-combustible",
+        "name": "Contaminación del combustible"
+      }
+    ]
+  },
+  {
+    "id": "inyeccion-gasolina",
+    "name": "Inyección gasolina",
+    "icon": "spark",
+    "description": "Inyección indirecta y directa, encendido, lambda y misfires.",
+    "children": [
+      {
+        "id": "inyeccion-indirecta",
+        "name": "Inyección indirecta"
+      },
+      {
+        "id": "inyeccion-directa",
+        "name": "Inyección directa"
+      },
+      {
+        "id": "inyeccion-multipunto",
+        "name": "Inyección multipunto"
+      },
+      {
+        "id": "inyectores",
+        "name": "Inyectores"
+      },
+      {
+        "id": "presion-de-combustible",
+        "name": "Presión de combustible"
+      },
+      {
+        "id": "bombas-de-alta-presion",
+        "name": "Bombas de alta presión"
+      },
+      {
+        "id": "encendido",
+        "name": "Encendido"
+      },
+      {
+        "id": "bobinas",
+        "name": "Bobinas"
+      },
+      {
+        "id": "bujias",
+        "name": "Bujías"
+      },
+      {
+        "id": "fallos-de-combustion",
+        "name": "Fallos de combustión"
+      },
+      {
+        "id": "mezcla-rica",
+        "name": "Mezcla rica"
+      },
+      {
+        "id": "mezcla-pobre",
+        "name": "Mezcla pobre"
+      },
+      {
+        "id": "sondas-lambda",
+        "name": "Sondas lambda"
+      },
+      {
+        "id": "correcciones-de-combustible",
+        "name": "Correcciones de combustible"
+      },
+      {
+        "id": "adaptaciones",
+        "name": "Adaptaciones"
+      },
+      {
+        "id": "cuerpo-de-mariposa",
+        "name": "Cuerpo de mariposa"
+      },
+      {
+        "id": "arranque-en-frio",
+        "name": "Arranque en frío"
+      },
+      {
+        "id": "diagnostico-de-misfires",
+        "name": "Diagnóstico de misfires"
+      },
+      {
+        "id": "sistemas-de-encendido",
+        "name": "Sistemas de encendido"
+      }
+    ]
+  },
+  {
+    "id": "turbo",
+    "name": "Turbo y sobrealimentación",
+    "icon": "wind",
+    "description": "Turbocompresores, geometría, actuadores, fugas y comprobaciones.",
+    "children": [
+      {
+        "id": "turbocompresores",
+        "name": "Turbocompresores"
+      },
+      {
+        "id": "turbos-de-geometria-variable",
+        "name": "Turbos de geometría variable"
+      },
+      {
+        "id": "turbos-de-geometria-fija",
+        "name": "Turbos de geometría fija"
+      },
+      {
+        "id": "actuadores-neumaticos",
+        "name": "Actuadores neumáticos"
+      },
+      {
+        "id": "actuadores-electronicos",
+        "name": "Actuadores electrónicos"
+      },
+      {
+        "id": "electrovalvulas-de-control",
+        "name": "Electroválvulas de control"
+      },
+      {
+        "id": "wastegate",
+        "name": "Wastegate"
+      },
+      {
+        "id": "circuitos-de-vacio",
+        "name": "Circuitos de vacío"
+      },
+      {
+        "id": "intercooler",
+        "name": "Intercooler"
+      },
+      {
+        "id": "manguitos-de-presion",
+        "name": "Manguitos de presión"
+      },
+      {
+        "id": "fugas-de-sobrealimentacion",
+        "name": "Fugas de sobrealimentación"
+      },
+      {
+        "id": "presion-solicitada-y-real",
+        "name": "Presión solicitada y real"
+      },
+      {
+        "id": "control-de-geometria",
+        "name": "Control de geometría"
+      },
+      {
+        "id": "diagnostico-de-falta-de-potencia",
+        "name": "Diagnóstico de falta de potencia"
+      },
+      {
+        "id": "sobrepresion",
+        "name": "Sobrepresión"
+      },
+      {
+        "id": "presion-insuficiente",
+        "name": "Presión insuficiente"
+      },
+      {
+        "id": "silbidos-y-ruidos",
+        "name": "Silbidos y ruidos"
+      },
+      {
+        "id": "lubricacion-del-turbo",
+        "name": "Lubricación del turbo"
+      },
+      {
+        "id": "retorno-de-aceite",
+        "name": "Retorno de aceite"
+      },
+      {
+        "id": "desmontaje-y-montaje",
+        "name": "Desmontaje y montaje"
+      },
+      {
+        "id": "comprobacion-de-holguras",
+        "name": "Comprobación de holguras"
+      },
+      {
+        "id": "causas-de-rotura",
+        "name": "Causas de rotura"
+      },
+      {
+        "id": "contaminacion-del-circuito",
+        "name": "Contaminación del circuito"
+      },
+      {
+        "id": "limpieza-e-inspeccion",
+        "name": "Limpieza e inspección"
+      },
+      {
+        "id": "comprobaciones-tras-sustituir",
+        "name": "Comprobaciones tras sustituir"
+      }
+    ]
+  },
+  {
+    "id": "egr-dpf",
+    "name": "EGR, DPF/FAP y anticontaminación",
+    "icon": "cloud",
+    "description": "Recirculación de gases, filtro de partículas, SCR y sensores.",
+    "children": [
+      {
+        "id": "valvula-egr",
+        "name": "Válvula EGR"
+      },
+      {
+        "id": "enfriador-egr",
+        "name": "Enfriador EGR"
+      },
+      {
+        "id": "mariposas-de-admision",
+        "name": "Mariposas de admisión"
+      },
+      {
+        "id": "colectores-de-admision",
+        "name": "Colectores de admisión"
+      },
+      {
+        "id": "sensor-de-presion-diferencial",
+        "name": "Sensor de presión diferencial"
+      },
+      {
+        "id": "sensores-de-temperatura-de-escape",
+        "name": "Sensores de temperatura de escape"
+      },
+      {
+        "id": "filtro-de-particulas-diesel",
+        "name": "Filtro de partículas diésel"
+      },
+      {
+        "id": "filtro-de-particulas-gasolina",
+        "name": "Filtro de partículas gasolina"
+      },
+      {
+        "id": "catalizadores",
+        "name": "Catalizadores"
+      },
+      {
+        "id": "sondas-lambda",
+        "name": "Sondas lambda"
+      },
+      {
+        "id": "sensores-nox",
+        "name": "Sensores NOx"
+      },
+      {
+        "id": "sistema-scr",
+        "name": "Sistema SCR"
+      },
+      {
+        "id": "adblue",
+        "name": "AdBlue"
+      },
+      {
+        "id": "inyeccion-de-urea",
+        "name": "Inyección de urea"
+      },
+      {
+        "id": "regeneracion-pasiva",
+        "name": "Regeneración pasiva"
+      },
+      {
+        "id": "regeneracion-activa",
+        "name": "Regeneración activa"
+      },
+      {
+        "id": "regeneracion-forzada",
+        "name": "Regeneración forzada"
+      },
+      {
+        "id": "carga-de-hollin",
+        "name": "Carga de hollín"
+      },
+      {
+        "id": "carga-de-cenizas",
+        "name": "Carga de cenizas"
+      },
+      {
+        "id": "presion-diferencial",
+        "name": "Presión diferencial"
+      },
+      {
+        "id": "temperaturas-de-escape",
+        "name": "Temperaturas de escape"
+      },
+      {
+        "id": "regeneraciones-fallidas",
+        "name": "Regeneraciones fallidas"
+      },
+      {
+        "id": "causas-de-obstruccion",
+        "name": "Causas de obstrucción"
+      },
+      {
+        "id": "averias-tras-sustituir-sensores",
+        "name": "Averías tras sustituir sensores"
+      },
+      {
+        "id": "diagnosis-anticontaminacion",
+        "name": "Diagnosis anticontaminación"
+      }
+    ]
+  },
+  {
+    "id": "electricidad",
+    "name": "Electricidad y electrónica",
+    "icon": "battery",
+    "description": "Fundamentos, medidas, esquemas, sensores y reparación eléctrica.",
+    "children": [
+      {
+        "id": "fundamentos-electricos",
+        "name": "Fundamentos eléctricos"
+      },
+      {
+        "id": "ley-de-ohm",
+        "name": "Ley de Ohm"
+      },
+      {
+        "id": "lectura-de-esquemas",
+        "name": "Lectura de esquemas"
+      },
+      {
+        "id": "multimetro",
+        "name": "Multímetro"
+      },
+      {
+        "id": "pinza-amperimetrica",
+        "name": "Pinza amperimétrica"
+      },
+      {
+        "id": "osciloscopio",
+        "name": "Osciloscopio"
+      },
+      {
+        "id": "pruebas-de-continuidad",
+        "name": "Pruebas de continuidad"
+      },
+      {
+        "id": "caidas-de-tension",
+        "name": "Caídas de tensión"
+      },
+      {
+        "id": "alimentaciones",
+        "name": "Alimentaciones"
+      },
+      {
+        "id": "masas",
+        "name": "Masas"
+      },
+      {
+        "id": "cortocircuitos",
+        "name": "Cortocircuitos"
+      },
+      {
+        "id": "circuitos-abiertos",
+        "name": "Circuitos abiertos"
+      },
+      {
+        "id": "consumos-parasitos",
+        "name": "Consumos parásitos"
+      },
+      {
+        "id": "fusibles-y-reles",
+        "name": "Fusibles y relés"
+      },
+      {
+        "id": "cableado",
+        "name": "Cableado"
+      },
+      {
+        "id": "conectores",
+        "name": "Conectores"
+      },
+      {
+        "id": "terminales",
+        "name": "Terminales"
+      },
+      {
+        "id": "corrosion",
+        "name": "Corrosión"
+      },
+      {
+        "id": "reparacion-de-instalaciones",
+        "name": "Reparación de instalaciones"
+      },
+      {
+        "id": "soldadura-y-empalmes",
+        "name": "Soldadura y empalmes"
+      },
+      {
+        "id": "senales-analogicas",
+        "name": "Señales analógicas"
+      },
+      {
+        "id": "senales-digitales",
+        "name": "Señales digitales"
+      },
+      {
+        "id": "pwm",
+        "name": "PWM"
+      },
+      {
+        "id": "sensores-inductivos",
+        "name": "Sensores inductivos"
+      },
+      {
+        "id": "sensores-hall",
+        "name": "Sensores Hall"
+      },
+      {
+        "id": "sensores-de-presion",
+        "name": "Sensores de presión"
+      },
+      {
+        "id": "sensores-de-temperatura",
+        "name": "Sensores de temperatura"
+      },
+      {
+        "id": "sensores-de-posicion",
+        "name": "Sensores de posición"
+      },
+      {
+        "id": "actuadores",
+        "name": "Actuadores"
+      },
+      {
+        "id": "alternador",
+        "name": "Alternador y sistema de carga"
+      },
+      {
+        "id": "motor-de-arranque",
+        "name": "Motor de arranque"
+      },
+      {
+        "id": "averias-intermitentes",
+        "name": "Averías intermitentes"
+      },
+      {
+        "id": "senales-en-carga",
+        "name": "Señales en carga"
+      },
+      {
+        "id": "interpretacion-de-oscilogramas",
+        "name": "Interpretación de oscilogramas"
+      }
+    ]
+  },
+  {
+    "id": "centralitas-diagnosis",
+    "name": "Centralitas, redes y diagnosis",
+    "icon": "cpu",
+    "description": "ECU, CAN, OBD, DTC, datos en vivo y codificaciones autorizadas.",
+    "children": [
+      {
+        "id": "ecu-de-motor",
+        "name": "ECU de motor"
+      },
+      {
+        "id": "tcu-de-transmision",
+        "name": "TCU de transmisión"
+      },
+      {
+        "id": "abs-esp",
+        "name": "ABS/ESP"
+      },
+      {
+        "id": "airbag",
+        "name": "Airbag"
+      },
+      {
+        "id": "bcm",
+        "name": "BCM"
+      },
+      {
+        "id": "gateway",
+        "name": "Gateway"
+      },
+      {
+        "id": "direccion-asistida",
+        "name": "Dirección asistida"
+      },
+      {
+        "id": "climatizacion",
+        "name": "Climatización"
+      },
+      {
+        "id": "inmovilizadores",
+        "name": "Inmovilizadores"
+      },
+      {
+        "id": "redes-can",
+        "name": "Redes CAN"
+      },
+      {
+        "id": "lin",
+        "name": "LIN"
+      },
+      {
+        "id": "k-line",
+        "name": "K-Line"
+      },
+      {
+        "id": "obd-y-eobd",
+        "name": "OBD y EOBD"
+      },
+      {
+        "id": "protocolos-de-diagnosis",
+        "name": "Protocolos de diagnosis"
+      },
+      {
+        "id": "lectura-de-dtc",
+        "name": "Lectura de DTC"
+      },
+      {
+        "id": "datos-en-vivo",
+        "name": "Datos en vivo"
+      },
+      {
+        "id": "freeze-frame",
+        "name": "Freeze frame"
+      },
+      {
+        "id": "pruebas-de-actuadores",
+        "name": "Pruebas de actuadores"
+      },
+      {
+        "id": "adaptaciones",
+        "name": "Adaptaciones"
+      },
+      {
+        "id": "codificaciones-autorizadas",
+        "name": "Codificaciones autorizadas"
+      },
+      {
+        "id": "aprendizajes",
+        "name": "Aprendizajes"
+      },
+      {
+        "id": "reseteos-de-mantenimiento",
+        "name": "Reseteos de mantenimiento"
+      },
+      {
+        "id": "localizacion-de-centralitas",
+        "name": "Localización de centralitas"
+      },
+      {
+        "id": "esquemas-de-conexion",
+        "name": "Esquemas de conexión"
+      },
+      {
+        "id": "falta-de-comunicacion",
+        "name": "Falta de comunicación"
+      },
+      {
+        "id": "programacion-autorizada",
+        "name": "Programación autorizada"
+      },
+      {
+        "id": "alimentacion-y-masa-de-ecu",
+        "name": "Alimentación y masa de ECU"
+      },
+      {
+        "id": "redes-con-osciloscopio",
+        "name": "Redes con osciloscopio"
+      }
+    ]
+  },
+  {
+    "id": "transmision",
+    "name": "Transmisión y embrague",
+    "icon": "gear",
+    "description": "Embrague, bimasa, cajas manuales, automáticas, DSG y CVT.",
+    "children": [
+      {
+        "id": "embragues",
+        "name": "Embragues"
+      },
+      {
+        "id": "volantes-bimasa",
+        "name": "Volantes bimasa"
+      },
+      {
+        "id": "bombas-y-bombines",
+        "name": "Bombas y bombines"
+      },
+      {
+        "id": "sistemas-hidraulicos",
+        "name": "Sistemas hidráulicos"
+      },
+      {
+        "id": "cajas-manuales",
+        "name": "Cajas manuales"
+      },
+      {
+        "id": "cajas-automaticas",
+        "name": "Cajas automáticas"
+      },
+      {
+        "id": "dsg-y-doble-embrague",
+        "name": "DSG y doble embrague"
+      },
+      {
+        "id": "convertidores-de-par",
+        "name": "Convertidores de par"
+      },
+      {
+        "id": "cajas-cvt",
+        "name": "Cajas CVT"
+      },
+      {
+        "id": "diferenciales",
+        "name": "Diferenciales"
+      },
+      {
+        "id": "arboles-de-transmision",
+        "name": "Árboles de transmisión"
+      },
+      {
+        "id": "palieres",
+        "name": "Palieres"
+      },
+      {
+        "id": "juntas-homocineticas",
+        "name": "Juntas homocinéticas"
+      },
+      {
+        "id": "soportes-de-motor-y-caja",
+        "name": "Soportes de motor y caja"
+      },
+      {
+        "id": "seleccion-de-marchas",
+        "name": "Selección de marchas"
+      },
+      {
+        "id": "sincronizadores",
+        "name": "Sincronizadores"
+      },
+      {
+        "id": "mantenimiento-de-transmision",
+        "name": "Mantenimiento de transmisión"
+      },
+      {
+        "id": "cambio-de-aceite",
+        "name": "Cambio de aceite"
+      },
+      {
+        "id": "adaptaciones-de-cajas",
+        "name": "Adaptaciones de cajas"
+      },
+      {
+        "id": "diagnosis-electronica",
+        "name": "Diagnosis electrónica"
+      },
+      {
+        "id": "vibraciones-y-ruidos",
+        "name": "Vibraciones y ruidos"
+      }
+    ]
+  },
+  {
+    "id": "frenos-abs",
+    "name": "Frenos, ABS y ESP",
+    "icon": "brake",
+    "description": "Discos, pastillas, hidráulica, ABS, ESP y sensores.",
+    "children": [
+      {
+        "id": "pastillas-de-freno",
+        "name": "Pastillas de freno"
+      },
+      {
+        "id": "discos-de-freno",
+        "name": "Discos de freno"
+      },
+      {
+        "id": "pinzas",
+        "name": "Pinzas"
+      },
+      {
+        "id": "bombas-de-freno",
+        "name": "Bombas de freno"
+      },
+      {
+        "id": "latiguillos",
+        "name": "Latiguillos"
+      },
+      {
+        "id": "liquido-de-frenos",
+        "name": "Líquido de frenos"
+      },
+      {
+        "id": "purgado",
+        "name": "Purgado"
+      },
+      {
+        "id": "freno-de-estacionamiento-electrico",
+        "name": "Freno de estacionamiento eléctrico"
+      },
+      {
+        "id": "servofreno",
+        "name": "Servofreno"
+      },
+      {
+        "id": "abs",
+        "name": "ABS"
+      },
+      {
+        "id": "esp",
+        "name": "ESP"
+      },
+      {
+        "id": "sensores-de-rueda",
+        "name": "Sensores de rueda"
+      },
+      {
+        "id": "anillos-magneticos",
+        "name": "Anillos magnéticos"
+      },
+      {
+        "id": "sensores-de-aceleracion",
+        "name": "Sensores de aceleración"
+      },
+      {
+        "id": "sensores-de-guinada",
+        "name": "Sensores de guiñada"
+      },
+      {
+        "id": "diagnostico-de-testigos",
+        "name": "Diagnóstico de testigos"
+      },
+      {
+        "id": "comprobacion-de-senales",
+        "name": "Comprobación de señales"
+      },
+      {
+        "id": "sustitucion-y-comprobacion",
+        "name": "Sustitución y comprobación"
+      }
+    ]
+  },
+  {
+    "id": "direccion-suspension",
+    "name": "Dirección, suspensión y ruedas",
+    "icon": "tire",
+    "description": "Amortiguadores, muelles, rótulas, alineación y TPMS.",
+    "children": [
+      {
+        "id": "amortiguadores",
+        "name": "Amortiguadores"
+      },
+      {
+        "id": "muelles",
+        "name": "Muelles"
+      },
+      {
+        "id": "brazos-de-suspension",
+        "name": "Brazos de suspensión"
+      },
+      {
+        "id": "silentblocks",
+        "name": "Silentblocks"
+      },
+      {
+        "id": "rotulas",
+        "name": "Rótulas"
+      },
+      {
+        "id": "rodamientos",
+        "name": "Rodamientos"
+      },
+      {
+        "id": "bieletas",
+        "name": "Bieletas"
+      },
+      {
+        "id": "cremalleras",
+        "name": "Cremalleras"
+      },
+      {
+        "id": "direccion-hidraulica",
+        "name": "Dirección hidráulica"
+      },
+      {
+        "id": "direccion-electrica",
+        "name": "Dirección eléctrica"
+      },
+      {
+        "id": "alineacion",
+        "name": "Alineación"
+      },
+      {
+        "id": "geometria",
+        "name": "Geometría"
+      },
+      {
+        "id": "vibraciones",
+        "name": "Vibraciones"
+      },
+      {
+        "id": "desgaste-irregular-de-neumaticos",
+        "name": "Desgaste irregular de neumáticos"
+      },
+      {
+        "id": "sensores-tpms",
+        "name": "Sensores TPMS"
+      },
+      {
+        "id": "diagnosis-de-ruidos",
+        "name": "Diagnosis de ruidos"
+      },
+      {
+        "id": "calibraciones",
+        "name": "Calibraciones"
+      }
+    ]
+  },
+  {
+    "id": "refrigeracion-climatizacion",
+    "name": "Refrigeración y climatización",
+    "icon": "thermo",
+    "description": "Circuito de agua, ventiladores, A/C y carga de refrigerante.",
+    "children": [
+      {
+        "id": "circuitos-de-refrigeracion",
+        "name": "Circuitos de refrigeración"
+      },
+      {
+        "id": "radiadores",
+        "name": "Radiadores"
+      },
+      {
+        "id": "termostatos",
+        "name": "Termostatos"
+      },
+      {
+        "id": "bombas-de-agua",
+        "name": "Bombas de agua"
+      },
+      {
+        "id": "ventiladores",
+        "name": "Ventiladores"
+      },
+      {
+        "id": "electroventiladores",
+        "name": "Electroventiladores"
+      },
+      {
+        "id": "sensores-de-temperatura",
+        "name": "Sensores de temperatura"
+      },
+      {
+        "id": "presion-del-circuito",
+        "name": "Presión del circuito"
+      },
+      {
+        "id": "pruebas-de-fugas",
+        "name": "Pruebas de fugas"
+      },
+      {
+        "id": "calefaccion",
+        "name": "Calefacción"
+      },
+      {
+        "id": "aire-acondicionado",
+        "name": "Aire acondicionado"
+      },
+      {
+        "id": "compresores",
+        "name": "Compresores"
+      },
+      {
+        "id": "condensadores",
+        "name": "Condensadores"
+      },
+      {
+        "id": "evaporadores",
+        "name": "Evaporadores"
+      },
+      {
+        "id": "valvulas-de-expansion",
+        "name": "Válvulas de expansión"
+      },
+      {
+        "id": "presostatos",
+        "name": "Presostatos"
+      },
+      {
+        "id": "diagnosis-de-climatizacion",
+        "name": "Diagnosis de climatización"
+      },
+      {
+        "id": "equipos-de-recuperacion-y-carga",
+        "name": "Equipos de recuperación y carga"
+      }
+    ]
+  },
+  {
+    "id": "carroceria-confort",
+    "name": "Carrocería, confort e interior",
+    "icon": "car",
+    "description": "Elevalunas, cierres, iluminación, cuadros y módulos de confort.",
+    "children": [
+      {
+        "id": "elevalunas",
+        "name": "Elevalunas"
+      },
+      {
+        "id": "cierres-centralizados",
+        "name": "Cierres centralizados"
+      },
+      {
+        "id": "cerraduras",
+        "name": "Cerraduras"
+      },
+      {
+        "id": "retrovisores",
+        "name": "Retrovisores"
+      },
+      {
+        "id": "iluminacion",
+        "name": "Iluminación"
+      },
+      {
+        "id": "faros",
+        "name": "Faros"
+      },
+      {
+        "id": "cuadros-de-instrumentos",
+        "name": "Cuadros de instrumentos"
+      },
+      {
+        "id": "sensores-de-aparcamiento",
+        "name": "Sensores de aparcamiento"
+      },
+      {
+        "id": "camaras",
+        "name": "Cámaras"
+      },
+      {
+        "id": "limpiaparabrisas",
+        "name": "Limpiaparabrisas"
+      },
+      {
+        "id": "mecanismos-de-puertas",
+        "name": "Mecanismos de puertas"
+      },
+      {
+        "id": "asientos-electricos",
+        "name": "Asientos eléctricos"
+      },
+      {
+        "id": "calefaccion-de-asientos",
+        "name": "Calefacción de asientos"
+      },
+      {
+        "id": "climatizacion",
+        "name": "Climatización"
+      },
+      {
+        "id": "techo-solar",
+        "name": "Techo solar"
+      },
+      {
+        "id": "sistemas-multimedia",
+        "name": "Sistemas multimedia"
+      },
+      {
+        "id": "diagnosis-de-modulos-de-confort",
+        "name": "Diagnosis de módulos de confort"
+      },
+      {
+        "id": "reparacion-de-conectores",
+        "name": "Reparación de conectores"
+      }
+    ]
+  },
+  {
+    "id": "hibridos-electricos",
+    "name": "Vehículos híbridos y eléctricos",
+    "icon": "spark",
+    "description": "Alta tensión, baterías de tracción, inversores y seguridad.",
+    "children": [
+      {
+        "id": "arquitectura-de-vehiculos-electricos",
+        "name": "Arquitectura de vehículos eléctricos"
+      },
+      {
+        "id": "motores-electricos",
+        "name": "Motores eléctricos"
+      },
+      {
+        "id": "inversores",
+        "name": "Inversores"
+      },
+      {
+        "id": "convertidores-dc-dc",
+        "name": "Convertidores DC-DC"
+      },
+      {
+        "id": "cargadores-embarcados",
+        "name": "Cargadores embarcados"
+      },
+      {
+        "id": "baterias-de-traccion",
+        "name": "Baterías de tracción"
+      },
+      {
+        "id": "sistemas-de-gestion-de-bateria",
+        "name": "Sistemas de gestión de batería"
+      },
+      {
+        "id": "refrigeracion-de-baterias",
+        "name": "Refrigeración de baterías"
+      },
+      {
+        "id": "sistemas-de-carga",
+        "name": "Sistemas de carga"
+      },
+      {
+        "id": "diagnosis-electronica",
+        "name": "Diagnosis electrónica"
+      },
+      {
+        "id": "sistemas-de-12-v",
+        "name": "Sistemas de 12 V"
+      },
+      {
+        "id": "fallos-de-aislamiento",
+        "name": "Fallos de aislamiento"
+      },
+      {
+        "id": "sistemas-de-alta-tension",
+        "name": "Sistemas de alta tensión"
+      },
+      {
+        "id": "desenergizacion",
+        "name": "Desenergización"
+      },
+      {
+        "id": "comprobaciones-posteriores",
+        "name": "Comprobaciones posteriores"
+      },
+      {
+        "id": "equipos-de-proteccion",
+        "name": "Equipos de protección"
+      }
+    ]
+  },
+  {
+    "id": "motos-comerciales",
+    "name": "Motos, comerciales y maquinaria",
+    "icon": "car",
+    "description": "Motocicletas, furgonetas, camiones, autobuses y maquinaria.",
+    "children": [
+      {
+        "id": "motocicletas-y-ciclomotores",
+        "name": "Motocicletas y ciclomotores"
+      },
+      {
+        "id": "furgonetas",
+        "name": "Furgonetas"
+      },
+      {
+        "id": "vehiculos-comerciales",
+        "name": "Vehículos comerciales"
+      },
+      {
+        "id": "camiones",
+        "name": "Camiones"
+      },
+      {
+        "id": "autobuses",
+        "name": "Autobuses"
+      },
+      {
+        "id": "maquinaria-agricola",
+        "name": "Maquinaria agrícola"
+      },
+      {
+        "id": "maquinaria-industrial",
+        "name": "Maquinaria industrial"
+      },
+      {
+        "id": "vehiculos-especiales",
+        "name": "Vehículos especiales"
+      }
+    ]
+  },
+  {
+    "id": "herramientas",
+    "name": "Herramientas y equipos de taller",
+    "icon": "wrench",
+    "description": "Diagnosis, medida, útiles de calado, elevación y mantenimiento.",
+    "children": [
+      {
+        "id": "diagnosis-multimarca",
+        "name": "Diagnosis multimarca"
+      },
+      {
+        "id": "equipos-especificos-de-fabricante",
+        "name": "Equipos específicos de fabricante"
+      },
+      {
+        "id": "interfaces-obd",
+        "name": "Interfaces OBD"
+      },
+      {
+        "id": "adaptadores-k-line",
+        "name": "Adaptadores K-Line"
+      },
+      {
+        "id": "equipos-de-osciloscopio",
+        "name": "Equipos de osciloscopio"
+      },
+      {
+        "id": "multimetros",
+        "name": "Multímetros"
+      },
+      {
+        "id": "pinzas-amperimetricas",
+        "name": "Pinzas amperimétricas"
+      },
+      {
+        "id": "compresimetros",
+        "name": "Compresímetros"
+      },
+      {
+        "id": "comprobadores-de-fugas",
+        "name": "Comprobadores de fugas"
+      },
+      {
+        "id": "manometros",
+        "name": "Manómetros"
+      },
+      {
+        "id": "comprobadores-de-presion-de-combustible",
+        "name": "Comprobadores de presión de combustible"
+      },
+      {
+        "id": "utiles-de-calado",
+        "name": "Útiles de calado"
+      },
+      {
+        "id": "extractores",
+        "name": "Extractores"
+      },
+      {
+        "id": "prensas",
+        "name": "Prensas"
+      },
+      {
+        "id": "elevadores",
+        "name": "Elevadores"
+      },
+      {
+        "id": "maquinas-de-climatizacion",
+        "name": "Máquinas de climatización"
+      },
+      {
+        "id": "equipos-de-frenos",
+        "name": "Equipos de frenos"
+      },
+      {
+        "id": "herramientas-de-programacion",
+        "name": "Herramientas de programación"
+      },
+      {
+        "id": "calibracion-de-herramientas",
+        "name": "Calibración de herramientas"
+      }
+    ]
+  },
+  {
+    "id": "itv-normativa",
+    "name": "ITV, homologación y normativa",
+    "icon": "file",
+    "description": "Preparación, emisiones, alumbrado y documentación.",
+    "children": [
+      {
+        "id": "preparacion-para-itv",
+        "name": "Preparación para ITV"
+      },
+      {
+        "id": "diagnostico-de-emisiones",
+        "name": "Diagnóstico de emisiones"
+      },
+      {
+        "id": "alumbrado",
+        "name": "Alumbrado"
+      },
+      {
+        "id": "frenos",
+        "name": "Frenos"
+      },
+      {
+        "id": "neumaticos",
+        "name": "Neumáticos"
+      },
+      {
+        "id": "identificacion-del-vehiculo",
+        "name": "Identificación del vehículo"
+      },
+      {
+        "id": "reformas-y-homologaciones",
+        "name": "Reformas y homologaciones"
+      },
+      {
+        "id": "documentacion",
+        "name": "Documentación"
+      },
+      {
+        "id": "sistemas-anticontaminacion",
+        "name": "Sistemas anticontaminación"
+      },
+      {
+        "id": "comprobaciones-previas",
+        "name": "Comprobaciones previas"
+      }
+    ]
+  },
+  {
+    "id": "casos-reales",
+    "name": "Casos reales y averías conocidas",
+    "icon": "forum",
+    "description": "Averías recurrentes, boletines públicos y diagnósticos resueltos.",
+    "children": [
+      {
+        "id": "averias-recurrentes-por-modelo",
+        "name": "Averías recurrentes por modelo"
+      },
+      {
+        "id": "fallos-frecuentes-por-motor",
+        "name": "Fallos frecuentes por motor"
+      },
+      {
+        "id": "problemas-conocidos-por-fabricante",
+        "name": "Problemas conocidos por fabricante"
+      },
+      {
+        "id": "campanas-tecnicas-publicas",
+        "name": "Campañas técnicas públicas"
+      },
+      {
+        "id": "boletines-tecnicos-publicos",
+        "name": "Boletines técnicos públicos"
+      },
+      {
+        "id": "casos-reales-de-talleres",
+        "name": "Casos reales de talleres"
+      },
+      {
+        "id": "diagnosticos-resueltos",
+        "name": "Diagnósticos resueltos"
+      },
+      {
+        "id": "errores-de-reparacion-frecuentes",
+        "name": "Errores de reparación frecuentes"
+      },
+      {
+        "id": "fallos-intermitentes",
+        "name": "Fallos intermitentes"
+      },
+      {
+        "id": "diagnosis-avanzada",
+        "name": "Diagnosis avanzada"
+      },
+      {
+        "id": "reparaciones-paso-a-paso",
+        "name": "Reparaciones paso a paso"
+      }
+    ]
+  }
+]

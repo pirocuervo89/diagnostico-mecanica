@@ -1,0 +1,51 @@
+RESUMEN DE AUDITORÍA DEL CATÁLOGO
+Fecha: 2026-10-22
+
+RESULTADO
+- Registros originales: 242.
+- Duplicados consolidados: 7.
+- Productos activos: 235.
+- Duplicados restantes: 0.
+- Productos con foto y enlace verificados: 36.
+- Productos pendientes de foto/enlace verificados: 199.
+- Enlaces comprobados con HTTP 200 y título coincidente: 36/36 (100 %).
+- Imágenes revisadas visualmente: 39/39, sin discrepancias.
+- Productos con referencia OEM/modelo/año verificable: 0.
+
+CATEGORÍAS ACTIVAS
+- Herramientas: 96 productos.
+- Diagnosis: 48 productos.
+- Líquidos y Químicos: 86 productos.
+- Maquinaria: 3 productos.
+- Repuestos: 2 productos.
+
+DUPLICADOS RETIRADOS
+- maletin-108-eco (se conserva man-108).
+- fac-nano (mismo ASIN que maletin-facom-pro).
+- dina-digi (duplicado de dinamometrica-digital-pro).
+- pro-add-2 (duplicado de pro-calado).
+- diag-eco-47 (duplicado de diag-eco-21).
+- liq-castrol-5w30 (mismo ASIN que castrol-5w30-5l).
+- liq-liquimoly-egr (mismo ASIN que liqui-moly-egr).
+
+CONTROL DE CALIDAD
+- 235 IDs y 235 nombres únicos.
+- 104 fichas usan marcas placeholder: 43 Línea Económica, 7 Profesional y 54 Genérico.
+- 199 productos no tienen una fuente verificada; se muestran como "Foto pendiente" y "Enlace pendiente".
+- No se inventaron fotos, enlaces, precios ni compatibilidades.
+- Los precios quedan en "Consultar": no se pudo fijar un precio de listado estable.
+- Compatibilidad: 147 universales, 86 de verificación manual y 2 específicas de vehículo; ninguna con referencia OEM completa.
+
+INFORME COMPLETO
+- INFORME_AUDITORIA_CATALOGO.md
+- data/auditoria-catalogo.json
+
+BACKUPS
+- Catálogo previo: backups/catalogo-pre-auditoria-20261022-220728.json
+- SHA256: a36813124a8d8c281f892ecf979552b1fdf0815364f8df4ca36fea2acd8090fc
+- Proyecto previo al rediseño: backups/pre-redesign-20261022-213226.tar.gz
+- SHA256: 9e68fa3b75f7ca303ace1b8e578f835d240b15bca1eea2c51f4a2f53b8359316
+
+PRUEBAS
+- npm test: 54/54 correctas.
+- UI real: 9 vistas sin errores, sin overflow móvil, selector de vehículo y simulador OBD operativos.

@@ -1,0 +1,55 @@
+RESUMEN DEL REDISEÑO VISUAL — AVANCE 2
+Fecha: 2026-10-22
+Proyecto: diagnostico-mecanica
+
+OBJETIVO
+Transformación visual integral con lenguaje de centro de mando automotriz:
+grafito, naranja y cian, tipografía técnica, paneles angulares, telemetría real
+y un vehículo conceptual SVG original. Sin cambiar la lógica de diagnóstico ni
+inventar datos.
+
+ARCHIVOS PRINCIPALES
+- public/index.html: nueva home, vehículo SVG, dock de selección de vehículo,
+  HUD, gauges, gráficas, módulos de mando, estado del catálogo y cabeceras.
+- public/css/vision.css: sistema visual completo, responsive, estados vacíos,
+  estilos de foro, catálogo, OBD, informe, formulario y reglas de impresión.
+- public/js/app.js: selector de vehículo compartido, telemetría simulada/real,
+  gauges, gráficas, render de productos y contador de verificación.
+- public/img/hero-car.svg: superdeportivo conceptual original, sin licencias
+  externas.
+- public/fonts/: Oxanium, Barlow y JetBrains Mono servidas localmente.
+
+EXPERIENCIA
+- Home: hero, estado real del sistema, selector de vehículo, KPIs, siete módulos,
+  paneles de severidad, telemetría y sala de máquinas.
+- Diagnóstico, DTC, OBD-II, productos, chat IA, informes, foro y contacto:
+  rediseñados con el mismo sistema visual.
+- OBD: gauges y gráfica alimentados por el simulador o por datos reales; sin
+  conexión muestran "--" y "SIN SEÑAL DE ECU".
+- Catálogo: foto o placeholder honesto, badges de foto/enlace verificado, 235
+  productos y 36 fichas verificadas.
+- Foro: mantiene autenticación, casos, respuestas, moderación, privados y
+  adjuntos; se adaptó visualmente sin reescribir su lógica.
+- Impresión: informe A4 de una página, fondo blanco y sin scanlines.
+
+VERIFICACIÓN
+- npm test: 54/54 correctas.
+- Playwright: 9 vistas sin errores de consola.
+- Móvil 390 px: sin overflow horizontal en todas las vistas.
+- Selector de vehículo: sincroniza home, catálogo, chat, informe y badge.
+- OBD simulado: RPM, refrigerante, carga y tensión en vivo, fuente identificada.
+- PDF: 1 página A4, 61.929 bytes, sin fondo oscuro ni overlay.
+- Auditoría de catálogo: 36/36 enlaces HTTP 200 con título coincidente.
+
+LIMITACIONES
+- 199 productos sin foto/enlace verificado; no se inventan fuentes.
+- No hay referencias OEM completas ni compatibilidad por vehículo verificable.
+- Gemini sigue limitado por cuota 429; se usa el motor experto local.
+- No hay hardware ELM327 físico; solo se prueba el simulador virtual.
+- El archivo de misión "avance 2" está truncado a mitad de la sección 10.
+
+BACKUPS
+- Pre-rediseño: backups/pre-redesign-20261022-213226.tar.gz
+- SHA256: 9e68fa3b75f7ca303ace1b8e578f835d240b15bca1eea2c51f4a2f53b8359316
+- Catálogo previo a auditoría: backups/catalogo-pre-auditoria-20261022-220728.json
+- SHA256: a36813124a8d8c281f892ecf979552b1fdf0815364f8df4ca36fea2acd8090fc

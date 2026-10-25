@@ -1,0 +1,315 @@
+{
+  "stages": [
+    {
+      "id": "stage-1",
+      "name": "Stage 1 — calibración de serie",
+      "summary": "Ajuste de software sobre hardware de serie. No requiere cambiar piezas mecánicas, pero sí verificar estado y límites de seguridad.",
+      "requires": [
+        "Diagnóstico previo sin fallos activos",
+        "Combustible adecuado",
+        "Temperaturas y presiones dentro de rango",
+        "Registro de parámetros antes/después"
+      ],
+      "avoid": [
+        "Prometer potencia sin banco",
+        "Usar mapas genéricos sin verificar el archivo original",
+        "Ignorar límites de par de la caja"
+      ],
+      "evidence": "Definición técnica de trabajo; no se publica una ganancia concreta sin medición."
+    },
+    {
+      "id": "stage-2",
+      "name": "Stage 2 — admisión y escape",
+      "summary": "Calibración acompañada de mejoras de flujo de admisión y escape. Exige comprobar que el hardware es compatible y que la ECU puede controlar la carga.",
+      "requires": [
+        "Admisión compatible y sin tomas falsas",
+        "Downpipe/escape con homologación y sensor lambda correcto",
+        "Intercooler con caudal y montaje adecuados",
+        "Calibración específica y datalogging"
+      ],
+      "avoid": [
+        "Downpipe sin catalizador para uso en vía pública",
+        "Mezclar piezas sin calibrar",
+        "Sustituir el turbo sin medir presión y contrapresión"
+      ],
+      "evidence": "Checklist de ingeniería; no se garantiza ninguna cifra de potencia."
+    },
+    {
+      "id": "stage-3",
+      "name": "Stage 3 — hardware mayor",
+      "summary": "Cambios de turbo, inyección, embrague y soportes. Solo tiene sentido con objetivo definido, presupuesto de mantenimiento y uso previsto.",
+      "requires": [
+        "Turbo compatible y control de wastegate/geometría",
+        "Inyección y bomba con margen verificado",
+        "Embrague o DSG reforzado según par",
+        "Frenos, neumáticos y refrigeración dimensionados",
+        "Calibración en banco y validación en pista cerrada"
+      ],
+      "avoid": [
+        "Circular en vía pública sin homologación",
+        "Montar par que la caja no soporta",
+        "Omitir refrigeración y frenos"
+      ],
+      "evidence": "Guía de seguridad; no se ofrecen cifras ni compatibilidades no verificadas."
+    }
+  ],
+  "packages": [
+    {
+      "id": "tuning-golf-r-75",
+      "modelId": "vw-golf-vii-r-75",
+      "name": "Golf VII R 7.5 — fast road equilibrado",
+      "tagline": "Más respuesta sin sacrificar fiabilidad ni frenos.",
+      "level": "Stage 1–2",
+      "idealFor": "Uso de carretera con mantenimiento al día y algún tramo de montaña ocasional.",
+      "notFor": "Circuito competitivo, uso diario sin presupuesto de mantenimiento o vehículos con fallos activos.",
+      "stages": [
+        "stage-1",
+        "stage-2"
+      ],
+      "hardware": [
+        "Admisión de alto flujo con carcasa cerrada",
+        "Intercooler de mayor capacidad y montaje verificado",
+        "Downpipe homologado con catalizador deportivo",
+        "Calibración de motor específica y datalogging",
+        "Calibración de DSG dentro del par admisible",
+        "Mantenimiento Haldex y aceite DSG al día",
+        "Frenos y neumáticos acordes al uso"
+      ],
+      "checks": [
+        "Compresión y estanqueidad del motor",
+        "Presión de turbo real vs. objetivo",
+        "Temperaturas de admisión y aceite",
+        "Correcciones de inyección y detonación",
+        "Estado de la caja DSG y del Haldex",
+        "Frenos, líquido DOT 4 y neumáticos"
+      ],
+      "notes": [
+        "La versión R europea de 310 PS ya usa turbo e intercooler específicos. No se promete una potencia final sin banco.",
+        "El pack Performance original de Volkswagen incluye frenos deportivos y escape de titanio Akrapovič; es una referencia OEM, no una receta universal."
+      ],
+      "productQueries": [
+        "admision directa",
+        "intercooler",
+        "escape deportivo",
+        "discos freno perforados",
+        "suspension roscada",
+        "bujias iridio"
+      ],
+      "legal": "Cualquier modificación que altere emisiones, ruido o potencia debe cumplir la homologación y la ITV. No se recomienda circular sin catalizador."
+    },
+    {
+      "id": "tuning-golf-gti-75",
+      "modelId": "vw-golf-vii-gti-performance-75",
+      "name": "Golf VII GTI Performance — tracción delantera",
+      "tagline": "Gestión de par y chasis antes que cifras.",
+      "level": "Stage 1–2",
+      "idealFor": "Quien quiere un GTI ágil en carretera y entiende la limitación de tracción.",
+      "notFor": "Quien busque arrasar en circuito sin presupuesto de frenos, neumáticos y refrigeración.",
+      "stages": [
+        "stage-1",
+        "stage-2"
+      ],
+      "hardware": [
+        "Admisión e intercooler compatibles",
+        "Downpipe homologado",
+        "Calibración específica",
+        "Datalogging de detonación y temperaturas",
+        "Revisión del diferencial delantero",
+        "Frenos y neumáticos de mayor agarre"
+      ],
+      "checks": [
+        "Presión de turbo y fugas de admisión",
+        "Temperaturas de admisión",
+        "Detonación/correcciones",
+        "Estado del DSG y del diferencial",
+        "Desgaste y temperatura de frenos",
+        "Alineación y neumáticos"
+      ],
+      "notes": [
+        "El GTI Performance de 245 PS ya incorpora diferencial autoblocante delantero. El límite real en mojado es la adherencia, no solo la potencia."
+      ],
+      "productQueries": [
+        "admision directa",
+        "intercooler",
+        "escape deportivo",
+        "discos freno perforados",
+        "bujias iridio",
+        "neumaticos deportivos"
+      ],
+      "legal": "Homologar cualquier cambio de escape, admisión o potencia. Verificar ruido y emisiones antes de la ITV."
+    },
+    {
+      "id": "tuning-golf-tdi-75",
+      "modelId": "vw-golf-vii-20-tdi-150",
+      "name": "Golf VII 2.0 TDI — eficiencia",
+      "tagline": "Par utilizable con DPF y EGR funcionando.",
+      "level": "Stage 1",
+      "idealFor": "Carretera y uso mixto con mantenimiento diésel documentado.",
+      "notFor": "Trayectos urbanos cortos, DPF saturado o EGR anulada.",
+      "stages": [
+        "stage-1"
+      ],
+      "hardware": [
+        "Calibración específica con límites de par seguros",
+        "Verificar estado de DPF, EGR y turbo",
+        "Mantenimiento de correa y bomba de agua al día",
+        "Aceite con especificación correcta",
+        "Frenos y neumáticos en buen estado"
+      ],
+      "checks": [
+        "Contrapresión del DPF y regeneraciones",
+        "Retornos y correcciones de inyectores",
+        "Presión de turbo y geometría variable",
+        "Temperatura de aceite y refrigerante",
+        "Estado del volante bimasa",
+        "Humo/opacidad y emisiones"
+      ],
+      "notes": [
+        "No se recomienda eliminar DPF ni EGR: es ilegal en vehículos de uso en vía pública y puede aumentar emisiones.",
+        "El par extra debe respetar los límites del embrague/DSG y del sistema de transmisión."
+      ],
+      "productQueries": [
+        "aceite motor 5w30",
+        "limpiador dpf",
+        "limpiador egr",
+        "bujias",
+        "filtro combustible diesel",
+        "discos freno"
+      ],
+      "legal": "La anulación de DPF/EGR no es legal para uso en carretera. Cualquier aumento de potencia debe declararse y homologarse cuando corresponda."
+    },
+    {
+      "id": "tuning-bmw-320d-f30",
+      "modelId": "bmw-320d-f30",
+      "name": "BMW 320d F30 — eficiencia y par",
+      "tagline": "Software conservador y salud de EGR/DPF primero.",
+      "level": "Stage 1",
+      "idealFor": "Quien hace carretera y quiere respuesta sin comprometer la ZF8.",
+      "notFor": "Unidades con cadena ruidosa, EGR con fugas o DPF degradado.",
+      "stages": [
+        "stage-1"
+      ],
+      "hardware": [
+        "Calibración específica y datalogging",
+        "Revisión de cadena y EGR",
+        "DPF en buen estado",
+        "Mantenimiento de ZF 8HP",
+        "Frenos y neumáticos acordes"
+      ],
+      "checks": [
+        "Ruido de cadena en frío",
+        "Contrapresión y regeneraciones del DPF",
+        "Fugas de EGR/refrigeración",
+        "Temperatura de aceite y agua",
+        "Suavidad y temperatura de la caja ZF",
+        "Humo y emisiones"
+      ],
+      "notes": [
+        "El par debe mantenerse dentro del límite que la ZF 8HP y el embrague puedan soportar.",
+        "No se sustituye la calibración de la caja sin equipo y procedimiento adecuados."
+      ],
+      "productQueries": [
+        "aceite motor 5w30",
+        "limpiador dpf",
+        "limpiador egr",
+        "filtro combustible diesel",
+        "discos freno",
+        "bujias"
+      ],
+      "legal": "La modificación de potencia debe ser compatible con la homologación del vehículo y la normativa de emisiones."
+    },
+    {
+      "id": "tuning-gasolina-turbo",
+      "modelId": null,
+      "name": "Gasolina turbo — guía Stage 1/2",
+      "tagline": "Primero medir, después calibrar.",
+      "level": "Stage 1–2",
+      "idealFor": "Motores turbo de gasolina con gestión electrónica y soporte de diagnóstico.",
+      "notFor": "Motores con compresión baja, consumo de aceite, detonación o fallos activos.",
+      "stages": [
+        "stage-1",
+        "stage-2"
+      ],
+      "hardware": [
+        "Bujías de grado correcto",
+        "Admisión e intercooler verificados",
+        "Downpipe homologado",
+        "Sensores y actuadores sin fallos",
+        "Datalogging de detonación y lambda"
+      ],
+      "checks": [
+        "Compresión y estanqueidad",
+        "Consumo de aceite",
+        "Presión de combustible",
+        "Presión de turbo real vs. objetivo",
+        "Correcciones de encendido",
+        "Temperaturas de admisión"
+      ],
+      "notes": [
+        "La gasolina de 95 no siempre permite el mismo avance que la de 98. La calibración debe adaptarse al combustible disponible.",
+        "Un filtro de admisión ruidoso no equivale a más potencia."
+      ],
+      "productQueries": [
+        "admision directa",
+        "intercooler",
+        "bujias iridio",
+        "escape deportivo",
+        "aceite motor 5w40",
+        "boroscopio camara inspeccion"
+      ],
+      "legal": "Cualquier kit de admisión o escape debe estar homologado para uso en vía pública. Verificar emisiones y ruido."
+    },
+    {
+      "id": "tuning-seguridad",
+      "modelId": null,
+      "name": "Seguridad, frenos y legalidad",
+      "tagline": "La potencia no sirve si no puedes parar.",
+      "level": "Transversal",
+      "idealFor": "Cualquier preparación, antes de aumentar potencia.",
+      "notFor": "Vehículos con frenos, neumáticos o suspensión defectuosos.",
+      "stages": [
+        "stage-1",
+        "stage-2",
+        "stage-3"
+      ],
+      "hardware": [
+        "Líquido de frenos con punto de ebullición adecuado",
+        "Discos y pastillas en buen estado",
+        "Neumáticos con carga/velocidad correctas",
+        "Suspensión sin holguras",
+        "Refrigeración y lubricación verificadas"
+      ],
+      "checks": [
+        "Espesor y alabeo de discos",
+        "Temperatura y humedad del líquido de frenos",
+        "Profundidad y edad de neumáticos",
+        "Holguras de suspensión y dirección",
+        "Fugas de aceite/refrigerante",
+        "Campañas y homologación"
+      ],
+      "notes": [
+        "No se recomienda modificar la altura o el escape sin verificar la normativa de homologación.",
+        "La seguridad pasiva y los seguros pueden verse afectados por modificaciones no declaradas."
+      ],
+      "productQueries": [
+        "liquido de frenos dot 4",
+        "discos freno perforados",
+        "pastillas de freno",
+        "neumaticos deportivos",
+        "suspension roscada",
+        "latiguillos freno metalicos"
+      ],
+      "legal": "Las modificaciones deben cumplir la normativa de homologación y la ITV. Esta ficha no sustituye un proyecto técnico."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Volkswagen Newsroom — Golf R Performance",
+      "url": "https://www.volkswagen-newsroom.com/en/press-releases/golf-r-golf-r-fuel-consumption-in-l-slash-100-km-10-dot-2-8-dot-6-urban-6-dot-7-5-dot-9-extra-urban-8-dot-0-6-dot-9-combined-co2-emissions-in-g-slash-km-182-157-combined-efficiency-class-e-d-dot-with-performance-technology-from-motorsport-high-performance-brakes-and-titanium-exhaust-system-925",
+      "publisher": "Volkswagen AG",
+      "type": "fabricante",
+      "accessed": "2026-10-23"
+    }
+  ],
+  "disclaimer": "Guía técnica y de seguridad. No se publican ganancias de potencia, precios ni compatibilidades no verificadas."
+}

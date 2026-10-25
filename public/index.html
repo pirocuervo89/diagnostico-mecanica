@@ -3,144 +3,1559 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#07111f">
-  <meta name="description" content="Diagnóstico y Mecánica: síntomas, códigos DTC, comprobaciones y herramientas.">
-  <title>Diagnóstico y Mecánica</title>
+  <meta name="theme-color" content="#08090b">
+  <meta name="description" content="Plataforma profesional de diagnóstico automotriz: síntomas, códigos DTC, lectura OBD-II, catálogo de taller, asistente IA e informes técnicos.">
+  <title>Diagnóstico y Mecánica · Plataforma Automotriz</title>
+  <link rel="stylesheet" href="/fonts/fonts.css">
   <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/vision.css">
+  <link rel="stylesheet" href="/css/tutorials.css">
+  <link rel="stylesheet" href="/css/reforma.css">
 </head>
 <body>
-<header class="topbar">
-  <div class="brand">
-    <div class="brand-mark">🔧</div>
-    <div><strong>DIAGNÓSTICO</strong><span>Y MECÁNICA</span></div>
-  </div>
-  <button id="menuBtn" class="icon-btn" aria-label="Abrir menú">☰</button>
-  <nav id="nav">
-    <button data-view="home">Inicio</button>
-    <button data-view="diagnostico">Diagnóstico</button>
-    <button data-view="dtc">Códigos DTC</button>
-    <button data-view="productos">Productos</button>
-    <button data-view="chat">Chat IA</button>
-    <button data-view="informe">Informe</button>
+
+<svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-logo" viewBox="0 0 24 24"><path d="M12 2.5 20 7v10l-8 4.5L4 17V7l8-4.5Z"/><path d="m13 7-4 6h3l-1 4 4-6h-3l1-4Z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+  <symbol id="i-car" viewBox="0 0 24 24"><path d="M4 14.5 5.5 9h13L20 14.5V18H4v-3.5Z"/><path d="M7 9l1.4-3.5h7.2L17 9"/><circle cx="7.5" cy="18" r="1.6"/><circle cx="16.5" cy="18" r="1.6"/><path d="M4 14h16"/></symbol>
+  <symbol id="i-engine" viewBox="0 0 24 24"><path d="M6 8h6l2 2h4v7H8l-2-2H4V9h2V8Z"/><path d="M12 5v3M9 5h6M20 12h2M9 20v-3M15 20v-3"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 17a8 8 0 1 1 16 0"/><path d="m12 14 4-5"/><circle cx="12" cy="15" r="1.4"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0 5 5L11 20a2.6 2.6 0 0 1-3.7-3.7l8.5-8.5a4 4 0 0 1-1.3-1.3Z"/><path d="m14.5 6.5 3-3"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><path d="M4 8h16l-1.2 11H5.2L4 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12.5h5"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V4h10v5"/><path d="M7 17H5V9h14v8h-2"/><path d="M7 14h10v6H7v-6Z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6 4h4l2 5-2.5 1.5a12 12 0 0 0 4 4L15 12l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 2-2Z"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5M12 17.2v.2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="m13 2-8 12h6l-1 8 9-13h-6l1-7Z"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m3 11 18-7-7 18-2.5-7.5L3 11Z"/><path d="M12.5 14.5 21 4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+  <symbol id="i-brake" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/></symbol>
+  <symbol id="i-battery" viewBox="0 0 24 24"><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10v4M7 7V5h4v2M15 7V5h2v2M7 11v2M11 11v2"/></symbol>
+  <symbol id="i-thermo" viewBox="0 0 24 24"><path d="M12 14V5a2 2 0 1 1 4 0v9a4.5 4.5 0 1 1-4 0Z"/><path d="M14 10v6"/></symbol>
+  <symbol id="i-oil" viewBox="0 0 24 24"><path d="M3 13h9l3 3h5v4H5a2 2 0 0 1-2-2v-5Z"/><path d="M6 13V9h6l2 4M12 3v3"/></symbol>
+  <symbol id="i-tire" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="m12 3.5-1.5 5M20.5 12l-5-1.5M12 20.5l1.5-5M3.5 12l5 1.5"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M6 18h11a3.5 3.5 0 0 0 .5-7 5.5 5.5 0 0 0-10.6-1.2A4 4 0 0 0 6 18Z"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-forum" viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/><circle cx="18.5" cy="18.5" r="2.5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 5h12l-2 4 2 4H5"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m4 18 5-5 4 4 3-3 4 4"/></symbol>
+  <symbol id="i-reply" viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4 12h9a6 6 0 0 1 6 6v1"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4V4Z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v4h16v-4"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24"><path d="M8 5v14M5 8l3-3 3 3M16 19V5M13 16l3 3 3-3"/></symbol>
+</svg>
+
+<div class="ambient" aria-hidden="true">
+  <span class="ambient-glow glow-a"></span>
+  <span class="ambient-glow glow-b"></span>
+  <span class="ambient-grid"></span>
+</div>
+
+<header class="topbar" id="topbar">
+  <a class="brand" href="#home" data-view="home" aria-label="Diagnóstico y Mecánica, inicio">
+    <span class="brand-mark"><svg class="ic"><use href="#i-logo"></use></svg></span>
+    <span class="brand-text"><strong>DIAGNÓSTICO</strong><small>Y MECÁNICA · PRO</small></span>
+  </a>
+
+  <nav id="nav" aria-label="Navegación principal">
+    <button data-view="home" class="active" type="button"><svg class="ic"><use href="#i-gauge"></use></svg>Inicio</button>
+    <button data-view="diagnostico" type="button"><svg class="ic"><use href="#i-pulse"></use></svg>Diagnóstico</button>
+    <button data-view="vehiculos" type="button"><svg class="ic"><use href="#i-car"></use></svg>Vehículos</button>
+    <button data-view="dtc" type="button"><svg class="ic"><use href="#i-search"></use></svg>Códigos DTC</button>
+    <button data-view="obd" type="button"><svg class="ic"><use href="#i-cpu"></use></svg>OBD-II</button>
+    <button data-view="tutoriales" type="button"><svg class="ic"><use href="#i-play"></use></svg>Tutoriales</button>
+    <button data-view="biblioteca" type="button"><svg class="ic"><use href="#i-file"></use></svg>Biblioteca</button>
+    <button data-view="productos" type="button"><svg class="ic"><use href="#i-cart"></use></svg>Productos</button>
+    <button data-view="tuning" type="button"><svg class="ic"><use href="#i-zap"></use></svg>Tuning</button>
+    <button data-view="chat" type="button"><svg class="ic"><use href="#i-chat"></use></svg>Chat IA</button>
+    <button data-view="informe" type="button"><svg class="ic"><use href="#i-file"></use></svg>Informe</button>
+    <button data-view="foro" type="button"><svg class="ic"><use href="#i-forum"></use></svg>Foro</button>
+    <button data-view="contacto" type="button"><svg class="ic"><use href="#i-mail"></use></svg>Contacto</button>
   </nav>
+
+  <div class="topbar-actions">
+    <span class="status-pill"><i></i> Núcleo local activo</span>
+    <button class="btn primary sm" data-view="diagnostico" type="button">Nuevo diagnóstico</button>
+  </div>
+
+  <button id="menuBtn" class="icon-btn" aria-label="Abrir menú" aria-expanded="false" type="button">
+    <svg class="ic"><use href="#i-menu"></use></svg>
+  </button>
 </header>
 
 <main>
+
+  <!-- ===================== INICIO ===================== -->
   <section id="view-home" class="view active">
     <div class="hero">
-      <div>
-        <span class="eyebrow">PLATAFORMA DE DIAGNÓSTICO AUTOMOTRIZ</span>
-        <h1>Encuentra la causa.<br><em>Comprueba antes de cambiar.</em></h1>
-        <p>Consulta síntomas, códigos OBD/DTC y procedimientos de comprobación en una interfaz pensada para móvil.</p>
+      <div class="hero-copy">
+        <span class="eyebrow"><i></i> PLATAFORMA DE DIAGNÓSTICO AUTOMOTRIZ</span>
+        <h1>El diagnóstico que<br><span class="grad">piensa como un ingeniero.</span></h1>
+        <p class="lead">Síntomas, códigos DTC, lectura OBD-II en vivo y asistencia con IA. Comprobaciones de taller antes de sustituir cualquier pieza.</p>
+
+        <div class="universal-search" role="search">
+          <span class="universal-search-icon"><svg class="ic"><use href="#i-spark"></use></svg></span>
+          <input id="universalSearch" type="search" autocomplete="off" aria-label="Buscador universal" aria-expanded="false" aria-controls="universalResults" placeholder="Describe el problema, pega un DTC o busca una pieza...">
+          <button id="universalSearchBtn" class="btn primary sm" type="button">Analizar</button>
+          <div id="universalResults" class="universal-results hidden" role="listbox" aria-label="Resultados de búsqueda"></div>
+        </div>
+
         <div class="actions">
-          <button class="btn primary" data-view="diagnostico">Empezar diagnóstico</button>
-          <button class="btn ghost" data-view="dtc">Buscar DTC</button>
+          <button class="btn primary lg" data-view="diagnostico" type="button">
+            Iniciar diagnóstico <svg class="ic"><use href="#i-arrow"></use></svg>
+          </button>
+          <button class="btn cyan lg" data-view="obd" type="button">
+            <svg class="ic"><use href="#i-cpu"></use></svg> Conectar OBD-II
+          </button>
+        </div>
+        <div class="hero-trust">
+          <span><svg class="ic"><use href="#i-check"></use></svg> 9.201 códigos DTC</span>
+          <span><svg class="ic"><use href="#i-check"></use></svg> 454 síntomas</span>
+          <span><svg class="ic"><use href="#i-check"></use></svg> Diagnóstico electrónico</span>
         </div>
       </div>
-      <div class="hero-card">
-        <div class="scanner">OBD</div>
-        <div><b>Diagnóstico orientativo</b><small>Datos + síntomas + comprobaciones</small></div>
+
+      <div class="hero-visual" aria-label="Volkswagen Golf 7.5 con puntos interactivos de sistemas">
+        <div class="holo-stage" aria-hidden="true">
+          <span class="holo-orbit orbit-a"></span>
+          <span class="holo-orbit orbit-b"></span>
+          <span class="holo-scan"></span>
+          <span class="holo-grid"></span>
+        </div>
+        <div class="golf-photo-frame golf3d-frame">
+          <canvas id="golf3dCanvas" role="img" aria-label="Representación 3D interactiva de un Volkswagen Golf 7.5 azul Lapiz. Interpretación estilizada, no una réplica CAD exacta."></canvas>
+          <div id="golf3dLoading" class="golf3d-loading"><i></i> Cargando modelo 3D…</div>
+          <div id="golf3dFallback" class="golf3d-fallback" hidden>
+            <b>3D no disponible</b>
+            <p>Este navegador no puede iniciar WebGL. El diagnóstico y el resto de la plataforma siguen operativos.</p>
+          </div>
+          <span class="golf-spec" aria-hidden="true">GOLF VII · 2.0 TSI</span>
+          <span class="golf3d-badge"><i></i> 3D INTERACTIVO · GOLF 7.5</span>
+          <button id="golf3dReset" class="golf3d-reset" type="button" title="Restablecer cámara y giro">
+            <svg class="ic"><use href="#i-arrow"></use></svg> Vista inicial
+          </button>
+        </div>
+        <div id="componentHotspots" class="component-hotspots"></div>
+        <div class="holo-caption">
+          <span><i></i> GOLF 7.5 · SISTEMAS / 12</span>
+          <span>Modelo 3D estilizado · no es réplica CAD</span>
+        </div>
+      </div>
+
+      <div class="hero-hud" aria-label="Panel de telemetría del sistema">
+        <div class="hud-top">
+          <span>TELEMETRÍA DEL SISTEMA</span>
+          <span class="live"><i></i> EN LÍNEA</span>
+        </div>
+        <div class="hud-gauge">
+          <svg viewBox="0 0 320 220" class="gauge-svg" role="img" aria-label="Indicador de cobertura de la base de datos">
+            <defs>
+              <linearGradient id="gaugeStroke" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#22d3ee"/>
+                <stop offset=".55" stop-color="#f39c12"/>
+                <stop offset="1" stop-color="#f39c12"/>
+              </linearGradient>
+            </defs>
+            <path class="gauge-track" d="M30 190a130 130 0 0 1 260 0"/>
+            <path class="gauge-fill" d="M30 190a130 130 0 0 1 260 0"/>
+            <g class="gauge-ticks">
+              <path d="M40 175v-12M70 135v-12M110 108v-12M160 97v-12M210 108v-12M250 135v-12M280 175v-12"/>
+            </g>
+            <path class="gauge-needle" d="M160 180 232 120"/>
+            <circle cx="160" cy="180" r="7" class="gauge-hub"/>
+          </svg>
+          <div class="hud-center">
+            <strong data-stat="dtc">9.201</strong>
+            <span>CÓDIGOS DTC INDEXADOS</span>
+          </div>
+          <div class="hud-foot"><span>OBD / EOBD</span><span>BASE LOCAL</span></div>
+        </div>
+        <div class="hud-metrics">
+          <div><span>SÍNTOMAS</span><b data-stat="symptoms">454</b></div>
+          <div><span>PRODUCTOS</span><b data-stat="products">500</b></div>
+          <div><span>MÓDULOS</span><b>10</b></div>
+        </div>
+        <div class="hud-bars" id="heroSeverity">
+          <div class="hud-bar"><span>Gravedad alta</span><i style="--v:0%"></i><b>—</b></div>
+          <div class="hud-bar"><span>Gravedad media</span><i style="--v:0%"></i><b>—</b></div>
+          <div class="hud-bar"><span>Gravedad baja</span><i style="--v:0%"></i><b>—</b></div>
+        </div>
+      </div>
+
+      <aside id="componentPanel" class="component-panel hidden" aria-live="polite" aria-label="Información del sistema seleccionado">
+        <div class="component-panel-head">
+          <span class="eyebrow">EXPLORADOR DE SISTEMAS</span>
+          <button id="componentClose" class="icon-btn" type="button" aria-label="Cerrar información del sistema">
+            <svg class="ic"><use href="#i-close"></use></svg>
+          </button>
+        </div>
+        <h3 id="componentName">Sistema</h3>
+        <p id="componentFunction" class="component-function"></p>
+        <div class="component-meta">
+          <span class="tag" id="componentSystem">—</span>
+          <span class="tag component-disclaimer">Información genérica del sistema</span>
+        </div>
+        <div class="component-lists">
+          <section><h4>Síntomas relacionados</h4><ul id="componentSymptoms"></ul></section>
+          <section><h4>Comprobaciones iniciales</h4><ul id="componentChecks"></ul></section>
+        </div>
+        <div class="component-actions">
+          <button id="componentSymptomBtn" class="btn primary sm" type="button">Ver síntomas</button>
+          <button id="componentTutorialBtn" class="btn ghost sm" type="button">Tutoriales</button>
+          <button id="componentIaBtn" class="btn ghost sm" type="button">Consultar IA</button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ===================== INICIO DE DIAGNÓSTICO ===================== -->
+    <section id="diagnosisStart" class="start-panel panel" aria-labelledby="startTitle">
+      <div class="start-head">
+        <div>
+          <span class="eyebrow"><i></i> IDENTIFICACIÓN DEL VEHÍCULO</span>
+          <h2 id="startTitle">EMPIEZA EL DIAGNÓSTICO DE TU VEHÍCULO</h2>
+          <p>Sube la ficha técnica de tu vehículo, una fotografía de sus datos o introduce sus características manualmente. Nuestra IA analizará la información disponible para preparar un diagnóstico adaptado a tu coche.</p>
+        </div>
+        <span class="start-trust"><svg class="ic"><use href="#i-shield"></use></svg> Procesamiento local · sin almacenar documentos</span>
+      </div>
+
+      <div class="start-grid">
+        <div class="start-upload">
+          <div id="scanDrop" class="scan-drop" tabindex="0" role="button" aria-label="Subir ficha técnica o fotografía de datos del vehículo">
+            <span class="scan-drop-icon"><svg class="ic"><use href="#i-upload"></use></svg></span>
+            <b>Sube una ficha técnica o una foto de los datos</b>
+            <p>JPG, PNG, WebP o PDF · hasta 12 MB. También puedes arrastrar el archivo aquí.</p>
+            <div class="scan-drop-actions">
+              <button id="scanBrowse" class="btn primary sm" type="button">Elegir archivo</button>
+              <button id="scanCameraBtn" class="btn ghost sm" type="button"><svg class="ic"><use href="#i-image"></use></svg> Hacer foto</button>
+            </div>
+            <input id="scanFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" hidden>
+            <input id="scanCamera" type="file" accept="image/*" capture="environment" hidden>
+          </div>
+          <p class="scan-privacy"><svg class="ic"><use href="#i-lock"></use></svg> El documento se procesa en memoria en este servidor y no se guarda. El VIN no se registra ni se publica.</p>
+        </div>
+
+        <form id="scanManual" class="scan-manual" autocomplete="off">
+          <div class="scan-manual-head">
+            <b>Introducir los datos manualmente</b>
+            <span>Si no tienes la ficha a mano</span>
+          </div>
+          <div class="scan-manual-grid">
+            <label>Marca<input id="scanBrand" name="brand" maxlength="60" placeholder="Volkswagen" required></label>
+            <label>Modelo<input id="scanModel" name="model" maxlength="80" placeholder="Golf" required></label>
+            <label>Año<input id="scanYear" name="year" type="number" min="2000" max="2026" placeholder="2018"></label>
+            <label>Motorización<input id="scanEngine" name="engine" maxlength="120" placeholder="2.0 TDI 150 CV"></label>
+            <label class="scan-manual-wide">VIN opcional<input id="scanVin" name="vin" maxlength="17" placeholder="17 caracteres"></label>
+          </div>
+          <button class="btn cyan sm" type="submit">Analizar datos <svg class="ic"><use href="#i-spark"></use></svg></button>
+        </form>
+      </div>
+
+      <div id="scanStatus" class="scan-status" role="status" aria-live="polite" hidden></div>
+
+      <div id="scanReview" class="scan-review" hidden>
+        <div class="scan-review-head">
+          <div>
+            <span class="eyebrow">DATOS DETECTADOS · REVISIÓN OBLIGATORIA</span>
+            <h3>Confirma el vehículo antes de diagnosticar</h3>
+            <p id="scanMethod">Corrige cualquier dato dudoso. Los campos vacíos se consideran desconocidos.</p>
+          </div>
+          <span id="scanConfidence" class="tag">—</span>
+        </div>
+        <div id="scanFields" class="scan-fields"></div>
+        <div id="scanWarnings" class="scan-warnings"></div>
+        <div class="scan-review-actions">
+          <button id="scanContinue" class="btn primary" type="button">Continuar al diagnóstico <svg class="ic"><use href="#i-arrow"></use></svg></button>
+          <button id="scanClear" class="btn ghost" type="button">Descartar y empezar de nuevo</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="vehicle-dock" aria-label="Selector de vehículo">
+      <div class="vehicle-dock-id">
+        <span>VEHÍCULO ACTIVO</span>
+        <b id="homeVehicleName">Sin configurar</b>
+      </div>
+      <label>Marca
+        <select id="homeBrand" aria-label="Marca del vehículo">
+          <option value="">Selecciona marca</option>
+        </select>
+      </label>
+      <label>Modelo
+        <select id="homeModel" aria-label="Modelo del vehículo" disabled>
+          <option value="">Selecciona modelo</option>
+        </select>
+      </label>
+      <label>Motorización
+        <select id="homeEngine" aria-label="Motorización del vehículo" disabled>
+          <option value="">Selecciona motorización</option>
+        </select>
+      </label>
+      <button id="homeApplyVehicle" class="btn primary" type="button">Fijar vehículo</button>
+      <button class="btn ghost" data-view="diagnostico" type="button">Diagnosticar <svg class="ic"><use href="#i-arrow"></use></svg></button>
+      <p id="homeVehicleHint" class="vehicle-dock-hint">El vehículo se aplica al chat, al informe y al diagnóstico.</p>
+    </div>
+
+    <div class="kpi-strip">
+      <article class="kpi">
+        <span class="kpi-icon"><svg class="ic"><use href="#i-db"></use></svg></span>
+        <div><strong id="statDtc" data-stat="dtc">9.201</strong><span>Códigos DTC</span></div>
+        <em>Motor · ABS · Airbag · CAN</em>
+      </article>
+      <article class="kpi">
+        <span class="kpi-icon"><svg class="ic"><use href="#i-pulse"></use></svg></span>
+        <div><strong id="statSymptoms" data-stat="symptoms">454</strong><span>Síntomas de avería</span></div>
+        <em>Causas y comprobaciones</em>
+      </article>
+      <article class="kpi">
+        <span class="kpi-icon"><svg class="ic"><use href="#i-cart"></use></svg></span>
+        <div><strong id="statProducts" data-stat="products">500</strong><span>Productos de taller</span></div>
+        <em>Herramientas y recambios</em>
+      </article>
+      <article class="kpi">
+        <span class="kpi-icon"><svg class="ic"><use href="#i-cpu"></use></svg></span>
+        <div><strong>ELM327</strong><span>Lectura OBD-II</span></div>
+        <em>USB · Bluetooth · Simulador</em>
+      </article>
+    </div>
+
+    <div class="home-grid">
+      <section class="panel capabilities">
+        <div class="panel-head">
+          <div><span class="eyebrow">MÓDULOS DE MANDO</span><h2>Diez sistemas. Una sola consola.</h2></div>
+          <span class="tag">10 módulos activos</span>
+        </div>
+        <div class="cap-grid">
+          <button class="cap-card" data-view="diagnostico" type="button">
+            <span class="cap-ico"><svg class="ic"><use href="#i-pulse"></use></svg></span>
+            <h3>Diagnóstico por síntomas</h3>
+            <p>Selecciona lo que notas y obtén causas probables, comprobaciones y soluciones.</p>
+            <span class="cap-link">Explorar <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+          <button class="cap-card" data-view="vehiculos" type="button">
+            <span class="cap-ico cyan"><svg class="ic"><use href="#i-car"></use></svg></span>
+            <h3>Fichas de vehículo</h3>
+            <p>Motor, transmisión, sistemas y puntos de inspección con fuentes y nivel de confianza.</p>
+            <span class="cap-link">Abrir fichas <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+          <button class="cap-card" data-view="compra" type="button">
+            <span class="cap-ico"><svg class="ic"><use href="#i-shield"></use></svg></span>
+            <h3>¿Qué coche comprar?</h3>
+            <p>Problemas conocidos por motor, comprobaciones precompra y veredicto editorial transparente.</p>
+            <span class="cap-link">Evaluar compra <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+          <button class="cap-card" data-view="dtc" type="button">
+            <span class="cap-ico cyan"><svg class="ic"><use href="#i-search"></use></svg></span>
+            <h3>Buscador DTC</h3>
+            <p>9.201 códigos con gravedad, sistema afectado y procedimiento de taller.</p>
+            <span class="cap-link">Buscar <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+          <button class="cap-card" data-view="obd" type="button">
+            <span class="cap-ico"><svg class="ic"><use href="#i-cpu"></use></svg></span>
+            <h3>Lectura OBD-II</h3>
+            <p>Conecta un ELM327 compatible o usa el simulador para leer la ECU sin hardware.</p>
+            <span class="cap-link">Conectar <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+          <button class="cap-card" data-view="tutoriales" type="button">
+            <span class="cap-ico cyan"><svg class="ic"><use href="#i-play"></use></svg></span>
+            <h3>Biblioteca de tutoriales</h3>
+            <p>Vídeos técnicos verificados por operación, sistema, DTC, motor y nivel de dificultad.</p>
+            <span class="cap-link">Aprender <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+          <button class="cap-card" data-view="productos" type="button">
+            <span class="cap-ico"><svg class="ic"><use href="#i-wrench"></use></svg></span>
+            <h3>Catálogo de taller</h3>
+            <p>Herramientas, diagnosis, maquinaria, químicos y repuestos filtrados por vehículo.</p>
+            <span class="cap-link">Ver catálogo <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+          <button class="cap-card" data-view="tuning" type="button">
+            <span class="cap-ico"><svg class="ic"><use href="#i-zap"></use></svg></span>
+            <h3>Tuning y preparación</h3>
+            <p>Etapas, hardware de soporte, frenos, legalidad y productos relacionados sin promesas falsas.</p>
+            <span class="cap-link">Ver guías <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+          <button class="cap-card" data-view="chat" type="button">
+            <span class="cap-ico cyan"><svg class="ic"><use href="#i-chat"></use></svg></span>
+            <h3>Asistente IA</h3>
+            <p>Explica la avería en lenguaje claro y propone un plan de comprobación paso a paso.</p>
+            <span class="cap-link">Consultar <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+          <button class="cap-card" data-view="informe" type="button">
+            <span class="cap-ico"><svg class="ic"><use href="#i-file"></use></svg></span>
+            <h3>Informes técnicos</h3>
+            <p>Documento profesional listo para imprimir o guardar en PDF y entregar al cliente.</p>
+            <span class="cap-link">Generar <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+          <button class="cap-card" data-view="foro" type="button">
+            <span class="cap-ico"><svg class="ic"><use href="#i-forum"></use></svg></span>
+            <h3>Foro de mecánicos</h3>
+            <p>Casos reales, mediciones y soluciones verificadas por la comunidad y la moderación.</p>
+            <span class="cap-link">Entrar al foro <svg class="ic"><use href="#i-arrow"></use></svg></span>
+          </button>
+        </div>
+      </section>
+
+      <aside class="panel telemetry-panel">
+        <div class="panel-head">
+          <div><span class="eyebrow">DATOS REALES</span><h2>Radiografía de la base</h2></div>
+          <span class="tag live-tag"><i></i> Local</span>
+        </div>
+
+        <div class="severity-block">
+          <div id="severityDonut" class="donut" role="img" aria-label="Distribución de códigos DTC por gravedad">
+            <div class="donut-center"><b data-stat="dtc">9.201</b><span>DTC</span></div>
+          </div>
+          <div id="severityLegend" class="legend">
+            <div class="legend-row"><i style="background:#ff5d6c"></i><span>Alta</span><b>—</b></div>
+            <div class="legend-row"><i style="background:#f39c12"></i><span>Media</span><b>—</b></div>
+            <div class="legend-row"><i style="background:#22d3ee"></i><span>Baja</span><b>—</b></div>
+          </div>
+        </div>
+
+        <div class="bars-head"><span>Códigos por sistema</span><span>Total</span></div>
+        <div id="systemBars" class="bars"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+
+        <div class="bars-head"><span>Catálogo por departamento</span><span>Arts.</span></div>
+        <div id="productCats" class="cats-chart"></div>
+      </aside>
+    </div>
+
+    <section class="panel live-station" aria-labelledby="liveStationTitle">
+      <div class="panel-head live-station-head">
+        <div>
+          <span class="eyebrow">TELEMETRÍA EN VIVO</span>
+          <h2 id="liveStationTitle">Sala de máquinas</h2>
+        </div>
+        <div class="live-station-state">
+          <span id="homeTelemetrySource" class="source-badge" data-state="offline"><i></i> OBD SIN CONEXIÓN</span>
+          <button class="btn ghost sm" data-view="obd" type="button">Abrir consola OBD <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        </div>
+      </div>
+
+      <div class="live-station-grid">
+        <div class="gauge-cluster">
+          <article class="gauge-ring" id="homeGaugeRpm" style="--p:0;--ring:var(--accent)" aria-label="Revoluciones del motor">
+            <div class="gauge-value"><b id="homeRpm">--</b><span>RPM</span></div>
+            <small>Revoluciones</small>
+          </article>
+          <article class="gauge-ring" id="homeGaugeCoolant" style="--p:0;--ring:var(--cyan)" aria-label="Temperatura del refrigerante">
+            <div class="gauge-value"><b id="homeCoolant">--</b><span>°C</span></div>
+            <small>Refrigerante</small>
+          </article>
+          <article class="gauge-ring" id="homeGaugeVoltage" style="--p:0;--ring:var(--ok)" aria-label="Tensión de batería">
+            <div class="gauge-value"><b id="homeVoltage">--</b><span>V</span></div>
+            <small>Batería</small>
+          </article>
+        </div>
+
+        <div class="signal-chart">
+          <div class="chart-head">
+            <span>SEÑAL DE MOTOR · ÚLTIMOS 48 REGISTROS</span>
+            <span id="homeChartState">ESPERANDO CONEXIÓN</span>
+          </div>
+          <div class="chart-canvas">
+            <svg id="homeChartSvg" viewBox="0 0 600 190" preserveAspectRatio="none" role="img" aria-label="Gráfica de revoluciones y temperatura del motor">
+              <defs>
+                <linearGradient id="chartFade" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ff6a00" stop-opacity=".28"/>
+                  <stop offset="1" stop-color="#ff6a00" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <g class="chart-grid">
+                <path d="M0 20h600M0 65h600M0 110h600M0 155h600"/>
+                <path d="M100 0v190M200 0v190M300 0v190M400 0v190M500 0v190"/>
+              </g>
+              <polyline id="homeChartRpm" class="chart-line rpm" points=""></polyline>
+              <polyline id="homeChartCoolant" class="chart-line coolant" points=""></polyline>
+            </svg>
+            <div id="homeChartEmpty" class="chart-empty">
+              <svg class="ic"><use href="#i-pulse"></use></svg>
+              <b>Sin señal de la ECU</b>
+              <span>Conecta un ELM327 o abre el simulador para trazar datos reales.</span>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <span><i class="dot-orange"></i> RPM <b id="homeChartRpmValue">--</b></span>
+            <span><i class="dot-cyan"></i> Refrigerante <b id="homeChartCoolantValue">--</b></span>
+          </div>
+        </div>
+      </div>
+      <p class="live-disclaimer" id="homeTelemetryNotice">Los indicadores permanecen vacíos hasta recibir datos de la ECU. El simulador se identifica siempre como simulación.</p>
+    </section>
+
+    <div class="notice">
+      <svg class="ic"><use href="#i-alert"></use></svg>
+      <div><b>Diagnóstico orientativo profesional.</b> Una pieza no debe sustituirse únicamente por la lectura de un código o síntoma. Verifica siempre con mediciones y comprobaciones físicas de taller.</div>
+    </div>
+  </section>
+
+  <!-- ===================== DIAGNÓSTICO ===================== -->
+  <section id="view-diagnostico" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">PASO 01 · DIAGNÓSTICO GUIADO</span>
+        <h2>¿Qué le ocurre al vehículo?</h2>
+        <p>Selecciona un síntoma o explora una solución por sistema. Verás causas probables, comprobaciones paso a paso y siguientes pasos.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-pulse"></use></svg> <b data-stat="symptoms">454</b> síntomas · <b id="diagSystemCount">12</b> sistemas</span>
+    </header>
+
+    <div class="diag-tabs" role="tablist" aria-label="Modo de diagnóstico">
+      <button class="diag-tab active" data-diag-tab="symptoms" type="button" role="tab" aria-selected="true">Síntomas</button>
+      <button class="diag-tab" data-diag-tab="solutions" type="button" role="tab" aria-selected="false">Soluciones por sistema</button>
+    </div>
+
+    <div id="diagSymptoms" class="diag-pane">
+      <div class="search-shell">
+        <svg class="ic"><use href="#i-search"></use></svg>
+        <input id="symptomSearch" placeholder="Filtrar síntoma: humo, tirones, freno, temperatura, vibración..." autocomplete="off" aria-label="Filtrar síntomas">
+        <kbd>/</kbd>
+      </div>
+
+      <div class="symptom-toolbar">
+        <div id="symptomFilters" class="symptom-filters" role="group" aria-label="Filtrar síntomas por categoría"></div>
+        <span id="symptomCount" class="symptom-count" aria-live="polite"></span>
+      </div>
+
+      <div id="symptomDetail" class="detail hidden"></div>
+      <div id="symptomGrid" class="symptom-grid"></div>
+    </div>
+
+    <div id="diagSolutions" class="diag-pane hidden">
+      <div class="search-shell">
+        <svg class="ic"><use href="#i-search"></use></svg>
+        <input id="solutionSearch" placeholder="Filtrar por sistema, avería o comprobación: turbo, EGR, frenos..." autocomplete="off" aria-label="Filtrar soluciones por sistema">
+        <kbd>/</kbd>
+      </div>
+      <div class="solution-summary">
+        <span>Guías técnicas por sistema</span>
+        <span id="solutionCount" class="symptom-count" aria-live="polite"></span>
+      </div>
+      <div id="solutionGrid" class="solution-grid"></div>
+    </div>
+  </section>
+
+  <!-- ===================== DTC ===================== -->
+  <section id="view-dtc" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">OBD / EOBD · BASE TÉCNICA</span>
+        <h2>Buscador de códigos DTC</h2>
+        <p>Localiza un código por número o por término técnico. Verás gravedad, sistema afectado, causas y comprobaciones.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-db"></use></svg> <b data-stat="dtc">9.201</b> códigos</span>
+    </header>
+
+    <div class="scan-panel">
+      <div class="search-shell big">
+        <svg class="ic"><use href="#i-search"></use></svg>
+        <input id="dtcSearch" placeholder="Ej.: P0300, P0299, inyección, sonda lambda, turbo..." autocomplete="off" aria-label="Buscar código DTC">
+        <button id="dtcSearchBtn" class="btn primary" type="button">Buscar código</button>
+      </div>
+      <div class="chips quick-chips">
+        <span class="chips-label">Accesos directos</span>
+        <button class="chip dtc-quick" data-q="P0300" type="button">P0300 · Encendido</button>
+        <button class="chip dtc-quick" data-q="P0299" type="button">P0299 · Turbo</button>
+        <button class="chip dtc-quick" data-q="P0101" type="button">P0101 · MAF</button>
+        <button class="chip dtc-quick" data-q="P0171" type="button">P0171 · Mezcla pobre</button>
+        <button class="chip dtc-quick" data-q="P0401" type="button">P0401 · EGR</button>
+        <button class="chip dtc-quick" data-q="P0420" type="button">P0420 · Catalizador</button>
+        <button class="chip dtc-quick" data-prefix="P" type="button">Prefijo P</button>
+        <button class="chip dtc-quick" data-prefix="C" type="button">Prefijo C</button>
+        <button class="chip dtc-quick" data-prefix="B" type="button">Prefijo B</button>
+        <button class="chip dtc-quick" data-prefix="U" type="button">Prefijo U</button>
       </div>
     </div>
-    <div class="grid stats">
-      <article><strong id="statDtc">—</strong><span>códigos DTC</span></article>
-      <article><strong id="statSymptoms">—</strong><span>síntomas</span></article>
-      <article><strong id="statProducts">—</strong><span>herramientas</span></article>
-    </div>
-    <div class="notice"><b>⚠️ Importante:</b> esta plataforma ofrece orientación. Una pieza no debe sustituirse únicamente por un código o síntoma; confirma con mediciones y pruebas.</div>
-  </section>
 
-  <section id="view-diagnostico" class="view">
-    <div class="section-head"><div><span class="eyebrow">PASO 1</span><h2>¿Qué le pasa al vehículo?</h2></div></div>
-    <div id="symptomGrid" class="symptom-grid"></div>
-    <div id="symptomDetail" class="detail hidden"></div>
-  </section>
-
-  <section id="view-dtc" class="view">
-    <div class="section-head"><div><span class="eyebrow">OBD / EOBD</span><h2>Códigos DTC</h2></div></div>
-    <div class="search-row">
-      <input id="dtcSearch" placeholder="Ej.: P0299, turbo, ABS..." autocomplete="off">
-      <button id="dtcSearchBtn" class="btn primary">Buscar</button>
-    </div>
     <div id="dtcResults" class="results"></div>
   </section>
 
-  
-  <section id="view-productos" class="view">
-    <div class="section-head">
+  <!-- ===================== OBD-II ===================== -->
+  <section id="view-obd" class="view">
+    <header class="page-head">
       <div>
-        <span class="eyebrow">CATÁLOGO ESTILO AUTODOC</span>
-        <h2>Recambios y Herramientas Profesionales</h2>
+        <span class="eyebrow">DIAGNOSIS ELECTRÓNICA</span>
+        <h2>Lectura OBD-II / ELM327</h2>
+        <p>Conecta un adaptador compatible o usa el simulador virtual para leer la ECU, códigos y parámetros en vivo.</p>
       </div>
-    </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-cpu"></use></svg> Web Serial · BLE</span>
+    </header>
 
-    <!-- SELECTOR DE MODELO DE COCHE -->
-    <div class="notice" style="background: var(--panel2); border-color: var(--accent2); margin-bottom: 20px; padding: 20px;">
-      <h4 style="margin: 0 0 10px 0; color: var(--accent2);">🚗 Selecciona tu Vehículo para filtrar piezas exactas:</h4>
-      <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
-        <select id="catBrand" style="background:#081524; border:1px solid var(--line); padding:10px; color:var(--text); border-radius:8px;">
-          <option value="">-- Selecciona Marca --</option>
-          <option value="audi">Audi</option>
-          <option value="bmw">BMW</option>
-          <option value="citroen">Citroën</option>
-          <option value="ford">Ford</option>
-          <option value="peugeot">Peugeot</option>
-          <option value="renault">Renault</option>
-          <option value="seat">SEAT</option>
-          <option value="volkswagen">Volkswagen</option>
-        </select>
-        <select id="catModel" style="background:#081524; border:1px solid var(--line); padding:10px; color:var(--text); border-radius:8px;">
-          <option value="">-- Selecciona Modelo --</option>
-        </select>
-        <select id="catEngine" style="background:#081524; border:1px solid var(--line); padding:10px; color:var(--text); border-radius:8px;">
-          <option value="">-- Motorización --</option>
-        </select>
-        <button id="btnFiltrarCoche" class="btn primary" style="padding: 10px;">Buscar Piezas</button>
+    <div id="obdBrowserSupport" class="notice"></div>
+
+    <div class="obd-panel panel">
+      <div class="panel-head">
+        <div><span class="eyebrow">CONEXIÓN</span><h3>Configuración del adaptador</h3></div>
+        <span id="obdStatus" class="obd-status" data-state="disconnected" role="status" aria-live="polite">Desconectado</span>
       </div>
-    </div>
 
-    <!-- PESTAÑAS DE DEPARTAMENTOS -->
-    <div class="chips" style="margin-bottom: 25px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; display: flex; justify-content: center; gap: 10px;">
-      <button class="btn cat-tab active" data-cat="Todos" style="padding: 8px 15px; font-size: 13px;">📦 Todos</button>
-      <button class="btn cat-tab" data-cat="Herramientas" style="padding: 8px 15px; font-size: 13px;">🧰 Herramientas</button>
-      <button class="btn cat-tab" data-cat="Maquinaria" style="padding: 8px 15px; font-size: 13px;">🏗️ Maquinaria</button>
-      <button class="btn cat-tab" data-cat="Diagnosis" style="padding: 8px 15px; font-size: 13px;">💻 Diagnosis</button>
-      <button class="btn cat-tab" data-cat="Líquidos y Químicos" style="padding: 8px 15px; font-size: 13px;">🧪 Aceites y Líquidos</button>
-      <button class="btn cat-tab" data-cat="Repuestos" style="padding: 8px 15px; font-size: 13px;">⚙️ Repuestos / Piezas</button>
-    </div>
+      <div class="form-grid">
+        <label>Tipo de conexión
+          <select id="obdMode">
+            <option value="simulated">Simulador virtual (sin hardware)</option>
+            <option value="serial">USB / Serie (Web Serial)</option>
+            <option value="bluetooth">Bluetooth BLE (Web Bluetooth)</option>
+          </select>
+        </label>
+        <label>Velocidad (baudios)
+          <select id="obdBaud">
+            <option value="38400" selected>38400</option>
+            <option value="9600">9600</option>
+            <option value="115200">115200</option>
+          </select>
+        </label>
+        <label>Vehículo (opcional)<input id="obdVehicle" placeholder="Ej. Seat León 1.6 TDI 2016"></label>
+        <label>Síntomas observados (opcional)<input id="obdSymptoms" placeholder="Ej. falta de potencia al acelerar"></label>
+      </div>
 
-    <div id="subTabsContainer" class="chips hidden" style="margin-bottom:20px; display:flex; gap:10px; justify-content:center;"><button class="btn sub-tab active" data-sub="Todas">🛠️ Todas</button><button class="btn sub-tab" data-sub="Maletines">💼 Maletines</button><button class="btn sub-tab" data-sub="Pistolas">⚡ Pistolas</button><button class="btn sub-tab" data-sub="Utiles">🔧 Útiles</button></div><div id="productGrid" class="product-grid"></div>
+      <div class="actions obd-actions">
+        <button id="obdConnect" class="btn primary" type="button"><svg class="ic"><use href="#i-zap"></use></svg> Conectar</button>
+        <button id="obdDisconnect" class="btn ghost" type="button" disabled>Desconectar</button>
+        <button id="obdRead" class="btn ghost" type="button" disabled><svg class="ic"><use href="#i-cpu"></use></svg> Leer DTC</button>
+        <button id="obdLive" class="btn ghost" type="button" disabled><svg class="ic"><use href="#i-pulse"></use></svg> Datos en vivo</button>
+        <button id="obdVin" class="btn ghost" type="button" disabled><svg class="ic"><use href="#i-search"></use></svg> Leer VIN</button>
+        <button id="obdClear" class="btn ghost danger" type="button" disabled><svg class="ic"><use href="#i-close"></use></svg> Borrar códigos</button>
+      </div>
+
+      <div class="obd-cockpit">
+        <div class="gauge-cluster obd-gauges">
+          <article class="gauge-ring" id="obdGaugeRpm" style="--p:0;--ring:var(--accent)" aria-label="Revoluciones del motor">
+            <div class="gauge-value"><b id="obdRpm">--</b><span>RPM</span></div>
+            <small>Revoluciones</small>
+          </article>
+          <article class="gauge-ring" id="obdGaugeCoolant" style="--p:0;--ring:var(--cyan)" aria-label="Temperatura del refrigerante">
+            <div class="gauge-value"><b id="obdCoolant">--</b><span>°C</span></div>
+            <small>Refrigerante</small>
+          </article>
+          <article class="gauge-ring" id="obdGaugeLoad" style="--p:0;--ring:#ffd166" aria-label="Carga del motor">
+            <div class="gauge-value"><b id="obdLoad">--</b><span>%</span></div>
+            <small>Carga motor</small>
+          </article>
+          <article class="gauge-ring" id="obdGaugeVoltage" style="--p:0;--ring:var(--ok)" aria-label="Tensión de batería">
+            <div class="gauge-value"><b id="obdVoltage">--</b><span>V</span></div>
+            <small>Batería</small>
+          </article>
+          <article class="gauge-ring" id="obdGaugeSpeed" style="--p:0;--ring:var(--accent)" aria-label="Velocidad del vehículo">
+            <div class="gauge-value"><b id="obdSpeed">--</b><span>km/h</span></div>
+            <small>Velocidad</small>
+          </article>
+          <article class="gauge-ring" id="obdGaugeOil" style="--p:0;--ring:var(--cyan)" aria-label="Temperatura del aceite">
+            <div class="gauge-value"><b id="obdOil">--</b><span>°C</span></div>
+            <small>Aceite</small>
+          </article>
+          <article class="gauge-ring" id="obdGaugeBoost" style="--p:0;--ring:#ffd166" aria-label="Presión de sobrealimentación">
+            <div class="gauge-value"><b id="obdBoost">--</b><span>kPa</span></div>
+            <small>Turbo</small>
+          </article>
+          <article class="gauge-ring" id="obdGaugeLambda" style="--p:0;--ring:var(--ok)" aria-label="Relación de equivalencia lambda">
+            <div class="gauge-value"><b id="obdLambda">--</b><span>λ</span></div>
+            <small>Lambda</small>
+          </article>
+        </div>
+
+        <div class="signal-chart obd-chart">
+          <div class="chart-head">
+            <span>REGISTRO DE SEÑAL · SESIÓN ACTUAL</span>
+            <span id="obdChartState">SIN DATOS</span>
+          </div>
+          <div class="chart-canvas">
+            <svg id="obdChartSvg" viewBox="0 0 600 190" preserveAspectRatio="none" role="img" aria-label="Gráfica de la sesión OBD actual">
+              <g class="chart-grid">
+                <path d="M0 20h600M0 65h600M0 110h600M0 155h600"/>
+                <path d="M100 0v190M200 0v190M300 0v190M400 0v190M500 0v190"/>
+              </g>
+              <polyline id="obdChartRpm" class="chart-line rpm" points=""></polyline>
+              <polyline id="obdChartCoolant" class="chart-line coolant" points=""></polyline>
+            </svg>
+            <div id="obdChartEmpty" class="chart-empty">
+              <svg class="ic"><use href="#i-pulse"></use></svg>
+              <b>Sin datos en vivo</b>
+              <span>Conecta el adaptador e inicia la monitorización.</span>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <span><i class="dot-orange"></i> RPM <b id="obdChartRpmValue">--</b></span>
+            <span><i class="dot-cyan"></i> Refrigerante <b id="obdChartCoolantValue">--</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="live-head">
+        <span>PARÁMETROS INSTANTÁNEOS</span>
+        <span id="obdLastRead" class="micro-note">Sin lectura</span>
+        <span id="obdSourceLabel" class="source-badge" data-state="offline"><i></i> SIN CONEXIÓN</span>
+      </div>
+      <div id="obdLiveGrid" class="live-grid"></div>
+      <p class="micro-note">Solo se muestran los parámetros que responden a la ECU. La disponibilidad de cada PID depende del vehículo, del protocolo y de la centralita; un PID no soportado no se representa como un valor real.</p>
+
+      <div id="obdDtcWrap" class="hidden">
+        <h4 class="subhead"><svg class="ic"><use href="#i-alert"></use></svg> Códigos detectados en la ECU</h4>
+        <div id="obdDtcResults" class="results"></div>
+        <div class="actions">
+          <button id="obdAnalyze" class="btn primary" type="button" disabled><svg class="ic"><use href="#i-spark"></use></svg> Generar informe IA</button>
+          <button id="obdToReport" class="btn ghost" type="button" disabled><svg class="ic"><use href="#i-file"></use></svg> Traspasar a Informe</button>
+        </div>
+      </div>
+
+      <article id="obdReport" class="report" style="display:none;"></article>
+
+      <details class="obd-terminal-wrap">
+        <summary>Consola de comunicación ELM327 (técnica)</summary>
+        <pre id="obdTerminal" class="terminal"></pre>
+      </details>
+    </div>
   </section>
 
+  <!-- ===================== TUTORIALES ===================== -->
+  <section id="view-tutoriales" class="view tut-view">
+    <header class="page-head tut-page-head">
+      <div>
+        <span class="eyebrow"><i></i> ESCUELA DE TALLER · CONOCIMIENTO VERIFICADO</span>
+        <h1>Biblioteca de tutoriales</h1>
+        <p class="lead">Aprende la operación exacta antes de tocar el vehículo. Busca por avería, sistema, motor, DTC o marca y reproduce el vídeo dentro de la plataforma.</p>
+      </div>
+      <div class="tut-head-stats" aria-label="Resumen de la biblioteca">
+        <span><b id="tutStatTotal">--</b><small>vídeos</small></span>
+        <span><b id="tutStatCategories">--</b><small>categorías</small></span>
+        <span><b id="tutStatHours">--</b><small>horas</small></span>
+      </div>
+    </header>
 
+    <div class="tut-search-panel panel">
+      <div class="tut-search-row">
+        <span class="tut-search-ico"><svg class="ic"><use href="#i-search"></use></svg></span>
+        <input id="tutSearch" type="search" autocomplete="off" spellcheck="false" aria-label="Buscar tutoriales" placeholder="Ej.: P0299, correa de distribución Golf 1.9 TDI, limpieza EGR, sensor ABS...">
+        <button id="tutSearchClear" class="tut-search-clear hidden" type="button" aria-label="Borrar búsqueda"><svg class="ic"><use href="#i-close"></use></svg></button>
+        <button id="tutSearchBtn" class="btn primary" type="button"><svg class="ic"><use href="#i-search"></use></svg> Buscar</button>
+      </div>
+      <div id="tutSuggestions" class="tut-suggestions hidden" role="listbox" aria-label="Sugerencias de tutoriales"></div>
+      <div class="tut-quick-row">
+        <span class="tut-quick-label">Accesos rápidos</span>
+        <button class="chip" data-tut-quick="P0299" type="button">P0299</button>
+        <button class="chip" data-tut-quick="correa distribución" type="button">Distribución</button>
+        <button class="chip" data-tut-quick="EGR" type="button">EGR</button>
+        <button class="chip" data-tut-quick="DPF" type="button">DPF / FAP</button>
+        <button class="chip" data-tut-quick="inyectores" type="button">Inyectores</button>
+        <button class="chip" data-tut-quick="ABS" type="button">ABS</button>
+        <button class="chip" data-tut-quick="aire acondicionado" type="button">A/C</button>
+        <button class="chip" data-tut-quick="híbrido alta tensión" type="button">Híbridos</button>
+      </div>
+      <div class="tut-search-meta">
+        <span id="tutProviderNote"><svg class="ic"><use href="#i-shield"></use></svg> Metadatos verificados con YouTube oEmbed</span>
+        <div class="tut-search-actions">
+          <button id="tutOpenLibrary" class="btn ghost sm" type="button"><svg class="ic"><use href="#i-bookmark"></use></svg> Mi biblioteca</button>
+          <button id="tutOpenAdmin" class="btn ghost sm hidden" type="button"><svg class="ic"><use href="#i-shield"></use></svg> Moderación</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tut-layout">
+      <aside id="tutFilters" class="tut-filters panel" aria-label="Filtros de tutoriales">
+        <div class="tut-filter-head">
+          <div><span class="eyebrow">FILTROS</span><h3>Afina la búsqueda</h3></div>
+          <button id="tutResetFilters" class="btn ghost sm" type="button">Limpiar</button>
+        </div>
+        <div class="tut-filter-grid">
+          <label>Categoría
+            <select id="tutCategory"><option value="">Todas</option></select>
+          </label>
+          <label>Subcategoría
+            <select id="tutSubcategory"><option value="">Todas</option></select>
+          </label>
+          <label>Marca
+            <input id="tutBrand" list="tutBrandList" placeholder="Volkswagen, BMW...">
+            <datalist id="tutBrandList"></datalist>
+          </label>
+          <label>Modelo
+            <input id="tutModel" placeholder="Golf IV, Serie 3...">
+          </label>
+          <label>Motor / código
+            <input id="tutEngine" placeholder="ASZ, N47, 1.9 TDI...">
+          </label>
+          <label>Año
+            <input id="tutYear" type="number" inputmode="numeric" min="1950" max="2100" placeholder="2004">
+          </label>
+          <label>Combustible
+            <select id="tutFuel"><option value="">Todos</option></select>
+          </label>
+          <label>Idioma
+            <select id="tutLanguage"><option value="">Todos</option></select>
+          </label>
+          <label>Nivel
+            <select id="tutLevel">
+              <option value="">Todos</option>
+              <option value="principiante">Principiante</option>
+              <option value="intermedio">Intermedio</option>
+              <option value="avanzado">Avanzado</option>
+            </select>
+          </label>
+          <label>Fuente
+            <select id="tutSource">
+              <option value="">Todas</option>
+              <option value="official">Oficial / fabricante</option>
+              <option value="educational">Formación / educativo</option>
+              <option value="community">Comunidad / taller</option>
+            </select>
+          </label>
+          <label>Duración
+            <select id="tutDuration">
+              <option value="">Cualquiera</option>
+              <option value="short">Menos de 10 min</option>
+              <option value="medium">10 a 30 min</option>
+              <option value="long">Más de 30 min</option>
+            </select>
+          </label>
+          <label>Tipo de vehículo
+            <select id="tutVehicleType">
+              <option value="">Todos</option>
+              <option value="coche">Coche</option>
+              <option value="moto">Moto</option>
+              <option value="hibrido">Híbrido / eléctrico</option>
+            </select>
+          </label>
+          <label>DTC
+            <input id="tutDtc" placeholder="P0299" maxlength="12">
+          </label>
+          <label>Síntoma
+            <input id="tutSymptom" placeholder="tirones, no arranca...">
+          </label>
+        </div>
+        <div class="tut-checks">
+          <label><input id="tutFree" type="checkbox" checked> Solo gratuitos</label>
+          <label><input id="tutEmbeddable" type="checkbox" checked> Reproducibles aquí</label>
+          <label><input id="tutWarnings" type="checkbox"> Con advertencias</label>
+        </div>
+        <button id="tutApplyFilters" class="btn primary tut-apply" type="button"><svg class="ic"><use href="#i-filter"></use></svg> Aplicar filtros</button>
+      </aside>
+
+      <div class="tut-results">
+        <div class="tut-toolbar">
+          <div id="tutResultCount" class="tut-result-count" role="status" aria-live="polite">Cargando biblioteca...</div>
+          <div class="tut-toolbar-actions">
+            <label class="tut-sort-label"><svg class="ic"><use href="#i-sort"></use></svg>
+              <select id="tutSort" aria-label="Ordenar tutoriales">
+                <option value="relevance">Más relevantes</option>
+                <option value="views">Más vistos</option>
+                <option value="newest">Comprobados recientemente</option>
+                <option value="duration_asc">Duración: menor primero</option>
+                <option value="duration_desc">Duración: mayor primero</option>
+                <option value="title">Título A-Z</option>
+              </select>
+            </label>
+            <div class="tut-view-toggle" role="group" aria-label="Vista de resultados">
+              <button id="tutViewGrid" class="active" type="button" aria-label="Vista de tarjetas" aria-pressed="true"><svg class="ic"><use href="#i-grid"></use></svg></button>
+              <button id="tutViewList" type="button" aria-label="Vista de lista" aria-pressed="false"><svg class="ic"><use href="#i-list"></use></svg></button>
+            </div>
+          </div>
+        </div>
+        <div id="tutActiveFilters" class="tut-active-filters"></div>
+        <div id="tutGrid" class="tut-grid" aria-live="polite"></div>
+        <div id="tutEmpty" class="tut-empty panel hidden">
+          <span class="tut-empty-ico"><svg class="ic"><use href="#i-search"></use></svg></span>
+          <h3>Sin resultados con estos filtros</h3>
+          <p>Prueba a quitar algún filtro o busca el procedimiento en YouTube. La biblioteca local solo muestra vídeos verificados.</p>
+          <div class="actions">
+            <button id="tutEmptyReset" class="btn primary" type="button">Limpiar filtros</button>
+            <a id="tutExternalSearch" class="btn ghost" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">Buscar en YouTube <svg class="ic"><use href="#i-external"></use></svg></a>
+          </div>
+        </div>
+        <button id="tutMore" class="btn ghost tut-more hidden" type="button">Cargar más tutoriales <svg class="ic"><use href="#i-arrow"></use></svg></button>
+      </div>
+    </div>
+
+    <section id="tutLibrary" class="tut-library-panel panel hidden" aria-label="Mi biblioteca de tutoriales">
+      <div class="tut-lib-head">
+        <div><span class="eyebrow">MI BIBLIOTECA</span><h3>Favoritos, historial y listas</h3></div>
+        <button id="tutCloseLibrary" class="icon-btn" type="button" aria-label="Cerrar biblioteca"><svg class="ic"><use href="#i-close"></use></svg></button>
+      </div>
+      <div class="tut-lib-tabs" role="tablist" aria-label="Secciones de la biblioteca">
+        <button class="active" data-tut-libtab="favorites" type="button" role="tab" aria-selected="true"><svg class="ic"><use href="#i-bookmark"></use></svg> Favoritos <span id="tutFavCount">0</span></button>
+        <button data-tut-libtab="history" type="button" role="tab" aria-selected="false"><svg class="ic"><use href="#i-eye"></use></svg> Historial <span id="tutHistCount">0</span></button>
+        <button data-tut-libtab="playlists" type="button" role="tab" aria-selected="false"><svg class="ic"><use href="#i-list"></use></svg> Listas <span id="tutPlaylistCount">0</span></button>
+      </div>
+      <div id="tutLibNotice" class="tut-lib-notice hidden"></div>
+      <div id="tutLibContent" class="tut-lib-content"></div>
+    </section>
+
+    <section id="tutAdmin" class="tut-admin-panel panel hidden" aria-label="Moderación de tutoriales">
+      <div class="tut-lib-head">
+        <div><span class="eyebrow">MODERACIÓN</span><h3>Avisos e importación verificada</h3></div>
+        <button id="tutCloseAdmin" class="icon-btn" type="button" aria-label="Cerrar moderación"><svg class="ic"><use href="#i-close"></use></svg></button>
+      </div>
+      <div class="tut-admin-grid">
+        <section class="tut-admin-block">
+          <div class="tut-admin-block-head"><h4><svg class="ic"><use href="#i-flag"></use></svg> Avisos de la comunidad</h4><button id="tutRefreshReports" class="btn ghost sm" type="button"><svg class="ic"><use href="#i-refresh"></use></svg> Actualizar</button></div>
+          <div id="tutReports" class="tut-reports"></div>
+        </section>
+        <section class="tut-admin-block">
+          <h4><svg class="ic"><use href="#i-upload"></use></svg> Importar catálogo JSON</h4>
+          <p class="tut-help">Acepta un array de vídeos con <code>id</code>, <code>title</code>, <code>categoryId</code> y <code>subcategoryId</code>. Las categorías deben existir.</p>
+          <input id="tutImportFile" type="file" accept="application/json,.json">
+          <textarea id="tutImportJson" rows="7" placeholder='[{"id":"yt-...","title":"...","categoryId":"frenos-abs","subcategoryId":"abs"}]'></textarea>
+          <div class="actions"><button id="tutImportBtn" class="btn primary sm" type="button"><svg class="ic"><use href="#i-upload"></use></svg> Importar JSON</button></div>
+          <div id="tutImportStatus" class="form-status" role="status" aria-live="polite"></div>
+        </section>
+        <section class="tut-admin-block">
+          <h4><svg class="ic"><use href="#i-shield"></use></svg> Verificar y añadir vídeo</h4>
+          <p class="tut-help">Pega una URL de YouTube. Se verifica con oEmbed antes de guardar; no se inventan metadatos.</p>
+          <input id="tutVerifyUrl" placeholder="https://www.youtube.com/watch?v=...">
+          <div class="tut-inline-fields">
+            <select id="tutVerifyCategory" aria-label="Categoría del vídeo"><option value="">Categoría</option></select>
+            <select id="tutVerifySubcategory" aria-label="Subcategoría del vídeo"><option value="">Subcategoría</option></select>
+            <select id="tutVerifyLanguage" aria-label="Idioma del vídeo"><option value="und">Idioma no determinado</option><option value="es">Español</option><option value="en">Inglés</option><option value="fr">Francés</option><option value="pt">Portugués</option><option value="it">Italiano</option><option value="de">Alemán</option></select>
+            <select id="tutVerifyLevel" aria-label="Nivel del vídeo"><option value="no-especificado">Nivel no indicado</option><option value="principiante">Principiante</option><option value="intermedio">Intermedio</option><option value="avanzado">Avanzado</option><option value="experto">Experto</option></select>
+            <select id="tutVerifySource" aria-label="Tipo de fuente"><option value="">Tipo de fuente</option><option value="official">Oficial / fabricante</option><option value="educational">Formación / educativo</option><option value="community">Comunidad / taller</option></select>
+            <select id="tutVerifyVehicle" aria-label="Tipo de vehículo"><option value="">Tipo de vehículo</option><option value="coche">Coche</option><option value="moto">Moto</option><option value="hibrido">Híbrido / eléctrico</option></select>
+          </div>
+          <div class="actions"><button id="tutVerifyBtn" class="btn primary sm" type="button"><svg class="ic"><use href="#i-check"></use></svg> Verificar</button></div>
+          <div id="tutVerifyResult" class="tut-verify-result"></div>
+          <div id="tutProviderStatus" class="tut-provider-status"></div>
+        </section>
+      </div>
+    </section>
+  </section>
+
+  <!-- ===================== PRODUCTOS ===================== -->
+  <!-- ===================== VEHÍCULOS ===================== -->
+  <section id="view-vehiculos" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">FICHAS TÉCNICAS Y GUÍA DE COMPRA</span>
+        <h2>Vehículos documentados</h2>
+        <p>Datos de versión, puntos de inspección, fuentes y contenido relacionado. No se atribuyen especificaciones de una versión a otra.</p>
+      </div>
+      <div class="page-head-actions">
+        <span class="page-meta"><svg class="ic"><use href="#i-car"></use></svg> <b id="vehicleCount">—</b> fichas · fuentes abiertas</span>
+        <button class="btn ghost sm" data-view="compra" type="button">¿Qué coche comprar? <svg class="ic"><use href="#i-arrow"></use></svg></button>
+      </div>
+    </header>
+
+    <div class="vehicle-browser">
+      <aside class="panel vehicle-index" aria-label="Listado de vehículos">
+        <div class="panel-head">
+          <div><span class="eyebrow">ÍNDICE</span><h3>Selecciona una ficha</h3></div>
+          <span class="tag">Verificado</span>
+        </div>
+        <div id="vehicleList" class="vehicle-list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+        <p class="micro-note">Las imágenes son de Wikimedia Commons y pueden mostrar otro acabado. Cada ficha indica la licencia y la fuente.</p>
+      </aside>
+      <div id="vehicleDetail" class="vehicle-detail panel">
+        <div class="notice">Cargando fichas técnicas…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ¿QUÉ COCHE COMPRAR? ===================== -->
+  <section id="view-compra" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">EVALUACIÓN ANTES DE COMPRAR</span>
+        <h2>¿Qué coche comprar?</h2>
+        <p>Problemas documentados por marca, modelo, generación y motor. Sin porcentajes inventados ni rankings de fiabilidad: solo puntos verificables y comprobaciones que debes exigir.</p>
+      </div>
+      <button class="btn ghost" data-view="vehiculos" type="button">Ver todas las fichas <svg class="ic"><use href="#i-arrow"></use></svg></button>
+    </header>
+
+    <div class="buying-warning panel">
+      <svg class="ic"><use href="#i-shield"></use></svg>
+      <div><b>Una ficha no sustituye una inspección.</b><p>La recomendación es editorial, no un dato estadístico. El estado real, el historial, el VIN, el motor exacto y una diagnosis previa pesan más que cualquier lista de problemas conocidos.</p></div>
+    </div>
+
+    <div class="buying-toolbar panel">
+      <label class="buying-search"><svg class="ic"><use href="#i-search"></use></svg><input id="buyingSearch" type="search" autocomplete="off" placeholder="Busca marca, modelo, versión, motor o problema..."></label>
+      <select id="buyingBrand" aria-label="Filtrar por marca"><option value="">Todas las marcas</option></select>
+      <select id="buyingVerdict" aria-label="Filtrar por recomendación">
+        <option value="">Todas las recomendaciones</option>
+        <option value="recomendable">Recomendable</option>
+        <option value="condiciones">Recomendable con condiciones</option>
+        <option value="precaucion">Compra con precaución</option>
+      </select>
+      <button id="buyingReset" class="btn ghost sm" type="button">Limpiar</button>
+    </div>
+
+    <div id="buyingList" class="buying-grid"><div class="notice">Cargando fichas de compra…</div></div>
+  </section>
+
+  <!-- ===================== BIBLIOTECA TÉCNICA ===================== -->
+  <section id="view-biblioteca" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">DOCUMENTACIÓN TÉCNICA POR VEHÍCULO Y SISTEMA</span>
+        <h2>Biblioteca técnica</h2>
+        <p>Dossiers por marca, modelo, generación y motor, más un mapa de 27 categorías técnicas. Solo se publican datos trazables; lo genérico, lo pendiente y lo que solo es una fuente externa se distingue con claridad.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-file"></use></svg> <b id="libraryCount">—</b> dossiers · <b id="libraryGapCount">—</b> pendientes</span>
+    </header>
+
+    <div class="library-switch" role="tablist" aria-label="Modo de biblioteca técnica">
+      <button class="library-switch-btn active" type="button" role="tab" aria-selected="true" data-library-mode="dossiers">
+        <span>Dossiers por vehículo</span><b id="libraryDossierTabCount">15</b>
+      </button>
+      <button class="library-switch-btn" type="button" role="tab" aria-selected="false" data-library-mode="technical">
+        <span>27 categorías técnicas</span><b id="libraryTechnicalTabCount">—</b>
+      </button>
+    </div>
+
+    <div id="libraryDossiers" class="library-mode-panel">
+      <div class="library-warning panel">
+        <svg class="ic"><use href="#i-shield"></use></svg>
+        <div><b>Sin datos inventados.</b><p>Esta biblioteca no sustituye al manual oficial. Esquemas, pares de apriete, capacidades y procedimientos solo se incorporarán cuando exista una fuente legítima y verificable.</p></div>
+      </div>
+
+      <div class="library-toolbar panel">
+        <label class="library-search"><svg class="ic"><use href="#i-search"></use></svg><input id="librarySearch" type="search" autocomplete="off" placeholder="Busca marca, modelo, motor o sistema..."></label>
+        <select id="libraryBrand" aria-label="Filtrar por marca"><option value="">Todas las marcas</option></select>
+        <select id="librarySystem" aria-label="Filtrar por sistema"><option value="">Todos los sistemas</option></select>
+        <button id="libraryReset" class="btn ghost sm" type="button">Limpiar</button>
+      </div>
+
+      <div class="library-browser vehicle-browser">
+        <aside class="panel library-index vehicle-index" aria-label="Listado de dossiers técnicos">
+          <div class="panel-head">
+            <div><span class="eyebrow">ÍNDICE</span><h3>Dossiers disponibles</h3></div>
+            <span class="tag">Trazable</span>
+          </div>
+          <div id="libraryList" class="library-list vehicle-list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+          <p class="micro-note">Cada dossier enlaza a sus fuentes originales. La ausencia de un dato se muestra explícitamente.</p>
+        </aside>
+        <div id="libraryDetail" class="library-detail vehicle-detail panel">
+          <div class="notice">Cargando biblioteca técnica…</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="libraryTechnical" class="library-mode-panel hidden">
+      <div class="technical-warning panel">
+        <svg class="ic"><use href="#i-shield"></use></svg>
+        <div>
+          <b>27 categorías, con el estado de cada dato a la vista.</b>
+          <p><span class="tech-status verified">Verificado</span> dato comprobado con fuente · <span class="tech-status reviewed">Revisado</span> ficha editorial trazable · <span class="tech-status generic">Genérico</span> patrón o guía sin valores de modelo · <span class="tech-status metadata_only">Metadatos</span> vídeo o referencia no validada · <span class="tech-status source_only">Fuente</span> portal localizado, contenido no integrado.</p>
+        </div>
+      </div>
+
+      <div class="technical-toolbar panel">
+        <label class="library-search"><svg class="ic"><use href="#i-search"></use></svg><input id="technicalSearch" type="search" autocomplete="off" placeholder="Busca PID, DTC, sistema, avería, vehículo o fuente..."></label>
+        <select id="technicalType" aria-label="Filtrar por tipo"><option value="">Todos los tipos</option></select>
+        <select id="technicalStatus" aria-label="Filtrar por estado"><option value="">Todos los estados</option></select>
+        <button id="technicalReset" class="btn ghost sm" type="button">Limpiar</button>
+        <select id="technicalBrand" aria-label="Filtrar por marca"><option value="">Todas las marcas</option></select>
+        <select id="technicalModel" aria-label="Filtrar por modelo"><option value="">Todos los modelos</option></select>
+        <select id="technicalGeneration" aria-label="Filtrar por generación"><option value="">Todas las generaciones</option></select>
+        <select id="technicalYear" aria-label="Filtrar por año"><option value="">Todos los años</option></select>
+        <select id="technicalEngine" aria-label="Filtrar por motor o código de motor"><option value="">Todos los motores</option></select>
+        <select id="technicalSystem" aria-label="Filtrar por sistema"><option value="">Todos los sistemas</option></select>
+      </div>
+
+      <div class="technical-browser">
+        <aside class="panel technical-index" aria-label="27 categorías técnicas">
+          <div class="panel-head">
+            <div><span class="eyebrow">MAPA TÉCNICO</span><h3>27 categorías</h3></div>
+            <span id="technicalCoverage" class="tag">—</span>
+          </div>
+          <div id="technicalCategoryList" class="technical-category-list">
+            <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+          </div>
+          <p class="micro-note">Las categorías sin documentación propia enlazan a fuentes oficiales localizadas o a una guía genérica claramente marcada.</p>
+        </aside>
+
+        <div class="technical-main">
+          <div id="technicalCategoryHead" class="panel technical-category-head">
+            <div class="notice">Selecciona una categoría o carga el mapa completo.</div>
+          </div>
+          <div class="technical-results-bar">
+            <span id="technicalResultCount">—</span>
+            <span id="technicalPageInfo"></span>
+          </div>
+          <div id="technicalDetail" class="technical-detail panel hidden"></div>
+          <div id="technicalListWrap">
+            <div id="technicalList" class="technical-list">
+              <div class="notice">Cargando categorías técnicas…</div>
+            </div>
+            <button id="technicalMore" class="btn ghost technical-more hidden" type="button">Ver más resultados</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TUNING ===================== -->
+  <section id="view-tuning" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">PREPARACIÓN Y SEGURIDAD</span>
+        <h2>Tuning con criterio técnico</h2>
+        <p>Etapas, hardware de soporte, frenos y legalidad. Sin cifras de potencia inventadas ni compatibilidades sin verificar.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-zap"></use></svg> <b id="tuningCount">—</b> guías · Stage 1–3</span>
+    </header>
+    <div class="tuning-warning panel">
+      <svg class="ic"><use href="#i-shield"></use></svg>
+      <div><b>La potencia no es el primer paso.</b><p>Antes de calibrar: diagnóstico sin fallos, compresión, presión de combustible, temperaturas, frenos y neumáticos. Cualquier cambio debe cumplir la homologación y la ITV.</p></div>
+    </div>
+    <div id="tuningStages" class="tuning-stages"></div>
+    <div id="tuningPackages" class="tuning-grid"><div class="notice">Cargando guías…</div></div>
+  </section>
+
+  <section id="view-productos" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">EQUIPAMIENTO Y RECAMBIOS</span>
+        <h2>Catálogo de taller</h2>
+        <p>Herramientas, diagnosis, maquinaria, químicos y repuestos. Selecciona tu vehículo para ajustar el diagnóstico.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-cart"></use></svg> <b data-stat="products">500</b> productos</span>
+    </header>
+
+    <div class="vehicle-panel panel">
+      <div class="panel-head">
+        <div><span class="eyebrow">SELECTOR DE VEHÍCULO</span><h3>¿Qué coche estás diagnosticando?</h3></div>
+        <span class="tag"><svg class="ic"><use href="#i-car"></use></svg> Marca · Modelo · Motor</span>
+      </div>
+      <div class="form-grid vehicle-grid">
+        <label>Marca
+          <select id="catBrand">
+            <option value="">-- Selecciona marca --</option>
+            <option value="Audi">Audi</option>
+            <option value="BMW">BMW</option>
+            <option value="Citroën">Citroën</option>
+            <option value="Ford">Ford</option>
+            <option value="Mercedes-Benz">Mercedes-Benz</option>
+            <option value="Opel">Opel</option>
+            <option value="Peugeot">Peugeot</option>
+            <option value="Renault">Renault</option>
+            <option value="SEAT">SEAT</option>
+            <option value="Toyota">Toyota</option>
+            <option value="Volkswagen">Volkswagen</option>
+          </select>
+        </label>
+        <label>Modelo
+          <select id="catModel" disabled>
+            <option value="">-- Selecciona modelo --</option>
+          </select>
+        </label>
+        <label>Motorización
+          <select id="catEngine" disabled>
+            <option value="">-- Motorización --</option>
+          </select>
+        </label>
+        <button id="btnFiltrarCoche" class="btn primary" type="button">Aplicar al diagnóstico</button>
+      </div>
+      <div id="activeVehicleBadge" class="vehicle-badge hidden"></div>
+    </div>
+
+    <div class="cat-tabs" role="tablist" aria-label="Departamentos del catálogo">
+      <button class="cat-tab active" data-cat="Todos" type="button" role="tab" aria-selected="true" aria-controls="productGrid"><svg class="ic"><use href="#i-db"></use></svg> Todos</button>
+      <button class="cat-tab" data-cat="Herramientas" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-wrench"></use></svg> Herramientas</button>
+      <button class="cat-tab" data-cat="Diagnosis" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-cpu"></use></svg> Diagnosis</button>
+      <button class="cat-tab" data-cat="Maquinaria" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-engine"></use></svg> Maquinaria</button>
+      <button class="cat-tab" data-cat="Líquidos y Químicos" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-oil"></use></svg> Químicos y aceites</button>
+      <button class="cat-tab" data-cat="Repuestos" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-tire"></use></svg> Repuestos</button>
+      <button class="cat-tab" data-cat="Tuning" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-zap"></use></svg> Tuning</button>
+    </div>
+
+    <div id="catalogStatus" class="catalog-status" role="status" aria-live="polite"></div>
+    <div id="productGrid" class="product-grid"></div>
+  </section>
+
+  <!-- ===================== CHAT IA ===================== -->
   <section id="view-chat" class="view">
-    <div class="section-head"><div><span class="eyebrow">ASISTENTE</span><h2>Chat de diagnóstico</h2></div></div>
-    <div id="chatBox" class="chat-box">
-      <div class="bubble assistant">Cuéntame qué le ocurre al coche. Si puedes, incluye marca, modelo, año, motor, síntomas y código DTC.</div>
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">INGENIERO AUTOMOTRIZ INTELIGENTE</span>
+        <h2>Chat de diagnóstico IA</h2>
+        <p>Describe el fallo y recibe una explicación técnica clara, con plan de comprobación y herramientas recomendadas.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-shield"></use></svg> Motor experto + IA</span>
+    </header>
+
+    <div id="chatVehicleInfo" class="notice" style="display:none;"></div>
+
+    <div class="chat-shell panel">
+      <div class="chat-head">
+        <div class="chat-agent">
+          <span class="agent-avatar"><svg class="ic"><use href="#i-spark"></use></svg></span>
+          <div><b>Asistente Técnico</b><small><i></i> Disponible · responde con criterio de taller</small></div>
+        </div>
+        <span class="tag"><svg class="ic"><use href="#i-lock"></use></svg> Consulta privada</span>
+      </div>
+
+      <div id="chatBox" class="chat-box" role="log" aria-live="polite" aria-label="Conversación con el asistente técnico">
+        <div class="bubble assistant">¡Hola! Soy tu Asistente Técnico Mecánico. Cuéntame qué síntoma o fallo presenta el vehículo. Si dispones de un código DTC, marca, modelo, año y motor, indícalo para ajustar las comprobaciones paso a paso.</div>
+      </div>
+
+      <div class="chat-suggestions">
+        <button class="chip" data-prompt="El coche da tirones en baja y se enciende la luz de avería. ¿Qué compruebo primero?" type="button">Tirones en baja</button>
+        <button class="chip" data-prompt="Noto olor a freno quemado y el pedal está esponjoso. ¿Cuál es el diagnóstico?" type="button">Problema de frenos</button>
+        <button class="chip" data-prompt="La batería se descarga si el coche está parado dos días. ¿Cómo localizo la fuga de corriente?" type="button">Batería se descarga</button>
+        <button class="chip" data-prompt="Tengo el código P0299 y falta de potencia en un 2.0 TDI. Explícame las causas." type="button">Analizar P0299</button>
+      </div>
+
+      <form id="chatForm" class="chat-form">
+        <input id="chatInput" placeholder="Ej.: Seat León 2.0 TDI da tirones en baja y marca código P0299..." maxlength="4000" autocomplete="off" required aria-label="Mensaje para el asistente">
+        <button type="submit" class="btn primary" aria-label="Enviar consulta"><svg class="ic"><use href="#i-send"></use></svg> Consultar</button>
+      </form>
     </div>
-    <form id="chatForm" class="chat-form">
-      <input id="chatInput" placeholder="Ej.: Golf 2.0 TDI pierde potencia y marca P0299..." maxlength="4000">
-      <button class="btn primary">Enviar</button>
-    </form>
+    <div id="chatTechnicalRefs"></div>
+    <div id="chatForumRefs"></div>
+    <div id="chatRecomendados"></div>
   </section>
 
+  <!-- ===================== INFORME ===================== -->
   <section id="view-informe" class="view">
-    <div class="section-head"><div><span class="eyebrow">DOCUMENTACIÓN</span><h2>Informe de diagnóstico</h2></div></div>
-    <div class="form-grid">
-      <label>Marca<input id="fBrand" placeholder="Volkswagen"></label>
-      <label>Modelo<input id="fModel" placeholder="Golf"></label>
-      <label>Año<input id="fYear" placeholder="2003"></label>
-      <label>Motor<input id="fEngine" placeholder="2.0 TDI"></label>
-      <label>Kilómetros<input id="fKm" placeholder="320000"></label>
-      <label>Código DTC<input id="fDtc" placeholder="P0299"></label>
-      <label class="full">Síntomas<textarea id="fSymptoms" rows="5" placeholder="Describe los síntomas, cuándo aparecen y qué se ha comprobado..."></textarea></label>
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">DOCUMENTACIÓN TÉCNICA</span>
+        <h2>Generador de informe</h2>
+        <p>Completa los datos del vehículo y genera un documento profesional listo para imprimir o guardar en PDF.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-file"></use></svg> Listo para PDF</span>
+    </header>
+
+    <div class="report-layout">
+      <div class="panel report-form">
+        <div class="panel-head">
+          <div><span class="eyebrow">DATOS DEL VEHÍCULO</span><h3>Ficha del diagnóstico</h3></div>
+        </div>
+        <div class="form-grid">
+          <label>Marca<input id="fBrand" placeholder="Ej. Volkswagen"></label>
+          <label>Modelo<input id="fModel" placeholder="Ej. Golf VII"></label>
+          <label>Año<input id="fYear" placeholder="Ej. 2016" type="number"></label>
+          <label>Motorización<input id="fEngine" placeholder="Ej. 2.0 TDI 150 CV"></label>
+          <label>Kilómetros actuales<input id="fKm" placeholder="Ej. 185.000 km"></label>
+          <label>Código(s) DTC detectados<input id="fDtc" placeholder="Ej. P0300, P0171"></label>
+          <label class="full">Síntomas observados y notas de taller
+            <textarea id="fSymptoms" rows="5" placeholder="Describe cuándo aparece el problema, ruidos, pérdida de potencia, comprobaciones ya realizadas..."></textarea>
+          </label>
+        </div>
+        <div class="actions">
+          <button id="generateReport" class="btn primary" type="button"><svg class="ic"><use href="#i-file"></use></svg> Generar informe técnico</button>
+          <button id="printReport" class="btn ghost" type="button"><svg class="ic"><use href="#i-print"></use></svg> Imprimir / Guardar en PDF</button>
+        </div>
+      </div>
+
+      <aside class="panel report-side">
+        <span class="eyebrow">VISTA PREVIA</span>
+        <div class="report-preview">
+          <span class="report-stamp"><svg class="ic"><use href="#i-shield"></use></svg></span>
+          <h3>Informe técnico profesional</h3>
+          <p>Incluye identificación del vehículo, síntomas, códigos DTC, dictamen de comprobación y espacio de firma.</p>
+          <ul>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Formato limpio para imprimir</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Guardar como PDF desde el navegador</li>
+            <li><svg class="ic"><use href="#i-check"></use></svg> Apto para taller y cliente</li>
+          </ul>
+        </div>
+      </aside>
     </div>
-    <div class="actions"><button id="generateReport" class="btn primary">Generar informe</button><button id="printReport" class="btn ghost">Imprimir / PDF</button></div>
-    <article id="report" class="report"></article>
+
+    <article id="report" class="report" style="display:none;"></article>
   </section>
+
+  <!-- ===================== CONTACTO ===================== -->
+  <section id="view-contacto" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">SOPORTE Y CONTACTO</span>
+        <h2>Hablemos de tu diagnóstico</h2>
+        <p>Envía tu consulta al equipo del taller o utiliza el asistente técnico para una respuesta inmediata.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-clock"></use></svg> Respuesta en 24-48 h</span>
+    </header>
+
+    <div class="contact-grid">
+      <form id="contactForm" class="panel contact-form">
+        <div class="panel-head">
+          <div><span class="eyebrow">FORMULARIO</span><h3>Cuéntanos qué necesitas</h3></div>
+          <span class="tag"><svg class="ic"><use href="#i-lock"></use></svg> Datos privados</span>
+        </div>
+        <div class="form-grid">
+          <label>Nombre y apellidos<input id="contactName" name="name" placeholder="Ej. Ana García" maxlength="120" required autocomplete="name"></label>
+          <label>Email de contacto<input id="contactEmail" name="email" type="email" placeholder="tu@email.com" required autocomplete="email"></label>
+          <label class="full">Asunto
+            <select id="contactTopic" name="topic">
+              <option>Consulta general</option>
+              <option>Diagnóstico de una avería</option>
+              <option>Productos y recambios</option>
+              <option>Informes técnicos</option>
+              <option>Colaboración o propuesta</option>
+            </select>
+          </label>
+          <label class="full">Mensaje
+            <textarea id="contactMessage" name="message" rows="6" placeholder="Describe el vehículo, el problema y las comprobaciones que ya has realizado..." minlength="10" maxlength="2000" required></textarea>
+          </label>
+        </div>
+        <div class="actions">
+          <button class="btn primary" type="submit"><svg class="ic"><use href="#i-send"></use></svg> Enviar mensaje</button>
+        </div>
+        <div id="contactStatus" class="form-status" role="status" aria-live="polite"></div>
+      </form>
+
+      <aside class="contact-side">
+        <article class="panel contact-card">
+          <span class="cap-ico"><svg class="ic"><use href="#i-chat"></use></svg></span>
+          <h3>Asistente técnico inmediato</h3>
+          <p>Para dudas de averías, códigos DTC y comprobaciones, el chat IA responde al momento.</p>
+          <button class="btn ghost" data-view="chat" type="button">Abrir chat IA <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        </article>
+        <article class="panel contact-card">
+          <span class="cap-ico cyan"><svg class="ic"><use href="#i-file"></use></svg></span>
+          <h3>Informe para tu taller</h3>
+          <p>Genera un documento con los datos del vehículo y entrégalo en el taller o al cliente.</p>
+          <button class="btn ghost" data-view="informe" type="button">Crear informe <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        </article>
+        <article class="panel contact-card">
+          <span class="cap-ico"><svg class="ic"><use href="#i-cart"></use></svg></span>
+          <h3>Productos y recambios</h3>
+          <p>Consulta el catálogo de herramientas y piezas filtrado por marca, modelo y motor.</p>
+          <button class="btn ghost" data-view="productos" type="button">Ver catálogo <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        </article>
+      </aside>
+    </div>
+  </section>
+
+
+  <!-- ===================== FORO DE MECÁNICOS ===================== -->
+  <section id="view-foro" class="view" data-pane="list">
+    <div class="page-head">
+      <div>
+        <span class="eyebrow"><i></i> COMUNIDAD TÉCNICA · CASOS REALES</span>
+        <h1>Foro de Mecánicos</h1>
+        <p class="lead">Casos de avería, mediciones y soluciones verificadas. El conocimiento queda guardado y la IA lo usa como referencia al diagnosticar.</p>
+      </div>
+      <div class="forum-head-actions">
+        <button id="forumNewBtn" class="btn primary" type="button"><svg class="ic"><use href="#i-forum"></use></svg> Publicar avería</button>
+      </div>
+    </div>
+
+    <div id="forumAuthPanel" class="panel forum-auth">
+      <div id="forumAuthSignedOut">
+        <div class="forum-auth-copy">
+          <span class="cap-ico"><svg class="ic"><use href="#i-lock"></use></svg></span>
+          <div><h3>Participa con tu cuenta local</h3><p class="muted">Sin correo ni servicios externos. La primera cuenta creada administra la moderación de esta instalación.</p></div>
+        </div>
+        <div class="forum-auth-tabs" role="tablist" aria-label="Acceso al foro">
+          <button id="forumTabLogin" class="active" type="button" role="tab" aria-selected="true">Entrar</button>
+          <button id="forumTabRegister" type="button" role="tab" aria-selected="false">Crear cuenta</button>
+        </div>
+        <form id="forumLoginForm" class="forum-auth-form">
+          <input id="forumLoginUser" placeholder="Usuario" autocomplete="username" maxlength="24" required>
+          <input id="forumLoginPass" type="password" placeholder="Contraseña" autocomplete="current-password" maxlength="200" required>
+          <input class="hp-field" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn primary" type="submit">Entrar</button>
+        </form>
+        <form id="forumRegisterForm" class="forum-auth-form hidden">
+          <input id="forumRegisterUser" placeholder="Usuario (3-24)" autocomplete="username" maxlength="24" required>
+          <input id="forumRegisterName" placeholder="Nombre visible" autocomplete="nickname" maxlength="60">
+          <input id="forumRegisterPass" type="password" placeholder="Contraseña (mínimo 8)" autocomplete="new-password" minlength="8" maxlength="200" required>
+          <input class="hp-field" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn primary" type="submit">Crear cuenta</button>
+        </form>
+        <div id="forumAuthStatus" class="form-status" role="status" aria-live="polite"></div>
+      </div>
+      <div id="forumAuthSignedIn" class="forum-userbar hidden">
+        <span id="forumUserAvatar" class="forum-avatar">M</span>
+        <div class="forum-userbar-info">
+          <strong id="forumUserName">Mecánico</strong>
+          <span><b id="forumUserRole">usuario</b> · <span id="forumUserRep">0</span> reputación</span>
+        </div>
+        <div class="forum-userbar-actions">
+          <button id="forumProfileBtn" class="btn ghost sm" type="button"><svg class="ic"><use href="#i-user"></use></svg> Mi perfil</button>
+          <button id="forumMessagesBtn" class="btn ghost sm" type="button"><svg class="ic"><use href="#i-mail"></use></svg> Privados</button>
+          <button id="forumModerationBtn" class="btn ghost sm hidden" type="button"><svg class="ic"><use href="#i-shield"></use></svg> Moderación</button>
+          <button id="forumLogout" class="btn ghost sm" type="button">Salir</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="forum-layout">
+      <aside class="panel forum-side">
+        <div class="forum-search">
+          <input id="forumSearch" placeholder="Marca, modelo, motor, DTC, síntoma..." aria-label="Buscar en el foro" maxlength="160">
+          <button id="forumSearchBtn" class="btn primary sm" type="button"><svg class="ic"><use href="#i-search"></use></svg></button>
+        </div>
+        <label class="forum-filter">Categoría
+          <select id="forumCategoryFilter"><option value="">Todas las categorías</option></select>
+        </label>
+        <label class="forum-filter">Estado
+          <select id="forumStatusFilter">
+            <option value="">Todos los estados</option>
+            <option value="abierto">Abiertos</option>
+            <option value="investigacion">En investigación</option>
+            <option value="solucion_propuesta">Con solución propuesta</option>
+            <option value="solucion_verificada">Solución verificada</option>
+            <option value="cerrado">Cerrados</option>
+          </select>
+        </label>
+        <label class="forum-filter">Fecha
+          <select id="forumDateFilter">
+            <option value="">Cualquier fecha</option>
+            <option value="7">Últimos 7 días</option>
+            <option value="30">Últimos 30 días</option>
+            <option value="365">Último año</option>
+          </select>
+        </label>
+        <label class="forum-filter">Orden
+          <select id="forumSortFilter">
+            <option value="relevancia">Relevancia</option>
+            <option value="recientes">Más recientes</option>
+            <option value="votos">Más útiles</option>
+            <option value="respuestas">Más respuestas</option>
+          </select>
+        </label>
+        <div class="forum-filter-buttons">
+          <button id="forumResetBtn" class="btn ghost sm" type="button">Limpiar filtros</button>
+        </div>
+        <div class="forum-side-section">
+          <h4>Sistemas</h4>
+          <div id="forumCatList" class="forum-cat-list"></div>
+        </div>
+        <div id="forumStatsMini" class="forum-stats-mini"></div>
+      </aside>
+
+      <div class="forum-content">
+        <div id="forumGlobalStatus" class="form-status" role="status" aria-live="polite"></div>
+
+        <div id="forumListView">
+          <div class="forum-list-head">
+            <div><strong id="forumListCount">0 casos</strong><span class="muted"> · conocimiento guardado en esta instalación</span></div>
+            <button id="forumRefreshBtn" class="btn ghost sm" type="button"><svg class="ic"><use href="#i-refresh"></use></svg> Actualizar</button>
+          </div>
+          <div id="forumList" class="forum-list"></div>
+          <div class="forum-list-foot">
+            <button id="forumLoadMore" class="btn ghost hidden" type="button">Cargar más casos</button>
+          </div>
+        </div>
+
+        <div id="forumCaseView" class="hidden"></div>
+
+        <div id="forumEditor" class="panel forum-editor hidden">
+          <div class="forum-editor-head">
+            <div><span class="eyebrow"><i></i> NUEVO CASO</span><h2 id="forumEditorHeading">Publicar una avería</h2></div>
+            <button id="forumCancelCase" class="btn ghost sm" type="button">Cancelar</button>
+          </div>
+          <form id="forumCaseForm" class="forum-form">
+            <input type="hidden" id="forumCaseId">
+            <input class="hp-field" id="forumCaseWebsite" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <div class="forum-form-grid">
+              <label class="full">Título del caso
+                <input id="forumCaseTitle" maxlength="160" minlength="8" placeholder="Ej.: Pérdida de potencia en caliente con P0299" required>
+              </label>
+              <label>Categoría
+                <select id="forumCaseCategory" required></select>
+              </label>
+              <label>Estado inicial
+                <select id="forumCaseStatus" disabled><option>Abierto</option></select>
+              </label>
+              <label>Marca<input id="forumCaseBrand" maxlength="60" placeholder="Ej.: SEAT"></label>
+              <label>Modelo<input id="forumCaseModel" maxlength="60" placeholder="Ej.: León"></label>
+              <label>Año<input id="forumCaseYear" maxlength="20" placeholder="Ej.: 2017"></label>
+              <label>Motorización<input id="forumCaseEngine" maxlength="100" placeholder="Ej.: 2.0 TDI 150 CV"></label>
+              <label>Código de motor<input id="forumCaseEngineCode" maxlength="60" placeholder="Ej.: CRLB"></label>
+              <label>Kilometraje<input id="forumCaseMileage" maxlength="30" placeholder="Ej.: 142.000 km"></label>
+              <label class="full">Códigos DTC<input id="forumCaseDtcs" maxlength="300" placeholder="Separados por espacios o comas: P0299 P0300"></label>
+              <label class="full">Descripción del problema
+                <textarea id="forumCaseBody" rows="5" minlength="20" maxlength="8000" placeholder="Qué ocurre, cuándo empezó y qué has observado..." required></textarea>
+              </label>
+              <label class="full">Síntomas<textarea id="forumCaseSymptoms" rows="3" maxlength="2000" placeholder="Ruidos, tirones, humo, testigos..."></textarea></label>
+              <label class="full">Condiciones en las que aparece<textarea id="forumCaseConditions" rows="3" maxlength="2000" placeholder="Frío/caliente, ralentí, cuesta, velocidad..."></textarea></label>
+              <label class="full">Mediciones realizadas<textarea id="forumCaseMeasurements" rows="3" maxlength="3000" placeholder="Presiones, tensiones, caudales, valores de escáner..."></textarea></label>
+              <label class="full">Pruebas efectuadas<textarea id="forumCaseTests" rows="3" maxlength="3000" placeholder="Pruebas de estanqueidad, intercambio de sensores..."></textarea></label>
+              <label class="full">Reparaciones intentadas<textarea id="forumCaseRepairs" rows="3" maxlength="3000" placeholder="Piezas sustituidas o ajustes ya realizados..."></textarea></label>
+              <label class="full">Resultado final<textarea id="forumCaseResult" rows="2" maxlength="2000" placeholder="Si ya está resuelto, indica el resultado y las pruebas que lo confirman."></textarea></label>
+              <label class="full forum-file-label"><svg class="ic"><use href="#i-image"></use></svg> Fotos o PDF (máx. 4 archivos, 2 MB cada uno)
+                <input id="forumCaseFiles" type="file" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" multiple>
+              </label>
+            </div>
+            <div id="forumFileInfo" class="forum-file-info"></div>
+            <div class="actions">
+              <button id="forumSaveCase" class="btn primary" type="submit"><svg class="ic"><use href="#i-send"></use></svg> Publicar caso</button>
+              <button id="forumCancelCase2" class="btn ghost" type="button">Cancelar</button>
+            </div>
+            <div id="forumEditorStatus" class="form-status" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+
+        <div id="forumMessagesView" class="panel hidden"></div>
+        <div id="forumProfileView" class="panel hidden"></div>
+        <div id="forumModerationView" class="panel hidden"></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===================== FICHA DE PRODUCTO ===================== -->
+  <div id="productModal" class="product-modal" hidden>
+    <div class="product-modal-backdrop" data-product-close></div>
+    <article class="product-sheet panel" role="dialog" aria-modal="true" aria-labelledby="productSheetTitle">
+      <button class="product-modal-close" data-product-close type="button" aria-label="Cerrar ficha del producto"><svg class="ic"><use href="#i-close"></use></svg></button>
+      <div id="productSheetBody"></div>
+    </article>
+  </div>
+
 </main>
 
-<footer><span>Diagnóstico y Mecánica</span><span>Herramienta informativa · Comprueba antes de sustituir</span></footer>
+<footer class="site-footer">
+  <div class="footer-brand">
+    <span class="brand-mark"><svg class="ic"><use href="#i-logo"></use></svg></span>
+    <div><strong>DIAGNÓSTICO Y MECÁNICA</strong><small>Plataforma automotriz profesional</small></div>
+  </div>
+  <nav class="footer-nav" aria-label="Enlaces del pie">
+    <button data-view="diagnostico" type="button">Diagnóstico</button>
+    <button data-view="compra" type="button">Comprar</button>
+    <button data-view="dtc" type="button">DTC</button>
+    <button data-view="obd" type="button">OBD-II</button>
+    <button data-view="tutoriales" type="button">Tutoriales</button>
+    <button data-view="biblioteca" type="button">Biblioteca</button>
+    <button data-view="productos" type="button">Productos</button>
+    <button data-view="chat" type="button">Chat IA</button>
+    <button data-view="informe" type="button">Informe</button>
+    <button data-view="foro" type="button">Foro</button>
+    <button data-view="contacto" type="button">Contacto</button>
+  </nav>
+  <div class="footer-legal">
+    <span>© <span id="footerYear">2026</span> Diagnóstico y Mecánica</span>
+    <span>Herramienta informativa · Comprueba antes de sustituir</span>
+  </div>
+</footer>
+
+<div id="tutModal" class="tut-modal" hidden>
+  <div class="tut-modal-backdrop" data-tut-close></div>
+  <article class="tut-detail panel" role="dialog" aria-modal="true" aria-labelledby="tutDetailTitle">
+    <button class="tut-modal-close" data-tut-close type="button" aria-label="Cerrar ficha del tutorial"><svg class="ic"><use href="#i-close"></use></svg></button>
+    <div id="tutDetailBody"></div>
+  </article>
+</div>
+
+<div id="tutToast" class="tut-toast" role="status" aria-live="polite"></div>
+
+<script src="/js/obd.js"></script>
+<script src="/js/tutorials.js"></script>
+<script type="module" src="/js/hero3d.js"></script>
 <script src="/js/app.js"></script>
+<script src="/js/buying.js"></script>
+<script src="/js/scan.js"></script>
+<script src="/js/forum.js"></script>
 </body>
 </html>

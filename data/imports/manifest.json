@@ -1,0 +1,608 @@
+{
+  "version": 2,
+  "importedAt": "2026-10-25T13:25:14.844Z",
+  "sources": [
+    {
+      "id": "src-obdex",
+      "url": "https://foerbsnavi.github.io/OBDex/generic.json",
+      "license": "CC0-1.0",
+      "cached": true,
+      "count": 9533
+    },
+    {
+      "id": "src-obdex",
+      "url": "https://foerbsnavi.github.io/OBDex/pids/mode01.json",
+      "license": "CC0-1.0",
+      "cached": true,
+      "count": 119
+    },
+    {
+      "id": "src-obdex",
+      "url": "https://foerbsnavi.github.io/OBDex/pids/mode09.json",
+      "license": "CC0-1.0",
+      "cached": true,
+      "count": 13
+    },
+    {
+      "id": "src-autoseeker",
+      "url": "https://autoseeker.eu/data/models.json",
+      "license": "CC-BY-4.0",
+      "cached": true,
+      "count": 281
+    },
+    {
+      "id": "src-nhtsa-recalls",
+      "url": "https://api.nhtsa.gov/recalls/recallsByVehicle",
+      "license": "Public domain US Government; no endorsement",
+      "queries": 49,
+      "count": 109
+    },
+    {
+      "id": "src-openev",
+      "url": "https://github.com/open-ev-data/open-ev-data-dataset/releases/download/v1.24.0/open-ev-data-v1.24.0.json",
+      "license": "CDLA-Permissive-2.0",
+      "cached": false,
+      "count": 1189
+    },
+    {
+      "id": "src-wal33d-dtc",
+      "url": "https://github.com/Wal33D/dtc-database",
+      "license": "MIT",
+      "cached": false,
+      "count": 9390
+    },
+    {
+      "id": "src-eea-co2-cars",
+      "url": "https://discodata.eea.europa.eu/sql",
+      "license": "CC BY 4.0",
+      "cached": false,
+      "count": 16066,
+      "variants": 75733
+    },
+    {
+      "id": "src-opendbc",
+      "url": "https://github.com/commaai/opendbc",
+      "license": "MIT",
+      "cached": false,
+      "count": 58
+    }
+  ],
+  "files": {
+    "dtc": {
+      "file": "data/imports/obdex-dtc.json",
+      "bytes": 19135343,
+      "sha256": "ee69cf3c4de97d08f6c26c047f91447ca1a77ec94275dc91febf5268255abe71"
+    },
+    "pids": {
+      "file": "data/imports/obdex-pids.json",
+      "bytes": 53652,
+      "sha256": "957a77bb9966ed0ce6a55cbc337963ac360d6aa2172ecf4ea46e16d285e1fd42"
+    },
+    "models": {
+      "file": "data/imports/autoseeker-models.json",
+      "bytes": 254201,
+      "sha256": "8e39f1bebca48a69a94a4e465878d9286c867e211edd2c85b3ebda4534247934"
+    },
+    "recalls": {
+      "file": "data/imports/nhtsa-recalls.json",
+      "bytes": 168597,
+      "sha256": "528f83e5bb28dcd417d078553d420a10af5a11b03a0ec426fd266a7b0afe7d95"
+    },
+    "openev": {
+      "file": "data/imports/openev-vehicles.json",
+      "bytes": 3140738,
+      "sha256": "9ae803469c8b9e2fe998a0621686ccc94131cd8a6b8398e4d6fbf2fc6c36933f"
+    },
+    "openev-raw": {
+      "file": "data/imports/raw/openev/open-ev-data-v1.24.0.json",
+      "bytes": 3140421,
+      "sha256": "71ae1b0008e04698f199f06fdea636b864e1f81d1b62e8f2d3bf2cf501cc3344"
+    },
+    "openev-license": {
+      "file": "data/imports/raw/openev/LICENCE",
+      "bytes": 2370,
+      "sha256": "9d242f2775d7a1d61249e49ed08bfcca3d8759782ad4bfdaa6dcfff830765054"
+    },
+    "wal33d": {
+      "file": "data/imports/wal33d-dtc.json",
+      "bytes": 2806062,
+      "sha256": "3893691d43d82e1d97926eec6b16f8893fee63c1908fd38742b0f77affdc6945"
+    },
+    "wal33d-raw-db": {
+      "file": "data/imports/raw/wal33d/dtc_codes.db",
+      "bytes": 3256320,
+      "sha256": "099a4ffd60398112a0540b0bbc93a5929e05e7f4e6d4988ca2a50858af01b743"
+    },
+    "wal33d-license": {
+      "file": "data/imports/raw/wal33d/LICENSE",
+      "bytes": 1078,
+      "sha256": "5106ad327a989f9f864f55f9111d055530af80c3109e9f26026bc2cd486087f5"
+    },
+    "eea": {
+      "file": "data/imports/eea-co2cars-2025.json",
+      "bytes": 22469600,
+      "sha256": "70de36e99d27405e44b97c6cbec44b1b5ff3e9483fc223ad04ecff439fccda48"
+    },
+    "eea-query": {
+      "file": "data/imports/raw/eea/co2cars-2025.query.sql",
+      "bytes": 589,
+      "sha256": "f192fac26fab66565912746aa5064fa84e806b416f6b1a0e41a2c1963d337b7b"
+    },
+    "opendbc": {
+      "file": "data/imports/opendbc-dbc.json",
+      "bytes": 461081,
+      "sha256": "cd5f5cfe435ee3d4d12bf3a97eaa5047e1250734d3dd6cac4de544fb9c76ca69"
+    },
+    "opendbc-license": {
+      "file": "data/imports/raw/opendbc/LICENSE",
+      "bytes": 1059,
+      "sha256": "6543c4a66b46affddae1b9ae1e1992687f0b7191e74ba3a7235388b9f42a6d13"
+    },
+    "wal33d-source-acura_codes.txt": {
+      "file": "data/imports/raw/wal33d/acura_codes.txt",
+      "bytes": 4172,
+      "sha256": "1a1067821e1cf2d833e100b8ceeaff1fd3e9a712625b284a7130405bd861eeb3"
+    },
+    "wal33d-source-audi_codes.txt": {
+      "file": "data/imports/raw/wal33d/audi_codes.txt",
+      "bytes": 19817,
+      "sha256": "7544034366a6d674aa9554604048c4c42d00d4e51c0b5aa381ba53dd79017567"
+    },
+    "wal33d-source-bmw_codes.txt": {
+      "file": "data/imports/raw/wal33d/bmw_codes.txt",
+      "bytes": 14298,
+      "sha256": "d85733da1796d58f76b803ca2bcc49a5f0e437c353f9a575fa33aa513533d7f0"
+    },
+    "wal33d-source-buick_codes.txt": {
+      "file": "data/imports/raw/wal33d/buick_codes.txt",
+      "bytes": 17975,
+      "sha256": "8465b0921369c073d5bb4bd927fc2ea44342416a4fecdac67bd9f8bdc1424e8f"
+    },
+    "wal33d-source-cadillac_codes.txt": {
+      "file": "data/imports/raw/wal33d/cadillac_codes.txt",
+      "bytes": 17949,
+      "sha256": "2bd9660877871478776e3c65dd6c9500bd3a86e38d957c76528a6c97b81016bd"
+    },
+    "wal33d-source-chevy_codes.txt": {
+      "file": "data/imports/raw/wal33d/chevy_codes.txt",
+      "bytes": 18002,
+      "sha256": "1445fa28d4f4fd4e5b75227c19c6a8deda8f9350fe6fc4718368a124fb9ccfa8"
+    },
+    "wal33d-source-chrysler_codes.txt": {
+      "file": "data/imports/raw/wal33d/chrysler_codes.txt",
+      "bytes": 13777,
+      "sha256": "ba6e2490908732ef63a7649e7e1f9fd9940506b7b5b7795cd1bc30e79e285fed"
+    },
+    "wal33d-source-dodge_codes.txt": {
+      "file": "data/imports/raw/wal33d/dodge_codes.txt",
+      "bytes": 5282,
+      "sha256": "6d793abd3f7437dfbf45cf8d21602923e9ee1bbdcdc51e82e22096b6481e019f"
+    },
+    "wal33d-source-ford_codes.txt": {
+      "file": "data/imports/raw/wal33d/ford_codes.txt",
+      "bytes": 20971,
+      "sha256": "a9232d2c7b21f4054d2641accabe1f2edb26354a12486067b917eb51d2e4c19c"
+    },
+    "wal33d-source-geo_codes.txt": {
+      "file": "data/imports/raw/wal33d/geo_codes.txt",
+      "bytes": 828,
+      "sha256": "2777af7bf01955a6f516e1151c6e7cef8314050dfdbe403ac1252260257ef56e"
+    },
+    "wal33d-source-gm_codes.txt": {
+      "file": "data/imports/raw/wal33d/gm_codes.txt",
+      "bytes": 17932,
+      "sha256": "6a5f0d294d08c243e172bcf99cf43b08c36d8e7e804271f5dc380f24942a2d24"
+    },
+    "wal33d-source-gmc_codes.txt": {
+      "file": "data/imports/raw/wal33d/gmc_codes.txt",
+      "bytes": 17932,
+      "sha256": "6a5f0d294d08c243e172bcf99cf43b08c36d8e7e804271f5dc380f24942a2d24"
+    },
+    "wal33d-source-honda_codes.txt": {
+      "file": "data/imports/raw/wal33d/honda_codes.txt",
+      "bytes": 4176,
+      "sha256": "1a946ca621f638dac2ad2510945c7ee5962ab74dec556544fe8afb16fd620c86"
+    },
+    "wal33d-source-infiniti_codes.txt": {
+      "file": "data/imports/raw/wal33d/infiniti_codes.txt",
+      "bytes": 4176,
+      "sha256": "1a946ca621f638dac2ad2510945c7ee5962ab74dec556544fe8afb16fd620c86"
+    },
+    "wal33d-source-jaguar_codes.txt": {
+      "file": "data/imports/raw/wal33d/jaguar_codes.txt",
+      "bytes": 7137,
+      "sha256": "a4e35ae5c59369ce92a167ed4463af82fbf480cb277d20c5ed093aa53ae7c9d9"
+    },
+    "wal33d-source-jeep_codes.txt": {
+      "file": "data/imports/raw/wal33d/jeep_codes.txt",
+      "bytes": 5173,
+      "sha256": "7b20289c6ca68798d7a4a7310a8a117c959378acae6b39516fafae38432344fe"
+    },
+    "wal33d-source-kia_codes.txt": {
+      "file": "data/imports/raw/wal33d/kia_codes.txt",
+      "bytes": 3587,
+      "sha256": "e6f61bfdaa8169ec36bd68db15af362092de9be888d66f46ecf42d910d17074b"
+    },
+    "wal33d-source-lexus_codes.txt": {
+      "file": "data/imports/raw/wal33d/lexus_codes.txt",
+      "bytes": 2433,
+      "sha256": "897964cfa94a0588dddac706e4e4246ecfa2059eba51e4dbc51956313345d76b"
+    },
+    "wal33d-source-lincoln_codes.txt": {
+      "file": "data/imports/raw/wal33d/lincoln_codes.txt",
+      "bytes": 20939,
+      "sha256": "9d1aa04a0d9096e7eea3407bc960fd3d0815acb199c961f4f1a8d2dcdca3867a"
+    },
+    "wal33d-source-mazda_codes.txt": {
+      "file": "data/imports/raw/wal33d/mazda_codes.txt",
+      "bytes": 11082,
+      "sha256": "3a1eb53716fc4d39dd745407dad31a618712d91ebbccaca81b957eb9b7279c7a"
+    },
+    "wal33d-source-mercedes_codes.txt": {
+      "file": "data/imports/raw/wal33d/mercedes_codes.txt",
+      "bytes": 1372,
+      "sha256": "9e1ee5ea5848600c36ac1473be53358172128bfe78b623508d9db1f31914d800"
+    },
+    "wal33d-source-mercury_codes.txt": {
+      "file": "data/imports/raw/wal33d/mercury_codes.txt",
+      "bytes": 20997,
+      "sha256": "61f02bed18d287546e895902d2960a4c96230d71b310b2999e9698b4533f0b3c"
+    },
+    "wal33d-source-mitsubishi_codes.txt": {
+      "file": "data/imports/raw/wal33d/mitsubishi_codes.txt",
+      "bytes": 1517,
+      "sha256": "789ef06d76b28ccf6e3dee226bb0af3841a18bd9400a2856519822a838d8c9c5"
+    },
+    "wal33d-source-nissan_codes.txt": {
+      "file": "data/imports/raw/wal33d/nissan_codes.txt",
+      "bytes": 2550,
+      "sha256": "203e496072781b98543e1deb0986f4e9781c46558aa8256105de795941c60388"
+    },
+    "wal33d-source-oldsmobile_codes.txt": {
+      "file": "data/imports/raw/wal33d/oldsmobile_codes.txt",
+      "bytes": 17892,
+      "sha256": "4744b6e8bff92f895684db29743260ae5f9db4463d8f19c18ed041a20b37988c"
+    },
+    "wal33d-source-plymouth_codes.txt": {
+      "file": "data/imports/raw/wal33d/plymouth_codes.txt",
+      "bytes": 5966,
+      "sha256": "8e937c51810486edb70763fa4024ca8144e049b4bee08edbaba9f4ddcf46901c"
+    },
+    "wal33d-source-pontiac_codes.txt": {
+      "file": "data/imports/raw/wal33d/pontiac_codes.txt",
+      "bytes": 6082,
+      "sha256": "d6d7b62c845914190557a224c8004e4b1d3cd1aab07b31f7091f7c9900040ddb"
+    },
+    "wal33d-source-saturn_codes.txt": {
+      "file": "data/imports/raw/wal33d/saturn_codes.txt",
+      "bytes": 17880,
+      "sha256": "39c8fd7827e5fe6b0b636f3afa13372b5101b9ffb2e9ad5effe5a3a2c435e432"
+    },
+    "wal33d-source-subaru_codes.txt": {
+      "file": "data/imports/raw/wal33d/subaru_codes.txt",
+      "bytes": 5164,
+      "sha256": "cfdf1a4b6fc317d66edd77185146e0d6c217ebfea66dbc4d5dc210d226db5959"
+    },
+    "wal33d-source-suzuki_codes.txt": {
+      "file": "data/imports/raw/wal33d/suzuki_codes.txt",
+      "bytes": 817,
+      "sha256": "7477d21580142a659b973e2fe41a5db44de5ccf1d71977e4d173683124c8d858"
+    },
+    "wal33d-source-toyota_codes.txt": {
+      "file": "data/imports/raw/wal33d/toyota_codes.txt",
+      "bytes": 1931,
+      "sha256": "6758d013d0f51f30402cdebf5a7a91ebb4916bdfc86b524c5914dc17c110c211"
+    },
+    "wal33d-source-volkswagen_codes.txt": {
+      "file": "data/imports/raw/wal33d/volkswagen_codes.txt",
+      "bytes": 28200,
+      "sha256": "fd6bf267f1db3a1a44279a21b1c69cba19ee96d2b2821e0b238cdf54b3a71579"
+    },
+    "wal33d-source-other_codes.txt": {
+      "file": "data/imports/raw/wal33d/other_codes.txt",
+      "bytes": 139052,
+      "sha256": "c366f43809cd8140e55f05f40ddd2ef716813a9abe011a6c2cd6fdbadba8e645"
+    },
+    "opendbc-source-opendbc/dbc/ESR.dbc": {
+      "file": "data/imports/raw/opendbc/ESR.dbc",
+      "bytes": 64876,
+      "sha256": "69b5c211129e243addfa165257e47c2076ac8fc84a2e74053b4341a4f0495b36"
+    },
+    "opendbc-source-opendbc/dbc/FORD_CADS.dbc": {
+      "file": "data/imports/raw/opendbc/FORD_CADS.dbc",
+      "bytes": 215720,
+      "sha256": "6d254309d8d66c3fe1d56420a5880716307c3640fba5ff76fb272431df8979f9"
+    },
+    "opendbc-source-opendbc/dbc/FORD_CADS_64.dbc": {
+      "file": "data/imports/raw/opendbc/FORD_CADS_64.dbc",
+      "bytes": 484651,
+      "sha256": "9d4b88f195953b8fbb42181c9f2e754807bda13cfb5ba43678e643d398131e3b"
+    },
+    "opendbc-source-opendbc/dbc/acura_ilx_2016_nidec.dbc": {
+      "file": "data/imports/raw/opendbc/acura_ilx_2016_nidec.dbc",
+      "bytes": 5237,
+      "sha256": "7b6b4832461572d29c31c882cf4be913735cf98bc2848d1a16090ea6454d297f"
+    },
+    "opendbc-source-opendbc/dbc/bmw_e9x_e8x.dbc": {
+      "file": "data/imports/raw/opendbc/bmw_e9x_e8x.dbc",
+      "bytes": 25167,
+      "sha256": "c238d3938e4dc461b96b5055e790ccea01d03fc8c84d44ebeb35446654988f07"
+    },
+    "opendbc-source-opendbc/dbc/byd_atto3.dbc": {
+      "file": "data/imports/raw/opendbc/byd_atto3.dbc",
+      "bytes": 7897,
+      "sha256": "536d6c2a1805b0ead4d426892e28f66b6a43b08736b3d72db2838bb60842d012"
+    },
+    "opendbc-source-opendbc/dbc/cadillac_ct6_chassis.dbc": {
+      "file": "data/imports/raw/opendbc/cadillac_ct6_chassis.dbc",
+      "bytes": 2495,
+      "sha256": "15156e370b26e7993d8f76225f69544ce90a59f822ed36c5e8dd34a1c86f2b47"
+    },
+    "opendbc-source-opendbc/dbc/cadillac_ct6_object.dbc": {
+      "file": "data/imports/raw/opendbc/cadillac_ct6_object.dbc",
+      "bytes": 232156,
+      "sha256": "df8a252302b54dbbdad9fa4cd497bd72dd7552cfaef1528d1bdbe8faac3383c2"
+    },
+    "opendbc-source-opendbc/dbc/cadillac_ct6_powertrain.dbc": {
+      "file": "data/imports/raw/opendbc/cadillac_ct6_powertrain.dbc",
+      "bytes": 8984,
+      "sha256": "b3183d4341267e73c65c6e5721a3804a5ae19a30eca8841bd426474b90652eff"
+    },
+    "opendbc-source-opendbc/dbc/chrysler_cusw.dbc": {
+      "file": "data/imports/raw/opendbc/chrysler_cusw.dbc",
+      "bytes": 7178,
+      "sha256": "5b2392ba5a65bf430799b160ad78a7520d21a8c013c9620491215835ecf38338"
+    },
+    "opendbc-source-opendbc/dbc/chrysler_pacifica_2017_hybrid_private_fusion.dbc": {
+      "file": "data/imports/raw/opendbc/chrysler_pacifica_2017_hybrid_private_fusion.dbc",
+      "bytes": 7263,
+      "sha256": "1fbba64fcdbcf06278c25cbb137df531731254b5e42631bd4a24305bf8096a3a"
+    },
+    "opendbc-source-opendbc/dbc/comma_body.dbc": {
+      "file": "data/imports/raw/opendbc/comma_body.dbc",
+      "bytes": 3521,
+      "sha256": "9040592f1138f0110224c2acd781edbfb32d032cecb86ca8ec6356ec961b35ce"
+    },
+    "opendbc-source-opendbc/dbc/fca_giorgio.dbc": {
+      "file": "data/imports/raw/opendbc/fca_giorgio.dbc",
+      "bytes": 9471,
+      "sha256": "d327a7a07670016f4ecf56ae200e0239705017888134274c34fc3151d7c0e96d"
+    },
+    "opendbc-source-opendbc/dbc/ford_cgea1_2_bodycan_2011.dbc": {
+      "file": "data/imports/raw/opendbc/ford_cgea1_2_bodycan_2011.dbc",
+      "bytes": 49588,
+      "sha256": "f7964196aea3688ed76d38316d9a9c4b65fa0161daf3e7089073a1e0789257e0"
+    },
+    "opendbc-source-opendbc/dbc/ford_cgea1_2_ptcan_2011.dbc": {
+      "file": "data/imports/raw/opendbc/ford_cgea1_2_ptcan_2011.dbc",
+      "bytes": 69133,
+      "sha256": "c19767779ffbef3296b492bd43036192f2b6db5e98916f8ea7d3e32c72b07f1b"
+    },
+    "opendbc-source-opendbc/dbc/ford_fusion_2018_adas.dbc": {
+      "file": "data/imports/raw/opendbc/ford_fusion_2018_adas.dbc",
+      "bytes": 14069,
+      "sha256": "34de8c6a13ad06318774fe99811b60606ab24669a372aeccc778af391e5aa078"
+    },
+    "opendbc-source-opendbc/dbc/ford_fusion_2018_pt.dbc": {
+      "file": "data/imports/raw/opendbc/ford_fusion_2018_pt.dbc",
+      "bytes": 4914,
+      "sha256": "702117aeef6128ae74664c6e46f92bdfea8613212f40fc2db195662194744764"
+    },
+    "opendbc-source-opendbc/dbc/ford_lincoln_base_pt.dbc": {
+      "file": "data/imports/raw/opendbc/ford_lincoln_base_pt.dbc",
+      "bytes": 807422,
+      "sha256": "536fe325ad4be0eeb9b1704c3663bb6518290185967eb738cf2a3b20f02804eb"
+    },
+    "opendbc-source-opendbc/dbc/gm_global_a_chassis.dbc": {
+      "file": "data/imports/raw/opendbc/gm_global_a_chassis.dbc",
+      "bytes": 1581,
+      "sha256": "caf7896a2ae241771562dbe6462034ab4c52e76ba31af1ed79fca6e3f55580a8"
+    },
+    "opendbc-source-opendbc/dbc/gm_global_a_high_voltage_management.dbc": {
+      "file": "data/imports/raw/opendbc/gm_global_a_high_voltage_management.dbc",
+      "bytes": 9498,
+      "sha256": "a6101722e9e2dbf567603f7a1aa3b6d27c654dbe086d5a38e8460dcaf8965e03"
+    },
+    "opendbc-source-opendbc/dbc/gm_global_a_lowspeed.dbc": {
+      "file": "data/imports/raw/opendbc/gm_global_a_lowspeed.dbc",
+      "bytes": 3420,
+      "sha256": "4c79d9c2e883c086d5e7232727a0064892268ad7ad9c1c08d219151c51148ba5"
+    },
+    "opendbc-source-opendbc/dbc/gm_global_a_lowspeed_1818125.dbc": {
+      "file": "data/imports/raw/opendbc/gm_global_a_lowspeed_1818125.dbc",
+      "bytes": 187112,
+      "sha256": "afccd2c0ca09543c025ce830500b4c72c3dd14dd7debdc979e82bea19fe8d9c7"
+    },
+    "opendbc-source-opendbc/dbc/gm_global_a_object.dbc": {
+      "file": "data/imports/raw/opendbc/gm_global_a_object.dbc",
+      "bytes": 45166,
+      "sha256": "a694b22b4a7ebbdf4a9a896525c5ff91c709655a240f3637fdbd1e4027f1c183"
+    },
+    "opendbc-source-opendbc/dbc/gm_global_a_powertrain_expansion.dbc": {
+      "file": "data/imports/raw/opendbc/gm_global_a_powertrain_expansion.dbc",
+      "bytes": 1415,
+      "sha256": "c9266a82aeae8a4ae37de89f44bb337e8d93400809ad3b7b5b20136c50a0d6de"
+    },
+    "opendbc-source-opendbc/dbc/gwm_haval_h6_phev_2024.dbc": {
+      "file": "data/imports/raw/opendbc/gwm_haval_h6_phev_2024.dbc",
+      "bytes": 11898,
+      "sha256": "e1f0b49d3912cbc0d545302b1c3ada6fe9051b0dfb8ce45db5c843d6841198f3"
+    },
+    "opendbc-source-opendbc/dbc/hongqi_hs5.dbc": {
+      "file": "data/imports/raw/opendbc/hongqi_hs5.dbc",
+      "bytes": 5171,
+      "sha256": "21dbaa15ad562b57ade34828e1acef9a3099a433898c4090ac7b17c93c8ffe43"
+    },
+    "opendbc-source-opendbc/dbc/hyundai_2015_ccan.dbc": {
+      "file": "data/imports/raw/opendbc/hyundai_2015_ccan.dbc",
+      "bytes": 81687,
+      "sha256": "d7f822e3a8d220cfde83aec2ae4ed28ddbc44a38ff29bea2e12e3e321d73a607"
+    },
+    "opendbc-source-opendbc/dbc/hyundai_2015_mcan.dbc": {
+      "file": "data/imports/raw/opendbc/hyundai_2015_mcan.dbc",
+      "bytes": 77667,
+      "sha256": "b18e69bdd30e53fe689b23fbd59779095249a1bb5b2391435e814a490fa924e4"
+    },
+    "opendbc-source-opendbc/dbc/hyundai_i30_2014.dbc": {
+      "file": "data/imports/raw/opendbc/hyundai_i30_2014.dbc",
+      "bytes": 23391,
+      "sha256": "12130a0e82f04f5bdc237fb4d9727792256e1f017b5f7fae23594eb1d0ffad16"
+    },
+    "opendbc-source-opendbc/dbc/hyundai_santafe_2007.dbc": {
+      "file": "data/imports/raw/opendbc/hyundai_santafe_2007.dbc",
+      "bytes": 3823,
+      "sha256": "98dab8afe58b1816b3b5464318437bf9486f00f22a4f0d506f0395a29cb3bc03"
+    },
+    "opendbc-source-opendbc/dbc/luxgen_s5_2015.dbc": {
+      "file": "data/imports/raw/opendbc/luxgen_s5_2015.dbc",
+      "bytes": 4630,
+      "sha256": "2528dee924b7c0fa758d46802fd9f87ef1792c85f5ce6bf60422c1f17ec95532"
+    },
+    "opendbc-source-opendbc/dbc/mazda_2017.dbc": {
+      "file": "data/imports/raw/opendbc/mazda_2017.dbc",
+      "bytes": 29344,
+      "sha256": "52d591be2ea6363e5d2f5bce95e3f85ceffbffef8936845a4b71da6ad8b408ea"
+    },
+    "opendbc-source-opendbc/dbc/mazda_3_2019.dbc": {
+      "file": "data/imports/raw/opendbc/mazda_3_2019.dbc",
+      "bytes": 14180,
+      "sha256": "ed3e6e636ad539528b2af26f8efdd39a1d4ca63b7f975a44aa9180ae88171533"
+    },
+    "opendbc-source-opendbc/dbc/mazda_radar.dbc": {
+      "file": "data/imports/raw/opendbc/mazda_radar.dbc",
+      "bytes": 1586,
+      "sha256": "0abd6760eb21be034c7f238cd42efb3753d1182b08eb2c33fc1a3a4764bc2869"
+    },
+    "opendbc-source-opendbc/dbc/mazda_rx8.dbc": {
+      "file": "data/imports/raw/opendbc/mazda_rx8.dbc",
+      "bytes": 2267,
+      "sha256": "3b2ba3f10e49808f6930e865fe53f93720cbd37d6e3c40242961f09432813c21"
+    },
+    "opendbc-source-opendbc/dbc/mercedes_benz_e350_2010.dbc": {
+      "file": "data/imports/raw/opendbc/mercedes_benz_e350_2010.dbc",
+      "bytes": 5972,
+      "sha256": "89f574ecec7e299c4cfd482b2d71cf5a97949d331a06c46c4669bf9f2a715c07"
+    },
+    "opendbc-source-opendbc/dbc/mg.dbc": {
+      "file": "data/imports/raw/opendbc/mg.dbc",
+      "bytes": 18992,
+      "sha256": "7213db50f5400fd43ab47a11e29494507f6df13a4dbe38ffd794cb5f1dd4da49"
+    },
+    "opendbc-source-opendbc/dbc/nissan_xterra_2011.dbc": {
+      "file": "data/imports/raw/opendbc/nissan_xterra_2011.dbc",
+      "bytes": 2276,
+      "sha256": "adc1ff094f3e703cfe3fa47ead5533f00af0d460fb8e51459e76d026f7f83efc"
+    },
+    "opendbc-source-opendbc/dbc/opel_omega_2001.dbc": {
+      "file": "data/imports/raw/opendbc/opel_omega_2001.dbc",
+      "bytes": 3053,
+      "sha256": "fc06200b5c9c712648281893b3e96ddd1bd2ef9315d1800a0d0713ae358c0345"
+    },
+    "opendbc-source-opendbc/dbc/psa_aee2010_r3.dbc": {
+      "file": "data/imports/raw/opendbc/psa_aee2010_r3.dbc",
+      "bytes": 56757,
+      "sha256": "e9791b8603861a86b2f2acc93e6327ef82587ce84f28d1438a1338d35cce5db5"
+    },
+    "opendbc-source-opendbc/dbc/rivian_park_assist_can.dbc": {
+      "file": "data/imports/raw/opendbc/rivian_park_assist_can.dbc",
+      "bytes": 1366,
+      "sha256": "aa3873bc1caaace1cf1f9c38cff3685f219f5f32a804fd530288d63eecd12c71"
+    },
+    "opendbc-source-opendbc/dbc/rivian_primary_actuator.dbc": {
+      "file": "data/imports/raw/opendbc/rivian_primary_actuator.dbc",
+      "bytes": 77464,
+      "sha256": "fd3e9924c36d8a343625c0bb6f79360961f833ac83c04b9e36bc73882c551517"
+    },
+    "opendbc-source-opendbc/dbc/tesla_can.dbc": {
+      "file": "data/imports/raw/opendbc/tesla_can.dbc",
+      "bytes": 54247,
+      "sha256": "de164d9e68e1758da9e573874687c0b16f2b3b35feefa2855655c8328e8d0e8d"
+    },
+    "opendbc-source-opendbc/dbc/tesla_model3_party.dbc": {
+      "file": "data/imports/raw/opendbc/tesla_model3_party.dbc",
+      "bytes": 35263,
+      "sha256": "efc12ca7d0d9a9b2ee4df039a9f3e2ee22e7e036ec6202af0fce19c486495749"
+    },
+    "opendbc-source-opendbc/dbc/tesla_model3_vehicle.dbc": {
+      "file": "data/imports/raw/opendbc/tesla_model3_vehicle.dbc",
+      "bytes": 24328,
+      "sha256": "c5edad0acc3285be7e6c4eb24fd36717a5a27f12a915e5069b855fa5cbe0bedb"
+    },
+    "opendbc-source-opendbc/dbc/tesla_powertrain.dbc": {
+      "file": "data/imports/raw/opendbc/tesla_powertrain.dbc",
+      "bytes": 7716,
+      "sha256": "d5fe66f2c1888a769ba73fb7b6c43da62ba0789da6193b170483bbcf51967930"
+    },
+    "opendbc-source-opendbc/dbc/toyota_2017_ref_pt.dbc": {
+      "file": "data/imports/raw/opendbc/toyota_2017_ref_pt.dbc",
+      "bytes": 68172,
+      "sha256": "5913e5dc834d0e206e7f69df34e62a08fc4f198b10e4a385d3fb34f9dea43be2"
+    },
+    "opendbc-source-opendbc/dbc/toyota_adas.dbc": {
+      "file": "data/imports/raw/opendbc/toyota_adas.dbc",
+      "bytes": 10178,
+      "sha256": "e50d02305cd62226b67d6dcd9f681b98def712eddc7929bd0011cfb1b4dae45c"
+    },
+    "opendbc-source-opendbc/dbc/toyota_iQ_2009_can.dbc": {
+      "file": "data/imports/raw/opendbc/toyota_iQ_2009_can.dbc",
+      "bytes": 7268,
+      "sha256": "46d9ffa3e00aa1e789a9486bca59358c6c485335c7aa6fd06a7760936005e34e"
+    },
+    "opendbc-source-opendbc/dbc/toyota_prius_2010_pt.dbc": {
+      "file": "data/imports/raw/opendbc/toyota_prius_2010_pt.dbc",
+      "bytes": 7330,
+      "sha256": "ebcc9c69b75241a152b3e4ae95dfc0ab7a176e9e76655090c91cff44ac637c9b"
+    },
+    "opendbc-source-opendbc/dbc/toyota_radar_dsu_tssp.dbc": {
+      "file": "data/imports/raw/opendbc/toyota_radar_dsu_tssp.dbc",
+      "bytes": 6517,
+      "sha256": "60cbb2512bb87ddb6831a262f537f96e57e6127208f6f0832308fb91411d549b"
+    },
+    "opendbc-source-opendbc/dbc/toyota_tss2_adas.dbc": {
+      "file": "data/imports/raw/opendbc/toyota_tss2_adas.dbc",
+      "bytes": 10426,
+      "sha256": "f9edf74785f23778c389f69fe83a4fecb8af07bfa60fdd3f0824f4d236a975a9"
+    },
+    "opendbc-source-opendbc/dbc/volvo_v40_2017_pt.dbc": {
+      "file": "data/imports/raw/opendbc/volvo_v40_2017_pt.dbc",
+      "bytes": 13069,
+      "sha256": "e2adc539cfda8703594301a6e5ebb384d458a682ea853e29744926a70db83343"
+    },
+    "opendbc-source-opendbc/dbc/volvo_v60_2015_pt.dbc": {
+      "file": "data/imports/raw/opendbc/volvo_v60_2015_pt.dbc",
+      "bytes": 10562,
+      "sha256": "dcdf7f7bd5c64d7debcf967580eb6ddf3437e29fcabc9f4b5529a15d5b17170a"
+    },
+    "opendbc-source-opendbc/dbc/vw_mlb.dbc": {
+      "file": "data/imports/raw/opendbc/vw_mlb.dbc",
+      "bytes": 229446,
+      "sha256": "88fe6bb0cf30c1e3656431ce66b43dfd9ffb34c54054a2fde0fa9c72a97fdc13"
+    },
+    "opendbc-source-opendbc/dbc/vw_mqb.dbc": {
+      "file": "data/imports/raw/opendbc/vw_mqb.dbc",
+      "bytes": 126883,
+      "sha256": "863f8e4b1bd26b4006f43f186e42f398bc7537fbfadf0b55d0edbe5ab50c2f67"
+    },
+    "opendbc-source-opendbc/dbc/vw_mqbevo.dbc": {
+      "file": "data/imports/raw/opendbc/vw_mqbevo.dbc",
+      "bytes": 113263,
+      "sha256": "61b581ff22f3f621dfd37d337d521d55882f78b9f3ec31ab67512c82f4903c3f"
+    },
+    "opendbc-source-opendbc/dbc/vw_pq.dbc": {
+      "file": "data/imports/raw/opendbc/vw_pq.dbc",
+      "bytes": 102586,
+      "sha256": "24c1fe1b0cfbd8e9fb6d203f1ad891b93298ca74c690946f72fe571696ef1974"
+    }
+  },
+  "notes": [
+    "OBDex cubre códigos genéricos; no incluye códigos específicos de fabricante.",
+    "autoseeker publica especificaciones indicativas de fabricante/WLTP; requiere atribución CC BY 4.0.",
+    "Las campañas NHTSA son del mercado estadounidense y no confirman aplicabilidad a versiones europeas ni a un VIN concreto.",
+    "Ningún manual, esquema o PDF protegido se ha descargado en esta importación.",
+    "OpenEV Data se importa bajo CDLA-Permissive-2.0; las imágenes y enlaces de terceros no se copian.",
+    "EEA CO2 cars 2025 es un conjunto provisional de homologación y matriculaciones; no contiene procedimientos de reparación.",
+    "Wal33D DTC Database es una compilación MIT con definiciones por fabricante; no se presenta como boletín oficial.",
+    "openpilot/opendbc DBC se importa bajo MIT como definiciones de red de la comunidad, no como esquema oficial del fabricante.",
+    "Los manuales, esquemas y documentos de pago o con copyright no se han descargado ni redistribuido."
+  ]
+}

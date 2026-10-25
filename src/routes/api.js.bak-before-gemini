@@ -1,0 +1,71 @@
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { obtenerSystemPrompt, filtrarProductosRecomendados } from '../../ia_reasoning.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = path.join(__dirname, '..', '..', 'data');
+const router = express.Router();
+
+function readJSON(name) {
+  try {
+    const filePath = path.join(DATA_DIR, name);
+    if (!fs.existsSync(filePath)) return name === 'products.json' ? { productos: [] } : [];
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (e) {
+    return name === 'products.json' ? { productos: [] } : [];
+  }
+}
+
+router.get('/health', (req, res) => res.json({ ok: true }));
+
+router.get('/products', (req, res) => {
+  const data = readJSON('products.json');
+  res.json(Array.isArray(data) ? data : (data.productos || []));
+});
+
+router.post('/chat', async (req, res) => {
+  const { message = '', context = {} } = req.body || {};
+  try {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: 'Falta API KEY' });
+
+    const systemPrompt = obtenerSystemPrompt();
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: 'Consulta: ' + message }
+        ],
+        temperature: 0.5
+      })
+    });
+
+    const data = await response.json();
+    const replyText = data.choices[0].message.content;
+
+    const pData = readJSON('products.json');
+    const todosProductos = Array.isArray(pData) ? pData : (pData.productos || []);
+    const txt = message.toUpperCase();
+
+    const recomendados = todosProductos.filter(p => {
+      const matchCod = (p.codigos_relacionados || []).some(c => txt.includes(c.toUpperCase()));
+      const matchCat = (p.categorias || []).some(t => txt.includes(t.toUpperCase()));
+      return matchCod || matchCat;
+    }).slice(0, 3);
+
+    res.json({ reply: replyText, productos_recomendados: recomendados });
+  } catch (err) {
+    res.status(500).json({ error: 'Error en la IA' });
+  }
+});
+
+export default router;

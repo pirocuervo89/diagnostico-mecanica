@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 640" role="img" aria-label="Ilustración conceptual de un superdeportivo en un garaje tecnológico">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a5059"/>
+      <stop offset=".18" stop-color="#262b31"/>
+      <stop offset=".48" stop-color="#101316"/>
+      <stop offset=".72" stop-color="#22272d"/>
+      <stop offset="1" stop-color="#070809"/>
+    </linearGradient>
+    <linearGradient id="bodyTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#767d86" stop-opacity=".9"/>
+      <stop offset=".3" stop-color="#2c3238"/>
+      <stop offset=".62" stop-color="#0c0e10"/>
+      <stop offset="1" stop-color="#343b43"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#15313a"/>
+      <stop offset=".42" stop-color="#081115"/>
+      <stop offset="1" stop-color="#020405"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff4d00"/>
+      <stop offset=".5" stop-color="#ffb13b"/>
+      <stop offset="1" stop-color="#ff5a00"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00eaff" stop-opacity=".1"/>
+      <stop offset=".5" stop-color="#b8fbff"/>
+      <stop offset="1" stop-color="#00c6e0" stop-opacity=".15"/>
+    </linearGradient>
+    <radialGradient id="rim" cx=".38" cy=".32" r=".78">
+      <stop offset="0" stop-color="#a9b2bd"/>
+      <stop offset=".3" stop-color="#4a525c"/>
+      <stop offset=".62" stop-color="#15181c"/>
+      <stop offset=".84" stop-color="#333a43"/>
+      <stop offset="1" stop-color="#070809"/>
+    </radialGradient>
+    <radialGradient id="tyre" cx=".42" cy=".36" r=".7">
+      <stop offset=".54" stop-color="#111315"/>
+      <stop offset=".78" stop-color="#070809"/>
+      <stop offset="1" stop-color="#010202"/>
+    </radialGradient>
+    <radialGradient id="floorGlow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ff6a00" stop-opacity=".45"/>
+      <stop offset=".45" stop-color="#ff6a00" stop-opacity=".13"/>
+      <stop offset="1" stop-color="#ff6a00" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cyanGlow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#00e5ff" stop-opacity=".4"/>
+      <stop offset="1" stop-color="#00e5ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur18"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="blur7"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="carbon" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="14" height="14" fill="#090b0d"/>
+      <path d="M0 0h7v7H0zM7 7h7v7H7z" fill="#15191d"/>
+    </pattern>
+    <linearGradient id="fadeReflect" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="reflectionMask">
+      <rect x="0" y="0" width="1400" height="220" fill="url(#fadeReflect)"/>
+    </mask>
+  </defs>
+
+  <!-- floor and atmosphere -->
+  <ellipse cx="710" cy="545" rx="560" ry="86" fill="url(#floorGlow)" filter="url(#blur18)"/>
+  <ellipse cx="470" cy="520" rx="260" ry="34" fill="#00e5ff" opacity=".10" filter="url(#blur18)"/>
+  <path d="M120 540h1180M70 575h1260M30 611h1340" stroke="#ff6a00" stroke-opacity=".13" stroke-width="1"/>
+  <path d="M250 640 530 428M1150 640 930 428M700 640V470" stroke="#00e5ff" stroke-opacity=".08" stroke-width="1"/>
+
+  <g id="hypercar">
+    <!-- underglow -->
+    <ellipse cx="710" cy="518" rx="500" ry="24" fill="#ff5a00" opacity=".3" filter="url(#blur7)"/>
+
+    <!-- main silhouette -->
+    <path d="M105 405c-5-35 15-65 60-80l135-25c40-35 90-58 155-68l235-12c70-2 120 5 170 22l170 44c75 14 150 34 205 74 25 18 37 42 25 70l-40 22h-60c-12-62-52-97-105-97s-95 35-109 97H470c-15-62-55-97-108-97s-92 35-107 97h-65c-55-4-82-22-85-47Z" fill="url(#body)" stroke="#59616b" stroke-opacity=".55"/>
+    <path d="M112 401c-1-27 15-52 53-66l145-27c34-32 84-56 155-66l240-12c72-2 124 5 176 23l169 43c75 14 145 34 197 70 17 12 27 27 27 44-13-22-31-36-59-47l-192-50-176-38c-48-13-93-18-147-16l-241 12c-68 10-111 31-143 61l-153 28c-37 7-56 19-66 41Z" fill="url(#bodyTop)" opacity=".86"/>
+
+    <!-- rear fender and haunch -->
+    <path d="M760 300c32-38 82-56 137-57 54-1 102 17 134 54l-20 33H782Z" fill="#111417" opacity=".78"/>
+    <path d="M880 286c42-17 92-12 128 15" fill="none" stroke="#7d8792" stroke-opacity=".4" stroke-width="2"/>
+    <path d="M178 421c34 12 92 17 150 14M915 440h180" stroke="#000" stroke-opacity=".45" stroke-width="5"/>
+
+    <!-- greenhouse -->
+    <path d="M438 255c42-39 100-57 169-60l128-1c45 2 82 13 113 37l45 51-465 2c-1-11 2-20 10-29Z" fill="url(#glass)" stroke="#7e8994" stroke-opacity=".38"/>
+    <path d="M485 257c29-27 72-43 126-47l120-2c38 1 69 9 94 25l30 24-370 2Z" fill="#0b1b21" opacity=".8"/>
+    <path d="M506 213c34-18 78-28 128-30l103-1c34 1 62 7 85 19" fill="none" stroke="#d5e0e6" stroke-opacity=".22" stroke-width="2"/>
+    <path d="M674 183v77" stroke="#8b959e" stroke-opacity=".25" stroke-width="2"/>
+    <path d="M440 283h476l-6 13H444Z" fill="#050607" opacity=".9"/>
+    <path d="M448 286h456" stroke="#ff7b1a" stroke-width="1.2" opacity=".45"/>
+
+    <!-- side sculpting -->
+    <path d="M238 360c105-19 226-29 361-30 144-1 275 10 393 33" fill="none" stroke="#8d98a3" stroke-opacity=".32" stroke-width="2"/>
+    <path d="M300 389c130-16 257-23 381-22 123 1 242 10 355 28" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="8"/>
+    <path d="M842 314c36-17 79-22 121-15l115 26-27 40-209-27Z" fill="url(#carbon)" stroke="#707a85" stroke-opacity=".3"/>
+    <path d="M856 326c31-10 62-12 94-6" fill="none" stroke="#ff6a00" stroke-width="3" filter="url(#glow)" opacity=".85"/>
+    <path d="M811 363c53 8 105 2 154-18" fill="none" stroke="#050607" stroke-width="3" opacity=".8"/>
+
+    <!-- front -->
+    <path d="M1127 327c45 8 91 20 128 39l33 24-41 18c-35-23-80-38-129-45Z" fill="#0b0d0f" stroke="#66707a" stroke-opacity=".35"/>
+    <path d="M1152 338c39 6 75 16 103 30" fill="none" stroke="url(#cyan)" stroke-width="7" stroke-linecap="round" filter="url(#glow)"/>
+    <path d="M1182 383h78l18 17-88 8Z" fill="#080909" stroke="#3b4249" stroke-opacity=".8"/>
+    <path d="M1207 403h44M1213 410h32" stroke="#65717c" stroke-opacity=".5" stroke-width="2"/>
+    <path d="M1070 395c21 11 43 12 65 4" fill="none" stroke="#ff6a00" stroke-width="3" opacity=".8" filter="url(#glow)"/>
+    <path d="M1010 385h55" stroke="#ff8a24" stroke-width="2" opacity=".5"/>
+
+    <!-- rear -->
+    <path d="M111 334c15-10 36-15 60-13l40 6-11 41-68-1-27-14Z" fill="#08090a" stroke="#3d444b" stroke-opacity=".7"/>
+    <path d="M120 342h52M123 352h46" stroke="#ff3300" stroke-width="3" opacity=".8" filter="url(#glow)"/>
+    <path d="M178 380h62l-8 20h-55Z" fill="#0c0e10" stroke="#59626c" stroke-opacity=".4"/>
+    <path d="M221 388h14M215 397h18" stroke="#7f8b96" stroke-opacity=".55" stroke-width="2"/>
+
+    <!-- mirrors -->
+    <path d="M520 248c14-14 35-17 53-7l-7 17-50 8Z" fill="#15191d" stroke="#79838e" stroke-opacity=".4"/>
+    <path d="M550 244l18-9" stroke="#ff7a17" stroke-width="2"/>
+
+    <!-- carbon skirts and diffuser -->
+    <path d="M258 455h190l-18 18H278Z" fill="url(#carbon)" stroke="#555e67" stroke-opacity=".4"/>
+    <path d="M945 455h192l-22 18H963Z" fill="url(#carbon)" stroke="#555e67" stroke-opacity=".4"/>
+    <path d="M292 476h115M995 476h113" stroke="#78838e" stroke-opacity=".4" stroke-width="3"/>
+
+    <!-- wheels -->
+    <g id="wheel-rear">
+      <circle cx="350" cy="430" r="99" fill="#030404"/>
+      <circle cx="350" cy="430" r="91" fill="url(#tyre)"/>
+      <circle cx="350" cy="430" r="75" fill="#050607" stroke="#293038" stroke-width="3"/>
+      <circle cx="350" cy="430" r="68" fill="url(#rim)"/>
+      <g stroke="#090b0d" stroke-width="9" stroke-linecap="round">
+        <path d="M350 371v18M350 471v18M291 430h18M391 430h18M308 388l13 13M379 459l13 13M392 388l-13 13M321 459l-13 13M350 430 309 397M350 430l41-33M350 430l-29 48M350 430l29 48"/>
+      </g>
+      <circle cx="350" cy="430" r="24" fill="#12161a" stroke="#5f6974" stroke-width="3"/>
+      <circle cx="350" cy="430" r="10" fill="#ff6a00" filter="url(#glow)"/>
+      <path d="M419 396c-11 16-14 37-9 58" fill="none" stroke="#ff6a00" stroke-width="8" stroke-linecap="round"/>
+    </g>
+    <g id="wheel-front">
+      <circle cx="1055" cy="430" r="99" fill="#030404"/>
+      <circle cx="1055" cy="430" r="91" fill="url(#tyre)"/>
+      <circle cx="1055" cy="430" r="75" fill="#050607" stroke="#293038" stroke-width="3"/>
+      <circle cx="1055" cy="430" r="68" fill="url(#rim)"/>
+      <g stroke="#090b0d" stroke-width="9" stroke-linecap="round">
+        <path d="M1055 371v18M1055 471v18M996 430h18M1096 430h18M1013 388l13 13M1084 459l13 13M1097 388l-13 13M1026 459l-13 13M1055 430l-41-33M1055 430l41-33M1055 430l-29 48M1055 430l29 48"/>
+      </g>
+      <circle cx="1055" cy="430" r="24" fill="#12161a" stroke="#5f6974" stroke-width="3"/>
+      <circle cx="1055" cy="430" r="10" fill="#ff6a00" filter="url(#glow)"/>
+      <path d="M1124 396c-11 16-14 37-9 58" fill="none" stroke="#ff6a00" stroke-width="8" stroke-linecap="round"/>
+    </g>
+
+    <!-- arch trims -->
+    <path d="M454 449c-14-46-45-69-93-69s-78 23-92 69" fill="none" stroke="#6f7a85" stroke-opacity=".32" stroke-width="4"/>
+    <path d="M1160 449c-14-46-45-69-93-69s-78 23-92 69" fill="none" stroke="#6f7a85" stroke-opacity=".32" stroke-width="4"/>
+
+    <!-- light signatures -->
+    <path d="M1143 340c24 4 48 12 68 23" fill="none" stroke="#dffcff" stroke-width="2.5" filter="url(#glow)"/>
+    <path d="M105 348c23-6 46-5 68 2" fill="none" stroke="#ff3300" stroke-width="2" filter="url(#glow)"/>
+
+    <!-- surface reflections -->
+    <path d="M240 330c100-22 200-29 300-26" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>
+    <path d="M870 290c47-7 97 1 143 23" fill="none" stroke="#fff" stroke-opacity=".15" stroke-width="2"/>
+    <path d="M457 306h190" stroke="#fff" stroke-opacity=".11" stroke-width="1.5"/>
+    <path d="M1178 360l79 31" stroke="#fff" stroke-opacity=".18" stroke-width="1.5"/>
+  </g>
+
+  <!-- car reflection -->
+  <use href="#hypercar" transform="translate(0 1078) scale(1 -.34)" opacity=".22" mask="url(#reflectionMask)"/>
+
+  <!-- technical callouts -->
+  <g font-family="monospace" font-size="11" fill="#9aa6b2" letter-spacing="1.2">
+    <path d="M446 174V116h-52" fill="none" stroke="#00e5ff" stroke-opacity=".4"/>
+    <circle cx="446" cy="174" r="3" fill="#00e5ff"/>
+    <text x="360" y="106" fill="#63efff">CABINA / HMI</text>
+    <path d="M1054 510v48h-92" fill="none" stroke="#ff7a17" stroke-opacity=".4"/>
+    <circle cx="1054" cy="510" r="3" fill="#ff7a17"/>
+    <text x="890" y="576" fill="#ffae52">CHASIS / TELEMETRÍA</text>
+    <text x="110" y="574" fill="#5f6b76">CONCEPTO AERO // DYNM</text>
+  </g>
+</svg>

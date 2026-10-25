@@ -1,0 +1,19 @@
+=== INFORME DEL PROYECTO: DIAGNOSTICO Y MECANICA ===
+
+1. LO QUE HEMOS HECHO:
+- Arreglado el internet y las DNS del ordenador (0 por ciento perdida de paquetes).
+- Creada la interfaz tactil adaptada a moviles con 6 pestanas independientes.
+- Indexada la base de datos masiva con 300 productos reales (50 por cada bloque).
+- Fijadas las tarifas comerciales de los informes en 10 EUR (Basico) y 15 EUR (Completo).
+- Activado el modo simulador seguro en los botones de pago.
+
+2. ESTADO ACTUAL DEL MOTOR WEB:
+- Servidor Express totalmente operativo en el puerto 3000.
+- Marcadores en pantalla sincronizados: 9201 DTCs, 219 Sintomas y 300 Productos.
+
+3. PROXIMOS PASOS (POR DONDE VAMOS):
+- Meter tu clave real de OpenAI en el archivo .env para liberar el habla de la IA.
+- Cambiar las rutas de las fotos locales cuando las tengas en tu carpeta.
+- Conectar las claves reales de Stripe para recibir los pagos de 10 y 15 euros directo a tu banco.
+
+=== FIN DEL INFORME (Copia de seguridad realizada con exito) ===

@@ -1,0 +1,93 @@
+const fs = require('fs');
+const path = require('path');
+
+let productsData = { productos: [] };
+
+try {
+    const productsPath = path.join(__dirname, 'data', 'products.json');
+
+    if (fs.existsSync(productsPath)) {
+        productsData = JSON.parse(
+            fs.readFileSync(productsPath, 'utf8')
+        );
+    }
+} catch (error) {
+    console.error("Error cargando productos.json:", error);
+}function obtenerSystemPrompt() {
+    return `Eres un Ingeniero Mecánico Experto
+y especialista en Diagnóstico OBD-II Automotriz.
+
+Analiza los síntomas y códigos DTC del usuario
+y ofrece un diagnóstico técnico razonado.
+
+No inventes códigos DTC.
+No inventes averías como confirmadas.
+Distingue entre posible, probable y confirmada.
+Si faltan datos, indícalo.
+
+Prioriza las causas más probables.
+Explica las comprobaciones necesarias antes
+de recomendar cambiar una pieza.
+
+Si existe riesgo para la seguridad, avísalo.
+
+No inventes enlaces de productos.
+No generes informes de pago automáticamente.
+El informe solo se genera cuando el usuario lo solicita.
+
+La respuesta debe incluir:
+
+1. Análisis del síntoma o código.
+2. Gravedad y seguridad.
+3. Causas más probables.
+4. Comprobaciones paso a paso.
+5. Solución recomendada.
+6. Mantenimiento preventivo.
+7. Herramientas o productos relacionados.
+
+Usa lenguaje técnico pero fácil de entender.`;
+}function filtrarProductosRecomendados(consulta) {
+    const texto = String(consulta || '').toUpperCase();
+
+    return productsData.productos
+        .filter(prod => {
+            const codigo =
+                Array.isArray(prod.codigos_relacionados) &&
+                prod.codigos_relacionados.some(c =>
+                    texto.includes(String(c).toUpperCase())
+                );
+
+            const categoria =
+                Array.isArray(prod.categorias) &&
+                prod.categorias.some(cat => {
+                    cat = String(cat).toLowerCase();
+
+                    if (cat === 'diagnostico')
+                        return texto.includes('OBD') ||
+                               texto.includes('ESCANER') ||
+                               texto.includes('P0') ||
+                               texto.includes('P1');
+
+                    if (cat === 'electricidad')
+                        return texto.includes('SENSOR') ||
+                               texto.includes('FUSIBLE') ||
+                               texto.includes('VOLTAJE') ||
+                               texto.includes('CABLE');
+
+                    if (cat === 'limpieza')
+                        return texto.includes('ACEITE') ||
+                               texto.includes('FAP') ||
+                               texto.includes('DPF') ||
+                               texto.includes('CARBONILLA');
+
+                    return false;
+                });
+
+            return codigo || categoria;
+        })
+        .slice(0, 3);
+}
+export {
+    obtenerSystemPrompt,
+    filtrarProductosRecomendados
+};

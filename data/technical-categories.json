@@ -1,0 +1,233 @@
+{
+  "version": 3,
+  "updatedAt": "2026-10-25",
+  "notice": "Biblioteca abierta organizada en 27 categorías. Cada categoría distingue documentos completos, datos importados, contenido parcial, metadatos, enlaces a portales externos y fuentes pendientes de autorización. No se inventan valores ni se presentan enlaces como manuales integrados.",
+  "groups": [
+    { "id": "vehiculos", "name": "Vehículos y motores" },
+    { "id": "manuales", "name": "Manuales y documentación" },
+    { "id": "electricidad", "name": "Electricidad, ECU y redes" },
+    { "id": "motor", "name": "Motor y gestión" },
+    { "id": "chasis", "name": "Chasis y transmisión" },
+    { "id": "diagnostico", "name": "Diagnóstico y datos" },
+    { "id": "taller", "name": "Procedimientos de taller" },
+    { "id": "normativa", "name": "Campañas, seguridad y fuentes" }
+  ],
+  "categories": [
+    {
+      "id": "vehicles-engines",
+      "number": 1,
+      "title": "Vehículos y motores",
+      "group": "vehiculos",
+      "description": "Especificaciones de vehículos, generaciones, años, combustibles y datos de motor disponibles.",
+      "icon": "car"
+    },
+    {
+      "id": "workshop-manuals",
+      "number": 2,
+      "title": "Manuales de taller",
+      "group": "manuales",
+      "description": "Manuales de reparación del fabricante localizados. Se enlazan cuando no existe permiso de copia.",
+      "icon": "book"
+    },
+    {
+      "id": "maintenance-manuals",
+      "number": 3,
+      "title": "Manuales de mantenimiento",
+      "group": "manuales",
+      "description": "Manuales del propietario, planes de mantenimiento y guías de uso publicadas por el fabricante.",
+      "icon": "file"
+    },
+    {
+      "id": "wiring-diagrams",
+      "number": 4,
+      "title": "Esquemas eléctricos",
+      "group": "electricidad",
+      "description": "Esquemas de alimentación, masas, circuitos y centralitas. Solo se integran conjuntos con licencia compatible.",
+      "icon": "zap"
+    },
+    {
+      "id": "ecu",
+      "number": 5,
+      "title": "ECU y centralitas",
+      "group": "electricidad",
+      "description": "Unidades de control, funciones guiadas, codificación y documentación específica de módulos.",
+      "icon": "cpu"
+    },
+    {
+      "id": "connectors-pinouts",
+      "number": 6,
+      "title": "Conectores y pinouts",
+      "group": "electricidad",
+      "description": "Pinout, conectores, colores y rutas de cableado documentadas y reutilizables.",
+      "icon": "link"
+    },
+    {
+      "id": "fuses-relays",
+      "number": 7,
+      "title": "Fusibles y relés",
+      "group": "electricidad",
+      "description": "Ubicación, numeración, amperaje, relés y circuito protegido por vehículo.",
+      "icon": "shield"
+    },
+    {
+      "id": "sensors-actuators",
+      "number": 8,
+      "title": "Sensores y actuadores",
+      "group": "electricidad",
+      "description": "Función, señal, comprobación y parámetros en vivo de sensores y actuadores.",
+      "icon": "pulse"
+    },
+    {
+      "id": "electrical-values",
+      "number": 9,
+      "title": "Tensiones, resistencias y curvas",
+      "group": "electricidad",
+      "description": "Valores eléctricos de referencia, fórmulas, condiciones de medida y oscilogramas documentados.",
+      "icon": "gauge"
+    },
+    {
+      "id": "timing",
+      "number": 10,
+      "title": "Distribución y calado",
+      "group": "motor",
+      "description": "Correa, cadena, marcas, útiles y procedimientos de calado por motor.",
+      "icon": "gear"
+    },
+    {
+      "id": "torque-specs",
+      "number": 11,
+      "title": "Pares de apriete",
+      "group": "motor",
+      "description": "Pares, ángulos, secuencias y tornillos de sustitución con fuente y ámbito de aplicación.",
+      "icon": "tool"
+    },
+    {
+      "id": "injection",
+      "number": 12,
+      "title": "Inyección diésel y gasolina",
+      "group": "motor",
+      "description": "Rail, inyectores, presión, mezcla, encendido y correcciones de combustible.",
+      "icon": "droplet"
+    },
+    {
+      "id": "turbo",
+      "number": 13,
+      "title": "Turbo y sobrealimentación",
+      "group": "motor",
+      "description": "Presión de soplado, geometría variable, wastegate, bypass y actuadores.",
+      "icon": "wind"
+    },
+    {
+      "id": "egr-intake",
+      "number": 14,
+      "title": "EGR y admisión",
+      "group": "motor",
+      "description": "Válvula EGR, colectores, mariposa, fugas de admisión e intercooler.",
+      "icon": "recycle"
+    },
+    {
+      "id": "dpf-emissions",
+      "number": 15,
+      "title": "DPF/FAP y anticontaminación",
+      "group": "motor",
+      "description": "Filtro de partículas, regeneración, SCR/AdBlue, catalizador y sensores de emisiones.",
+      "icon": "filter"
+    },
+    {
+      "id": "cooling-lubrication",
+      "number": 16,
+      "title": "Refrigeración y lubricación",
+      "group": "motor",
+      "description": "Circuito de refrigerante, termostato, bombas, radiador, presión y calidad de aceite.",
+      "icon": "thermometer"
+    },
+    {
+      "id": "brakes-abs-esp",
+      "number": 17,
+      "title": "Frenos, ABS y ESP",
+      "group": "chasis",
+      "description": "Frenos, hidráulica, sensores de rueda, ABS, ESP y asistencia de frenada.",
+      "icon": "brake"
+    },
+    {
+      "id": "suspension-steering",
+      "number": 18,
+      "title": "Suspensión y dirección",
+      "group": "chasis",
+      "description": "Amortiguadores, brazos, rodamientos, geometría y dirección asistida.",
+      "icon": "steering"
+    },
+    {
+      "id": "clutch-transmission",
+      "number": 19,
+      "title": "Embragues y transmisiones",
+      "group": "chasis",
+      "description": "Embrague, volante bimasa, cajas manuales, automáticas, DSG y tracción.",
+      "icon": "gear"
+    },
+    {
+      "id": "obd-dtc-pids",
+      "number": 20,
+      "title": "OBD-II, códigos DTC y PID",
+      "group": "diagnostico",
+      "description": "Códigos genéricos OBD-II, parámetros PID, fórmulas, causas, síntomas y referencias.",
+      "icon": "scan"
+    },
+    {
+      "id": "can-diagnostics",
+      "number": 21,
+      "title": "Redes CAN y diagnosis electrónica",
+      "group": "diagnostico",
+      "description": "Comunicación entre módulos, códigos U, bus CAN, alimentación y estrategias de diagnosis.",
+      "icon": "network"
+    },
+    {
+      "id": "hybrid-ev",
+      "number": 22,
+      "title": "Vehículos híbridos y eléctricos",
+      "group": "diagnostico",
+      "description": "Alta tensión, baterías, inversores, frenada regenerativa y seguridad en híbridos/EV.",
+      "icon": "battery"
+    },
+    {
+      "id": "adas",
+      "number": 23,
+      "title": "Sistemas ADAS",
+      "group": "normativa",
+      "description": "Asistencias a la conducción, calibraciones, radares, cámaras y requisitos de seguridad.",
+      "icon": "radar"
+    },
+    {
+      "id": "bulletins-recalls",
+      "number": 24,
+      "title": "Boletines técnicos y campañas",
+      "group": "normativa",
+      "description": "Campañas y boletines oficiales importados o enlazados, con mercado y ámbito declarados.",
+      "icon": "alert"
+    },
+    {
+      "id": "repair-procedures",
+      "number": 25,
+      "title": "Procedimientos de reparación",
+      "group": "taller",
+      "description": "Secuencias editoriales de comprobación y reparación, claramente separadas de los manuales oficiales.",
+      "icon": "wrench"
+    },
+    {
+      "id": "technical-tutorials",
+      "number": 26,
+      "title": "Tutoriales técnicos",
+      "group": "taller",
+      "description": "Vídeos y tutoriales con metadatos verificados. El contenido no se valida como procedimiento oficial.",
+      "icon": "play"
+    },
+    {
+      "id": "official-sources",
+      "number": 27,
+      "title": "Documentación oficial y fuentes abiertas",
+      "group": "normativa",
+      "description": "Registro de fuentes, licencias, permisos, atribuciones y estado de cada importación.",
+      "icon": "db"
+    }
+  ]
+}

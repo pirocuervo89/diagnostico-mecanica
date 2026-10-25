@@ -1,0 +1,478 @@
+[
+  {
+    "id": "motor",
+    "name": "Motor",
+    "system": "Motor y gestión",
+    "function": "Convierte la energía del combustible en movimiento y aloja los circuitos de lubricación, refrigeración y distribución.",
+    "symptoms": [
+      "Falta de potencia",
+      "Ralentí inestable",
+      "Ruidos metálicos",
+      "Consumo elevado de aceite"
+    ],
+    "commonFaults": [
+      "Desgaste de componentes internos",
+      "Pérdida de compresión",
+      "Fugas de aceite o refrigerante",
+      "Fallo de sincronización"
+    ],
+    "checks": [
+      "Lectura de DTC y parámetros en vivo",
+      "Prueba de compresión y estanqueidad",
+      "Inspección de ruidos y fugas",
+      "Comprobación de distribución"
+    ],
+    "tools": [
+      "Escáner OBD",
+      "Compresímetro",
+      "Manómetro de aceite",
+      "Osciloscopio"
+    ],
+    "relatedDtc": [
+      "P0300",
+      "P0171",
+      "P0016"
+    ],
+    "tutorialQuery": "motor",
+    "hotspot": {
+      "x": 44,
+      "y": 56
+    }
+  },
+  {
+    "id": "turbo",
+    "name": "Turboalimentación",
+    "system": "Admisión y sobrealimentación",
+    "function": "Comprime el aire de admisión para aumentar la masa de oxígeno y la potencia del motor.",
+    "symptoms": [
+      "Pérdida de potencia",
+      "Silbido anormal",
+      "Humo en escape",
+      "Fallo bajo carga"
+    ],
+    "commonFaults": [
+      "Fugas en circuito de presión",
+      "Geometría variable atascada",
+      "Actuador o válvula de descarga defectuosos",
+      "Holgura del eje"
+    ],
+    "checks": [
+      "Comparar presión real y solicitada",
+      "Prueba de estanqueidad del circuito",
+      "Inspección de actuador y varilla",
+      "Revisión de retorno de aceite"
+    ],
+    "tools": [
+      "Escáner OBD",
+      "Manómetro de presión",
+      "Herramienta de vacío",
+      "Boroscopio"
+    ],
+    "relatedDtc": [
+      "P0299",
+      "P0234",
+      "P2563"
+    ],
+    "tutorialQuery": "turbo",
+    "hotspot": {
+      "x": 34,
+      "y": 59
+    }
+  },
+  {
+    "id": "admision",
+    "name": "Admisión",
+    "system": "Admisión y sobrealimentación",
+    "function": "Filtra y conduce el aire hacia el motor; incluye conductos, mariposa y sensores de presión y caudal.",
+    "symptoms": [
+      "Ralentí irregular",
+      "Falta de respuesta",
+      "Consumo alto",
+      "Mezcla pobre o rica"
+    ],
+    "commonFaults": [
+      "Toma de aire parásita",
+      "Filtro obstruido",
+      "Sensor MAF sucio o defectuoso",
+      "Mariposa carbonizada"
+    ],
+    "checks": [
+      "Inspección de conductos y abrazaderas",
+      "Lectura de MAF y MAP",
+      "Prueba de fugas con humo",
+      "Limpieza y adaptación de mariposa"
+    ],
+    "tools": [
+      "Escáner OBD",
+      "Máquina de humo",
+      "Multímetro",
+      "Limpiador específico"
+    ],
+    "relatedDtc": [
+      "P0101",
+      "P0171",
+      "P0507"
+    ],
+    "tutorialQuery": "admisión",
+    "hotspot": {
+      "x": 55,
+      "y": 50
+    }
+  },
+  {
+    "id": "egr",
+    "name": "Válvula EGR",
+    "system": "Anticontaminación",
+    "function": "Recircula parte de los gases de escape hacia la admisión para reducir óxidos de nitrógeno.",
+    "symptoms": [
+      "Tirones a baja carga",
+      "Ralentí inestable",
+      "Humo negro",
+      "Testigo de avería"
+    ],
+    "commonFaults": [
+      "Carbonilla acumulada",
+      "Actuador eléctrico defectuoso",
+      "Obturador atascado",
+      "Refrigerador de EGR obstruido"
+    ],
+    "checks": [
+      "Lectura de posición y caudal",
+      "Inspección de carbonilla",
+      "Prueba de actuación",
+      "Comprobación de fugas"
+    ],
+    "tools": [
+      "Escáner OBD",
+      "Limpiador de EGR",
+      "Multímetro",
+      "Herramienta de actuadores"
+    ],
+    "relatedDtc": [
+      "P0401",
+      "P0402",
+      "P0403"
+    ],
+    "tutorialQuery": "EGR",
+    "hotspot": {
+      "x": 61,
+      "y": 58
+    }
+  },
+  {
+    "id": "dpf",
+    "name": "Filtro DPF/FAP",
+    "system": "Anticontaminación",
+    "function": "Retiene partículas sólidas del escape y las elimina mediante regeneración controlada.",
+    "symptoms": [
+      "Pérdida de potencia",
+      "Regeneraciones frecuentes",
+      "Humo blanco",
+      "Aviso de filtro saturado"
+    ],
+    "commonFaults": [
+      "Obstrucción por cenizas",
+      "Regeneraciones interrumpidas",
+      "Sensor de presión diferencial defectuoso",
+      "Fallo de dosificación"
+    ],
+    "checks": [
+      "Lectura de presión diferencial",
+      "Carga de hollín y cenizas",
+      "Temperaturas de regeneración",
+      "Inspección de sensores"
+    ],
+    "tools": [
+      "Escáner OBD",
+      "Manómetro diferencial",
+      "Termómetro infrarrojo",
+      "Equipo de diagnosis"
+    ],
+    "relatedDtc": [
+      "P2002",
+      "P2453",
+      "P2463"
+    ],
+    "tutorialQuery": "DPF",
+    "hotspot": {
+      "x": 21,
+      "y": 66
+    }
+  },
+  {
+    "id": "combustible",
+    "name": "Sistema de combustible",
+    "system": "Alimentación",
+    "function": "Almacena, filtra y entrega combustible a la presión necesaria para la inyección.",
+    "symptoms": [
+      "Arranque difícil",
+      "Pérdida de potencia",
+      "Tirones",
+      "Consumo excesivo"
+    ],
+    "commonFaults": [
+      "Presión insuficiente",
+      "Filtro obstruido",
+      "Inyector desgastado",
+      "Retorno excesivo"
+    ],
+    "checks": [
+      "Medir presión de baja y alta",
+      "Prueba de retorno de inyectores",
+      "Inspección de filtro y bomba",
+      "Análisis de correcciones"
+    ],
+    "tools": [
+      "Manómetro de combustible",
+      "Escáner OBD",
+      "Kit de retorno",
+      "Multímetro"
+    ],
+    "relatedDtc": [
+      "P0087",
+      "P0088",
+      "P0263"
+    ],
+    "tutorialQuery": "inyectores combustible",
+    "hotspot": {
+      "x": 49,
+      "y": 64
+    }
+  },
+  {
+    "id": "distribucion",
+    "name": "Distribución",
+    "system": "Motor y gestión",
+    "function": "Sincroniza el cigüeñal y el árbol de levas para abrir y cerrar las válvulas en el momento correcto.",
+    "symptoms": [
+      "No arranca",
+      "Ruido de cadena o correa",
+      "Fallo de sincronización",
+      "Pérdida de potencia"
+    ],
+    "commonFaults": [
+      "Correa o cadena desgastada",
+      "Tensor defectuoso",
+      "Salto de un diente",
+      "Fallo de variador"
+    ],
+    "checks": [
+      "Comprobar marcas de sincronización",
+      "Lectura de ángulos de árbol",
+      "Inspección de tensor y guías",
+      "Prueba de compresión"
+    ],
+    "tools": [
+      "Kit de calado",
+      "Escáner OBD",
+      "Osciloscopio",
+      "Llave dinamométrica"
+    ],
+    "relatedDtc": [
+      "P0016",
+      "P0017",
+      "P0011"
+    ],
+    "tutorialQuery": "distribución",
+    "hotspot": {
+      "x": 41,
+      "y": 49
+    }
+  },
+  {
+    "id": "transmision",
+    "name": "Transmisión",
+    "system": "Transmisión",
+    "function": "Adapta el par y la velocidad del motor a las necesidades de tracción y marcha.",
+    "symptoms": [
+      "Tirones al cambiar",
+      "Deslizamiento",
+      "Ruido en marcha",
+      "Fallo de embrague"
+    ],
+    "commonFaults": [
+      "Nivel o estado del aceite incorrecto",
+      "Embrague desgastado",
+      "Electroválvula defectuosa",
+      "Fallo de mecatrónica"
+    ],
+    "checks": [
+      "Lectura de presiones y temperaturas",
+      "Inspección de fugas",
+      "Prueba de patinaje",
+      "Revisión de adaptaciones"
+    ],
+    "tools": [
+      "Escáner OBD",
+      "Manómetro de transmisión",
+      "Termómetro",
+      "Equipo de cambio de aceite"
+    ],
+    "relatedDtc": [
+      "P0700",
+      "P0715",
+      "P0741"
+    ],
+    "tutorialQuery": "transmisión",
+    "hotspot": {
+      "x": 58,
+      "y": 68
+    }
+  },
+  {
+    "id": "frenos",
+    "name": "Frenos",
+    "system": "Chasis y seguridad",
+    "function": "Reduce la velocidad del vehículo y mantiene la estabilidad mediante hidráulica y control electrónico.",
+    "symptoms": [
+      "Pedal esponjoso",
+      "Ruido al frenar",
+      "Vibración",
+      "Testigo ABS"
+    ],
+    "commonFaults": [
+      "Pastillas o discos desgastados",
+      "Aire en circuito hidráulico",
+      "Fuga de líquido",
+      "Sensor de rueda defectuoso"
+    ],
+    "checks": [
+      "Medir espesor de pastillas y discos",
+      "Comprobar nivel y fugas",
+      "Lectura de sensores ABS",
+      "Purga del circuito"
+    ],
+    "tools": [
+      "Multímetro",
+      "Escáner OBD",
+      "Calibre",
+      "Equipo de purga"
+    ],
+    "relatedDtc": [
+      "C0035",
+      "C0040",
+      "C0110"
+    ],
+    "tutorialQuery": "frenos",
+    "hotspot": {
+      "x": 24,
+      "y": 76
+    }
+  },
+  {
+    "id": "suspension",
+    "name": "Suspensión",
+    "system": "Chasis y seguridad",
+    "function": "Absorbe irregularidades, mantiene las ruedas en contacto y controla la inclinación de la carrocería.",
+    "symptoms": [
+      "Vibración",
+      "Ruido en baches",
+      "Desgaste irregular de neumáticos",
+      "Pérdida de estabilidad"
+    ],
+    "commonFaults": [
+      "Amortiguador desgastado",
+      "Silentblock deteriorado",
+      "Rótula con holgura",
+      "Muelle roto"
+    ],
+    "checks": [
+      "Inspección de holguras",
+      "Prueba de rebote",
+      "Revisión de alineación",
+      "Comprobación de neumáticos"
+    ],
+    "tools": [
+      "Elevador",
+      "Palanca de holguras",
+      "Alineador",
+      "Llave dinamométrica"
+    ],
+    "relatedDtc": [],
+    "tutorialQuery": "suspensión",
+    "hotspot": {
+      "x": 77,
+      "y": 76
+    }
+  },
+  {
+    "id": "sensores",
+    "name": "Sensores",
+    "system": "Electrónica y comunicación",
+    "function": "Transforman magnitudes físicas en señales eléctricas que utiliza la centralita para calcular la gestión.",
+    "symptoms": [
+      "Lecturas incoherentes",
+      "Testigo de avería",
+      "Consumo anómalo",
+      "Fallo intermitente"
+    ],
+    "commonFaults": [
+      "Sensor defectuoso",
+      "Cableado dañado",
+      "Conector oxidado",
+      "Masa deficiente"
+    ],
+    "checks": [
+      "Leer valor en vivo y comparar",
+      "Medir alimentación y señal",
+      "Probar continuidad y masas",
+      "Verificar referencia"
+    ],
+    "tools": [
+      "Escáner OBD",
+      "Multímetro",
+      "Osciloscopio",
+      "Kit de terminales"
+    ],
+    "relatedDtc": [
+      "P0101",
+      "P0113",
+      "P0128"
+    ],
+    "tutorialQuery": "sensor",
+    "hotspot": {
+      "x": 65,
+      "y": 55
+    }
+  },
+  {
+    "id": "centralita",
+    "name": "Centralita / ECU",
+    "system": "Electrónica y comunicación",
+    "function": "Gestiona el motor y coordina los módulos electrónicos mediante redes de comunicación del vehículo.",
+    "symptoms": [
+      "No arranca",
+      "Fallo de comunicación",
+      "Testigos múltiples",
+      "Comportamiento errático"
+    ],
+    "commonFaults": [
+      "Alimentación o masa deficiente",
+      "Conector o cableado dañado",
+      "Red CAN con fallo",
+      "Software o codificación incorrecta"
+    ],
+    "checks": [
+      "Leer DTC en todos los módulos",
+      "Comprobar alimentación y masas",
+      "Verificar red CAN",
+      "Revisar codificación"
+    ],
+    "tools": [
+      "Escáner profesional",
+      "Multímetro",
+      "Osciloscopio",
+      "Fuente estabilizada"
+    ],
+    "relatedDtc": [
+      "U0100",
+      "U0121",
+      "P0600"
+    ],
+    "tutorialQuery": "centralita ECU",
+    "hotspot": {
+      "x": 68,
+      "y": 62
+    }
+  }
+]

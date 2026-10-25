@@ -1,0 +1,945 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-23",
+  "notice": "30 PIDs estándar OBD-II con fórmula y rango. Son parámetros genéricos: la ECU debe declararlos y el valor real depende del motor y del protocolo. No sustituyen datos de fabricante.",
+  "sourceIds": [
+    "src-obd-pids-wikipedia"
+  ],
+  "pids": [
+    {
+      "id": "pid-0104",
+      "code": "0104",
+      "mode": "01",
+      "name": "Carga calculada del motor",
+      "shortName": "Carga motor",
+      "description": "Carga calculada por la ECU a partir del caudal de aire y el régimen.",
+      "formula": "100/255*A",
+      "unit": "%",
+      "range": {
+        "min": 0,
+        "max": 100
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "carga",
+        "motor"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0105",
+      "code": "0105",
+      "mode": "01",
+      "name": "Temperatura del refrigerante",
+      "shortName": "Temp. refrigerante",
+      "description": "Temperatura del líquido refrigerante informada por la ECU.",
+      "formula": "A-40",
+      "unit": "°C",
+      "range": {
+        "min": -40,
+        "max": 215
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "refrigeracion",
+        "termostato"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0106",
+      "code": "0106",
+      "mode": "01",
+      "name": "Corrección corto plazo banco 1",
+      "shortName": "STFT B1",
+      "description": "Corrección inmediata de mezcla del banco 1.",
+      "formula": "100/128*A-100",
+      "unit": "%",
+      "range": {
+        "min": -100,
+        "max": 99.2
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "lambda",
+        "mezcla"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0107",
+      "code": "0107",
+      "mode": "01",
+      "name": "Corrección largo plazo banco 1",
+      "shortName": "LTFT B1",
+      "description": "Corrección de mezcla aprendida por la ECU en el banco 1.",
+      "formula": "100/128*A-100",
+      "unit": "%",
+      "range": {
+        "min": -100,
+        "max": 99.2
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "lambda",
+        "mezcla"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-010A",
+      "code": "010A",
+      "mode": "01",
+      "name": "Presión de combustible",
+      "shortName": "Presión combustible",
+      "description": "Presión del circuito de combustible (referencia relativa).",
+      "formula": "3*A",
+      "unit": "kPa",
+      "range": {
+        "min": 0,
+        "max": 765
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "combustible",
+        "presion"
+      ],
+      "note": "La interpretación exacta depende del tipo de circuito; no confundir con presión de rail en inyección directa."
+    },
+    {
+      "id": "pid-010B",
+      "code": "010B",
+      "mode": "01",
+      "name": "Presión absoluta del colector",
+      "shortName": "MAP",
+      "description": "Presión absoluta en el colector de admisión.",
+      "formula": "A",
+      "unit": "kPa",
+      "range": {
+        "min": 0,
+        "max": 255
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "admision",
+        "map",
+        "turbo"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-010C",
+      "code": "010C",
+      "mode": "01",
+      "name": "Régimen del motor",
+      "shortName": "RPM",
+      "description": "Revoluciones por minuto del cigüeñal.",
+      "formula": "(256*A+B)/4",
+      "unit": "rpm",
+      "range": {
+        "min": 0,
+        "max": 16383.75
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "motor",
+        "rpm"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-010D",
+      "code": "010D",
+      "mode": "01",
+      "name": "Velocidad del vehículo",
+      "shortName": "Velocidad",
+      "description": "Velocidad calculada por la ECU.",
+      "formula": "A",
+      "unit": "km/h",
+      "range": {
+        "min": 0,
+        "max": 255
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "velocidad"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-010E",
+      "code": "010E",
+      "mode": "01",
+      "name": "Avance de encendido",
+      "shortName": "Avance",
+      "description": "Ángulo de avance de encendido respecto al PMS.",
+      "formula": "A/2-64",
+      "unit": "°",
+      "range": {
+        "min": -64,
+        "max": 63.5
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "encendido",
+        "avance"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-010F",
+      "code": "010F",
+      "mode": "01",
+      "name": "Temperatura del aire de admisión",
+      "shortName": "Temp. admisión",
+      "description": "Temperatura del aire en la admisión.",
+      "formula": "A-40",
+      "unit": "°C",
+      "range": {
+        "min": -40,
+        "max": 215
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "admision",
+        "iats"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0110",
+      "code": "0110",
+      "mode": "01",
+      "name": "Caudal de aire MAF",
+      "shortName": "MAF",
+      "description": "Caudal másico de aire medido por el sensor MAF.",
+      "formula": "(256*A+B)/100",
+      "unit": "g/s",
+      "range": {
+        "min": 0,
+        "max": 655.35
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "admision",
+        "maf",
+        "caudal"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0111",
+      "code": "0111",
+      "mode": "01",
+      "name": "Posición del acelerador",
+      "shortName": "Acelerador",
+      "description": "Apertura de la mariposa o posición del pedal según implementación.",
+      "formula": "100/255*A",
+      "unit": "%",
+      "range": {
+        "min": 0,
+        "max": 100
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "acelerador",
+        "mariposa"
+      ],
+      "note": "Algunos vehículos usan este PID para la mariposa y otros para el pedal. Contrastar con el PID 0149."
+    },
+    {
+      "id": "pid-0114",
+      "code": "0114",
+      "mode": "01",
+      "name": "Sonda lambda banco 1 sensor 1",
+      "shortName": "O2 B1S1",
+      "description": "Tensión de la sonda lambda de banda estrecha y su corrección asociada.",
+      "formula": "A/200 V; 100/128*B-100 %",
+      "unit": "V / %",
+      "range": {
+        "min": 0,
+        "max": 1.275
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "lambda",
+        "emisiones"
+      ],
+      "note": "Para sondas de banda ancha, usar 0124 si está disponible. El segundo valor es la corrección corta asociada."
+    },
+    {
+      "id": "pid-0122",
+      "code": "0122",
+      "mode": "01",
+      "name": "Presión relativa del rail",
+      "shortName": "Rail relativo",
+      "description": "Presión relativa del combustible en el rail de alta presión.",
+      "formula": "0.079*(256*A+B)",
+      "unit": "kPa",
+      "range": {
+        "min": 0,
+        "max": 5177.265
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "diesel",
+        "rail",
+        "inyeccion"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0123",
+      "code": "0123",
+      "mode": "01",
+      "name": "Presión de rail (manométrica)",
+      "shortName": "Rail gauge",
+      "description": "Presión manométrica del rail de combustible.",
+      "formula": "10*(256*A+B)",
+      "unit": "kPa",
+      "range": {
+        "min": 0,
+        "max": 655350
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "diesel",
+        "rail",
+        "inyeccion"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0124",
+      "code": "0124",
+      "mode": "01",
+      "name": "Sonda lambda de banda ancha B1S1",
+      "shortName": "Lambda amplio B1S1",
+      "description": "Relación lambda y tensión de la sonda de banda ancha.",
+      "formula": "2/65536*(256*A+B); 8/65536*(256*C+D)",
+      "unit": "λ / V",
+      "range": {
+        "min": 0,
+        "max": 2
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "lambda",
+        "wideband",
+        "emisiones"
+      ],
+      "note": "La segunda fórmula devuelve la tensión de la sonda. Disponibilidad y escala dependen del fabricante."
+    },
+    {
+      "id": "pid-012F",
+      "code": "012F",
+      "mode": "01",
+      "name": "Nivel de combustible",
+      "shortName": "Nivel combustible",
+      "description": "Nivel del depósito en porcentaje.",
+      "formula": "100/255*A",
+      "unit": "%",
+      "range": {
+        "min": 0,
+        "max": 100
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "combustible",
+        "nivel"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0133",
+      "code": "0133",
+      "mode": "01",
+      "name": "Presión barométrica",
+      "shortName": "Baro",
+      "description": "Presión atmosférica medida por el vehículo.",
+      "formula": "A",
+      "unit": "kPa",
+      "range": {
+        "min": 0,
+        "max": 255
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "baro",
+        "admision"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-013C",
+      "code": "013C",
+      "mode": "01",
+      "name": "Temperatura del catalizador B1S1",
+      "shortName": "Temp. catalizador",
+      "description": "Temperatura estimada del catalizador del banco 1, sensor 1.",
+      "formula": "(256*A+B)/10-40",
+      "unit": "°C",
+      "range": {
+        "min": -40,
+        "max": 6513.5
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "catalizador",
+        "emisiones"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0142",
+      "code": "0142",
+      "mode": "01",
+      "name": "Tensión del módulo",
+      "shortName": "Tensión ECU",
+      "description": "Tensión de alimentación vista por la centralita.",
+      "formula": "(256*A+B)/1000",
+      "unit": "V",
+      "range": {
+        "min": 0,
+        "max": 65.535
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "bateria",
+        "alimentacion"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0144",
+      "code": "0144",
+      "mode": "01",
+      "name": "Lambda comandada",
+      "shortName": "Lambda objetivo",
+      "description": "Relación aire/combustible comandada por la ECU.",
+      "formula": "2/65536*(256*A+B)",
+      "unit": "λ",
+      "range": {
+        "min": 0,
+        "max": 2
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "lambda",
+        "mezcla"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0146",
+      "code": "0146",
+      "mode": "01",
+      "name": "Temperatura ambiente",
+      "shortName": "Temp. ambiente",
+      "description": "Temperatura exterior informada por el vehículo.",
+      "formula": "A-40",
+      "unit": "°C",
+      "range": {
+        "min": -40,
+        "max": 215
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "ambiente",
+        "clima"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0149",
+      "code": "0149",
+      "mode": "01",
+      "name": "Posición del pedal de acelerador",
+      "shortName": "Pedal D",
+      "description": "Posición del pedal de acelerador, sensor D.",
+      "formula": "100/255*A",
+      "unit": "%",
+      "range": {
+        "min": 0,
+        "max": 100
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "acelerador",
+        "pedal"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-015C",
+      "code": "015C",
+      "mode": "01",
+      "name": "Temperatura del aceite de motor",
+      "shortName": "Temp. aceite",
+      "description": "Temperatura del aceite de motor.",
+      "formula": "A-40",
+      "unit": "°C",
+      "range": {
+        "min": -40,
+        "max": 215
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "aceite",
+        "motor"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-015E",
+      "code": "015E",
+      "mode": "01",
+      "name": "Consumo de combustible",
+      "shortName": "Consumo",
+      "description": "Caudal de combustible consumido por el motor.",
+      "formula": "(256*A+B)/20",
+      "unit": "L/h",
+      "range": {
+        "min": 0,
+        "max": 3276.75
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "combustible",
+        "consumo"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0162",
+      "code": "0162",
+      "mode": "01",
+      "name": "Par motor real",
+      "shortName": "Par real",
+      "description": "Par motor actual como porcentaje del par de referencia.",
+      "formula": "A-125",
+      "unit": "%",
+      "range": {
+        "min": -125,
+        "max": 130
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "par",
+        "motor"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0163",
+      "code": "0163",
+      "mode": "01",
+      "name": "Par de referencia del motor",
+      "shortName": "Par referencia",
+      "description": "Par de referencia utilizado para calcular el par real.",
+      "formula": "256*A+B",
+      "unit": "Nm",
+      "range": {
+        "min": 0,
+        "max": 65535
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "par",
+        "motor"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-0166",
+      "code": "0166",
+      "mode": "01",
+      "name": "Sensor de caudal de aire A",
+      "shortName": "MAF A",
+      "description": "Caudal másico medido por el sensor de aire A.",
+      "formula": "(256*B+C)/32",
+      "unit": "g/s",
+      "range": {
+        "min": 0,
+        "max": 2047.96875
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "maf",
+        "admision"
+      ],
+      "note": ""
+    },
+    {
+      "id": "pid-017C",
+      "code": "017C",
+      "mode": "01",
+      "name": "Temperatura del DPF banco 1",
+      "shortName": "Temp. DPF",
+      "description": "Temperatura del filtro de partículas, banco 1.",
+      "formula": "(256*A+B)/10-40",
+      "unit": "°C",
+      "range": {
+        "min": -40,
+        "max": 6513.5
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "dpf",
+        "diesel",
+        "emisiones"
+      ],
+      "note": "El PID devuelve varias temperaturas; esta ficha usa los bytes A/B (banco 1, sensor 1)."
+    },
+    {
+      "id": "pid-01A6",
+      "code": "01A6",
+      "mode": "01",
+      "name": "Odómetro",
+      "shortName": "Odómetro",
+      "description": "Distancia total recorrida almacenada por el vehículo.",
+      "formula": "(A*16777216+B*65536+C*256+D)/10",
+      "unit": "km",
+      "range": {
+        "min": 0,
+        "max": 429496729.5
+      },
+      "system": "Motor",
+      "categoryId": "electrical-values",
+      "relatedCategoryIds": [
+        "sensors-actuators",
+        "electrical-values"
+      ],
+      "applicability": "Vehículo compatible con OBD-II/EOBD que declare este PID en el modo 01. La ECU puede no soportarlo o devolver valores sustitutos.",
+      "status": "verified",
+      "confidence": "alta",
+      "sourceIds": [
+        "src-obd-pids-wikipedia"
+      ],
+      "tags": [
+        "odometro",
+        "kilometraje"
+      ],
+      "note": ""
+    }
+  ]
+}

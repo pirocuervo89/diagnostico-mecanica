@@ -1,0 +1,1237 @@
+[
+  {
+    "id": "vw-golf-vii-r-75",
+    "brand": "Volkswagen",
+    "model": "Golf",
+    "generation": "Mk7 facelift (7.5)",
+    "version": "R 2.0 TSI 4MOTION",
+    "years": "2017–2020",
+    "body": "Hatchback 3/5 puertas",
+    "image": {
+      "src": "/img/vehiculos/golf-r-75.jpg",
+      "alt": "Volkswagen Golf VII R de la generación 7.5; la foto puede corresponder a otro equipamiento.",
+      "credit": "Matti Blume",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Volkswagen_Golf_VII_R,_TWB_2018,_Friedrichshafen_(OW1A0552).jpg",
+      "note": "Volkswagen Golf VII R de la generación 7.5; la foto puede corresponder a otro equipamiento."
+    },
+    "engine": {
+      "code": "EA888 Gen3 (código exacto no verificado)",
+      "displacementCc": 1984,
+      "fuel": "Gasolina",
+      "powerPs": 310,
+      "powerKw": 228,
+      "torqueNm": 400,
+      "aspiration": "Turboalimentado",
+      "injection": "Inyección directa",
+      "distribution": "Cadena de distribución",
+      "notes": "Datos de la versión europea de 310 PS. La versión de EE. UU. puede diferir."
+    },
+    "transmission": {
+      "type": "Manual o DSG",
+      "gears": "6 velocidades manual / 7 velocidades DSG",
+      "drive": "Tracción integral 4MOTION con embrague Haldex"
+    },
+    "emissions": {
+      "standard": "Euro 6 (según mercado)",
+      "aftertreatment": "Catalizador y GPF en algunas versiones; verificar por mercado"
+    },
+    "systems": [
+      "Motor EA888",
+      "Turbo y admisión",
+      "DSG DQ381",
+      "Haldex",
+      "ABS/ESC",
+      "Dirección eléctrica",
+      "Climatización",
+      "Electrónica MQB"
+    ],
+    "inspection": [
+      {
+        "area": "Transmisión Haldex",
+        "check": "Cambio de aceite y filtro de la bomba Haldex según mantenimiento",
+        "why": "El R usa tracción integral; un mantenimiento descuidado afecta al embrague Haldex.",
+        "level": "alta"
+      },
+      {
+        "area": "DSG",
+        "check": "Aceite y filtro de la caja DQ381; comprobar tirones y temperatura",
+        "why": "La caja DSG requiere mantenimiento específico.",
+        "level": "alta"
+      },
+      {
+        "area": "Refrigeración",
+        "check": "Termostato, bomba de agua y fugas de refrigerante",
+        "why": "Punto habitual de revisión en motores EA888.",
+        "level": "media"
+      },
+      {
+        "area": "Admisión",
+        "check": "Fugas en manguitos, intercooler y PCV; carbonilla en válvulas",
+        "why": "La inyección directa puede acumular carbonilla y una fuga de admisión altera la mezcla.",
+        "level": "media"
+      },
+      {
+        "area": "Turbo",
+        "check": "Holgura de eje, actuador de geometría/wastegate y presión real vs. objetivo",
+        "why": "No sustituir el turbo sin medir presión y comprobar control.",
+        "level": "alta"
+      },
+      {
+        "area": "Frenos y neumáticos",
+        "check": "Discos, pastillas, líquido DOT 4 y desgaste irregular",
+        "why": "Alto rendimiento exige frenos y neumáticos en buen estado.",
+        "level": "alta"
+      },
+      {
+        "area": "Electrónica",
+        "check": "Lectura completa de módulos y comprobación de campañas pendientes",
+        "why": "Un escáner genérico puede no ver todos los módulos del grupo VAG.",
+        "level": "media"
+      }
+    ],
+    "knownIssues": [
+      {
+        "title": "Puntos de inspección del EA888 y Haldex",
+        "detail": "Revisar consumo de aceite, PCV, bomba de agua/termostato y mantenimiento Haldex/DSG. Son puntos de inspección de taller, no una afirmación de que todas las unidades fallen.",
+        "source": "Checklist técnico interno basado en mantenimiento del fabricante",
+        "sourceType": "checklist"
+      }
+    ],
+    "buyingGuide": {
+      "idealFor": "Quien busca un compacto deportivo con tracción integral, caja DSG y buen soporte de mantenimiento.",
+      "notIdealFor": "Quien no quiera asumir mantenimiento de Haldex, DSG, neumáticos deportivos y frenos de mayor coste.",
+      "budgetNote": "No se muestran precios estimados: consultar mercado y estado real. El coste de mantenimiento depende del historial y del desgaste.",
+      "priorityChecks": [
+        "Historial de aceite Haldex y DSG",
+        "Fugas de refrigerante y estado de bomba/termostato",
+        "Presión real de turbo y ausencia de tirones",
+        "Estado de discos, pastillas y neumáticos",
+        "Escaneo completo de módulos y campañas",
+        "Comprobar que el VIN y la versión corresponden a 310 PS"
+      ],
+      "verdict": "Muy completo, pero exige historial de mantenimiento y una diagnosis previa seria.",
+      "riskLevel": "Medio-alto por complejidad de Haldex/DSG y coste de componentes."
+    },
+    "sources": [
+      {
+        "title": "Volkswagen Newsroom — Motorversionen Golf VII",
+        "url": "https://www.volkswagen-newsroom.com/de/motorversionen-golf-7-steckbrief-20040",
+        "publisher": "Volkswagen AG",
+        "type": "fabricante",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Volkswagen España — Nuevos e-Golf, GTE, GTI Performance, R y Variant R",
+        "url": "https://www.volkswagen.es/comunicacion/volkswagen-presenta-en-mallorca-los-nuevos-e-golf-golf-gte-golf-gti-performance-golf-r-y-golf-variant-r/",
+        "publisher": "Volkswagen España",
+        "type": "fabricante",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Volkswagen Newsroom — Golf R con tecnología de competición",
+        "url": "https://www.volkswagen-newsroom.com/en/press-releases/golf-r-golf-r-fuel-consumption-in-l-slash-100-km-10-dot-2-8-dot-6-urban-6-dot-7-5-dot-9-extra-urban-8-dot-0-6-dot-9-combined-co2-emissions-in-g-slash-km-182-157-combined-efficiency-class-e-d-dot-with-performance-technology-from-motorsport-high-performance-brakes-and-titanium-exhaust-system-925",
+        "publisher": "Volkswagen AG",
+        "type": "fabricante",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "confidence": "alta",
+    "notes": "Ficha orientativa de la versión europea. Verificar equipamiento, normativa de emisiones y código de motor por mercado y VIN."
+  },
+  {
+    "id": "vw-golf-vii-gti-performance-75",
+    "brand": "Volkswagen",
+    "model": "Golf",
+    "generation": "Mk7 facelift (7.5)",
+    "version": "GTI Performance 2.0 TSI",
+    "years": "2017–2019",
+    "body": "Hatchback 3/5 puertas",
+    "image": {
+      "src": "/img/vehiculos/golf-gti-75.jpg",
+      "alt": "Volkswagen Golf VII GTI; la foto puede corresponder a otro equipamiento o mercado.",
+      "credit": "Midnight Runner",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Volkswagen_Golf_VII_GTI_(KW_P_36).jpg",
+      "note": "Volkswagen Golf VII GTI; la foto puede corresponder a otro equipamiento o mercado."
+    },
+    "engine": {
+      "code": "EA888 Gen3 (código exacto no verificado)",
+      "displacementCc": 1984,
+      "fuel": "Gasolina",
+      "powerPs": 245,
+      "powerKw": 180,
+      "torqueNm": 370,
+      "aspiration": "Turboalimentado",
+      "injection": "Inyección directa",
+      "distribution": "Cadena de distribución",
+      "notes": "Datos de la versión europea GTI Performance de 245 PS."
+    },
+    "transmission": {
+      "type": "Manual o DSG",
+      "gears": "6 velocidades manual / 7 velocidades DSG",
+      "drive": "Tracción delantera con diferencial autoblocante delantero"
+    },
+    "emissions": {
+      "standard": "Euro 6 (según mercado)",
+      "aftertreatment": "Catalizador; GPF según versión y mercado"
+    },
+    "systems": [
+      "Motor EA888",
+      "Turbo y admisión",
+      "DSG DQ381",
+      "Diferencial VAQ",
+      "ABS/ESC",
+      "Dirección eléctrica",
+      "Climatización",
+      "Electrónica MQB"
+    ],
+    "inspection": [
+      {
+        "area": "DSG",
+        "check": "Aceite/filtro y comportamiento en frío y caliente",
+        "why": "La caja DSG y el diferencial delantero son caros de reparar.",
+        "level": "alta"
+      },
+      {
+        "area": "Refrigeración",
+        "check": "Bomba de agua, termostato y fugas",
+        "why": "Revisión habitual en EA888.",
+        "level": "media"
+      },
+      {
+        "area": "Admisión",
+        "check": "Carbonilla, PCV y estanqueidad de manguitos",
+        "why": "La inyección directa acumula residuos; una fuga descompensa la mezcla.",
+        "level": "media"
+      },
+      {
+        "area": "Turbo",
+        "check": "Presión real vs. objetivo y actuador",
+        "why": "Evita condenar el turbo sin pruebas.",
+        "level": "alta"
+      },
+      {
+        "area": "Diferencial delantero",
+        "check": "Ruidos y funcionamiento del bloqueo",
+        "why": "El GTI Performance equipa diferencial autoblocante; comprobar su estado.",
+        "level": "media"
+      },
+      {
+        "area": "Frenos y neumáticos",
+        "check": "Discos, pastillas y desgaste uniforme",
+        "why": "La potencia y el par exigen un tren delantero sano.",
+        "level": "alta"
+      }
+    ],
+    "knownIssues": [
+      {
+        "title": "Puntos de inspección del GTI Performance",
+        "detail": "Revisar DSG, bomba de agua/termostato, PCV, carbonilla y estado del diferencial delantero. Son comprobaciones de mantenimiento, no un dictamen de avería.",
+        "source": "Checklist técnico interno",
+        "sourceType": "checklist"
+      }
+    ],
+    "buyingGuide": {
+      "idealFor": "Quien prioriza diversión con tracción delantera, cambio DSG y un chasis muy eficaz.",
+      "notIdealFor": "Quien busque tracción integral o no quiera mantener DSG y frenos deportivos.",
+      "budgetNote": "Consultar mercado. No se publican precios estimados ni costes de reparación sin presupuesto real.",
+      "priorityChecks": [
+        "Historial de DSG y diferencial",
+        "Fugas de refrigerante",
+        "Presión de turbo y tirones",
+        "Carbonilla y PCV",
+        "Discos y neumáticos",
+        "Escaneo completo y campañas"
+      ],
+      "verdict": "Referencia entre los compactos deportivos de tracción delantera; el historial manda.",
+      "riskLevel": "Medio."
+    },
+    "sources": [
+      {
+        "title": "Volkswagen Newsroom — Motorversionen Golf VII",
+        "url": "https://www.volkswagen-newsroom.com/de/motorversionen-golf-7-steckbrief-20040",
+        "publisher": "Volkswagen AG",
+        "type": "fabricante",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Volkswagen Newsroom — Golf GTI Performance 245 PS",
+        "url": "https://www.volkswagen-newsroom.com/en/up-gti-polo-gti-golf-gti-performance-2396/golf-gti-performance-245-ps-icon-for-the-ages-2427",
+        "publisher": "Volkswagen AG",
+        "type": "fabricante",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "confidence": "alta",
+    "notes": "Ficha de la versión europea. Verificar equipamiento y emisiones por mercado."
+  },
+  {
+    "id": "vw-golf-vii-20-tdi-150",
+    "brand": "Volkswagen",
+    "model": "Golf",
+    "generation": "Mk7 facelift (7.5)",
+    "version": "2.0 TDI 150",
+    "years": "2017–2020",
+    "body": "Hatchback 3/5 puertas",
+    "image": {
+      "src": "/img/vehiculos/golf-tdi-75.jpg",
+      "alt": "Volkswagen Golf VII 2.0 TDI; la foto puede corresponder a otro acabado.",
+      "credit": "Damian B Oh",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Volkswagen_Golf_2.0_TDI_Bluemotion_Mk7_Silk_Blue_Metallic_(3).jpg",
+      "note": "Volkswagen Golf VII 2.0 TDI; la foto puede corresponder a otro acabado."
+    },
+    "engine": {
+      "code": "EA288 (código exacto no verificado)",
+      "displacementCc": 1968,
+      "fuel": "Diésel",
+      "powerPs": 150,
+      "powerKw": 110,
+      "torqueNm": 340,
+      "aspiration": "Turboalimentado",
+      "injection": "Inyección directa common rail",
+      "distribution": "Correa de distribución",
+      "notes": "Datos de la versión europea de 150 PS."
+    },
+    "transmission": {
+      "type": "Manual o DSG",
+      "gears": "6 velocidades manual / 7 velocidades DSG (según versión)",
+      "drive": "Tracción delantera"
+    },
+    "emissions": {
+      "standard": "Euro 6 (según mercado)",
+      "aftertreatment": "DPF/FAP y SCR/AdBlue según versión y mercado"
+    },
+    "systems": [
+      "Motor EA288",
+      "Turbo",
+      "EGR",
+      "DPF/FAP",
+      "SCR/AdBlue",
+      "DSG",
+      "ABS/ESC",
+      "Electrónica MQB"
+    ],
+    "inspection": [
+      {
+        "area": "DPF/FAP",
+        "check": "Contrapresión, regeneraciones y sensores de presión",
+        "why": "Un DPF saturado o con regeneraciones fallidas no se arregla solo con un aditivo.",
+        "level": "alta"
+      },
+      {
+        "area": "EGR",
+        "check": "Carbonilla, funcionamiento y fugas",
+        "why": "La EGR puede afectar a admisión y estabilidad de ralentí.",
+        "level": "media"
+      },
+      {
+        "area": "Distribución",
+        "check": "Estado y sustitución de correa según intervalo oficial",
+        "why": "No asumir intervalos por kilometraje sin documentación del motor.",
+        "level": "alta"
+      },
+      {
+        "area": "Inyección",
+        "check": "Retornos de inyectores y valores de corrección",
+        "why": "Permite detectar inyectores fuera de tolerancia.",
+        "level": "media"
+      },
+      {
+        "area": "Turbo",
+        "check": "Presión real vs. objetivo y holgura",
+        "why": "Confirmar con medición antes de sustituir.",
+        "level": "media"
+      },
+      {
+        "area": "Embrague/volante bimasa",
+        "check": "Vibraciones y ruidos en arranque/parada",
+        "why": "El volante bimasa es un coste relevante.",
+        "level": "media"
+      }
+    ],
+    "knownIssues": [
+      {
+        "title": "Puntos de inspección del 2.0 TDI",
+        "detail": "Revisar DPF, EGR, correa, inyectores y volante bimasa. La ficha no afirma que estos fallos sean sistemáticos.",
+        "source": "Checklist técnico interno",
+        "sourceType": "checklist"
+      }
+    ],
+    "buyingGuide": {
+      "idealFor": "Quien hace muchos kilómetros y busca consumo contenido con buen par.",
+      "notIdealFor": "Trayectos muy cortos donde el DPF no alcanza temperatura.",
+      "budgetNote": "Consultar mercado. Valorar historial de DPF/EGR y correa; no se estiman precios.",
+      "priorityChecks": [
+        "Historial de DPF y regeneraciones",
+        "Estado de EGR y admisión",
+        "Correa y bomba de agua",
+        "Retornos de inyectores",
+        "Volante bimasa y embrague",
+        "Escaneo y campañas"
+      ],
+      "verdict": "Muy válido para carretera si el mantenimiento diésel está documentado.",
+      "riskLevel": "Medio."
+    },
+    "sources": [
+      {
+        "title": "Volkswagen Newsroom — Motorversionen Golf VII",
+        "url": "https://www.volkswagen-newsroom.com/de/motorversionen-golf-7-steckbrief-20040",
+        "publisher": "Volkswagen AG",
+        "type": "fabricante",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "confidence": "alta",
+    "notes": "Ficha orientativa. La presencia de SCR/AdBlue y el tipo de cambio varían por mercado y versión."
+  },
+  {
+    "id": "bmw-320d-f30",
+    "brand": "BMW",
+    "model": "Serie 3",
+    "generation": "F30",
+    "version": "320d",
+    "years": "2012–2019",
+    "body": "Sedán",
+    "image": {
+      "src": "/img/vehiculos/bmw-320d-f30.jpg",
+      "alt": "BMW 320d F30; la foto puede corresponder a otro acabado o mercado.",
+      "credit": "Benespit",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:0_BMW_320d_(F30)_1.jpg",
+      "note": "BMW 320d F30; la foto puede corresponder a otro acabado o mercado."
+    },
+    "engine": {
+      "code": "N47D20 / B47D20 (según año)",
+      "displacementCc": 1995,
+      "fuel": "Diésel",
+      "powerPs": 184,
+      "powerKw": 135,
+      "torqueNm": 380,
+      "aspiration": "Turboalimentado",
+      "injection": "Common rail",
+      "distribution": "Cadena de distribución",
+      "notes": "184 PS/380 Nm en la primera etapa; 190 PS/400 Nm desde la actualización de 2015, según mercado."
+    },
+    "transmission": {
+      "type": "Manual o automática",
+      "gears": "6 velocidades manual / 8 velocidades automática ZF",
+      "drive": "Tracción trasera (xDrive opcional)"
+    },
+    "emissions": {
+      "standard": "Euro 5/6 según año",
+      "aftertreatment": "DPF/FAP; SCR en algunas versiones"
+    },
+    "systems": [
+      "Motor diésel",
+      "Turbo",
+      "EGR",
+      "DPF/FAP",
+      "ZF 8HP",
+      "ABS/ESC",
+      "Dirección",
+      "Electrónica BMW"
+    ],
+    "inspection": [
+      {
+        "area": "Distribución",
+        "check": "Ruido de cadena y estado del tensor, especialmente en N47",
+        "why": "La cadena trasera del N47 es un punto de inspección costoso.",
+        "level": "alta"
+      },
+      {
+        "area": "EGR/refrigeración EGR",
+        "check": "Fugas y carbonilla",
+        "why": "Puede afectar a admisión y refrigeración.",
+        "level": "alta"
+      },
+      {
+        "area": "DPF/FAP",
+        "check": "Regeneraciones y contrapresión",
+        "why": "Verificar antes de borrar o sustituir.",
+        "level": "media"
+      },
+      {
+        "area": "Caja automática",
+        "check": "Historial de aceite ZF y suavidad de cambios",
+        "why": "El mantenimiento de la ZF 8HP es relevante.",
+        "level": "media"
+      },
+      {
+        "area": "Admisión",
+        "check": "Swirl flaps y fugas",
+        "why": "Comprobar mando y estanqueidad.",
+        "level": "media"
+      },
+      {
+        "area": "Suspensión",
+        "check": "Silentblocks, rótulas y neumáticos",
+        "why": "El peso y la geometría exigen revisión.",
+        "level": "media"
+      }
+    ],
+    "knownIssues": [
+      {
+        "title": "Puntos críticos del 320d",
+        "detail": "Cadena del N47, EGR, DPF y mantenimiento de la ZF 8HP son los puntos que más conviene documentar. No se afirma que todas las unidades fallen.",
+        "source": "Checklist técnico interno",
+        "sourceType": "checklist"
+      }
+    ],
+    "buyingGuide": {
+      "idealFor": "Quien valora tacto de propulsión trasera, eficiencia y una caja ZF excelente.",
+      "notIdealFor": "Quien no quiera asumir costes de cadena/EGR/DPF en unidades antiguas.",
+      "budgetNote": "Consultar mercado. El historial de mantenimiento y el año del motor cambian mucho el riesgo.",
+      "priorityChecks": [
+        "Ruido de cadena en frío",
+        "Fugas y estado de EGR",
+        "Regeneraciones y DPF",
+        "Aceite y comportamiento de la ZF",
+        "Swirl flaps y admisión",
+        "Historial de mantenimiento por VIN"
+      ],
+      "verdict": "Buen coche de carretera si el N47/B47 y la caja están documentados.",
+      "riskLevel": "Medio-alto en N47 de primeros años."
+    },
+    "sources": [
+      {
+        "title": "BMW 3 Series (F30)",
+        "url": "https://en.wikipedia.org/wiki/BMW_3_Series_(F30)",
+        "publisher": "Wikipedia",
+        "type": "enciclopedia",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "confidence": "media",
+    "notes": "Datos de versión europea; la potencia y el código de motor cambian según año y mercado. No se ha verificado el VIN concreto."
+  },
+  {
+    "id": "mercedes-c220d-w205",
+    "brand": "Mercedes-Benz",
+    "model": "Clase C",
+    "generation": "W205",
+    "version": "C 220 d",
+    "years": "2014–2021",
+    "body": "Sedán / Estate",
+    "image": {
+      "src": "/img/vehiculos/mercedes-c220d-w205.jpg",
+      "alt": "Mercedes-Benz C 220 d W205; la foto puede corresponder a otro acabado.",
+      "credit": "Calreyn88",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:2015_Mercedes_C220d_Sport_Auto.jpg",
+      "note": "Mercedes-Benz C 220 d W205; la foto puede corresponder a otro acabado."
+    },
+    "engine": {
+      "code": "OM651 / OM654 (según año)",
+      "displacementCc": 2143,
+      "fuel": "Diésel",
+      "powerPs": 170,
+      "powerKw": 125,
+      "torqueNm": 400,
+      "aspiration": "Turboalimentado",
+      "injection": "Common rail",
+      "distribution": "Cadena de distribución",
+      "notes": "OM651 2.1 de 170 PS en la primera etapa; OM654 2.0 de 194 PS desde 2018, según mercado."
+    },
+    "transmission": {
+      "type": "Automática",
+      "gears": "7G-Tronic / 9G-Tronic según año",
+      "drive": "Tracción trasera (4MATIC opcional)"
+    },
+    "emissions": {
+      "standard": "Euro 6 según año",
+      "aftertreatment": "DPF/FAP; SCR/AdBlue según versión"
+    },
+    "systems": [
+      "Motor diésel",
+      "Turbo",
+      "EGR",
+      "DPF/FAP",
+      "SCR/AdBlue",
+      "7G/9G-Tronic",
+      "ABS/ESC",
+      "Electrónica Mercedes-Benz"
+    ],
+    "inspection": [
+      {
+        "area": "Cadena y tensores",
+        "check": "Ruido en arranque en frío, especialmente OM651",
+        "why": "La cadena es un punto de inspección de coste elevado.",
+        "level": "alta"
+      },
+      {
+        "area": "Inyectores",
+        "check": "Retornos y fugas de sellado",
+        "why": "Una fuga puede afectar a arranque y olor a gasoil.",
+        "level": "alta"
+      },
+      {
+        "area": "EGR/DPF",
+        "check": "Carbonilla, fugas y regeneraciones",
+        "why": "No sustituir sin leer valores y contrapresión.",
+        "level": "media"
+      },
+      {
+        "area": "Caja automática",
+        "check": "Historial de aceite y suavidad",
+        "why": "7G/9G requieren mantenimiento según fabricante.",
+        "level": "media"
+      },
+      {
+        "area": "Refrigeración",
+        "check": "Fugas, termostato y bomba",
+        "why": "Revisar en unidades de kilometraje alto.",
+        "level": "media"
+      },
+      {
+        "area": "Suspensión",
+        "check": "Silentblocks y neumáticos",
+        "why": "El confort puede ocultar desgaste.",
+        "level": "baja"
+      }
+    ],
+    "knownIssues": [
+      {
+        "title": "Puntos críticos del C 220 d",
+        "detail": "Cadena, inyectores, EGR/DPF y mantenimiento de la caja son los puntos a documentar. Son comprobaciones, no una lista de fallos garantizados.",
+        "source": "Checklist técnico interno",
+        "sourceType": "checklist"
+      }
+    ],
+    "buyingGuide": {
+      "idealFor": "Quien busca confort, eficiencia y una buena red de servicio.",
+      "notIdealFor": "Quien no quiera asumir mantenimiento de diésel moderno y posibles costes de cadena/inyectores.",
+      "budgetNote": "Consultar mercado. Verificar versión OM651/OM654 y equipamiento; no se estiman precios.",
+      "priorityChecks": [
+        "Ruido de cadena en frío",
+        "Retornos de inyectores y fugas",
+        "Estado de EGR/DPF",
+        "Aceite y funcionamiento de la caja",
+        "Fugas de refrigerante",
+        "Historial y campañas"
+      ],
+      "verdict": "Cómodo y eficiente, pero conviene comprar con historial y diagnosis previa.",
+      "riskLevel": "Medio."
+    },
+    "sources": [
+      {
+        "title": "Mercedes-Benz C-Class (W205)",
+        "url": "https://en.wikipedia.org/wiki/Mercedes-Benz_C-Class_(W205)",
+        "publisher": "Wikipedia",
+        "type": "enciclopedia",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "confidence": "media",
+    "notes": "Potencia, cilindrada y caja cambian según año. Verificar la ficha técnica exacta por VIN."
+  },
+  {
+    "id": "renault-clio-iv-15-dci-90",
+    "brand": "Renault",
+    "model": "Clio",
+    "generation": "Clio IV",
+    "version": "1.5 dCi 90",
+    "years": "2012–2019",
+    "body": "Hatchback 5 puertas",
+    "image": {
+      "src": "/img/vehiculos/renault-clio-iv.jpg",
+      "alt": "Renault Clio IV; la foto puede corresponder a otra motorización.",
+      "credit": "M 93",
+      "license": "CC BY-SA 3.0 de",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Renault_Clio_TCe_90_Luxe_(IV)_%E2%80%93_Frontansicht,_17._Mai_2013,_M%C3%BCnster.jpg",
+      "note": "Renault Clio IV; la foto puede corresponder a otra motorización."
+    },
+    "engine": {
+      "code": "K9K (código exacto no verificado)",
+      "displacementCc": 1461,
+      "fuel": "Diésel",
+      "powerPs": 90,
+      "powerKw": 66,
+      "torqueNm": 220,
+      "aspiration": "Turboalimentado",
+      "injection": "Common rail",
+      "distribution": "Correa de distribución",
+      "notes": "Datos de la versión europea 1.5 dCi 90."
+    },
+    "transmission": {
+      "type": "Manual",
+      "gears": "5 velocidades",
+      "drive": "Tracción delantera"
+    },
+    "emissions": {
+      "standard": "Euro 5/6 según año",
+      "aftertreatment": "DPF/FAP en versiones Euro 6"
+    },
+    "systems": [
+      "Motor K9K",
+      "Turbo",
+      "EGR",
+      "DPF/FAP",
+      "ABS/ESC",
+      "Dirección eléctrica",
+      "Electrónica Renault"
+    ],
+    "inspection": [
+      {
+        "area": "Turbo",
+        "check": "Holgura, ruido y presión",
+        "why": "El turbo es un coste relevante; confirmar con medición.",
+        "level": "alta"
+      },
+      {
+        "area": "EGR/DPF",
+        "check": "Carbonilla y regeneraciones",
+        "why": "Trayectos urbanos cortos favorecen la saturación.",
+        "level": "media"
+      },
+      {
+        "area": "Inyección",
+        "check": "Retornos y arranque en frío",
+        "why": "Revisar antes de sustituir inyectores.",
+        "level": "media"
+      },
+      {
+        "area": "Distribución",
+        "check": "Correa según intervalo oficial",
+        "why": "No asumir un intervalo genérico.",
+        "level": "alta"
+      },
+      {
+        "area": "Embrague",
+        "check": "Ruidos y punto de mordida",
+        "why": "Cambio manual de 5 vel.; comprobar desgaste.",
+        "level": "media"
+      },
+      {
+        "area": "Chasis",
+        "check": "Rótulas, silentblocks y óxido",
+        "why": "Revisión habitual en utilitarios.",
+        "level": "media"
+      }
+    ],
+    "knownIssues": [
+      {
+        "title": "Puntos de inspección del Clio dCi",
+        "detail": "Turbo, EGR/DPF, inyección y correa son los puntos a revisar. No se afirma que sean fallos universales.",
+        "source": "Checklist técnico interno",
+        "sourceType": "checklist"
+      }
+    ],
+    "buyingGuide": {
+      "idealFor": "Quien busca un utilitario económico y sencillo para carretera o mixto.",
+      "notIdealFor": "Quien haga casi todo ciudad y no mantenga el DPF.",
+      "budgetNote": "Consultar mercado. Priorizar historial y estado mecánico sobre kilometraje aislado.",
+      "priorityChecks": [
+        "Estado del turbo",
+        "Regeneraciones y DPF",
+        "Arranque en frío e inyectores",
+        "Correa y bomba de agua",
+        "Embrague",
+        "Rótulas y óxido"
+      ],
+      "verdict": "Utilitario muy válido si el diésel está bien mantenido y se usa en condiciones adecuadas.",
+      "riskLevel": "Medio."
+    },
+    "sources": [
+      {
+        "title": "Renault Clio",
+        "url": "https://en.wikipedia.org/wiki/Renault_Clio",
+        "publisher": "Wikipedia",
+        "type": "enciclopedia",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "confidence": "media",
+    "notes": "La ficha puede variar por mercado y normativa. Verificar la versión exacta."
+  },
+  {
+    "id": "ford-focus-mk3-15-tdci-120",
+    "brand": "Ford",
+    "model": "Focus",
+    "generation": "Mk3 facelift",
+    "version": "1.5 TDCi 120",
+    "years": "2014–2018",
+    "body": "Hatchback / Sedán / Estate",
+    "image": {
+      "src": "/img/vehiculos/ford-focus-mk3.jpg",
+      "alt": "Ford Focus Mk3 facelift; la foto puede corresponder a otra motorización.",
+      "credit": "Vauxford",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:2015_Ford_Focus_Titanium_1.0_Front.jpg",
+      "note": "Ford Focus Mk3 facelift; la foto puede corresponder a otra motorización."
+    },
+    "engine": {
+      "code": "1.5 TDCi (código exacto no verificado)",
+      "displacementCc": 1499,
+      "fuel": "Diésel",
+      "powerPs": 120,
+      "powerKw": 88,
+      "torqueNm": 270,
+      "aspiration": "Turboalimentado",
+      "injection": "Common rail",
+      "distribution": "Consultar sistema exacto por código de motor",
+      "notes": "Datos de la versión europea 1.5 TDCi 120."
+    },
+    "transmission": {
+      "type": "Manual o automática",
+      "gears": "6 velocidades manual / automática según versión",
+      "drive": "Tracción delantera"
+    },
+    "emissions": {
+      "standard": "Euro 6 según año",
+      "aftertreatment": "DPF/FAP"
+    },
+    "systems": [
+      "Motor diésel",
+      "Turbo",
+      "EGR",
+      "DPF/FAP",
+      "ABS/ESC",
+      "Dirección eléctrica",
+      "Electrónica Ford"
+    ],
+    "inspection": [
+      {
+        "area": "Distribución",
+        "check": "Identificar tipo de correa y intervalo con el código de motor",
+        "why": "No asumir intervalo ni tipo de correa sin documentación.",
+        "level": "alta"
+      },
+      {
+        "area": "EGR/DPF",
+        "check": "Carbonilla y regeneraciones",
+        "why": "Trayectos cortos pueden acelerar la saturación.",
+        "level": "media"
+      },
+      {
+        "area": "Inyección",
+        "check": "Retornos y arranque",
+        "why": "Revisar correcciones y fugas.",
+        "level": "media"
+      },
+      {
+        "area": "Turbo",
+        "check": "Presión y holgura",
+        "why": "No sustituir sin pruebas.",
+        "level": "media"
+      },
+      {
+        "area": "Embrague/volante bimasa",
+        "check": "Vibración y ruido",
+        "why": "Coste relevante en manual.",
+        "level": "media"
+      },
+      {
+        "area": "Chasis",
+        "check": "Rótulas, silentblocks y óxido",
+        "why": "Revisión habitual.",
+        "level": "baja"
+      }
+    ],
+    "knownIssues": [
+      {
+        "title": "Puntos de inspección del Focus TDCi",
+        "detail": "Confirmar tipo de distribución por motor, revisar EGR/DPF, inyección y volante bimasa. Son comprobaciones preventivas.",
+        "source": "Checklist técnico interno",
+        "sourceType": "checklist"
+      }
+    ],
+    "buyingGuide": {
+      "idealFor": "Quien busca un compacto ágil, cómodo y con buena oferta de mercado.",
+      "notIdealFor": "Quien no pueda verificar el historial de distribución y DPF.",
+      "budgetNote": "Consultar mercado. Verificar por código de motor antes de comprar correa o filtros.",
+      "priorityChecks": [
+        "Tipo e historial de distribución",
+        "DPF y regeneraciones",
+        "Retornos de inyectores",
+        "Volante bimasa",
+        "Rótulas y óxido",
+        "Campañas pendientes"
+      ],
+      "verdict": "Compacto equilibrado; la clave es identificar bien la motorización y su mantenimiento.",
+      "riskLevel": "Medio."
+    },
+    "sources": [
+      {
+        "title": "Ford Focus (third generation)",
+        "url": "https://en.wikipedia.org/wiki/Ford_Focus_(third_generation)",
+        "publisher": "Wikipedia",
+        "type": "enciclopedia",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "confidence": "media",
+    "notes": "La denominación y el sistema de distribución pueden variar. Verificar con VIN y documentación Ford."
+  },
+  {
+    "id": "audi-a3-8v-20-tdi-150",
+    "brand": "Audi",
+    "model": "A3",
+    "generation": "8V",
+    "version": "2.0 TDI 150",
+    "years": "2012–2020",
+    "body": "Hatchback / Sportback / Sedán",
+    "image": {
+      "src": "/img/vehiculos/audi-a3-8v.jpg",
+      "alt": "Audi A3 8V; la foto puede corresponder a otro acabado o carrocería.",
+      "credit": "Peulle",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Audi_A3_SportBack_2017_(front_right_side).jpg",
+      "note": "Audi A3 8V; la foto puede corresponder a otro acabado o carrocería."
+    },
+    "engine": {
+      "code": "EA288 (código exacto no verificado)",
+      "displacementCc": 1968,
+      "fuel": "Diésel",
+      "powerPs": 150,
+      "powerKw": 110,
+      "torqueNm": 340,
+      "aspiration": "Turboalimentado",
+      "injection": "Common rail",
+      "distribution": "Correa de distribución",
+      "notes": "Datos de la versión europea 2.0 TDI 150."
+    },
+    "transmission": {
+      "type": "Manual o DSG",
+      "gears": "6 velocidades manual / 6 velocidades DSG según versión",
+      "drive": "Tracción delantera (quattro opcional)"
+    },
+    "emissions": {
+      "standard": "Euro 6 según año",
+      "aftertreatment": "DPF/FAP; SCR en algunas versiones"
+    },
+    "systems": [
+      "Motor EA288",
+      "Turbo",
+      "EGR",
+      "DPF/FAP",
+      "DSG",
+      "ABS/ESC",
+      "Dirección",
+      "Electrónica MQB"
+    ],
+    "inspection": [
+      {
+        "area": "DSG",
+        "check": "Aceite/filtro y comportamiento",
+        "why": "Mantenimiento específico.",
+        "level": "alta"
+      },
+      {
+        "area": "DPF/EGR",
+        "check": "Carbonilla y regeneraciones",
+        "why": "Revisar antes de limpiar o sustituir.",
+        "level": "media"
+      },
+      {
+        "area": "Distribución",
+        "check": "Correa y bomba de agua según intervalo",
+        "why": "No asumir intervalos genéricos.",
+        "level": "alta"
+      },
+      {
+        "area": "Inyección",
+        "check": "Retornos y correcciones",
+        "why": "Diagnóstico con valores reales.",
+        "level": "media"
+      },
+      {
+        "area": "Turbo",
+        "check": "Presión y actuador",
+        "why": "Confirmar con medición.",
+        "level": "media"
+      },
+      {
+        "area": "Electrónica",
+        "check": "Escaneo completo y campañas",
+        "why": "Audi puede requerir equipo específico.",
+        "level": "media"
+      }
+    ],
+    "knownIssues": [
+      {
+        "title": "Puntos de inspección del A3 TDI",
+        "detail": "DSG, DPF/EGR, correa y bomba de agua son los puntos a documentar. No se afirma que fallen en todas las unidades.",
+        "source": "Checklist técnico interno",
+        "sourceType": "checklist"
+      }
+    ],
+    "buyingGuide": {
+      "idealFor": "Quien busca compacto premium con buen acabado y eficiencia diésel.",
+      "notIdealFor": "Quien no quiera mantener DSG o no haga kilómetros suficientes para el diésel.",
+      "budgetNote": "Consultar mercado. Verificar versión, caja y mantenimiento; no se estiman precios.",
+      "priorityChecks": [
+        "Historial de DSG",
+        "Estado de DPF/EGR",
+        "Correa y bomba de agua",
+        "Inyectores",
+        "Turbo",
+        "Escaneo completo"
+      ],
+      "verdict": "Buen compacto premium si el mantenimiento está documentado.",
+      "riskLevel": "Medio."
+    },
+    "sources": [
+      {
+        "title": "Audi A3",
+        "url": "https://en.wikipedia.org/wiki/Audi_A3",
+        "publisher": "Wikipedia",
+        "type": "enciclopedia",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "confidence": "media",
+    "notes": "Ficha orientativa. La caja y la presencia de SCR cambian por año y mercado."
+  },
+  {
+    "id": "seat-leon-5f-20-tdi-150",
+    "brand": "SEAT",
+    "model": "León",
+    "generation": "Mk3 (5F)",
+    "version": "2.0 TDI 150",
+    "years": "2012–2020",
+    "body": "Hatchback / SC / ST",
+    "image": {
+      "src": "/img/vehiculos/seat-leon-5f.jpg",
+      "alt": "SEAT León Mk3; la foto puede corresponder a otro acabado.",
+      "credit": "Retired electrician",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Moscow,_SEAT_Leon_FR_Mk3_red,_Aug_2025_01.jpg",
+      "note": "SEAT León Mk3; la foto puede corresponder a otro acabado."
+    },
+    "engine": {
+      "code": "EA288 (código exacto no verificado)",
+      "displacementCc": 1968,
+      "fuel": "Diésel",
+      "powerPs": 150,
+      "powerKw": 110,
+      "torqueNm": 340,
+      "aspiration": "Turboalimentado",
+      "injection": "Common rail",
+      "distribution": "Correa de distribución",
+      "notes": "Datos de la versión europea 2.0 TDI 150."
+    },
+    "transmission": {
+      "type": "Manual o DSG",
+      "gears": "6 velocidades manual / 6 velocidades DSG según versión",
+      "drive": "Tracción delantera"
+    },
+    "emissions": {
+      "standard": "Euro 6 según año",
+      "aftertreatment": "DPF/FAP; SCR en algunas versiones"
+    },
+    "systems": [
+      "Motor EA288",
+      "Turbo",
+      "EGR",
+      "DPF/FAP",
+      "DSG",
+      "ABS/ESC",
+      "Dirección",
+      "Electrónica MQB"
+    ],
+    "inspection": [
+      {
+        "area": "DSG",
+        "check": "Aceite/filtro y tirones",
+        "why": "Mantenimiento específico.",
+        "level": "alta"
+      },
+      {
+        "area": "DPF/EGR",
+        "check": "Carbonilla y regeneraciones",
+        "why": "Revisar con valores antes de sustituir.",
+        "level": "media"
+      },
+      {
+        "area": "Distribución",
+        "check": "Correa y bomba de agua",
+        "why": "Usar intervalo oficial del motor.",
+        "level": "alta"
+      },
+      {
+        "area": "Inyección",
+        "check": "Retornos y correcciones",
+        "why": "Diagnóstico con escáner.",
+        "level": "media"
+      },
+      {
+        "area": "Turbo",
+        "check": "Presión real vs. objetivo",
+        "why": "No condenar sin pruebas.",
+        "level": "media"
+      },
+      {
+        "area": "Chasis",
+        "check": "Silentblocks y rótulas",
+        "why": "Revisión habitual.",
+        "level": "baja"
+      }
+    ],
+    "knownIssues": [
+      {
+        "title": "Puntos de inspección del León TDI",
+        "detail": "DSG, DPF/EGR, correa y bomba de agua son los puntos a documentar. Comprobaciones preventivas, no diagnósticos automáticos.",
+        "source": "Checklist técnico interno",
+        "sourceType": "checklist"
+      }
+    ],
+    "buyingGuide": {
+      "idealFor": "Quien quiere un compacto con base MQB, buen espacio y eficiencia diésel.",
+      "notIdealFor": "Quien busque un acabado premium o no mantenga DSG/DPF.",
+      "budgetNote": "Consultar mercado. Verificar versión y mantenimiento; no se estiman precios.",
+      "priorityChecks": [
+        "Historial de DSG",
+        "DPF/EGR",
+        "Correa y bomba de agua",
+        "Inyectores",
+        "Turbo",
+        "Escaneo y campañas"
+      ],
+      "verdict": "Compacto racional con buena relación espacio/prestaciones si está bien mantenido.",
+      "riskLevel": "Medio."
+    },
+    "sources": [
+      {
+        "title": "SEAT León",
+        "url": "https://en.wikipedia.org/wiki/SEAT_Le%C3%B3n",
+        "publisher": "Wikipedia",
+        "type": "enciclopedia",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "confidence": "media",
+    "notes": "Ficha orientativa. Verificar equipamiento y normativa por mercado."
+  },
+  {
+    "id": "toyota-corolla-e210-18-hybrid",
+    "brand": "Toyota",
+    "model": "Corolla",
+    "generation": "E210",
+    "version": "1.8 Hybrid 122",
+    "years": "2019–2022",
+    "body": "Hatchback / Touring Sports / Sedán",
+    "image": {
+      "src": "/img/vehiculos/toyota-corolla-e210.jpg",
+      "alt": "Toyota Corolla E210 híbrido; la foto puede corresponder a otra versión.",
+      "credit": "Alexander-93",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:2023_Toyota_Corolla_Hybrid_(E210)_hatchback_IMG_9877.jpg",
+      "note": "Toyota Corolla E210 híbrido; la foto puede corresponder a otra versión."
+    },
+    "engine": {
+      "code": "2ZR-FXE (sistema híbrido)",
+      "displacementCc": 1798,
+      "fuel": "Gasolina híbrido",
+      "powerPs": 122,
+      "powerKw": 90,
+      "torqueNm": 142,
+      "aspiration": "Atmosférico",
+      "injection": "Inyección indirecta",
+      "distribution": "Cadena de distribución",
+      "notes": "122 PS de potencia combinada del sistema híbrido; el par indicado es el del motor térmico. No sumar pares de motor y eléctrico."
+    },
+    "transmission": {
+      "type": "Transmisión híbrida",
+      "gears": "e-CVT (sin marchas convencionales)",
+      "drive": "Tracción delantera"
+    },
+    "emissions": {
+      "standard": "Euro 6",
+      "aftertreatment": "Catalizador; sin DPF"
+    },
+    "systems": [
+      "Sistema híbrido",
+      "Motor 2ZR-FXE",
+      "Batería HV",
+      "Inversor",
+      "e-CVT",
+      "Frenos regenerativos",
+      "ABS/ESC",
+      "Electrónica Toyota"
+    ],
+    "inspection": [
+      {
+        "area": "Batería híbrida",
+        "check": "Estado de salud y refrigeración",
+        "why": "La batería HV y su ventilación son claves en el coste futuro.",
+        "level": "alta"
+      },
+      {
+        "area": "Refrigeración del inversor",
+        "check": "Nivel y fugas del circuito específico",
+        "why": "No mezclar con refrigerante convencional.",
+        "level": "alta"
+      },
+      {
+        "area": "Frenos",
+        "check": "Pastillas, discos y líquido; los frenos regenerativos reducen desgaste pero no eliminan mantenimiento",
+        "why": "Revisar aunque el desgaste sea lento.",
+        "level": "media"
+      },
+      {
+        "area": "e-CVT",
+        "check": "Funcionamiento y mantenimiento del fluido",
+        "why": "La caja híbrida es distinta de un CVT convencional.",
+        "level": "media"
+      },
+      {
+        "area": "Suspensión",
+        "check": "Rótulas y silentblocks",
+        "why": "Revisión habitual.",
+        "level": "baja"
+      },
+      {
+        "area": "Electrónica",
+        "check": "Historial de salud híbrida y campañas",
+        "why": "Usar diagnosis compatible.",
+        "level": "media"
+      }
+    ],
+    "knownIssues": [
+      {
+        "title": "Puntos de inspección del Corolla híbrido",
+        "detail": "Salud de batería HV, refrigeración del inversor, frenos y fluido de e-CVT. No se afirman fallos sistemáticos.",
+        "source": "Checklist técnico interno",
+        "sourceType": "checklist"
+      }
+    ],
+    "buyingGuide": {
+      "idealFor": "Quien hace mucha ciudad y busca fiabilidad, suavidad y bajo consumo.",
+      "notIdealFor": "Quien haga mucha autopista a alta velocidad y priorice deportividad.",
+      "budgetNote": "Consultar mercado. Verificar salud de batería híbrida y campañas; no se estiman precios.",
+      "priorityChecks": [
+        "Estado de batería HV",
+        "Refrigeración del inversor",
+        "Historial de mantenimiento",
+        "Frenos y líquido",
+        "e-CVT",
+        "Campañas y diagnosis híbrida"
+      ],
+      "verdict": "Muy racional para uso urbano/mixto; la batería HV es el punto económico a valorar.",
+      "riskLevel": "Bajo-medio."
+    },
+    "sources": [
+      {
+        "title": "Toyota Corolla (E210)",
+        "url": "https://en.wikipedia.org/wiki/Toyota_Corolla_(E210)",
+        "publisher": "Wikipedia",
+        "type": "enciclopedia",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "confidence": "media",
+    "notes": "Potencia combinada de 122 PS para la versión inicial; la versión de 2023 sube a 140 PS. Verificar año y mercado."
+  }
+]
