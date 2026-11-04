@@ -490,3 +490,32 @@ Ampliado de 18 a **101 testigos** en siete bloques, todos con las 21 secciones y
 
 Recuento final: rojo 16, amarillo 67, azul 2, verde 15, blanco 1 · crítico 4, grave 23, precaución 54, informativo 20.
 Verificado: `npm test` 111/111, stats de la API `lights: 101`, **las 101 fichas responden 200**, búsqueda (`adblue` 1, `turbo` 2, `remolque` 7, `hielo` 3) y filtro `color=rojo` → 16. El aviso del catálogo se actualizó al total real.
+
+## Fiabilidad: bloque 3, cuatro motores (04/11/2026)
+
+La base pasa de **16 a 20 motores y de 69 a 87 averías**, con fuentes consultadas para cada ficha.
+
+| Motor | Familia | Años | Averías |
+|---|---|---|---|
+| `honda-l15b7-15-vtec-turbo` | L15B7 / L15BA (1.5 VTEC Turbo) | 2015– | 5 |
+| `psa-dv5-15-bluehdi` | DV5R (1.5 BlueHDi) | 2017– | 5 |
+| `toyota-2zr-fxe-18-hybrid` | 2ZR-FXE (1.8 híbrido) | 2009– | 4 |
+| `bmw-n20-20-turbo` | N20 / N26 (2.0 TwinPower Turbo) | 2011–2017 | 4 |
+
+Criterio de selección: familias que faltaban y que no repiten las ya documentadas (EA888, EA211, EA189, PureTech, EcoBoost, K9K, H5Ft, K4M, N47, OM651, OM642, DV6, EP6, 1.3 Multijet, 1.6 CRDi). Se añaden por primera vez un híbrido y dos gasolinas turbo de inyección directa modernos.
+
+- **Honda L15**: dilución de aceite por combustible (estado *confirmada*: actualización de software y ampliación de garantía), carbonilla de admisión, wastegate, inyectores y consumo de aceite.
+- **PSA DV5**: cadena interna de 7 mm con campaña oficial a 8 mm —el motor usa correa húmeda exterior **y** cadena en la culata, y esa confusión es la causa de diagnósticos caros—, correa húmeda, SCR/AdBlue, FAP y EGR. Incluye la especificación de aceite FPW9.55535/03, requisito de la garantía ampliada.
+- **Toyota 2ZR-FXE**: junta de culata de la 3.ª generación del Prius, con las dos explicaciones en disputa (material de la junta y sobrecalentamiento por bomba de agua frente a la teoría de la carbonilla del EGR), bomba de agua eléctrica, EGR y consumo de aceite.
+- **BMW N20**: guías y tensor de cadena, cadena de la bomba de aceite y aspiración obstruida por restos, solenoides VANOS que imitan la avería de cadena y fugas por la tapa de válvulas.
+
+Ninguna ficha inventa una quinta avería para cuadrar el bloque: el 2ZR-FXE y el N20 se quedan en cuatro. Los importes son orientativos para talleres españoles y el estado distingue *confirmada* (campaña o reconocimiento) de *reportada*.
+
+Verificado: `npm test` 111/111 · API `engines: 20 / issues: 87` · las cuatro fichas responden 200 · `brand=Honda` → 1, `q=cadena` → 12, `q=adblue` → 1 · validación de esquema y duplicados en el script de fusión, con todas las fuentes en https.
+
+## Revisión en navegador del catálogo de testigos (04/11/2026)
+
+Comprobado en Firefox real con el catálogo de 101 fichas:
+
+- **1360×1000**: 101 tarjetas pintadas, contador de cabecera 101, filtro rojo → 16, gravedad *informativo* → 20, búsqueda `adblue` → 1, detalle abierto con 10 bloques y 4 fuentes, sin desbordamiento horizontal (1354/1360) y 0 errores de consola.
+- **390×844** (iframe de ancho real, porque Firefox headless no baja de 500 px de ventana): 101 tarjetas, filtro rojo → 16, búsqueda `remolque` → 7, detalle con 3 fuentes, sin desbordamiento (384/384) y 0 errores.

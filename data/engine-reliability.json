@@ -1,6 +1,6 @@
 {
   "updated": "2026-11-04",
-  "version": 3,
+  "version": 4,
   "notice": "Fiabilidad por MOTOR y generación, no por modelo. Una avería descrita aquí solo se aplica a los motores y años indicados; no se deben extrapolar a otras versiones del mismo coche. Cada dato lleva su fuente y su estado. Los costes son orientativos, sin IVA salvo que se indique, y corresponden a talleres españoles; pide siempre presupuesto con la referencia del motor.",
   "statusLegend": [
     {
@@ -5687,6 +5687,1408 @@
       ],
       "confidence": "media-baja",
       "confidenceNote": "La cadena del D4FB está documentada por prensa técnica y foros, con kilometrajes de desgaste concretos. El fallo del pasador de la polea en el D4FE procede de un análisis de taller y de casos repetidos, pero no consta una campaña europea pública: conviene confirmarlo por VIN. No hay estadística oficial de tasa de fallo para ninguna de las dos generaciones."
+    },
+    {
+      "id": "honda-l15b7-15-vtec-turbo",
+      "brand": "Honda",
+      "group": "Honda Motor",
+      "family": "L15B7 / L15BA (1.5 VTEC Turbo, Earth Dreams)",
+      "commercial": "Civic 1.5 VTEC Turbo, CR-V 1.5 VTEC Turbo, Accord 1.5 Turbo, Integra, HR-V según mercado",
+      "codes": "L15B7, L15BA, L15B8 y variantes por mercado y normativa de emisiones",
+      "years": "2015–actualidad (el Civic de 11.ª generación y el CR-V de 6.ª siguen con la familia L15)",
+      "displacementCc": 1498,
+      "fuel": "Gasolina",
+      "powerPs": "150–193 PS según versión y mercado",
+      "aspiration": "Turboalimentado de geometría fija con wastegate eléctrica",
+      "injection": "Inyección directa de gasolina a alta presión, culata de 4 válvulas por cilindro con VTEC en la admisión",
+      "transmissionNote": "CVT en la mayoría de versiones; cambio manual de 6 marchas en algunas carrocerías",
+      "vehicles": [],
+      "distribution": {
+        "type": "Cadena de distribución",
+        "interval": "Sin intervalo oficial de sustitución",
+        "note": "Honda no publica intervalo para la cadena. Es un motor de inyección directa y turbo pequeño, así que la cadena y el tensor dependen mucho de la calidad y la frecuencia del aceite: los casos de ruido en frío aparecen sobre todo en unidades con intervalos largos o con dilución de aceite por combustible.",
+        "sources": [
+          {
+            "title": "Most common Honda 1.5T engine problems",
+            "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+            "publisher": "Orbi Motors",
+            "type": "taller",
+            "accessed": "2026-11-04"
+          }
+        ]
+      },
+      "reliability": {
+        "verdict": "media-alta si se respeta el mantenimiento y se hacen recorridos largos",
+        "note": "Es un motor fino y eficiente, y las unidades posteriores a 2019 han corregido lo peor. El problema es que su talón de Aquiles —la dilución de aceite por combustible en trayectos cortos y fríos— no se arregla con mantenimiento: se arregla con la actualización de software y con uso. En un coche de ciudad con trayectos de cinco minutos, el aceite sube de nivel y se degrada; en uno de carretera, es un motor muy sano."
+      },
+      "summary": "Cuatro cilindros de 1,5 litros con inyección directa y turbo, montado en prácticamente toda la gama media de Honda. Está diseñado para consumir poco y responder abajo, y lo consigue, pero la inyección directa trae dos consecuencias conocidas: el combustible puede pasar al cárter en frío y la carbonilla se deposita en las válvulas de admisión, que ya no reciben gasolina que las lave. La wastegate eléctrica del turbo y los inyectores completan la lista de averías típicas.",
+      "issues": [
+        {
+          "id": "l15-oil-dilution",
+          "title": "Dilución de aceite por combustible en trayectos cortos y fríos",
+          "symptom": [
+            "Nivel de aceite que sube en la varilla entre revisiones",
+            "Olor a gasolina en el aceite y en el tapón de llenado",
+            "Consumo alto y tirones en frío en climas muy fríos",
+            "Aviso de nivel de aceite o de presión en los casos extremos"
+          ],
+          "cause": "En arranque frío la inyección directa lanza gasolina sobre las paredes del cilindro, que aún están frías; parte de ese combustible no se quema y baja por los segmentos hasta el cárter. Con trayectos cortos el motor no llega a temperatura de evaporación y el combustible se acumula en el aceite. Es un problema de concepción del sistema, no un fallo de una pieza concreta.",
+          "checks": [
+            "Medir el nivel en frío y compararlo con el registro de la última revisión",
+            "Oler el aceite de la varilla: un olor claro a gasolina confirma la dilución",
+            "Preguntar si la unidad pasó la actualización de software de gestión motor",
+            "Revisar el historial de uso: trayectos cortos diarios en clima frío son el escenario de riesgo"
+          ],
+          "solution": "Aplicar la actualización de software de la centralita, que modifica la estrategia de arranque y de calentamiento, y acortar el intervalo de aceite en uso urbano. Honda amplió la garantía en los mercados afectados. En unidades muy castigadas se añade cambio de aceite frecuente y revisión de inyectores.",
+          "severity": "grave",
+          "status": "confirmada",
+          "risk": "El aceite diluido pierde viscosidad y capacidad de lubricar: acelera el desgaste de cadena, cojinetes y turbo. En el peor caso, el nivel alto y la gasolina en el cárter provocan un fallo de lubricación con daño grave. No es un aviso para seguir circulando meses sin mirar la varilla.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "sin piezas en la actualización; aceite y filtro si toca",
+            "labour": "1–2 h de actualización de software",
+            "typical": "0–150 € si la unidad entra en la campaña de actualización; 60–120 € fuera de ella",
+            "note": "Orientativo. Lo caro no es la reparación, sino el motor si se ignora: por eso el coste real es el del aceite cambiado con más frecuencia.",
+            "sources": [
+              {
+                "title": "Most common Honda 1.5T engine problems",
+                "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+                "publisher": "Orbi Motors",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Most common Honda 1.5T engine problems",
+              "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+              "publisher": "Orbi Motors",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "Class action alleges Honda hid engine oil dilution defect in CR-V, Civic and Accord",
+              "url": "https://www.classaction.org/news/class-action-alleges-honda-hid-engine-oil-dilution-defect-in-newer-cr-v-civic-accord-models",
+              "publisher": "ClassAction.org",
+              "type": "prensa",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "l15-intake-carbon",
+          "title": "Carbonilla en válvulas de admisión",
+          "symptom": [
+            "Ralentí irregular y pequeñas vibraciones",
+            "Pérdida progresiva de potencia y de respuesta",
+            "Consumo algo más alto sin avería declarada",
+            "Fallos de encendido esporádicos en frío"
+          ],
+          "cause": "Al ser inyección directa, la gasolina entra directamente en la cámara y no lava las válvulas de admisión. Los vapores de aceite del sistema de ventilación del cárter y los residuos de la EGR se depositan allí y se cuecen con el calor, formando una capa dura que reduce la sección de paso.",
+          "checks": [
+            "Endoscopia por el colector de admisión para ver el estado real de las válvulas",
+            "Comparar la masa de aire real con la esperada en diagnosis en marcha",
+            "Descartar bujías, bobinas e inyectores antes de atribuirlo a la carbonilla",
+            "Revisar el consumo de aceite: un motor que lo gasta ensucia más la admisión"
+          ],
+          "solution": "Limpieza con proyección de nuez molida (granallado suave) o limpieza química específica para inyección directa. No se arregla con aditivos en el depósito, porque el combustible no pasa por esas válvulas.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "Es progresiva y no rompe el motor, pero empeora el rendimiento y la combustión, y complica el diagnóstico de otras averías. En motores con mucha carbonilla pueden aparecer fallos de encendido que acaban dañando el catalizador.",
+          "cost": {
+            "diagnosis": "60–120 € (endoscopia incluida)",
+            "parts": "consumibles de limpieza",
+            "labour": "3–5 h",
+            "typical": "250–500 €",
+            "note": "Orientativo. El precio depende mucho de si se desmonta el colector o se limpia con el colector puesto.",
+            "sources": [
+              {
+                "title": "Most common Honda 1.5T engine problems",
+                "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+                "publisher": "Orbi Motors",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Most common Honda 1.5T engine problems",
+              "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+              "publisher": "Orbi Motors",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "l15-wastegate-rattle",
+          "title": "Holgura de la wastegate del turbo: cascabeleo a bajas vueltas",
+          "symptom": [
+            "Cascabeleo metálico a bajas vueltas o al soltar el acelerador",
+            "Ruido que desaparece al acelerar con carga",
+            "Pérdida de presión de soplado y de respuesta",
+            "Testigo de motor con códigos de sobrepresión o de regulación del turbo"
+          ],
+          "cause": "La wastegate es eléctrica y va montada en el propio cuerpo del turbo. Con los ciclos térmicos, el eje y el actuador desarrollan holgura; la compuerta vibra sin sellar del todo y produce el cascabeleo, además de fugas de presión en la admisión.",
+          "checks": [
+            "Localizar el ruido con el coche en rampa y comprobar el juego del brazo del actuador",
+            "Registrar la presión de sobrealimentación real frente a la solicitada",
+            "Revisar códigos de la válvula de descarga y del sensor de presión de admisión",
+            "Descartar un escudo térmico o un soporte suelto antes de cambiar el turbo"
+          ],
+          "solution": "Ajustar o sustituir el actuador cuando el desgaste es solo suyo; si la holgura está en la compuerta o en el eje, se sustituye el cartucho o el turbo completo. Honda no vende el actuador suelto en todas las versiones.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "No es peligroso a corto plazo, pero la fuga de presión empobrece la mezcla en carga y castiga el turbo y el catalizador. Un turbo que silba y no sopla acaba en avería mayor si se sigue exigiendo.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "150–400 € actuador; 700–1.400 € cartucho o turbo",
+            "labour": "2–6 h",
+            "typical": "400–1.200 €",
+            "note": "Orientativo. Cambiar solo el actuador es mucho más barato, pero no siempre es posible ni suficiente.",
+            "sources": [
+              {
+                "title": "Most common Honda 1.5T engine problems",
+                "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+                "publisher": "Orbi Motors",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Most common Honda 1.5T engine problems",
+              "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+              "publisher": "Orbi Motors",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "l15-injector-coking",
+          "title": "Inyectores obstruidos o con pulverización deficiente",
+          "symptom": [
+            "Fallos de encendido y ralentí inestable",
+            "Tirones al acelerar desde bajo régimen",
+            "Consumo elevado y olor a gasolina",
+            "Testigo de motor con códigos de mezcla o de fallo de combustión"
+          ],
+          "cause": "Los inyectores de inyección directa trabajan a mucha presión y con temperaturas altas en la punta; los residuos de la combustión y del propio combustible se cocen en el orificio y deforman el chorro. La dilución de aceite y la carbonilla de admisión agravan el cuadro.",
+          "checks": [
+            "Leer los códigos de fallo de encendido por cilindro y comprobar la compensación de mezcla",
+            "Probar caudal y estanqueidad de los inyectores en banco",
+            "Descartar bujías y bobinas antes de desmontar inyectores",
+            "Revisar la presión de la bomba de alta y el filtro de combustible"
+          ],
+          "solution": "Limpieza en banco con ultrasonidos si la avería es solo de suciedad; sustitución del inyector afectado si la punta está dañada. Después, adaptación de la centralita y aceite nuevo si había dilución.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "Un inyector que gotea lava el cilindro de gasolina, diluye el aceite y puede provocar detonación. Además, la gasolina sin quemar destruye el catalizador, que es una pieza carísima.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "120–300 € por inyector",
+            "labour": "2–4 h",
+            "typical": "200–700 €",
+            "note": "Orientativo. En este motor los inyectores van bajo la rampa de alta presión y el acceso es laborioso.",
+            "sources": [
+              {
+                "title": "Most common Honda 1.5T engine problems",
+                "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+                "publisher": "Orbi Motors",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Most common Honda 1.5T engine problems",
+              "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+              "publisher": "Orbi Motors",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "Honda CR-V 1.5T: oil dilution and injector experience (foro de propietarios)",
+              "url": "https://honda-tech.com/forums/honda-cr-v-element-156/i-no-longer-have-oil-dilution-problem-3346555/",
+              "publisher": "Honda-Tech",
+              "type": "foro",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "l15-oil-consumption",
+          "title": "Consumo de aceite por segmentos o retenes del turbo en unidades de muchos kilómetros",
+          "symptom": [
+            "Aviso de nivel bajo entre revisiones",
+            "Humo azulado al arrancar o al soltar el acelerador",
+            "Bujías engrasadas y fallos de encendido",
+            "Carbonilla creciente en la admisión y en la cámara"
+          ],
+          "cause": "Con kilometraje alto, los segmentos rascadores pierden elasticidad y los retenes del eje del turbo se endurecen. En motores que han sufrido dilución de aceite, el desgaste llega antes porque el lubricante ha trabajado con viscosidad insuficiente.",
+          "checks": [
+            "Cuantificar el consumo con pesada o con registro de rellenos cada 1.000 km",
+            "Medir compresión y hacer prueba de estanqueidad por cilindro",
+            "Inspeccionar el lado frío y caliente del turbo en busca de aceite",
+            "Descartar fuga externa por junta de tapa de válvulas y por el retén del cigüeñal"
+          ],
+          "solution": "Si el consumo viene del turbo, sustituir el cartucho; si viene de los segmentos, la reparación pasa por abrir el motor (segmentos y, según desgaste, rectificado). Antes de decidir, conviene valorar el estado general del coche: es una reparación de más de la mitad de su valor en muchos casos.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "El consumo de aceite degrada el catalizador y la sonda lambda, ensucia la admisión y puede provocar detonación por carbonilla incandescente. Es un desgaste que solo empeora.",
+          "cost": {
+            "diagnosis": "120–250 €",
+            "parts": "300–900 € (segmentos, juntas y tornillería) o 700–1.400 € el cartucho del turbo",
+            "labour": "12–20 h si se abre el motor",
+            "typical": "1.500–3.500 €",
+            "note": "Orientativo. Es la avería más cara de la lista y la que más justifica pedir una segunda opinión antes de autorizar.",
+            "sources": [
+              {
+                "title": "Most common Honda 1.5T engine problems",
+                "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+                "publisher": "Orbi Motors",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Most common Honda 1.5T engine problems",
+              "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+              "publisher": "Orbi Motors",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "maintenance": [
+        {
+          "item": "Aceite y filtro",
+          "interval": "cada 10.000–15.000 km o 12 meses; en uso urbano, antes",
+          "note": "Aceite sintético con la especificación Honda de la versión. En este motor el intervalo corto es la mejor protección contra la dilución y el desgaste de cadena.",
+          "sources": [
+            {
+              "title": "Most common Honda 1.5T engine problems",
+              "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+              "publisher": "Orbi Motors",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Bujías",
+          "interval": "cada 100.000 km",
+          "note": "Bujías de iridio de la referencia exacta. Una bujía gastada en un motor turbo de inyección directa provoca fallos de encendido que se confunden con inyectores.",
+          "sources": [
+            {
+              "title": "Most common Honda 1.5T engine problems",
+              "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+              "publisher": "Orbi Motors",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Limpieza de admisión",
+          "interval": "cada 80.000–100.000 km en uso urbano",
+          "note": "Endoscopia primero y limpieza solo si hay depósito real. No es mantenimiento de libro, pero en inyección directa marca la diferencia.",
+          "sources": [
+            {
+              "title": "Most common Honda 1.5T engine problems",
+              "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+              "publisher": "Orbi Motors",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Nivel de aceite",
+          "interval": "cada 1.000–2.000 km en trayectos cortos",
+          "note": "Comprobar la varilla es el mejor diagnóstico precoz de la dilución: un nivel que sube es tan mala señal como uno que baja.",
+          "sources": [
+            {
+              "title": "Most common Honda 1.5T engine problems",
+              "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+              "publisher": "Orbi Motors",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Most common Honda 1.5T engine problems",
+          "url": "https://orbimotors.com/news/most-common-honda-1-5t-engine-problems/",
+          "publisher": "Orbi Motors",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Class action alleges Honda hid engine oil dilution defect in newer CR-V, Civic and Accord models",
+          "url": "https://www.classaction.org/news/class-action-alleges-honda-hid-engine-oil-dilution-defect-in-newer-cr-v-civic-accord-models",
+          "publisher": "ClassAction.org",
+          "type": "prensa",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Honda CR-V 1.5T: oil dilution experience (foro de propietarios)",
+          "url": "https://honda-tech.com/forums/honda-cr-v-element-156/i-no-longer-have-oil-dilution-problem-3346555/",
+          "publisher": "Honda-Tech",
+          "type": "foro",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "How bad is the Honda oil dilution issue (comunidad de propietarios)",
+          "url": "https://community.caredge.com/c/general/how-bad-is-the-honda-oil-dilution-issue-are-there-model-years-to-avoid",
+          "publisher": "CarEdge Community",
+          "type": "foro",
+          "accessed": "2026-11-04"
+        }
+      ],
+      "confidence": "media",
+      "confidenceNote": "La dilución de aceite está reconocida por Honda con actualización de software y ampliación de garantía, y hay demanda colectiva documentada. La carbonilla, la wastegate y los inyectores están descritos por talleres especializados y foros con muchos casos, sin campaña europea pública. Los importes son orientativos y varían por país y por servicio oficial o independiente."
+    },
+    {
+      "id": "psa-dv5-15-bluehdi",
+      "brand": "Peugeot / Citroën / DS / Opel / Fiat / Toyota",
+      "group": "Stellantis",
+      "family": "DV5R (1.5 BlueHDi)",
+      "commercial": "208, 2008, 308, 3008, 5008, 508, Rifter, Partner, Expert, C3, C4, C4 Cactus, C5 Aircross, Berlingo, Corsa, Mokka, Crossland, Astra, Combo, Proace City",
+      "codes": "DV5RC, DV5RD, DV5RE, DV5RUC, DV5RCE, DV5RCF (códigos comerciales YHR, YHS, YHT, YHV, YHW, YHX, YHY, YHZ)",
+      "years": "2017–actualidad",
+      "displacementCc": 1499,
+      "fuel": "Diésel",
+      "powerPs": "75–130 PS según versión",
+      "aspiration": "Turboalimentado de geometría variable",
+      "injection": "Common rail de alta presión, 16 válvulas, culata y bloque de aluminio",
+      "transmissionNote": "Manual de 6 marchas o automático EAT8 según versión",
+      "vehicles": [],
+      "distribution": {
+        "type": "Correa húmeda exterior + cadena interna entre árboles de levas",
+        "interval": "Correa: 120.000–180.000 km o 6 años. Cadena de 7 mm: sustituida por la de 8 mm en campaña",
+        "note": "El DV5R usa dos sistemas a la vez, y de ahí viene la confusión habitual: una correa de distribución bañada en aceite que mueve el cigüeñal y la bomba de agua, y una cadena interna en la culata que sincroniza los dos árboles de levas. La cadena original de 7 mm resultó insuficiente y Stellantis lanzó campaña para montar la de 8 mm. Quien cambia 'la distribución' sin saber cuál de las dos piezas ha fallado paga dos veces.",
+        "sources": [
+          {
+            "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+            "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+            "publisher": "Autoricambi Tritella",
+            "type": "taller",
+            "accessed": "2026-11-04"
+          }
+        ]
+      },
+      "reliability": {
+        "verdict": "media-baja en unidades con correa sin sustituir",
+        "note": "Es el diésel más vendido de Stellantis y eso hace que se conozcan todos sus defectos. La campaña de la cadena y el aceite específico han mejorado mucho la situación, y la garantía ampliada a 10 años o 240.000 km cubre a quien mantiene el coche en la red. El riesgo real está en las unidades de segunda mano sin facturas: si no hay prueba del cambio de correa húmeda ni de la campaña de cadena, el precio debe reflejarlo."
+      },
+      "summary": "Cuatro cilindros diésel de 1,5 litros que sustituyó al veterano 1.6 HDi en todo el grupo. Es suave, gasta poco y cumple Euro 6d con EGR, AdBlue y FAP. Su punto débil es la distribución: una correa bañada en aceite que exige el aceite exacto y una cadena interna de 7 mm que quedó corta y obligó a campaña. Alrededor de eso, los fallos típicos son los de cualquier diésel moderno: FAP en uso urbano, EGR obstruida y sensores de NOx del sistema SCR.",
+      "issues": [
+        {
+          "id": "dv5-7mm-chain",
+          "title": "Cadena de 7 mm entre árboles de levas: campaña a la versión de 8 mm",
+          "symptom": [
+            "Ruido metálico de cadena al ralentí en frío",
+            "Pérdida progresiva de potencia y arranque más difícil",
+            "Códigos de correlación entre cigüeñal y árbol de levas (P0011, P0012, P0016, P0017, P0018)",
+            "En el caso extremo, rotura de cadena y motor bloqueado"
+          ],
+          "cause": "La cadena que une los dos árboles de levas se diseñó con 7 mm de ancho y resultó insuficiente para las cargas del motor. Se estira y se desgasta antes de lo esperado, sobre todo con aceite degradado o intervalos largos. Stellantis reconoció el problema y pasó a una cadena de 8 mm.",
+          "checks": [
+            "Comprobar con el VIN si la unidad está incluida en la campaña y si ya se ejecutó",
+            "Diagnóstico de ruido con la aplicación oficial que usa el concesionario para valorar el desgaste",
+            "Leer códigos de correlación y comparar posición real de árboles y cigüeñal",
+            "Revisar la factura del aceite: la especificación correcta es parte del expediente de garantía"
+          ],
+          "solution": "Pasar por la campaña: actualización de software, aceite con especificación FPW9.55535/03 (Total Quartz INEO RCP 5W-30) y, si el diagnóstico de ruido es positivo, sustitución por el kit de cadena de 8 mm. Fuera de campaña, el cambio se hace igual, pero se paga.",
+          "severity": "critica",
+          "status": "confirmada",
+          "risk": "Si la cadena salta o rompe, los pistones golpean las válvulas y el motor se destruye. Es la avería que convierte un coche en una reparación de varios miles de euros, y avisa con ruido antes de llegar ahí.",
+          "cost": {
+            "diagnosis": "gratis en campaña; 60–120 € fuera",
+            "parts": "kit de cadena de 8 mm y juntas",
+            "labour": "6–10 h",
+            "typical": "1.200–2.000 € fuera de campaña; 0 € si la campaña lo cubre",
+            "note": "Orientativo. La horquilla es amplia porque depende de si se accede por la culata o se levanta el motor, y de si hay daños asociados.",
+            "sources": [
+              {
+                "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+                "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+                "publisher": "Autoricambi Tritella",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+              "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+              "publisher": "Autoricambi Tritella",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "1.5 BlueHDi (DV5) reliability & problems",
+              "url": "https://autoscore.pro/engine/1.5-bluehdi-dv5",
+              "publisher": "Autoscore",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "dv5-wet-belt",
+          "title": "Correa de distribución bañada en aceite degradada",
+          "symptom": [
+            "Ruido de roce o chirrido en la zona de la distribución",
+            "Restos de goma en el aceite y en el tamiz de aspiración",
+            "Pérdida de presión de aceite y aviso en el cuadro",
+            "Arranque difícil y pérdida de sincronización en el caso extremo"
+          ],
+          "cause": "La correa vive dentro del cárter, en contacto con el aceite. Si el lubricante no es el especificado, se alarga el intervalo o se usa el coche en trayectos muy cortos, la goma se degrada, se deshilacha y sus restos acaban en el circuito de aceite. Es el mismo principio que la correa húmeda del 1.2 PureTech.",
+          "checks": [
+            "Preguntar por el historial del cambio de correa y por el aceite usado en cada revisión",
+            "Inspeccionar el estado de la correa por la tapa de distribución y buscar fibras en el aceite",
+            "Comprobar la presión de aceite y el estado del tamiz de aspiración",
+            "Verificar que el aceite cumple FPW9.55535/03"
+          ],
+          "solution": "Sustituir el kit completo (correa, tensor, rodillos y bomba de agua) antes de que se rompa, con aceite y filtro nuevos. Preventivo a los 120.000–180.000 km o 6 años, antes en uso urbano.",
+          "severity": "critica",
+          "status": "reportada",
+          "risk": "Una correa húmeda rota deja de mover el árbol de levas y el motor se para en marcha; además, los restos de goma obstruyen la aspiración de la bomba de aceite y destruyen los cojinetes. No avisa con suficiente antelación.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "150–300 € (kit con bomba de agua)",
+            "labour": "5–8 h",
+            "typical": "500–900 € preventivo; 2.500 € o más si rompe",
+            "note": "Orientativo. Es la intervención con mejor relación coste-riesgo de todo el motor: se hace una vez y se evita la avería cara.",
+            "sources": [
+              {
+                "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+                "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+                "publisher": "Autoricambi Tritella",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "Peugeot 1.5 BlueHDi: información clave de mantenimiento y averías",
+                "url": "https://www.peugeot.co.uk/owners/Peugeot-1-5-blue-hdi-key-information.html",
+                "publisher": "Peugeot",
+                "type": "fabricante",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+              "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+              "publisher": "Autoricambi Tritella",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "Peugeot 1.5 BlueHDi: información clave de mantenimiento y averías",
+              "url": "https://www.peugeot.co.uk/owners/Peugeot-1-5-blue-hdi-key-information.html",
+              "publisher": "Peugeot",
+              "type": "fabricante",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "dv5-adblue-scr",
+          "title": "Fallo del sistema SCR: AdBlue, bomba, inyector o sensor de NOx",
+          "symptom": [
+            "Aviso de emisiones y cuenta atrás de arranque en el cuadro",
+            "Testigo de motor con códigos de eficiencia del SCR",
+            "Consumo de AdBlue anómalo, por exceso o por defecto",
+            "Limitación de potencia cuando la cuenta atrás llega a cero"
+          ],
+          "cause": "El sistema SCR inyecta urea en el escape para reducir los NOx. La bomba, el inyector y el sensor de NOx trabajan en un ambiente agresivo y se obstruyen o fallan. El AdBlue caducado o contaminado, y los trayectos cortos que no dejan calentar el sistema, agravan el problema.",
+          "checks": [
+            "Leer los códigos concretos del SCR y la eficiencia de conversión",
+            "Comprobar la calidad y la fecha del AdBlue del depósito",
+            "Verificar el funcionamiento de la bomba y la dosificación del inyector",
+            "Revisar el sensor de NOx y su cableado antes de cambiar piezas caras"
+          ],
+          "solution": "Limpiar o sustituir el inyector de urea, la bomba o el sensor de NOx según el código. Rellenar con AdBlue fresco y hacer un ciclo de conducción que permita la regeneración. Si el depósito está cristalizado, se sustituye.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "No rompe el motor, pero puede dejar el coche en modo limitado o impedir el arranque cuando la cuenta atrás termina. Además, circular con el sistema anulado es una reforma ilegal y un problema en la ITV.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "150–700 € según la pieza",
+            "labour": "2–5 h",
+            "typical": "400–1.200 €",
+            "note": "Orientativo. El sensor de NOx y el depósito son las piezas caras; el inyector y la bomba, las baratas.",
+            "sources": [
+              {
+                "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+                "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+                "publisher": "Autoricambi Tritella",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+              "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+              "publisher": "Autoricambi Tritella",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "dv5-dpf-clogging",
+          "title": "FAP obstruido por uso urbano",
+          "symptom": [
+            "Aviso de riesgo de obstrucción del filtro de partículas",
+            "Regeneraciones frecuentes y consumo momentáneo alto",
+            "Pérdida de potencia y respuesta perezosa",
+            "Nivel de aceite alto y olor a gasóleo en la varilla en casos avanzados"
+          ],
+          "cause": "El filtro retiene hollín y lo quema en regeneraciones que necesitan temperatura y tiempo. En trayectos cortos el motor no alcanza la temperatura necesaria, las regeneraciones se interrumpen y el hollín se acumula. El gasóleo que se inyecta de más para regenerar acaba en el cárter y diluye el aceite.",
+          "checks": [
+            "Leer la carga de hollín y la presión diferencial del FAP",
+            "Comprobar el número y el resultado de las últimas regeneraciones",
+            "Revisar el nivel y el olor del aceite por si hay dilución",
+            "Descartar una fuga de admisión o un inyector que genere humo de más"
+          ],
+          "solution": "Regeneración forzada en taller si la carga es moderada. Si el filtro está saturado o contiene cenizas, limpieza profesional o sustitución. Después, cambiar el aceite si está diluido y corregir el patrón de uso.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "Un FAP muy obstruido sube la contrapresión, castiga el turbo y puede dejar el coche en avería. La dilución de aceite asociada acelera el desgaste interno y es tan peligrosa como el propio filtro.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "limpieza profesional o filtro nuevo",
+            "labour": "2–6 h",
+            "typical": "800–2.500 €",
+            "note": "Orientativo. La limpieza es mucho más barata que el filtro, pero no siempre recupera un FAP con cenizas acumuladas.",
+            "sources": [
+              {
+                "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+                "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+                "publisher": "Autoricambi Tritella",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+              "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+              "publisher": "Autoricambi Tritella",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "dv5-egr-intake",
+          "title": "Válvula EGR y colector de admisión obstruidos",
+          "symptom": [
+            "Ralentí inestable y tirones a bajo régimen",
+            "Testigo de motor con código de caudal de EGR insuficiente",
+            "Humo negro y consumo algo mayor",
+            "Arranque más difícil en frío"
+          ],
+          "cause": "La EGR devuelve gases de escape a la admisión y con ellos hollín. En uso urbano, ese hollín se mezcla con los vapores de aceite y forma una pasta que agarrota la válvula y reduce la sección del colector.",
+          "checks": [
+            "Leer el caudal de EGR solicitado y el real en diagnosis en marcha",
+            "Inspeccionar el colector con endoscopia y comprobar el juego de la mariposa",
+            "Descartar un sensor de presión de admisión descalibrado",
+            "Revisar el estado del filtro de aire"
+          ],
+          "solution": "Limpieza de la válvula y del colector, o sustitución de la EGR si el motor eléctrico está dañado. En muchos casos conviene limpiar también la mariposa y el sensor de presión.",
+          "severity": "baja",
+          "status": "reportada",
+          "risk": "Molesta y ensucia, pero no destruye el motor. El riesgo está en ignorarla: una EGR agarrotada abierta provoca humo y pérdida de potencia, y cerrada dispara las temperaturas de combustión.",
+          "cost": {
+            "diagnosis": "60–100 €",
+            "parts": "limpieza o 150–350 € la válvula",
+            "labour": "2–4 h",
+            "typical": "150–900 €",
+            "note": "Orientativo. La limpieza manual del colector es la parte que más mano de obra consume.",
+            "sources": [
+              {
+                "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+                "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+                "publisher": "Autoricambi Tritella",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+              "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+              "publisher": "Autoricambi Tritella",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "maintenance": [
+        {
+          "item": "Aceite y filtro",
+          "interval": "cada 15.000 km o 12 meses; antes en uso urbano",
+          "note": "Aceite con especificación FPW9.55535/03 (Total Quartz INEO RCP 5W-30). No es una recomendación comercial: es requisito para la cobertura de la garantía ampliada de la campaña de la cadena.",
+          "sources": [
+            {
+              "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+              "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+              "publisher": "Autoricambi Tritella",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Correa húmeda y bomba de agua",
+          "interval": "120.000–180.000 km o 6 años, lo que llegue antes",
+          "note": "Adelantar en uso urbano o con muchos arranques en frío. Es la intervención preventiva más importante del motor.",
+          "sources": [
+            {
+              "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+              "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+              "publisher": "Autoricambi Tritella",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Filtro de combustible",
+          "interval": "cada 40.000–60.000 km",
+          "note": "Protege la bomba de alta presión y los inyectores, que son la pieza más cara del sistema de inyección.",
+          "sources": [
+            {
+              "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+              "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+              "publisher": "Autoricambi Tritella",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "AdBlue y sistema SCR",
+          "interval": "rellenar cuando avise; revisar el sistema cada 60.000 km",
+          "note": "Usar AdBlue fresco y de calidad. El producto caducado cristaliza y estropea bomba e inyector.",
+          "sources": [
+            {
+              "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+              "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+              "publisher": "Autoricambi Tritella",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "1.5 BlueHDi: problemas reales, campaña de la cadena de 7 a 8 mm, AdBlue y DPF",
+          "url": "https://autoricambitritella.it/en/blogs/problematiche-e-guasti-delle-vetture/motore-1-5-bluehdi-problemi-comuni-soluzioni-consigli",
+          "publisher": "Autoricambi Tritella",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "1.5 BlueHDi (DV5) reliability & problems",
+          "url": "https://autoscore.pro/engine/1.5-bluehdi-dv5",
+          "publisher": "Autoscore",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Peugeot 1.5 BlueHDi: información clave de mantenimiento y averías",
+          "url": "https://www.peugeot.co.uk/owners/Peugeot-1-5-blue-hdi-key-information.html",
+          "publisher": "Peugeot",
+          "type": "fabricante",
+          "accessed": "2026-11-04"
+        }
+      ],
+      "confidence": "alta",
+      "confidenceNote": "La campaña de la cadena de 7 a 8 mm es oficial de Stellantis y está documentada por recambistas y concesionarios; la correa húmeda y la especificación de aceite también. Los importes son orientativos y varían según país, versión y si la intervención entra en campaña. El estado de las averías sin campaña (FAP, EGR, SCR) es 'reportada'."
+    },
+    {
+      "id": "toyota-2zr-fxe-18-hybrid",
+      "brand": "Toyota / Lexus",
+      "group": "Toyota Motor",
+      "family": "2ZR-FXE (1.8 híbrido, ciclo Atkinson)",
+      "commercial": "Prius, Prius+, Auris Hybrid, Corolla Hybrid 1.8, C-HR Hybrid, Yaris Cross Hybrid (según mercado), Lexus CT 200h",
+      "codes": "2ZR-FXE",
+      "years": "2009–actualidad",
+      "displacementCc": 1798,
+      "fuel": "Gasolina (híbrido no enchufable)",
+      "powerPs": "98–99 PS térmicos; 122–140 PS de sistema según generación",
+      "aspiration": "Atmosférico",
+      "injection": "Inyección indirecta multipunto, distribución variable VVT-i y ciclo Atkinson",
+      "transmissionNote": "Transmisión e-CVT por engranaje planetario con motor-generador y motor eléctrico",
+      "vehicles": [],
+      "distribution": {
+        "type": "Cadena de distribución",
+        "interval": "Sin intervalo oficial de sustitución",
+        "note": "La cadena del 2ZR es muy duradera y rara vez es el problema. Lo que sí castiga este motor es el calor: la bomba de agua es eléctrica y, si falla, el motor se sobrecalienta sin que el conductor lo note, porque el Prius no lleva indicador de temperatura. La distribución se revisa por ruido, no por kilometraje.",
+        "sources": [
+          {
+            "title": "Gen 3 Prius head gasket failure: síntomas y reparación",
+            "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+            "publisher": "Atomic Auto",
+            "type": "taller",
+            "accessed": "2026-11-04"
+          }
+        ]
+      },
+      "reliability": {
+        "verdict": "media-alta si se respeta el mantenimiento y se hacen recorridos largos",
+        "note": "El conjunto híbrido es de los más fiables del mercado: frenos que duran el doble, motor térmico poco exigido y electrónica muy probada. El punto negro es la junta de culata de la tercera generación del Prius (2010–2015), favorecida por sobrecalentamientos silenciosos por fallo de la bomba de agua eléctrica. En un Auris o Corolla posterior el riesgo baja mucho. Aceite al día y limpieza de EGR a su tiempo alargan la vida sin drama."
+      },
+      "summary": "Cuatro cilindros atmosférico de 1,8 litros en ciclo Atkinson, diseñado desde cero para trabajar en un híbrido: arranca y se para constantemente, funciona en un rango estrecho de revoluciones y no lleva correa de accesorios. Esa vida fácil explica su longevidad, pero también crea un punto ciego: el conductor no tiene indicador de temperatura y el motor puede sobrecalentarse sin aviso si la bomba de agua eléctrica falla. De ahí salen las dos averías serias conocidas: junta de culata y consumo de aceite.",
+      "issues": [
+        {
+          "id": "2zr-head-gasket",
+          "title": "Junta de culata debilitada en la 3.ª generación del Prius (2010–2015)",
+          "symptom": [
+            "Traqueteo fuerte al arrancar en frío que se suaviza en segundos (el 'death rattle')",
+            "Pérdida de refrigerante sin fuga visible",
+            "Humo blanco por el escape y fallos de encendido (P0300–P0304)",
+            "Aceite con aspecto lechoso en los casos graves"
+          ],
+          "cause": "El taller que documenta el caso atribuye el fallo al material y al recubrimiento de la junta en las unidades de 2010–2012, y señala como factor que agrava el problema el fallo intermitente de la bomba de agua eléctrica: un sobrecalentamiento sin testigo de temperatura acaba deformando la culata. La teoría muy difundida en foros de que la carbonilla del EGR es la causa principal no encaja con lo que ven en taller.",
+          "checks": [
+            "Comprobar pérdida de refrigerante con el motor frío y buscar fugas externas antes de culpar a la junta",
+            "Prueba de gases en el refrigerante y test de compresión por cilindro",
+            "Endoscopia de cilindros para ver restos de refrigerante y estado de las paredes",
+            "Leer códigos de fallo de encendido y de la bomba de agua (P261B, P261C, P261D)"
+          ],
+          "solution": "Sustitución de la junta de culata con verificación de planitud de la culata y, si procede, rectificado. Se aprovecha para revisar la bomba de agua eléctrica y el termostato. En unidades con muchos kilómetros conviene valorar el estado de los segmentos antes de abrir.",
+          "severity": "critica",
+          "status": "reportada",
+          "risk": "El refrigerante en la cámara de combustión provoca fallos de encendido, hidrolock en el peor caso y contaminación del aceite. Seguir circulando con el traqueteo y la pérdida de refrigerante convierte una junta en una culata o un motor.",
+          "cost": {
+            "diagnosis": "100–200 €",
+            "parts": "200–450 € (junta, tornillería, refrigerante y termostato)",
+            "labour": "8–14 h",
+            "typical": "1.200–2.500 €",
+            "note": "Orientativo. Si la culata necesita rectificado o hay que sustituir la bomba de agua, el importe sube.",
+            "sources": [
+              {
+                "title": "Gen 3 Prius head gasket failure: síntomas y reparación",
+                "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+                "publisher": "Atomic Auto",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "Head gasket failure driven by EGR system carbon clogging (1.8 2ZR-FXE)",
+                "url": "https://kicktyres.com/inspections/toyota/prius/head-gasket-failure-driven-by-egr-system-carbon-clogging-1-8-2zr-fxe",
+                "publisher": "Kicktyres",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Gen 3 Prius head gasket failure: síntomas y reparación",
+              "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+              "publisher": "Atomic Auto",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "Why Prius head gaskets fail: the EGR cooler question",
+              "url": "https://www.tucsonhybrids.com/prius-head-gasket-failure/",
+              "publisher": "Tucson Hybrids",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "Head gasket failure driven by EGR system carbon clogging (1.8 2ZR-FXE)",
+              "url": "https://kicktyres.com/inspections/toyota/prius/head-gasket-failure-driven-by-egr-system-carbon-clogging-1-8-2zr-fxe",
+              "publisher": "Kicktyres",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "2zr-electric-water-pump",
+          "title": "Bomba de agua eléctrica que falla o funciona de forma intermitente",
+          "symptom": [
+            "Aviso de sistema híbrido o de motor en el cuadro, con un icono de termómetro pequeño",
+            "Sobrecalentamiento sin que el conductor lo perciba por falta de indicador de temperatura",
+            "Códigos P261B, P261C o P261D",
+            "Pérdida de refrigerante y ruidos de ebullición tras parar"
+          ],
+          "cause": "Este motor no lleva bomba de agua mecánica: la mueve un motor eléctrico controlado por la centralita. Cuando envejece o se atasca, el caudal cae o desaparece. Como el Prius no tiene indicador de temperatura, el primer síntoma suele ser el testigo maestro, que se comparte con decenas de avisos y por eso se ignora.",
+          "checks": [
+            "Leer los códigos de la bomba y comprobar su funcionamiento con la diagnosis activa",
+            "Verificar que el caudal se mantiene en caliente y a ralentí",
+            "Revisar el nivel y el estado del refrigerante y descartar aire en el circuito",
+            "Comprobar el conector y el cableado de la bomba, que van expuestos a calor y humedad"
+          ],
+          "solution": "Sustituir la bomba por la referencia mejorada y purgar el circuito. Toyota publicó un boletín técnico sobre este problema y una bomba revisada. Si ya ha habido sobrecalentamiento, comprobar la junta de culata antes de dar el coche por reparado.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "Es la puerta de entrada a la junta de culata: un sobrecalentamiento silencioso deforma la culata y contamina el aceite. Una bomba que cuesta poco se convierte en una reparación de más de mil euros si se ignora el aviso.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "200–350 € (bomba mejorada)",
+            "labour": "2–4 h",
+            "typical": "350–650 €",
+            "note": "Orientativo. Es barata comparada con la junta de culata, y por eso muchos talleres la cambian de forma preventiva en unidades de más de 150.000 km.",
+            "sources": [
+              {
+                "title": "Gen 3 Prius head gasket failure: síntomas y reparación (boletín y bomba mejorada)",
+                "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+                "publisher": "Atomic Auto",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Gen 3 Prius head gasket failure: síntomas y reparación (boletín y bomba mejorada)",
+              "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+              "publisher": "Atomic Auto",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "2zr-egr-carbon",
+          "title": "Carbonilla en la válvula EGR y en el colector de admisión",
+          "symptom": [
+            "Ralentí irregular y tirones al arrancar el motor térmico",
+            "Testigo de motor con código P0401 (caudal de EGR insuficiente)",
+            "Consumo algo más alto y respuesta pobre",
+            "Mayor tendencia al picado en carga"
+          ],
+          "cause": "El motor arranca y se para constantemente y trabaja en frío más que un térmico convencional, así que la EGR acumula hollín y vapores de aceite sin quemar. El conducto y la válvula se obstruyen y el caudal de recirculación cae.",
+          "checks": [
+            "Leer el caudal de EGR solicitado y el real y revisar el código P0401",
+            "Inspeccionar la válvula y el conducto con endoscopia",
+            "Comprobar el sensor de presión de admisión y el filtro de aire",
+            "Descartar bujías y bobinas antes de atribuir los tirones al EGR"
+          ],
+          "solution": "Limpieza de la válvula, del conducto y del intercambiador si está accesible. Sustitución de la válvula si el motor paso a paso está dañado. En unidades de muchos kilómetros se limpia también la mariposa.",
+          "severity": "baja",
+          "status": "reportada",
+          "risk": "No destruye el motor, pero empeora la combustión y el consumo. Mantenerla limpia es además la mejor forma de reducir el riesgo de picado y de depósitos en la cámara.",
+          "cost": {
+            "diagnosis": "60–100 €",
+            "parts": "limpieza o 200–400 € la válvula",
+            "labour": "2–4 h",
+            "typical": "150–400 €",
+            "note": "Orientativo. La limpieza manual es la opción habitual y suficiente en la mayoría de los casos.",
+            "sources": [
+              {
+                "title": "Head gasket failure driven by EGR system carbon clogging (1.8 2ZR-FXE)",
+                "url": "https://kicktyres.com/inspections/toyota/prius/head-gasket-failure-driven-by-egr-system-carbon-clogging-1-8-2zr-fxe",
+                "publisher": "Kicktyres",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Head gasket failure driven by EGR system carbon clogging (1.8 2ZR-FXE)",
+              "url": "https://kicktyres.com/inspections/toyota/prius/head-gasket-failure-driven-by-egr-system-carbon-clogging-1-8-2zr-fxe",
+              "publisher": "Kicktyres",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "2zr-oil-consumption",
+          "title": "Consumo de aceite por desgaste de segmentos en unidades de muchos kilómetros",
+          "symptom": [
+            "Aviso de nivel bajo de aceite entre revisiones",
+            "Humo azulado al arrancar el motor térmico",
+            "Carbonilla creciente en bujías y cámara",
+            "Mayor consumo de combustible y respuesta irregular"
+          ],
+          "cause": "Con kilometraje alto, los segmentos pierden elasticidad y el aceite pasa a la cámara. Los ciclos de arranque y parada del híbrido y los intervalos de aceite largos aceleran el desgaste. La carbonilla de la admisión agrava el cuadro porque el motor respira peor.",
+          "checks": [
+            "Cuantificar el consumo con registro de rellenos",
+            "Medir compresión y hacer prueba de estanqueidad",
+            "Revisar bujías y cámara con endoscopia",
+            "Descartar fuga externa por junta de tapa de válvulas y retenes"
+          ],
+          "solution": "Si el consumo es moderado, aceite de la viscosidad correcta y control frecuente del nivel. Si es alto, sustitución de segmentos con rectificado de cilindros si hay ovalización. En un híbrido con muchos kilómetros conviene valorar el estado de la batería de alta tensión antes de invertir en el motor.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "El aceite quemado ensucia la cámara, provoca picado y puede dañar el catalizador. Un nivel bajo sostenido es letal para los cojinetes, sobre todo en un motor que arranca y se para muchas veces al día.",
+          "cost": {
+            "diagnosis": "120–200 €",
+            "parts": "300–800 € (segmentos y juntas)",
+            "labour": "12–18 h",
+            "typical": "1.500–3.000 €",
+            "note": "Orientativo. Es la reparación menos frecuente de la lista y la que más cuesta justificar por el valor del coche.",
+            "sources": [
+              {
+                "title": "Gen 3 Prius head gasket failure: síntomas y reparación",
+                "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+                "publisher": "Atomic Auto",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Gen 3 Prius head gasket failure: síntomas y reparación",
+              "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+              "publisher": "Atomic Auto",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "Why Prius head gaskets fail: the EGR cooler question",
+              "url": "https://www.tucsonhybrids.com/prius-head-gasket-failure/",
+              "publisher": "Tucson Hybrids",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "maintenance": [
+        {
+          "item": "Aceite y filtro",
+          "interval": "cada 10.000–15.000 km o 12 meses",
+          "note": "Aceite sintético 0W-20 con la especificación Toyota de la versión. El motor térmico arranca en frío muchas veces, así que el aceite trabaja en condiciones duras.",
+          "sources": [
+            {
+              "title": "Gen 3 Prius head gasket failure: síntomas y reparación",
+              "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+              "publisher": "Atomic Auto",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Refrigerante del motor y del inversor",
+          "interval": "según libro; revisar nivel cada 20.000 km",
+          "note": "Hay dos circuitos. El del inversor es crítico para la electrónica de potencia y se olvida con frecuencia.",
+          "sources": [
+            {
+              "title": "Gen 3 Prius head gasket failure: síntomas y reparación",
+              "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+              "publisher": "Atomic Auto",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Limpieza de EGR y admisión",
+          "interval": "cada 100.000 km en uso urbano",
+          "note": "Preventivo. Evita el P0401 y reduce la carbonilla que agrava el picado.",
+          "sources": [
+            {
+              "title": "Head gasket failure driven by EGR system carbon clogging (1.8 2ZR-FXE)",
+              "url": "https://kicktyres.com/inspections/toyota/prius/head-gasket-failure-driven-by-egr-system-carbon-clogging-1-8-2zr-fxe",
+              "publisher": "Kicktyres",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Bomba de agua eléctrica",
+          "interval": "revisar a partir de 120.000 km; sustituir si hay códigos",
+          "note": "No es mantenimiento de libro, pero es la pieza que más barato evita la avería más cara de este motor.",
+          "sources": [
+            {
+              "title": "Gen 3 Prius head gasket failure: síntomas y reparación",
+              "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+              "publisher": "Atomic Auto",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Gen 3 Prius head gasket failure: síntomas y reparación",
+          "url": "https://atomicauto.com/reports/gen3-head-gaskets",
+          "publisher": "Atomic Auto",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Why Prius head gaskets fail: the EGR cooler question",
+          "url": "https://www.tucsonhybrids.com/prius-head-gasket-failure/",
+          "publisher": "Tucson Hybrids",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Head gasket failure driven by EGR system carbon clogging (1.8 2ZR-FXE)",
+          "url": "https://kicktyres.com/inspections/toyota/prius/head-gasket-failure-driven-by-egr-system-carbon-clogging-1-8-2zr-fxe",
+          "publisher": "Kicktyres",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        }
+      ],
+      "confidence": "media",
+      "confidenceNote": "La debilidad de la junta de culata está documentada por talleres especializados en híbridos y por el cambio de referencia de la pieza a lo largo de los años, pero Toyota no ha publicado una campaña europea. Hay desacuerdo técnico sobre la causa principal: unos señalan la carbonilla del EGR y otros el material de la junta y los sobrecalentamientos por la bomba de agua. La ficha recoge ambas posturas y no da ninguna por cerrada."
+    },
+    {
+      "id": "bmw-n20-20-turbo",
+      "brand": "BMW",
+      "group": "BMW Group",
+      "family": "N20 / N26 (2.0 TwinPower Turbo)",
+      "commercial": "320i, 328i, 520i, 528i, X1 sDrive20i/28i, X3 xDrive20i/28i, X4, Z4 sDrive28i, Serie 1 y 2 con motor 2.0 turbo",
+      "codes": "N20B20A, N20B20B, N26B20A (versión SULEV para California)",
+      "years": "2011–2017",
+      "displacementCc": 1997,
+      "fuel": "Gasolina",
+      "powerPs": "184–245 PS según versión",
+      "aspiration": "Turboalimentado twin-scroll",
+      "injection": "Inyección directa de alta precisión, Valvetronic y distribución variable VANOS en admisión y escape",
+      "transmissionNote": "Manual de 6 marchas o automático ZF de 8; tracción trasera o total xDrive",
+      "vehicles": [],
+      "distribution": {
+        "type": "Cadena de distribución simple, con cadena independiente para la bomba de aceite",
+        "interval": "Sin intervalo oficial; BMW revisó guías y tensor durante la producción. Inspeccionar a partir de 100.000 km",
+        "note": "El N20 lleva dos cadenas: la de distribución, que mueve los árboles de levas, y otra separada para la bomba de aceite. Las dos comparten enemigo: las guías y el tensor de plástico. Cuando se desmenuzan, la distribución pierde tensión y los restos pueden obstruir la aspiración de la bomba. Es un motor de interferencia: si la cadena salta, se tocan válvulas y pistones.",
+        "sources": [
+          {
+            "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+            "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+            "publisher": "DreamBMW",
+            "type": "taller",
+            "accessed": "2026-11-04"
+          }
+        ]
+      },
+      "reliability": {
+        "verdict": "media-baja",
+        "note": "Como motor es excelente: empuja desde abajo, gasta poco y suena bien. Como propiedad de segunda mano es una lotería con las cartas marcadas, porque la cadena no tiene intervalo oficial y el fallo depende del aceite y del trato. Un N20 con facturas de aceite cada 10.000 km y guías revisadas es buena compra; uno de 150.000 km sin historial, no. El coste de la distribución supera muchas veces el valor del coche."
+      },
+      "summary": "El cuatro cilindros turbo que motorizó media gama BMW entre 2011 y 2017, de la Serie 1 al Z4. Técnicamente es muy refinado —turbo twin-scroll, Valvetronic e inyección directa— y entrega potencia de seis cilindros con consumo de cuatro. Su debilidad es de materiales: las guías y el tensor de plástico de la cadena se degradan antes de lo razonable y arrastran consigo la cadena de la bomba de aceite. El resto de averías habituales son las de cualquier turbo de inyección directa: juntas de aceite y gestiones electrónicas que imitan síntomas de cadena.",
+      "issues": [
+        {
+          "id": "n20-chain-guides",
+          "title": "Guías y tensor de la cadena de distribución degradados",
+          "symptom": [
+            "Cascabeleo metálico de 1 a 3 segundos al arrancar en frío",
+            "Ruido que se alarga o aparece también en marcha",
+            "Ralentí irregular, tirones y pérdida de potencia",
+            "Testigo de motor con códigos de correlación de árboles de levas"
+          ],
+          "cause": "Las guías y el tensor son de plástico. Con calor, ciclos térmicos y aceite degradado se vuelven quebradizos, se agrietan y dejan de sujetar la cadena. La cadena se estira, golpea la tapa y acaba saltando dientes en los piñones. Los intervalos de aceite largos que BMW recomendaba al principio agravaron el problema.",
+          "checks": [
+            "Escuchar el arranque en frío: el cascabeleo corto es el síntoma más fiable",
+            "Leer códigos de correlación y comprobar la posición real con ISTA",
+            "Inspeccionar el tensor y las guías por la tapa de distribución, buscando plástico roto",
+            "Revisar el historial de aceite: es el mejor predictor del estado de las guías"
+          ],
+          "solution": "Sustituir el kit completo: cadena, guías, tensor, piñones si están marcados y juntas de la tapa. Se aprovecha para revisar la cadena de la bomba de aceite. Usar solo recambio revisado y aceite con el intervalo corto a partir de ahí.",
+          "severity": "critica",
+          "status": "reportada",
+          "risk": "Es un motor de interferencia: si la cadena salta o rompe, las válvulas golpean los pistones y el motor se destruye. La diferencia entre cambiar el kit y cambiar el motor es escuchar el ruido a tiempo.",
+          "cost": {
+            "diagnosis": "100–200 €",
+            "parts": "400–900 € (kit completo, juntas y tornillería)",
+            "labour": "8–14 h",
+            "typical": "1.200–2.500 €",
+            "note": "Orientativo. En un servicio oficial el importe se dispara; en un especialista BMW independiente se queda en la parte baja de la horquilla.",
+            "sources": [
+              {
+                "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+                "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+                "publisher": "DreamBMW",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "BMW N20 timing chain repair: guide to failure",
+                "url": "https://motronix.net/blog/bmw-n20-timing-chain-failure/",
+                "publisher": "Motronix",
+                "type": "taller",
+                "accessed": "2026-11-04",
+                "accessNote": "El sitio devolvió 502 al acceso automático; abrir en el navegador para confirmar."
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+              "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+              "publisher": "DreamBMW",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "BMW N20 timing chain repair: guide to failure",
+              "url": "https://motronix.net/blog/bmw-n20-timing-chain-failure/",
+              "publisher": "Motronix",
+              "type": "taller",
+              "accessed": "2026-11-04",
+              "accessNote": "El sitio devolvió 502 al acceso automático; abrir en el navegador para confirmar."
+            }
+          ]
+        },
+        {
+          "id": "n20-oil-pump-chain",
+          "title": "Cadena de la bomba de aceite y aspiración obstruida por restos de guía",
+          "symptom": [
+            "Aviso de presión de aceite en el cuadro",
+            "Ruido de cadena también en caliente",
+            "Testigo de motor con códigos de presión o de VANOS",
+            "En el caso extremo, gripado de cojinetes"
+          ],
+          "cause": "El N20 tiene una cadena propia para la bomba de aceite, con su propio tensor. Se desgasta y, además, los trozos de guía de la distribución caen al cárter y taponan el tamiz de aspiración. El resultado es una caída de presión que llega al tren superior y acelera el desgaste de todo.",
+          "checks": [
+            "Medir la presión de aceite en caliente con manómetro, no solo con el testigo",
+            "Bajar el cárter y revisar el tamiz de aspiración en busca de plástico",
+            "Comprobar el estado de la cadena de la bomba y su tensor",
+            "Revisar códigos de VANOS y de regulación de presión"
+          ],
+          "solution": "Sustituir la cadena y el tensor de la bomba, limpiar el tamiz y el cárter, y cambiar el aceite y el filtro. Si ya ha habido pérdida de presión sostenida, valorar el estado de los cojinetes antes de montar.",
+          "severity": "critica",
+          "status": "reportada",
+          "risk": "La presión de aceite baja destruye cojinetes y árboles de levas en pocos kilómetros. Es la vía por la que una avería de distribución acaba en motor nuevo.",
+          "cost": {
+            "diagnosis": "100–200 €",
+            "parts": "200–450 €",
+            "labour": "6–10 h",
+            "typical": "800–1.800 €",
+            "note": "Orientativo. Si se hace a la vez que la distribución, la mano de obra se comparte y el total baja.",
+            "sources": [
+              {
+                "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+                "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+                "publisher": "DreamBMW",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+              "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+              "publisher": "DreamBMW",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "N20/N26 timing chain failure log (foro técnico)",
+              "url": "https://f30.bimmerpost.com/forums/showthread.php?p=26739090",
+              "publisher": "Bimmerpost F30",
+              "type": "foro",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "n20-vanos-solenoid",
+          "title": "Solenoides VANOS y sensores que imitan una avería de cadena",
+          "symptom": [
+            "Ralentí irregular y pérdida de par a bajo régimen",
+            "Testigo de motor con códigos de correlación o de regulación VANOS",
+            "Respuesta irregular al acelerar",
+            "Arranque algo más largo de lo normal"
+          ],
+          "cause": "Los solenoides del VANOS se ensucian con aceite degradado y dejan de regular el avance. Los códigos que generan son muy parecidos a los de una cadena estirada, y de ahí vienen diagnósticos caros equivocados: se cambia la distribución cuando el problema era un solenoide.",
+          "checks": [
+            "Comparar los códigos con los valores reales de posición de árboles",
+            "Comprobar la resistencia y la respuesta de los solenoides",
+            "Revisar el estado del aceite y los filtros de las válvulas",
+            "Descartar primero la cadena con una inspección visual del tensor"
+          ],
+          "solution": "Limpiar o sustituir los solenoides y los filtros de las válvulas, con aceite y filtro nuevos. Si el problema persiste con códigos de correlación, entonces sí toca revisar la cadena.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "No rompe el motor, pero provoca diagnósticos equivocados y un gasto evitable. Circular con el VANOS fuera de punto empeora el consumo y las emisiones.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "120–350 € por solenoide",
+            "labour": "1–3 h",
+            "typical": "150–500 €",
+            "note": "Orientativo. Es la avería que hay que descartar antes de autorizar una distribución.",
+            "sources": [
+              {
+                "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+                "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+                "publisher": "DreamBMW",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+              "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+              "publisher": "DreamBMW",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "n20-valve-cover-leaks",
+          "title": "Fugas de aceite por la tapa de válvulas y retenes",
+          "symptom": [
+            "Olor a aceite quemado al parar el motor",
+            "Manchas de aceite sobre el colector de escape y la culata",
+            "Consumo de aceite sin humo visible",
+            "Aceite en los alojamientos de las bujías"
+          ],
+          "cause": "La junta de la tapa de válvulas y los retenes se endurecen con el calor del turbo, que va muy cerca. El aceite cae sobre el escape y el olor entra en el habitáculo. La tapa de plástico también puede deformarse con los años.",
+          "checks": [
+            "Limpiar la zona y rodar para localizar el origen exacto",
+            "Inspeccionar los retenes de las bujías y el sellado de la tapa",
+            "Revisar la ventilación del cárter, que si está obstruida presuriza y provoca fugas",
+            "Descartar fuga por el retén del cigüeñal y por el turbo"
+          ],
+          "solution": "Sustituir la junta de la tapa de válvulas y los retenes de las bujías; si la tapa está deformada, cambiarla completa. Verificar la válvula de ventilación del cárter y limpiar la zona para poder detectar recaídas.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "El aceite sobre el escape puede humear y, en el peor caso, prender. Además, una fuga no detectada baja el nivel y encadena desgaste de cadena y cojinetes, que en este motor es lo más caro.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "80–300 € (junta, retenes o tapa completa)",
+            "labour": "2–5 h",
+            "typical": "250–700 €",
+            "note": "Orientativo. La tapa completa es bastante más cara que la junta, pero a veces es la única solución.",
+            "sources": [
+              {
+                "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+                "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+                "publisher": "DreamBMW",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+              "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+              "publisher": "DreamBMW",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "maintenance": [
+        {
+          "item": "Aceite y filtro",
+          "interval": "cada 10.000 km o 12 meses, aunque el libro diga más",
+          "note": "Es la medida preventiva más eficaz contra el desgaste de guías y cadena. Aceite con la especificación BMW Longlife de la versión.",
+          "sources": [
+            {
+              "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+              "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+              "publisher": "DreamBMW",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Bujías",
+          "interval": "cada 60.000 km",
+          "note": "Bujías de la referencia exacta. Un motor con Valvetronic y turbo nota mucho una bujía gastada.",
+          "sources": [
+            {
+              "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+              "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+              "publisher": "DreamBMW",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Inspección de distribución",
+          "interval": "a partir de 100.000 km, y siempre antes de comprar",
+          "note": "Escuchar el arranque en frío y revisar el tensor. En este motor una inspección de veinte minutos ahorra una factura de cuatro cifras.",
+          "sources": [
+            {
+              "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+              "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+              "publisher": "DreamBMW",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Filtro de aire y bujías de encendido",
+          "interval": "filtro cada 30.000 km",
+          "note": "En un turbo de inyección directa, la admisión limpia reduce la carbonilla y el consumo.",
+          "sources": [
+            {
+              "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+              "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+              "publisher": "DreamBMW",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "BMW N20 timing chain failure: symptoms, causes and repair cost",
+          "url": "https://dreambmw.com/blog/bmw-n20-timing-chain-failure-symptoms-repair-costs",
+          "publisher": "DreamBMW",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "BMW N20 timing chain repair: guide to failure",
+          "url": "https://motronix.net/blog/bmw-n20-timing-chain-failure/",
+          "publisher": "Motronix",
+          "type": "taller",
+          "accessed": "2026-11-04",
+          "accessNote": "El sitio devolvió 502 al acceso automático; abrir en el navegador para confirmar."
+        },
+        {
+          "title": "N20/N26 timing chain failure log (foro técnico)",
+          "url": "https://f30.bimmerpost.com/forums/showthread.php?p=26739090",
+          "publisher": "Bimmerpost F30",
+          "type": "foro",
+          "accessed": "2026-11-04"
+        }
+      ],
+      "confidence": "media",
+      "confidenceNote": "El fallo de guías y tensor del N20 está ampliamente documentado por especialistas BMW y foros técnicos con muchos casos, y BMW revisó los componentes durante la producción. No hay campaña europea pública ni intervalo oficial, así que el estado es 'reportada'. Los importes varían mucho entre servicio oficial y especialista independiente."
     }
   ]
 }
