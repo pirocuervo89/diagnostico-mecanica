@@ -306,6 +306,106 @@ async function callGemini(provider, prompt, opts) {
   }
 }
 
+// Visión: solo algunos modelos aceptan imágenes. Se comprueba por nombre de
+// modelo para no enviar una imagen a un modelo de texto y gastar cuota.
+function providerSupportsVision(provider) {
+  if (!provider) return false;
+  if (provider.kind === 'gemini') return true;
+  return /vision|llava|pixtral|llama-4|gpt-4o|gpt-4\.1|claude|o4/i.test(String(provider.model || ''));
+}
+
+export function aiVisionStatus(env = process.env) {
+  const provider = resolveProvider(env);
+  if (!provider) return { available: false, reason: 'no_key' };
+  if (!providerSupportsVision(provider)) {
+    return { available: false, reason: 'no_vision', provider: provider.id, model: provider.model };
+  }
+  return { available: true, provider: provider.id, providerLabel: provider.label, model: provider.model };
+}
+
+function splitDataUrl(dataUrl) {
+  const match = String(dataUrl || '').match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=\s]+)$/);
+  if (!match) return null;
+  return { mime: match[1], base64: match[2].replace(/\s/g, '') };
+}
+
+/**
+ * Llama al proveedor activo con una imagen. Nunca lanza excepción hacia la ruta.
+ */
+export async function callAIVision(prompt, imageDataUrl, opts = {}) {
+  const provider = resolveProvider(opts.env || process.env);
+  if (!provider) return { ok: false, reason: 'no_key' };
+  if (!providerSupportsVision(provider)) return { ok: false, reason: 'no_vision', provider: provider.id, model: provider.model };
+  if (Date.now() < cooldownUntil) return { ok: false, reason: 'cooldown' };
+
+  const image = splitDataUrl(imageDataUrl);
+  if (!image) return { ok: false, reason: 'bad_image' };
+
+  const { temperature = 0.2, maxOutputTokens = 900, timeoutMs = 30000 } = opts;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  const isGemini = provider.kind === 'gemini';
+  const url = isGemini
+    ? `${provider.baseUrl.replace(/\/+$/, '')}/models/${encodeURIComponent(provider.model)}:generateContent`
+    : `${provider.baseUrl.replace(/\/+$/, '')}/chat/completions`;
+
+  const body = isGemini
+    ? {
+        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: image.mime, data: image.base64 } }] }],
+        generationConfig: { temperature, maxOutputTokens, thinkingConfig: { thinkingBudget: 0 } }
+      }
+    : {
+        model: provider.model,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: `data:${image.mime};base64,${image.base64}` } }
+          ]
+        }],
+        temperature,
+        max_tokens: maxOutputTokens,
+        stream: false
+      };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: isGemini
+        ? { 'Content-Type': 'application/json', 'x-goog-api-key': provider.apiKey }
+        : { 'Content-Type': 'application/json', Authorization: `Bearer ${provider.apiKey}` },
+      signal: controller.signal,
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      const reason = classifyError(response.status);
+      console.warn(`[IA] ${provider.label} (visión) respondió ${response.status}; se pide selección manual.`);
+      setCooldown(reason, Number(response.headers.get('retry-after') || 0) * 1000);
+      return { ok: false, reason, status: response.status };
+    }
+
+    const data = await response.json();
+    const text = (isGemini
+      ? data?.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('')
+      : data?.choices?.[0]?.message?.content || '').trim();
+
+    if (!text) {
+      setCooldown('empty');
+      return { ok: false, reason: 'empty' };
+    }
+    cooldownUntil = 0;
+    return { ok: true, text, model: provider.model, provider: provider.id, providerLabel: provider.label };
+  } catch (err) {
+    const aborted = err.name === 'AbortError';
+    setCooldown(aborted ? 'timeout' : 'network');
+    return { ok: false, reason: aborted ? 'timeout' : 'network' };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 /**
  * Llama al proveedor activo. Nunca lanza excepción hacia la ruta.
  * @returns {Promise<{ok: boolean, text?: string, reason?: string, model?: string, provider?: string, providerLabel?: string, finishReason?: string}>}

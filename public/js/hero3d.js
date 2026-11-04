@@ -35,10 +35,10 @@ if (canvas && frame) {
 
   if (renderer) {
     const isCompact = window.matchMedia('(max-width: 920px)').matches;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isCompact ? 1.5 : 1.75));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isCompact ? 1.6 : 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 1.14;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setClearColor(0x000000, 0);
@@ -51,13 +51,13 @@ if (canvas && frame) {
     const envScene = new RoomEnvironment();
     const envRT = pmrem.fromScene(envScene, 0.04);
     scene.environment = envRT.texture;
-    scene.environmentIntensity = 0.72;
+    scene.environmentIntensity = 0.95;
     envScene.dispose?.();
 
     const hemi = new THREE.HemisphereLight(0xcfd8ff, 0x05040f, 1.05);
     scene.add(hemi);
 
-    const key = new THREE.DirectionalLight(0xffffff, 2.8);
+    const key = new THREE.DirectionalLight(0xffffff, 3.15);
     key.position.set(-5.5, 7.5, 6.5);
     key.castShadow = true;
     key.shadow.mapSize.set(isCompact ? 1024 : 1536, isCompact ? 1024 : 1536);
@@ -134,12 +134,12 @@ if (canvas && frame) {
     };
 
     const state = {
-      theta: -0.8,
-      phi: 1.25,
-      radius: 5.9,
-      targetTheta: -0.8,
-      targetPhi: 1.25,
-      targetRadius: 5.9,
+      theta: -0.62,
+      phi: 1.16,
+      radius: 5.15,
+      targetTheta: -0.62,
+      targetPhi: 1.16,
+      targetRadius: 5.15,
       fit: 1,
       dragging: false,
       lastX: 0,
@@ -147,7 +147,7 @@ if (canvas && frame) {
       pointerId: null,
       loaded: false
     };
-    const lookAt = new THREE.Vector3(0, 0.62, 0);
+    const lookAt = new THREE.Vector3(0, 0.58, 0);
 
     function applyCamera() {
       const r = state.radius * state.fit;
@@ -209,12 +209,12 @@ if (canvas && frame) {
     });
     canvas.tabIndex = 0;
     const reset = () => {
-      state.theta = -0.8;
-      state.phi = 1.25;
-      state.radius = 5.9;
-      state.targetTheta = -0.8;
-      state.targetPhi = 1.25;
-      state.targetRadius = 5.9;
+      state.theta = -0.62;
+      state.phi = 1.16;
+      state.radius = 5.15;
+      state.targetTheta = -0.62;
+      state.targetPhi = 1.16;
+      state.targetRadius = 5.15;
       applyCamera();
     };
     resetBtn?.addEventListener('click', reset);
@@ -372,6 +372,8 @@ if (canvas && frame) {
       raf = requestAnimationFrame(animate);
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
+      // Giro lento de escaparate cuando nadie toca el coche.
+      if (state.loaded && !state.dragging) state.targetTheta += dt * 0.11;
       state.theta += (state.targetTheta - state.theta) * Math.min(1, dt * 8);
       state.phi += (state.targetPhi - state.phi) * Math.min(1, dt * 8);
       state.radius += (state.targetRadius - state.radius) * Math.min(1, dt * 7);

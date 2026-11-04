@@ -1,6 +1,8 @@
 # Informe de cierre — Reforma total
 
 > Nota de vigencia: este documento cubre la fase de reforma visual de octubre de 2026. El estado más reciente (3D, escáner de fichas, compra y pendientes) está en `INFORME_REMODELACION_2026-10-23.md`.
+>
+> **Aviso (29/10/2026):** la Biblioteca técnica mencionada en este informe se eliminó de la aplicación. Se conserva una copia en `backups/biblioteca-tecnica-20261029.tar.gz`; las referencias del documento son históricas.
 
 Fecha: 2026-10-23  
 Proyecto: `/home/selupiro/diagnostico-mecanica`  

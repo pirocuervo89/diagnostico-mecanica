@@ -19,6 +19,11 @@ data/forum.sqlite
 data/forum.sqlite-shm
 data/forum.sqlite-wal
 data/forum/uploads/
+data/garage/uploads/
+
+# Artefactos de depuración y pruebas locales (perfiles de navegador, scripts sueltos)
+.dbg/
+.tmp/
 data/tutorials.sqlite
 data/tutorials.sqlite-shm
 data/tutorials.sqlite-wal

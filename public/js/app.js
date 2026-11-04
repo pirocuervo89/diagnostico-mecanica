@@ -38,6 +38,10 @@ function fmtNum(n) {
   return Number(n || 0).toLocaleString('es-ES').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
+function foldText(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 function sourceCountLabel(n) {
   return `${fmtNum(n)} ${Number(n) === 1 ? 'fuente' : 'fuentes'}`;
 }
@@ -610,10 +614,7 @@ function universalIcon(type) {
     tutorial: 'play',
     component: 'car',
     vehicle: 'car',
-    tuning: 'zap',
-    library: 'file',
-    technical: 'file'
-  })[type] || 'spark';
+    tuning: 'zap'  })[type] || 'spark';
 }
 
 function renderUniversalResults(data) {
@@ -627,10 +628,7 @@ function renderUniversalResults(data) {
     ['components', 'Sistemas del vehículo'],
     ['tutorials', 'Tutoriales'],
     ['products', 'Productos'],
-    ['tuning', 'Tuning'],
-    ['library', 'Dossiers de vehículo'],
-    ['technical', 'Biblioteca técnica']
-  ];
+    ['tuning', 'Tuning']  ];
   const html = groups.map(([key, label]) => {
     const items = data.groups?.[key] || [];
     if (!items.length) return '';
@@ -718,18 +716,6 @@ async function openUniversalResult(type, id, title = '') {
     showView('tuning');
     await loadTuning();
     openTuningPackage(id);
-    return;
-  }
-  if (type === 'library') {
-    showView('biblioteca');
-    await loadLibrary();
-    await openLibraryEntry(id, { scroll: true });
-    return;
-  }
-  if (type === 'technical') {
-    showView('biblioteca');
-    await switchLibraryMode('technical');
-    await openTechnicalEntry(id, { scroll: true });
     return;
   }
   if (type === 'product') {
@@ -1242,7 +1228,6 @@ const chatInput = $('#chatInput');
 const chatBox = $('#chatBox');
 const chatRecomendados = $('#chatRecomendados');
 const chatForumRefs = $('#chatForumRefs');
-const chatTechnicalRefs = $('#chatTechnicalRefs');
 let chatBusy = false;
 
 function addBubble(content, type = 'assistant', isHtml = false) {
@@ -1270,7 +1255,6 @@ async function submitChat(text) {
   addBubble(query, 'user');
   if (chatRecomendados) chatRecomendados.innerHTML = '';
   if (chatForumRefs) chatForumRefs.innerHTML = '';
-  if (chatTechnicalRefs) chatTechnicalRefs.innerHTML = '';
 
   const thinkingBubble = addBubble('<i></i><i></i><i></i>', 'assistant typing', true);
 
@@ -1317,32 +1301,6 @@ async function submitChat(text) {
           </div>
           <p class="forum-note">Solo se muestran casos guardados en esta instalación. La confianza depende de la coincidencia y de si la solución está verificada.</p>
         </div>`;
-    }
-
-    if (Array.isArray(res.technical_references) && res.technical_references.length && chatTechnicalRefs) {
-      chatTechnicalRefs.innerHTML = `
-        <div class="panel recommended-panel">
-          <div class="panel-head">
-            <div><span class="eyebrow">BIBLIOTECA TÉCNICA</span><h3>Referencias locales consultadas</h3></div>
-            <span class="tag">${icon('db')} ${res.technical_references.length} referencias</span>
-          </div>
-          <div class="forum-reference-list">
-            ${res.technical_references.map(ref => `
-              <button class="forum-reference" type="button" data-chat-tech="${esc(ref.id)}">
-                <span class="forum-ref">${esc(ref.category || 'Biblioteca')} · ${esc(ref.type || 'Documento')}</span>
-                <strong>${esc(ref.title)}</strong>
-                <small>${technicalStatusBadge(ref.status)} ${(ref.sourceNames || []).map(esc).join(', ') || 'Sin fuente externa registrada'}</small>
-              </button>`).join('')}
-          </div>
-          <p class="forum-note">Referencias trazables de la biblioteca local. Su estado indica si el dato está verificado, revisado, es genérico o solo enlaza a una fuente externa.</p>
-        </div>`;
-      chatTechnicalRefs.querySelectorAll('[data-chat-tech]').forEach(button => {
-        button.addEventListener('click', async () => {
-          showView('biblioteca');
-          await switchLibraryMode('technical');
-          await openTechnicalEntry(button.dataset.chatTech, { scroll: true });
-        });
-      });
     }
 
     if (Array.isArray(res.productos_recomendados) && res.productos_recomendados.length && chatRecomendados) {
@@ -1764,6 +1722,120 @@ function renderObdDtcs(codes) {
   if (toReport) toReport.disabled = codes.length === 0;
 }
 
+async function initObdProtocols() {
+  const box = $('#obdProtocolList');
+  if (!box) return;
+  try {
+    const data = await api('/api/obd/protocols');
+    const notice = $('#obdProtocolNotice');
+    if (notice) notice.textContent = data.notice || '';
+    const select = $('#obdProtocol');
+    if (select) {
+      const current = select.value;
+      select.innerHTML = '';
+      for (const p of data.protocols || []) {
+        const opt = document.createElement('option');
+        opt.value = p.code;
+        opt.textContent = p.state === 'recomendado' ? `${p.label} (recomendado)` : p.label;
+        select.appendChild(opt);
+      }
+      select.value = (data.protocols || []).some(p => p.code === current) ? current : (data.recommended || 'ATSP0');
+    }
+    const labels = { recomendado: 'Recomendado', estandar: 'Estándar OBD-II', especial: 'Vehículo pesado' };
+    box.innerHTML = (data.protocols || []).map(p => `
+      <article class="obd-protocol ${esc(p.state)}">
+        <div class="obd-protocol-head">
+          <b>${esc(p.label)}</b>
+          <code>${esc(p.code)}</code>
+        </div>
+        <p>${esc(p.note)}</p>
+        <dl>
+          <div><dt>Bus</dt><dd>${esc(p.bus)}</dd></div>
+          <div><dt>Pines OBD</dt><dd>${esc(p.pins)}</dd></div>
+          <div><dt>Uso habitual</dt><dd>${esc(p.era)}</dd></div>
+        </dl>
+        <span class="obd-protocol-badge">${esc(labels[p.state] || p.state)}</span>
+      </article>`).join('');
+  } catch (err) {
+    box.innerHTML = `<div class="notice">No se pudieron cargar los protocolos: ${esc(err.message)}.</div>`;
+  }
+}
+
+
+let obdScannersCache = [];
+
+function renderObdScanners() {
+  const box = $('#obdScannerList');
+  if (!box) return;
+  const items = obdScannersCache
+    .filter(item => item.forWeb && /adaptador/i.test(item.type))
+    .sort((a, b) => a.price - b.price);
+  if (!items.length) {
+    box.innerHTML = '<div class="notice">No hay adaptadores compatibles disponibles.</div>';
+    return;
+  }
+  box.innerHTML = items.map((item, index) => {
+    const tags = [
+      item.protocolSupport?.label,
+      item.connection,
+      'Sin pantalla ni app',
+      'Compatible con esta web'
+    ].filter(Boolean);
+    return `
+      <article class="obd-scanner for-web${index === 0 ? ' cheapest' : ''}">
+        <div class="scanner-media">
+          <img class="scanner-img" src="${esc(item.image)}" alt="${esc(item.imageAlt)}" loading="lazy">
+          ${index === 0 ? '<span class="scanner-cheapest">Más barato</span>' : ''}
+        </div>
+        <div class="scanner-body">
+          <div class="scanner-head">
+            <b>${esc(item.name)}</b>
+            <span class="scanner-price">${esc(item.priceText)}</span>
+          </div>
+          <div class="scanner-meta">${esc(item.brand)} · ${esc(item.type)} · ${esc(item.coverage)}</div>
+          <p class="scanner-best">${esc(item.bestFor)}</p>
+          <div class="scanner-tags">${tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>
+          <p class="scanner-stock">${esc(item.availability)}</p>
+          <details>
+            <summary>Puntos fuertes y límites</summary>
+            <ul class="scanner-pros">${(item.highlights || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+            <ul class="scanner-cons">${(item.limits || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+            <p class="micro-note">${esc(item.protocolSupport?.note || '')}</p>
+            <p class="micro-note">${esc(item.verification?.note || '')}</p>
+          </details>
+          <a class="btn btn-ghost scanner-buy" href="${esc(item.url)}" target="_blank" rel="noopener sponsored">Ver ficha y precio en Amazon</a>
+        </div>
+      </article>`;
+  }).join('');
+}
+
+async function initObdScanners() {
+  const box = $('#obdScannerList');
+  if (!box) return;
+  try {
+    const data = await api('/api/obd/scanners');
+    obdScannersCache = data.items || [];
+    const items = obdScannersCache
+      .filter(item => item.forWeb && /adaptador/i.test(item.type))
+      .sort((a, b) => a.price - b.price);
+    const count = $('#obdAdapterCount');
+    if (count) {
+      count.textContent = items.length
+        ? `${items.length} adaptadores · desde ${items[0].priceText}`
+        : 'Sin adaptadores';
+    }
+    const notice = $('#obdScannerNotice');
+    if (notice) {
+      notice.textContent = `${data.notice} ${data.compatibilityNote || ''} Precios comprobados: ${data.priceCheckedAt || ''}.`.trim();
+    }
+    const coverage = $('#obdScannerModeNote');
+    if (coverage) coverage.textContent = data.protocolCoverageNote || '';
+    renderObdScanners();
+  } catch (err) {
+    box.innerHTML = `<div class="notice">No se pudieron cargar los equipos: ${esc(err.message)}.</div>`;
+  }
+}
+
 function initOBD() {
   if (!window.ELM327Manager) {
     const sup = $('#obdBrowserSupport');
@@ -1793,6 +1865,8 @@ function initOBD() {
     });
   }
 
+  initObdProtocols();
+  initObdScanners();
   obdManager = new ELM327Manager();
 
   obdManager.on('status', d => {
@@ -1814,13 +1888,14 @@ function initOBD() {
   $('#obdConnect')?.addEventListener('click', async () => {
     const mode = modeSel?.value || 'simulated';
     const baud = Number($('#obdBaud')?.value) || 38400;
+    const protocol = $('#obdProtocol')?.value || 'ATSP0';
     obdState.mode = mode;
     obdState.connected = false;
     resetTelemetry();
     obdSetStatus(`Iniciando conexión ${mode.toUpperCase()}...`, 'connecting');
     obdSetButtons({ connect: false, disconnect: true, read: false, live: false, vin: false, clear: false });
     try {
-      const info = await obdManager.connect(mode, baud);
+      const info = await obdManager.connect(mode, baud, protocol);
       obdState.connected = true;
       obdSetStatus(`Conectado (${info.version}) · Protocolo: ${info.protocol} · Batería: ${info.voltage}`, 'connected');
       renderLiveGrid({ voltage: info.voltage });
@@ -2256,47 +2331,214 @@ function renderTuning() {
   const stages = $('#tuningStages');
   if (stages) {
     stages.innerHTML = (tuningCache.stages || []).map(s => `
-      <article class="stage-card">
-        <span class="eyebrow">${esc(s.name.split('—')[0])}</span>
-        <h3>${esc(s.name)}</h3>
-        <p>${esc(s.summary)}</p>
-        <h4>Requiere</h4><ul>${(s.requires || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
-        <h4>Evita</h4><ul class="danger-list">${(s.avoid || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+      <article class="stage-card" id="${esc(s.id)}">
+        <header class="stage-head">
+          <div>
+            <span class="eyebrow">${esc(s.name.split('—')[0].trim())}</span>
+            <h3>${esc(s.name.split('—')[1]?.trim() || s.name)}</h3>
+          </div>
+          <span class="stage-cost" title="Coste orientativo">${esc(s.cost || '€')}</span>
+        </header>
+        <p class="stage-goal">${esc(s.goal || '')}</p>
+        <p class="stage-summary">${esc(s.summary || '')}</p>
+
+        <h4>${icon('zap')} Qué da potencia de verdad</h4>
+        <ul class="stage-levers">
+          ${(s.powerLevers || []).map(l => `<li><div><b>${esc(l.title)}</b><em>${esc(l.effect)}</em></div><p>${esc(l.detail)}</p></li>`).join('')}
+        </ul>
+
+        <div class="stage-cols">
+          <div><h4>Hardware necesario</h4><ul>${(s.hardware || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+          <div><h4>Software y medición</h4><ul>${(s.software || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+          <div><h4>Límites a respetar</h4><ul class="danger-list">${(s.limits || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+        </div>
+
+        <div class="stage-checks">
+          <div><h4>Comprobaciones</h4><ul>${(s.checks || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+          <div><h4>Mitos que cuestan dinero</h4><ul class="danger-list">${(s.myths || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+        </div>
+
+        <p class="tuning-legal"><b>${icon('shield')} Legalidad:</b> ${esc(s.legality || '')}</p>
+        ${(s.sources || []).length ? `<p class="stage-sources">Fuentes: ${(s.sources || []).map(id => {
+          const src = (tuningCache.sources || []).find(x => x.id === id);
+          return src ? `<a href="${esc(src.url)}" target="_blank" rel="noopener noreferrer">${esc(src.publisher)}</a>` : '';
+        }).filter(Boolean).join(' · ')}</p>` : ''}
       </article>
     `).join('');
   }
+
   const box = $('#tuningPackages');
   if (!box) return;
   box.innerHTML = (tuningCache.packages || []).map(pkg => {
-    const vehicle = pkg.vehicle;
-    const products = (pkg.relatedProducts || []).map(p => `<button class="rel-product" type="button" data-tuning-product="${esc(p.id)}"><img src="${esc(p.image)}" alt="" loading="lazy"><span><b>${esc(p.name)}</b><small>${esc(p.manufacturer)} · ${esc(p.category)}</small></span>${icon('arrow')}</button>`).join('');
+    const cats = (pkg.productCategories || []).map(c =>
+      `<button class="btn ghost sm" type="button" data-tp-open="${esc(c.id)}">${esc(c.name)} <span class="tp-mini-count">${c.count}</span></button>`
+    ).join('');
     return `
       <article class="tuning-card panel" id="tuning-${esc(pkg.id)}">
         <div class="tuning-card-head">
-          ${vehicle ? `<img src="${esc(vehicle.image?.src || '')}" alt="${esc(vehicle.brand)} ${esc(vehicle.model)}">` : '<span class="tuning-generic">' + icon('zap') + '</span>'}
+          <span class="tuning-generic">${icon('zap')}</span>
           <div>
             <span class="eyebrow">${esc(pkg.level)}</span>
             <h3>${esc(pkg.name)}</h3>
             <p>${esc(pkg.tagline)}</p>
-            ${vehicle ? `<button class="btn ghost sm" type="button" data-tuning-vehicle="${esc(vehicle.id)}">Abrir ficha del vehículo ${icon('arrow')}</button>` : ''}
           </div>
         </div>
         <div class="tuning-cols">
           <div><h4>Ideal para</h4><p>${esc(pkg.idealFor)}</p><h4>No es para</h4><p>${esc(pkg.notFor)}</p></div>
-          <div><h4>Hardware y verificaciones</h4><ul>${(pkg.hardware || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+          <div><h4>Hardware por etapa</h4><ul>${(pkg.hardware || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
           <div><h4>Comprobaciones antes/después</h4><ul>${(pkg.checks || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
         </div>
-        <div class="tuning-notes">${(pkg.notes || []).map(x => `<p>${esc(x)}</p>`).join('')}</div>
-        <div class="tuning-legal"><b>${icon('shield')} Legalidad:</b> ${esc(pkg.legal)}</div>
-        <h4>Productos relacionados</h4>
-        <div class="rel-products">${products || '<p class="micro-note">Sin productos verificados para esta guía.</p>'}</div>
+        <div class="tuning-notes"><p>${esc(pkg.notes || '')}</p></div>
+        <h4>Piezas para esta ruta</h4>
+        <div class="tp-quick">${cats || '<p class="micro-note">Sin categorías asociadas.</p>'}</div>
       </article>`;
   }).join('');
-  box.querySelectorAll('[data-tuning-vehicle]').forEach(b => b.addEventListener('click', () => {
-    showView('vehiculos');
-    openVehicleSheet(b.dataset.tuningVehicle, { scroll: true });
+  box.querySelectorAll('[data-tp-open]').forEach(b => b.addEventListener('click', () => openTuningProducts(b.dataset.tpOpen)));
+}
+
+function openTuningProducts(category = 'all') {
+  tpCategory = category;
+  showView('tuning-productos');
+  loadTuningProducts();
+}
+
+// -------------------------------------------------------------
+// CATÁLOGO DE RECAMBIOS DE TUNING
+// -------------------------------------------------------------
+// De dónde sale la foto de cada ficha: la del vendedor, una foto libre de esa
+// pieza concreta o, si Commons no tiene ninguna, la imagen de su categoría.
+const TP_PHOTO_LABEL = {
+  tienda: 'Foto del vendedor',
+  referencia: 'Foto de referencia',
+  categoria: 'Imagen de categoría'
+};
+
+let tpCache = null;
+let tpCategory = 'all';
+let tpCar = 'all';
+let tpQuery = '';
+
+async function loadTuningProducts(force = false) {
+  const grid = $('#tpGrid');
+  if (!grid) return;
+  if (tpCache && !force) {
+    renderTpTabs();
+    renderTpGrid();
+    return;
+  }
+  grid.innerHTML = '<div class="notice">Cargando catálogo…</div>';
+  try {
+    const slow = new Promise((_, reject) => setTimeout(() => reject(new Error('el servidor tarda demasiado en responder')), 15000));
+    tpCache = await Promise.race([api('/api/tuning-products'), slow]);
+    const tabs = $('#tpTabs');
+    if (tabs) tabs.hidden = false;
+    const count = $('#tpCount');
+    if (count) count.textContent = fmtNum(tpCache.stats?.items || tpCache.items.length);
+    const cats = $('#tpCats');
+    if (cats) cats.textContent = fmtNum((tpCache.categories || []).length);
+    const select = $('#tpCar');
+    if (select && select.options.length <= 1) {
+      (tpCache.cars || []).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `${c.name} · ${c.engine}`;
+        select.appendChild(opt);
+      });
+    }
+    const legal = $('#tpLegal');
+    if (legal) legal.textContent = tpCache.disclaimer || '';
+    renderTpTabs();
+    renderTpGrid();
+  } catch (err) {
+    grid.innerHTML = `<div class="tp-empty">No se pudo cargar el catálogo: ${esc(err.message)}. <button class="btn ghost sm" type="button" id="tpRetry">Reintentar</button></div>`;
+    grid.querySelector('#tpRetry')?.addEventListener('click', () => loadTuningProducts(true));
+  }
+}
+
+function tpCounts() {
+  const counts = {};
+  for (const item of tpCache?.items || []) counts[item.category] = (counts[item.category] || 0) + 1;
+  return counts;
+}
+
+function renderTpTabs() {
+  const box = $('#tpTabs');
+  if (!box || !tpCache) return;
+  const counts = tpCounts();
+  const total = (tpCache.items || []).length;
+  box.innerHTML = [{ id: 'all', name: 'Todo' }, ...(tpCache.categories || [])].map(c => {
+    const n = c.id === 'all' ? total : counts[c.id] || 0;
+    return `<button class="tp-tab${tpCategory === c.id ? ' active' : ''}" type="button" role="tab" aria-selected="${tpCategory === c.id}" data-tp-cat="${esc(c.id)}">${esc(c.name)}<span>${n}</span></button>`;
+  }).join('');
+  box.querySelectorAll('[data-tp-cat]').forEach(b => b.addEventListener('click', () => {
+    tpCategory = b.dataset.tpCat;
+    renderTpTabs();
+    renderTpGrid();
   }));
-  box.querySelectorAll('[data-tuning-product]').forEach(b => b.addEventListener('click', () => openProductSheet(b.dataset.tuningProduct)));
+}
+
+function tpMatches(item) {
+  if (tpCategory !== 'all' && item.category !== tpCategory) return false;
+  if (tpCar !== 'all' && (item.cars || []).length && !item.cars.includes(tpCar)) return false;
+  if (!tpQuery) return true;
+  const text = foldText([item.name, item.brand, item.note, (item.fitment || []).join(' ')].join(' '));
+  return tpQuery.split(/\s+/).filter(Boolean).every(term => text.includes(term));
+}
+
+function renderTpGrid() {
+  const grid = $('#tpGrid');
+  if (!grid || !tpCache) return;
+  const items = (tpCache.items || []).filter(tpMatches);
+  const counter = $('#tpResults');
+  if (counter) counter.textContent = `${items.length} de ${tpCache.items.length} piezas`;
+  if (!items.length) {
+    grid.innerHTML = '<div class="tp-empty">No hay piezas con esos filtros. Prueba otra categoría o quita el filtro de coche.</div>';
+    return;
+  }
+  grid.innerHTML = items.map((item, index) => {
+    const links = (item.links || []).map(l => `<a class="tp-link" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.shop)} ${icon('arrow')}</a>`).join('');
+    const fits = (item.fitment || []).slice(0, 2).map(f => `<span class="tp-fit">${esc(f)}</span>`).join('');
+    const more = (item.fitment || []).length > 2 ? `<span class="tp-fit more">+${item.fitment.length - 2}</span>` : '';
+    return `
+      <article class="tp-card">
+        <div class="tp-media">
+          <img src="${esc(item.image)}" alt="${esc(item.name)}" loading="${index < 6 ? 'eager' : 'lazy'}" decoding="async" style="object-position:${50 + (index % 3) * 5}% ${50 + (index % 2) * 6}%">
+          <span class="tp-price" title="Coste orientativo">${esc(item.price || '€')}</span>
+          <span class="tp-ref" title="${item.photoKind === 'tienda' ? 'Foto del vendedor' : item.photoKind === 'referencia' ? 'Foto libre de esa pieza (Wikimedia Commons)' : 'Commons no tiene foto libre de esta pieza concreta: se muestra la de su categoría'}">${TP_PHOTO_LABEL[item.photoKind] || 'Foto de referencia'}</span>
+        </div>
+        <div class="tp-body">
+          <span class="tp-cat-label">${esc(catName(item.category))}</span>
+          <h3 title="${esc(item.name)}">${esc(item.name)}</h3>
+          <p class="tp-brand">${esc(item.brand)}</p>
+          <p class="tp-note">${esc(item.note)}</p>
+          <div class="tp-fits" title="${esc((item.fitment || []).join(' · '))}">${fits}${more}</div>
+          <div class="tp-links">${links}</div>
+        </div>
+      </article>`;
+  }).join('');
+}
+
+function catName(id) {
+  return (tpCache?.categories || []).find(c => c.id === id)?.name || id;
+}
+
+const tpSearchInput = $('#tpSearch');
+if (tpSearchInput) {
+  let timer = 0;
+  tpSearchInput.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      tpQuery = foldText(tpSearchInput.value.trim());
+      renderTpGrid();
+    }, 120);
+  });
+}
+const tpCarSelect = $('#tpCar');
+if (tpCarSelect) {
+  tpCarSelect.addEventListener('change', () => {
+    tpCar = tpCarSelect.value;
+    renderTpGrid();
+  });
 }
 
 function openTuningPackage(id) {
@@ -2305,817 +2547,6 @@ function openTuningPackage(id) {
   el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   el.classList.add('search-hit');
   setTimeout(() => el.classList.remove('search-hit'), 2200);
-}
-
-// -------------------------------------------------------------
-// BIBLIOTECA TÉCNICA
-// -------------------------------------------------------------
-let libraryData = null;
-let librarySelected = null;
-let libraryRequest = 0;
-
-function libraryMatches(item, q, brand, system) {
-  if (brand && item.brand !== brand) return false;
-  if (system && !(item.systems || []).includes(system)) return false;
-  if (!q) return true;
-  const text = foldText([item.title, item.brand, item.model, item.generation, item.version, item.engine?.code, (item.systems || []).join(' ')].join(' '));
-  return q.split(/\s+/).filter(Boolean).every(term => text.includes(term));
-}
-
-function foldText(value) {
-  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-}
-
-function libraryFilteredItems() {
-  if (!libraryData) return [];
-  const q = foldText($('#librarySearch')?.value || '').trim();
-  const brand = $('#libraryBrand')?.value || '';
-  const system = $('#librarySystem')?.value || '';
-  return libraryData.items.filter(item => libraryMatches(item, q, brand, system));
-}
-
-function renderLibraryIndex() {
-  const list = $('#libraryList');
-  if (!list || !libraryData) return;
-  const items = libraryFilteredItems();
-  if (!items.length) {
-    list.innerHTML = '<div class="notice">No hay dossiers que coincidan con los filtros.</div>';
-    return;
-  }
-  list.innerHTML = items.map(item => `
-    <button class="library-index-item vehicle-index-item${item.id === librarySelected ? ' active' : ''}" type="button" data-library-id="${esc(item.id)}">
-      ${item.image?.src ? `<img src="${esc(item.image.src)}" alt="" loading="lazy">` : `<span class="library-index-icon">${icon('file')}</span>`}
-      <span><b>${esc(item.brand)} ${esc(item.model)}</b><small>${esc(item.version)} · ${esc(item.years)}</small></span>
-      <em>${sourceCountLabel(item.sourceCount)}</em>
-    </button>
-  `).join('');
-  list.querySelectorAll('[data-library-id]').forEach(btn => {
-    btn.addEventListener('click', () => openLibraryEntry(btn.dataset.libraryId, { scroll: true }));
-  });
-}
-
-function renderLibraryMeta() {
-  if (!libraryData) return;
-  const count = $('#libraryCount');
-  if (count) count.textContent = fmtNum(libraryData.total);
-  const gaps = $('#libraryGapCount');
-  if (gaps) gaps.textContent = fmtNum((libraryData.documentationGaps || []).length);
-  const dossierTab = $('#libraryDossierTabCount');
-  if (dossierTab) dossierTab.textContent = fmtNum(libraryData.total);
-  const brandSel = $('#libraryBrand');
-  if (brandSel && brandSel.options.length === 1) {
-    brandSel.insertAdjacentHTML('beforeend', (libraryData.brands || []).map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join(''));
-  }
-  const systemSel = $('#librarySystem');
-  if (systemSel && systemSel.options.length === 1) {
-    systemSel.insertAdjacentHTML('beforeend', (libraryData.systems || []).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join(''));
-  }
-}
-
-async function loadLibrary(force = false) {
-  const list = $('#libraryList');
-  if (!list) return;
-  if (libraryData && !force) {
-    renderLibraryMeta();
-    renderLibraryIndex();
-    return;
-  }
-  try {
-    libraryData = await api('/api/library');
-    renderLibraryMeta();
-    renderLibraryIndex();
-    if (!librarySelected && libraryData.items[0]) openLibraryEntry(libraryData.items[0].id);
-  } catch (err) {
-    list.innerHTML = `<div class="notice">No se pudo cargar la biblioteca: ${esc(err.message)}</div>`;
-  }
-}
-
-function renderLibraryDetail(item) {
-  const detail = $('#libraryDetail');
-  if (!detail) return;
-  const e = item.engine || {};
-  const t = item.transmission || {};
-  const em = item.emissions || {};
-  const sources = (item.sources || []).map(x => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title)} ${icon('external')}</a><small>${esc(x.publisher)} · ${esc(x.type)} · consultado ${esc(x.accessed)}</small></li>`).join('');
-  const systems = (item.systems || []).map(s => `<span class="tag">${esc(s)}</span>`).join('');
-  const inspection = (item.inspection || []).map(i => `<li><span class="insp-level ${severityClass(i.level)}">${esc(i.level || 'media')}</span><div><b>${esc(i.area)}</b><p>${esc(i.check)}</p><small>${esc(i.why)}</small></div></li>`).join('');
-  const covered = (item.covered || []).map(c => `<li>${esc(c.title)}</li>`).join('');
-  const pending = (item.pending || []).map(p => `<li><b>${esc(p.title)}</b><small>${esc(p.note)}</small></li>`).join('');
-  detail.innerHTML = `
-    <div class="library-detail-head">
-      <div>
-        <span class="eyebrow">${esc(item.brand)} · ${esc(item.generation)}</span>
-        <h2>${esc(item.model)} <span>${esc(item.version)}</span></h2>
-        <p>${esc(item.years)} · ${esc(item.body || 'Carrocería no verificada')} · ${esc(e.code || 'Motor no verificado')}</p>
-      </div>
-      <div class="library-detail-tags">
-        <span class="tag">${icon('shield')} Confianza ${esc(item.confidence || 'media')}</span>
-        <span class="tag">${icon('db')} ${sourceCountLabel((item.sources || []).length)}</span>
-        <span class="tag">${icon('file')} ${esc(item.statusLabel || 'Dossier parcial')}</span>
-      </div>
-    </div>
-    <div class="library-actions">
-      <button class="btn primary" type="button" data-library-vehicle="${esc(item.id)}">Abrir ficha del vehículo ${icon('arrow')}</button>
-      <button class="btn ghost" type="button" data-library-tutorials="${esc(item.id)}">Ver tutoriales ${icon('play')}</button>
-      <button class="btn ghost" type="button" data-library-diagnose="${esc(item.id)}">Diagnosticar ${icon('pulse')}</button>
-    </div>
-    <p class="library-notice">${esc(item.notice || '')}</p>
-    <div class="sheet-section-grid">
-      <section class="sheet-section">
-        <h3>${icon('engine')} Motor y transmisión</h3>
-        <dl class="spec-list">
-          <div><dt>Cilindrada</dt><dd>${esc(e.displacementCc ? `${e.displacementCc} cc` : 'No verificado')}</dd></div>
-          <div><dt>Potencia / par</dt><dd>${esc(e.powerPs ? `${e.powerPs} CV` : 'No verificado')}${e.torqueNm ? ` · ${esc(e.torqueNm)} Nm` : ''}</dd></div>
-          <div><dt>Combustible</dt><dd>${esc(e.fuel || 'No verificado')}</dd></div>
-          <div><dt>Distribución</dt><dd>${esc(e.distribution || 'No verificado')}</dd></div>
-          <div><dt>Alimentación</dt><dd>${esc(e.injection || 'No verificado')}</dd></div>
-          <div><dt>Cambio / tracción</dt><dd>${esc(t.gears || t.type || 'No verificado')} · ${esc(t.drive || 'No verificado')}</dd></div>
-        </dl>
-      </section>
-      <section class="sheet-section">
-        <h3>${icon('shield')} Emisiones y sistemas</h3>
-        <dl class="spec-list">
-          <div><dt>Norma</dt><dd>${esc(em.standard || 'No verificado')}</dd></div>
-          <div><dt>Postratamiento</dt><dd>${esc(em.aftertreatment || 'No verificado')}</dd></div>
-        </dl>
-        <div class="library-systems">${systems || '<span class="micro-note">Sistemas no documentados.</span>'}</div>
-      </section>
-    </div>
-    <section class="sheet-section">
-      <h3>${icon('pulse')} Puntos de inspección</h3>
-      <ul class="inspection-list">${inspection || '<li>No hay puntos de inspección documentados.</li>'}</ul>
-    </section>
-    <div class="library-doc-grid">
-      <section class="sheet-section library-covered">
-        <h3>${icon('check')} Cobertura documental</h3>
-        <ul>${covered || '<li>Sin apartados cubiertos.</li>'}</ul>
-      </section>
-      <section class="sheet-section library-pending">
-        <h3>${icon('alert')} Pendiente de documentación oficial</h3>
-        <ul>${pending || '<li>No hay carencias declaradas.</li>'}</ul>
-        <p class="micro-note">No se completan con valores genéricos de otros motores o versiones.</p>
-      </section>
-    </div>
-    <section class="sheet-section">
-      <h3>${icon('db')} Fuentes y trazabilidad</h3>
-      <ul class="source-list">${sources || '<li>Sin fuentes registradas.</li>'}</ul>
-    </section>
-  `;
-  detail.querySelector('[data-library-vehicle]')?.addEventListener('click', async () => {
-    showView('vehiculos');
-    await loadVehicles();
-    await openVehicleSheet(item.id, { scroll: true });
-  });
-  detail.querySelector('[data-library-tutorials]')?.addEventListener('click', () => {
-    goToTutorials({ q: `${item.brand} ${item.model} ${item.version}` });
-  });
-  detail.querySelector('[data-library-diagnose]')?.addEventListener('click', () => {
-    setVehicleState({ id: item.id, brand: item.brand, model: item.model, engine: item.version }, 'library');
-    showView('diagnostico');
-  });
-}
-
-async function openLibraryEntry(id, { scroll = false } = {}) {
-  if (!id) return;
-  librarySelected = id;
-  renderLibraryIndex();
-  const detail = $('#libraryDetail');
-  if (!detail) return;
-  detail.innerHTML = '<div class="notice">Cargando dossier técnico…</div>';
-  const request = ++libraryRequest;
-  try {
-    const item = await api(`/api/library/${encodeURIComponent(id)}`);
-    if (request !== libraryRequest) return;
-    renderLibraryDetail(item);
-    if (scroll && window.matchMedia('(max-width: 900px)').matches) {
-      window.requestAnimationFrame(() => {
-        const top = detail.getBoundingClientRect().top + window.scrollY - 78;
-        window.scrollTo({ top, behavior: 'smooth' });
-      });
-    }
-  } catch (err) {
-    if (request === libraryRequest) detail.innerHTML = `<div class="notice">No se pudo abrir el dossier: ${esc(err.message)}</div>`;
-  }
-}
-
-function initLibraryFilters() {
-  const search = $('#librarySearch');
-  const brand = $('#libraryBrand');
-  const system = $('#librarySystem');
-  const reset = $('#libraryReset');
-  let timer = null;
-  search?.addEventListener('input', () => {
-    clearTimeout(timer);
-    timer = setTimeout(renderLibraryIndex, 140);
-  });
-  brand?.addEventListener('change', renderLibraryIndex);
-  system?.addEventListener('change', renderLibraryIndex);
-  reset?.addEventListener('click', () => {
-    if (search) search.value = '';
-    if (brand) brand.value = '';
-    if (system) system.value = '';
-    renderLibraryIndex();
-  });
-}
-
-
-// -------------------------------------------------------------
-// BIBLIOTECA TÉCNICA: 27 CATEGORÍAS
-// -------------------------------------------------------------
-const TECHNICAL_GROUP_LABELS = {
-  vehiculos: 'Vehículos y motores',
-  manuales: 'Manuales y documentación',
-  electricidad: 'Electricidad, ECU y redes',
-  motor: 'Motor y gestión',
-  chasis: 'Chasis y transmisión',
-  diagnostico: 'Diagnóstico y datos',
-  taller: 'Procedimientos de taller',
-  normativa: 'Campañas, seguridad y fuentes'
-};
-const TECHNICAL_TYPE_LABELS = {
-  vehicle_spec: 'Especificación de modelo',
-  vehicle_dossier: 'Dossier de vehículo',
-  inspection: 'Punto de inspección',
-  symptom: 'Patrón genérico',
-  tutorial: 'Vídeo técnico',
-  pid: 'PID OBD-II',
-  source: 'Fuente externa',
-  guide: 'Guía genérica',
-  dtc: 'Código DTC',
-  recall: 'Campaña de seguridad',
-  document: 'Documento'
-};
-const TECHNICAL_STATUS_LABELS = {
-  verified: 'Verificado',
-  reviewed: 'Revisado',
-  generic: 'Genérico',
-  metadata_only: 'Metadatos',
-  source_only: 'Fuente'
-};
-
-let technicalMeta = null;
-let technicalData = null;
-let technicalItems = [];
-let technicalSelectedCategory = '';
-let technicalSelectedId = '';
-let technicalLoaded = false;
-let technicalRequest = 0;
-let technicalLimit = 40;
-let libraryMode = 'dossiers';
-
-function technicalStatusBadge(status) {
-  const key = Object.prototype.hasOwnProperty.call(TECHNICAL_STATUS_LABELS, status) ? status : 'generic';
-  return `<span class="tech-status ${key}">${esc(TECHNICAL_STATUS_LABELS[key])}</span>`;
-}
-
-function technicalTypeLabel(type) {
-  return TECHNICAL_TYPE_LABELS[type] || type || 'Documento';
-}
-
-function technicalCoverageLabel(coverage) {
-  return ({ data: 'Con datos', source: 'Solo fuentes', pending: 'Pendiente' })[coverage] || coverage;
-}
-
-function technicalCoverageDot(coverage) {
-  return `<i class="tech-cat-dot ${esc(coverage)}"></i>`;
-}
-
-function fillTechnicalSelect(select, values, labels = {}) {
-  if (!select || select.options.length > 1) return;
-  select.insertAdjacentHTML('beforeend', (values || []).map(value => `<option value="${esc(value)}">${esc(labels[value] || value)}</option>`).join(''));
-}
-
-function technicalCategoryCount() {
-  return technicalMeta?.categories?.length || 27;
-}
-
-async function loadTechnicalMeta(force = false) {
-  if (technicalMeta && !force) return technicalMeta;
-  const meta = await api('/api/technical/meta');
-  technicalMeta = meta;
-  const tabCount = $('#libraryTechnicalTabCount');
-  if (tabCount) tabCount.textContent = fmtNum(meta.counts.total);
-  const coverage = $('#technicalCoverage');
-  if (coverage) {
-    const data = meta.categories.filter(c => c.coverage === 'data').length;
-    const source = meta.categories.filter(c => c.coverage === 'source').length;
-    coverage.innerHTML = `${technicalCoverageDot('data')} ${data} datos · ${technicalCoverageDot('source')} ${source} fuentes`;
-  }
-  fillTechnicalSelect($('#technicalType'), meta.types, TECHNICAL_TYPE_LABELS);
-  fillTechnicalSelect($('#technicalStatus'), meta.statuses, TECHNICAL_STATUS_LABELS);
-  const facets = meta.facets || {};
-  fillTechnicalSelect($('#technicalBrand'), facets.brands);
-  fillTechnicalSelect($('#technicalModel'), facets.models);
-  fillTechnicalSelect($('#technicalGeneration'), facets.generations);
-  fillTechnicalSelect($('#technicalYear'), (facets.years || []).map(String));
-  fillTechnicalSelect($('#technicalEngine'), facets.engines);
-  fillTechnicalSelect($('#technicalSystem'), facets.systems);
-  renderTechnicalCategories();
-  renderTechnicalCategoryHead();
-  return meta;
-}
-
-function renderTechnicalCategories() {
-  const list = $('#technicalCategoryList');
-  if (!list || !technicalMeta) return;
-  const groups = [...new Set(technicalMeta.categories.map(c => c.group))];
-  const allActive = !technicalSelectedCategory;
-  const allCount = technicalMeta.counts.total;
-  let html = `<button class="tech-cat-btn${allActive ? ' active' : ''}" type="button" data-tech-cat="" title="Ver todas las entradas">
-    <span class="tech-cat-num">Σ</span>
-    <span class="tech-cat-name">Todas las categorías</span>
-    <span class="tech-cat-count">${fmtNum(allCount)}</span>
-  </button>`;
-  for (const group of groups) {
-    const categories = technicalMeta.categories.filter(c => c.group === group);
-    html += `<div class="tech-group-label">${esc(TECHNICAL_GROUP_LABELS[group] || group)}</div>`;
-    html += categories.map(category => {
-      const count = category.total + category.relatedTotal;
-      const active = technicalSelectedCategory === category.id;
-      return `<button class="tech-cat-btn${active ? ' active' : ''}" type="button" data-tech-cat="${esc(category.id)}" title="${esc(category.title)}: ${category.total} propias y ${category.relatedTotal} relacionadas">
-        <span class="tech-cat-num">${String(category.number).padStart(2, '0')}</span>
-        <span class="tech-cat-name">${esc(category.title)}</span>
-        <span class="tech-cat-count">${technicalCoverageDot(category.coverage)}${fmtNum(count)}</span>
-      </button>`;
-    }).join('');
-  }
-  list.innerHTML = html;
-  list.querySelectorAll('[data-tech-cat]').forEach(button => {
-    button.addEventListener('click', () => {
-      technicalSelectedCategory = button.dataset.techCat || '';
-      renderTechnicalCategories();
-      renderTechnicalCategoryHead();
-      fetchTechnicalEntries(true);
-    });
-  });
-}
-
-function renderTechnicalCategoryHead() {
-  const head = $('#technicalCategoryHead');
-  if (!head || !technicalMeta) return;
-  const category = technicalMeta.categories.find(c => c.id === technicalSelectedCategory);
-  if (!category) {
-    const counts = technicalMeta.counts;
-    head.innerHTML = `
-      <div class="tech-head-top">
-        <div>
-          <span class="eyebrow">${technicalCategoryCount()} CATEGORÍAS · MAPA COMPLETO</span>
-          <h3>Documentación técnica organizada por sistema</h3>
-          <p>Selecciona una categoría a la izquierda o busca por PID, DTC, sistema, avería, vehículo o fuente. Cada ficha indica si el dato está verificado, revisado, es genérico o solo enlaza a una fuente externa.</p>
-        </div>
-        <span class="tag">${icon('db')} ${fmtNum(counts.total)} entradas</span>
-      </div>
-      <div class="tech-cat-stats">
-        <span class="tag">${technicalStatusBadge('verified')} ${fmtNum(counts.byStatus.verified || 0)}</span>
-        <span class="tag">${technicalStatusBadge('reviewed')} ${fmtNum(counts.byStatus.reviewed || 0)}</span>
-        <span class="tag">${technicalStatusBadge('generic')} ${fmtNum(counts.byStatus.generic || 0)}</span>
-        <span class="tag">${technicalStatusBadge('metadata_only')} ${fmtNum(counts.byStatus.metadata_only || 0)}</span>
-        <span class="tag">${technicalStatusBadge('source_only')} ${fmtNum(counts.byStatus.source_only || 0)}</span>
-        <span class="tag">${fmtNum(counts.byAvailability.full || 0)} completos</span>
-        <span class="tag">${fmtNum(counts.byAvailability.partial || 0)} parciales</span>
-        <span class="tag">${fmtNum(counts.byAvailability.link || 0)} solo enlaces</span>
-        <span class="tag">${fmtNum(counts.byAvailability.metadata || 0)} metadatos</span>
-      </div>`;
-    return;
-  }
-  const related = category.dataCount + category.sourceCount;
-  const status = category.status || {};
-  head.innerHTML = `
-    <div class="tech-head-top">
-      <div>
-        <span class="eyebrow">CATEGORÍA ${String(category.number).padStart(2, '0')} · ${esc(TECHNICAL_GROUP_LABELS[category.group] || category.group)}</span>
-        <h3>${esc(category.title)}</h3>
-        <p>${esc(category.description)}</p>
-      </div>
-      <span class="tag">${technicalCoverageDot(category.coverage)} ${esc(technicalCoverageLabel(category.coverage))}</span>
-    </div>
-    <div class="tech-cat-stats">
-      <span class="tag">${fmtNum(category.total)} propias</span>
-      <span class="tag">${fmtNum(category.relatedTotal)} relacionadas</span>
-      <span class="tag">${fmtNum(related)} referencias totales</span>
-      <span class="tag">${technicalStatusBadge('verified')} ${fmtNum(status.verified || 0)}</span>
-      <span class="tag">${technicalStatusBadge('reviewed')} ${fmtNum(status.reviewed || 0)}</span>
-      <span class="tag">${technicalStatusBadge('metadata_only')} ${fmtNum(status.metadata_only || 0)}</span>
-      <span class="tag">${technicalStatusBadge('source_only')} ${fmtNum(status.source_only || 0)}</span>
-      <span class="tag">${fmtNum(category.availability.full || 0)} completos</span>
-      <span class="tag">${fmtNum(category.availability.partial || 0)} parciales</span>
-      <span class="tag">${fmtNum(category.availability.link || 0)} solo enlaces</span>
-      <span class="tag">${fmtNum(category.availability.metadata || 0)} metadatos</span>
-    </div>
-    ${category.coverage === 'source'
-      ? '<p class="tech-inline-warning">Esta categoría no tiene todavía documentos propios. Las entradas disponibles son fuentes externas localizadas: su contenido no se ha copiado ni validado.</p>'
-      : ''}`;
-}
-
-function technicalFilters() {
-  return {
-    q: ($('#technicalSearch')?.value || '').trim(),
-    type: $('#technicalType')?.value || '',
-    status: $('#technicalStatus')?.value || '',
-    brand: $('#technicalBrand')?.value || '',
-    model: $('#technicalModel')?.value || '',
-    generation: $('#technicalGeneration')?.value || '',
-    year: $('#technicalYear')?.value || '',
-    engine: $('#technicalEngine')?.value || '',
-    system: $('#technicalSystem')?.value || ''
-  };
-}
-
-async function fetchTechnicalEntries(reset = true) {
-  if (!technicalMeta) await loadTechnicalMeta();
-  const list = $('#technicalList');
-  if (!list) return;
-  const request = ++technicalRequest;
-  if (reset) {
-    technicalItems = [];
-    setTechnicalDetailMode(false);
-    list.innerHTML = `<div class="notice">Buscando en las ${technicalCategoryCount()} categorías…</div>`;
-  }
-  const filters = technicalFilters();
-  const params = new URLSearchParams();
-  params.set('limit', String(technicalLimit));
-  params.set('offset', String(reset ? 0 : technicalItems.length));
-  if (filters.q) params.set('q', filters.q);
-  if (filters.type) params.set('type', filters.type);
-  if (filters.status) params.set('status', filters.status);
-  if (filters.brand) params.set('brand', filters.brand);
-  if (filters.model) params.set('model', filters.model);
-  if (filters.generation) params.set('generation', filters.generation);
-  if (filters.year) params.set('year', filters.year);
-  if (filters.engine) params.set('engine', filters.engine);
-  if (filters.system) params.set('system', filters.system);
-  if (technicalSelectedCategory) params.set('category', technicalSelectedCategory);
-  try {
-    const data = await api(`/api/technical?${params.toString()}`);
-    if (request !== technicalRequest) return;
-    technicalData = data;
-    technicalItems = reset ? data.items : technicalItems.concat(data.items);
-    technicalLoaded = true;
-    renderTechnicalList();
-  } catch (err) {
-    if (request !== technicalRequest) return;
-    technicalLoaded = false;
-    list.innerHTML = `<div class="notice">No se pudo cargar la biblioteca técnica: ${esc(err.message)}</div>`;
-    const more = $('#technicalMore');
-    if (more) more.classList.add('hidden');
-  }
-}
-
-function renderTechnicalList() {
-  const list = $('#technicalList');
-  if (!list || !technicalData) return;
-  const count = $('#technicalResultCount');
-  if (count) count.innerHTML = `<b>${fmtNum(technicalData.total)}</b> resultado${technicalData.total === 1 ? '' : 's'}${technicalSelectedCategory ? ` en ${esc(technicalMeta?.categories.find(c => c.id === technicalSelectedCategory)?.title || 'la categoría')}` : ` en ${technicalCategoryCount()} categorías`}`;
-  const pageInfo = $('#technicalPageInfo');
-  if (pageInfo) pageInfo.textContent = technicalData.total ? `${fmtNum(technicalItems.length)} de ${fmtNum(technicalData.total)} visibles` : '';
-  if (!technicalItems.length) {
-    list.innerHTML = '<div class="notice">No hay resultados con esos filtros. Prueba otra categoría o limpia la búsqueda.</div>';
-    const more = $('#technicalMore');
-    if (more) more.classList.add('hidden');
-    return;
-  }
-  list.innerHTML = technicalItems.map(entry => {
-    const tags = (entry.tags || []).slice(0, 3).map(tag => `<span class="tag">${esc(tag)}</span>`).join('');
-    const vehicle = entry.vehicleLabel ? `<span>${icon('car')} ${esc(entry.vehicleLabel)}</span>` : '';
-    const sources = entry.sourceCount ? `<span>${icon('db')} ${sourceCountLabel(entry.sourceCount)}</span>` : '';
-    return `<button class="technical-card" type="button" data-tech-id="${esc(entry.id)}">
-      <div class="technical-card-top">
-        ${technicalStatusBadge(entry.status)}
-        <span class="technical-type">${esc(technicalTypeLabel(entry.type))}</span>
-        <span class="technical-cat">· ${esc(entry.categoryTitle)}</span>
-      </div>
-      <h3>${esc(entry.title)}</h3>
-      <p>${esc(entry.summary || '')}</p>
-      <div class="technical-card-foot">
-        ${vehicle}${sources}${tags}
-        <span class="arrow">${icon('arrow')}</span>
-      </div>
-    </button>`;
-  }).join('');
-  list.querySelectorAll('[data-tech-id]').forEach(button => {
-    button.addEventListener('click', () => openTechnicalEntry(button.dataset.techId));
-  });
-  const more = $('#technicalMore');
-  if (more) more.classList.toggle('hidden', !technicalData.hasMore);
-}
-
-function setTechnicalDetailMode(open) {
-  const detail = $('#technicalDetail');
-  const wrap = $('#technicalListWrap');
-  const bar = $('.technical-results-bar');
-  if (detail) detail.classList.toggle('hidden', !open);
-  if (wrap) wrap.classList.toggle('hidden', open);
-  if (bar) bar.classList.toggle('hidden', open);
-}
-
-function closeTechnicalDetail() {
-  technicalSelectedId = '';
-  setTechnicalDetailMode(false);
-}
-
-function technicalRows(rows) {
-  const filtered = rows.filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '');
-  if (!filtered.length) return '';
-  return `<dl class="tech-data-list">${filtered.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`;
-}
-
-function technicalTextList(items, ordered = false) {
-  const values = (items || []).map(item => typeof item === 'string' ? item : (item?.text || '')).filter(Boolean);
-  if (!values.length) return '<p class="micro-note">Sin datos registrados.</p>';
-  const tag = ordered ? 'ol' : 'ul';
-  return `<${tag}>${values.map(value => `<li>${esc(value)}</li>`).join('')}</${tag}>`;
-}
-
-function technicalDataHtml(entry) {
-  const data = entry.data || {};
-  if (entry.type === 'vehicle_spec') {
-    const specs = data.specs || {};
-    const years = data.yearFrom ? `${data.yearFrom}–${data.yearTo || 'actualidad'}` : '';
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Modelo</h4>${technicalRows([
-        ['Marca', data.brand], ['Modelo', data.model], ['Generación', data.generation], ['Años', years],
-        ['Combustibles', (data.fuels || []).join(', ')], ['Estado comercial', data.status]
-      ])}</section>
-      <section class="tech-block"><h4>Especificaciones publicadas</h4>${technicalRows([
-        ['Carrocería', specs.carrosserie], ['Plazas', specs.zitplaatsen], ['Puertas', specs.deuren],
-        ['Potencia', specs.vermogen_pk ? `${specs.vermogen_pk} CV` : ''],
-        ['0–100 km/h', specs.acceleratie_0_100_s ? `${specs.acceleratie_0_100_s} s` : ''],
-        ['Velocidad máxima', specs.topsnelheid_kmh ? `${specs.topsnelheid_kmh} km/h` : ''],
-        ['Longitud', specs.lengte_mm ? `${specs.lengte_mm} mm` : ''], ['Anchura', specs.breedte_mm ? `${specs.breedte_mm} mm` : ''],
-        ['Altura', specs.hoogte_mm ? `${specs.hoogte_mm} mm` : ''], ['Masa en orden de marcha', specs.massa_rijklaar_kg ? `${specs.massa_rijklaar_kg} kg` : ''],
-        ['Remolque frenado', specs.trekgewicht_geremd_kg ? `${specs.trekgewicht_geremd_kg} kg` : ''],
-        ['Maletero', specs.kofferbak_liter ? `${specs.kofferbak_liter} l` : '']
-      ])}</section>
-    </div><p class="tech-inline-warning">${esc(data.note || 'Especificaciones indicativas del fabricante/WLTP. Verificar la ficha oficial de la versión y el mercado antes de usarlas para una reparación.')}</p>`;
-  }
-  if (entry.type === 'vehicle_dossier') {
-    const engine = data.engine || {};
-    const transmission = data.transmission || {};
-    const emissions = data.emissions || {};
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Identificación</h4>${technicalRows([
-        ['Marca', data.brand], ['Modelo', data.model], ['Generación', data.generation], ['Versión', data.version], ['Años', data.years], ['Carrocería', data.body]
-      ])}</section>
-      <section class="tech-block"><h4>Motor</h4>${technicalRows([
-        ['Código', engine.code], ['Cilindrada', engine.displacementCc ? `${engine.displacementCc} cc` : ''], ['Combustible', engine.fuel],
-        ['Potencia', engine.powerPs ? `${engine.powerPs} CV / ${engine.powerKw || '—'} kW` : ''], ['Par', engine.torqueNm ? `${engine.torqueNm} Nm` : ''],
-        ['Alimentación', engine.injection], ['Sobrealimentación', engine.aspiration], ['Distribución', engine.distribution], ['Notas', engine.notes]
-      ])}</section>
-      <section class="tech-block"><h4>Transmisión y emisiones</h4>${technicalRows([
-        ['Cambio', transmission.type], ['Relaciones', transmission.gears], ['Tracción', transmission.drive],
-        ['Norma', emissions.standard], ['Postratamiento', emissions.aftertreatment], ['Notas del dossier', data.notes]
-      ])}</section>
-      <section class="tech-block"><h4>Sistemas documentados</h4>${(data.systems || []).length ? `<div class="library-systems">${data.systems.map(s => `<span class="tag">${esc(s)}</span>`).join('')}</div>` : '<p class="micro-note">Sin sistemas registrados.</p>'}</section>
-    </div><p class="tech-inline-warning">${esc(data.documentationScope || 'Dossier editorial: no sustituye al manual del fabricante.')}</p>`;
-  }
-  if (entry.type === 'dtc') {
-    const causes = (data.causes || []).map(cause => `${cause.likelihoodLabel || cause.likelihood || 'Posible'}: ${cause.text || ''}`).filter(Boolean);
-    const symptoms = data.symptoms || [];
-    const repair = data.repair || {};
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Identificación</h4>${technicalRows([
-        ['Código', data.code], ['Familia', data.family], ['Categoría OBDex', data.category], ['Componentes', (data.components || []).join(', ')]
-      ])}</section>
-      <section class="tech-block"><h4>Descripción</h4><p>${esc(data.descriptionEn || entry.summary || '')}</p></section>
-      <section class="tech-block"><h4>Causas posibles</h4>${technicalTextList(causes)}</section>
-      <section class="tech-block"><h4>Síntomas descritos</h4>${technicalTextList(symptoms)}</section>
-      <section class="tech-block"><h4>Reparación estimada</h4>${technicalRows([
-        ['Dificultad', repair.difficultyLabel], ['Posible por cuenta propia', repair.diyPossible ? 'Sí' : 'No indicado'],
-        ['Coste estimado', repair.costLabel], ['Horas estimadas', repair.hoursLabel]
-      ])}</section>
-      <section class="tech-block"><h4>Códigos relacionados</h4>${technicalTextList(data.relatedCodes)}</section>
-    </div><p class="tech-inline-warning">${esc(data.scopeNote || 'Código genérico. La definición y las causas pueden variar según fabricante y motor.')}</p>`;
-  }
-  if (entry.type === 'recall') {
-    const labels = (data.labels || []).join(', ');
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Campaña</h4>${technicalRows([
-        ['Campaña', data.campaign], ['Fabricante', data.manufacturer], ['Componente', data.component],
-        ['Fecha', data.reportDate], ['Mercado', data.market], ['Años', (data.years || []).join(', ')],
-        ['Modelos', data.models], ['Versiones afectadas', labels]
-      ])}</section>
-      <section class="tech-block"><h4>Aviso</h4><p>${esc(data.summary || '')}</p><p>${esc(data.consequence || '')}</p></section>
-      <section class="tech-block"><h4>Remedio publicado</h4><p>${esc(data.remedy || 'No indicado en la fuente.')}</p>${technicalRows([
-        ['Parar el vehículo', data.parkIt ? 'Sí' : 'No'], ['Aparcar al aire libre', data.parkOutside ? 'Sí' : 'No'],
-        ['Actualización remota', data.overTheAirUpdate ? 'Sí' : 'No']
-      ])}</section>
-      <section class="tech-block"><h4>Código de campaña</h4><p>${esc(data.campaign || '')}</p></section>
-    </div><p class="tech-inline-warning">${esc(data.scopeNote || 'Campaña del mercado estadounidense. Comprobar el VIN en el fabricante u organismo oficial correspondiente.')}</p>`;
-  }
-  if (entry.type === 'document') {
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Documento</h4>${technicalRows([
-        ['Archivo', data.fileName], ['Formato', data.mimeType], ['Páginas', data.pages],
-        ['Fragmentos indexados', data.chunkCount], ['Importado', data.importedAt], ['Licencia', data.license]
-      ])}</section>
-      <section class="tech-block"><h4>Uso</h4><p>${esc(data.note || 'Documento importado con licencia declarada.')}</p></section>
-    </div>`;
-  }
-  if (entry.type === 'inspection') {
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Comprobación</h4><p>${esc(data.check || entry.summary)}</p></section>
-      <section class="tech-block"><h4>Motivo y prioridad</h4><p>${esc(data.why || '')}</p>${technicalRows([['Nivel', data.level]])}</section>
-    </div><p class="tech-inline-warning">${esc(data.note || 'Punto de revisión editorial; no es un procedimiento oficial del fabricante.')}</p>`;
-  }
-  if (entry.type === 'pid') {
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Lectura OBD-II</h4>${technicalRows([
-        ['Modo', data.mode || '01'], ['PID', data.pid], ['Bytes', data.bytes], ['Fórmula', data.formula], ['Unidad', data.unit],
-        ['Rango', Array.isArray(data.range) ? `${data.range[0]} … ${data.range[1]} ${data.unit || ''}` : (data.range ? `${data.range.min} … ${data.range.max} ${data.unit || ''}` : '')]
-      ])}</section>
-      <section class="tech-block"><h4>Interpretación</h4><p>${esc(data.note || 'PID estándar. La ECU debe declararlo y el valor real depende del motor y del protocolo.')}</p></section>
-    </div>`;
-  }
-  if (entry.type === 'tutorial') {
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Vídeo</h4>${technicalRows([
-        ['Canal', data.channel], ['Duración', data.duration], ['Idioma', data.language], ['Nivel', data.level], ['DTC relacionados', (data.dtcs || []).join(', ')]
-      ])}</section>
-      <section class="tech-block"><h4>Alcance</h4><p>${esc(data.sourceNote || '')}</p></section>
-    </div>`;
-  }
-  if (entry.type === 'source') {
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Fuente</h4>${technicalRows([
-        ['Editor', data.publisher], ['Acceso', data.access], ['Licencia', data.license],
-        ['HTTP', data.httpStatus ? String(data.httpStatus) : ''], ['Comprobada', data.lastCheckedAt], ['Idioma', data.language], ['Mercado', data.market]
-      ])}</section>
-      <section class="tech-block"><h4>Uso</h4><p>${esc(data.note || '')}</p>${data.httpStatus !== 200 ? `<p class="tech-inline-warning">La comprobación automatizada devolvió ${esc(String(data.httpStatus))}. No se presenta como contenido verificado.</p>` : ''}</section>
-    </div>`;
-  }
-  if (entry.type === 'symptom') {
-    const causes = (data.commonCauses || []).map(cause => `${cause.likelihood ? `[${cause.likelihood}] ` : ''}${cause.text}`).join('\n');
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Contexto</h4>${technicalRows([
-        ['Sistema', data.category], ['Área', data.area], ['Urgencia', data.urgency], ['Alcance', data.vehicleScope], ['Riesgo', data.driveRisk]
-      ])}</section>
-      <section class="tech-block"><h4>Causas posibles</h4>${technicalTextList(causes ? causes.split('\n') : [])}</section>
-      <section class="tech-block"><h4>Comprobaciones rápidas</h4>${technicalTextList(data.quickChecks, true)}</section>
-      <section class="tech-block"><h4>Herramientas y DTC</h4>${technicalTextList([...(data.tools || []), ...(data.relatedDtc || [])])}</section>
-    </div><p class="tech-inline-warning">${esc(data.scopeNote || '')}</p>`;
-  }
-  if (entry.type === 'guide') {
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Pasos</h4>${technicalTextList(data.steps, true)}</section>
-      <section class="tech-block"><h4>Advertencias</h4>${technicalTextList(data.warnings)}</section>
-    </div><p class="tech-inline-warning">${esc(data.note || '')}</p>`;
-  }
-  if (entry.type === 'dtc_index') {
-    return `<div class="tech-detail-grid">
-      <section class="tech-block"><h4>Base local</h4>${technicalRows([['Códigos', fmtNum(data.count)], ['Consulta', 'Vista de diagnosis DTC']])}</section>
-      <section class="tech-block"><h4>Uso</h4><p>${esc(data.note || '')}</p></section>
-    </div>`;
-  }
-  return `<p class="micro-note">Tipo de documento sin ficha específica.</p>`;
-}
-
-function renderTechnicalDetail(entry) {
-  const detail = $('#technicalDetail');
-  if (!detail) return;
-  const category = entry.category || {};
-  const actions = [];
-  if (entry.refType === 'vehicle') actions.push(`<button class="btn primary sm" type="button" data-tech-action="vehicle" data-tech-id="${esc(entry.refId)}">Abrir ficha del vehículo ${icon('arrow')}</button>`);
-  if (entry.refType === 'symptom') actions.push(`<button class="btn primary sm" type="button" data-tech-action="symptom" data-tech-id="${esc(entry.refId)}">Abrir síntoma ${icon('pulse')}</button>`);
-  if (entry.refType === 'tutorial') actions.push(`<button class="btn primary sm" type="button" data-tech-action="tutorials">Buscar en tutoriales ${icon('play')}</button>`);
-  if (entry.refType === 'pid') actions.push(`<button class="btn primary sm" type="button" data-tech-action="obd">Abrir consola OBD ${icon('cpu')}</button>`);
-  if (entry.refType === 'dtc') actions.push(`<button class="btn primary sm" type="button" data-tech-action="dtc">Abrir base DTC ${icon('search')}</button>`);
-  if (entry.url && entry.type !== 'source') actions.push(`<a class="btn ghost sm" href="${esc(entry.url)}" target="_blank" rel="noopener noreferrer">Abrir original ${icon('external')}</a>`);
-  if (entry.url && entry.type === 'source' && entry.data?.httpStatus === 200) actions.push(`<a class="btn ghost sm" href="${esc(entry.url)}" target="_blank" rel="noopener noreferrer">Abrir fuente ${icon('external')}</a>`);
-  let sources = (entry.sources || []).map(source => `<li><a href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">${esc(source.title)} ${icon('external')}</a><small>${esc(source.publisher)} · ${esc(source.type)} · ${esc(source.access)} · ${esc(source.license)}</small></li>`).join('');
-  if (!sources && entry.type === 'tutorial' && entry.url) {
-    sources = `<li><a href="${esc(entry.url)}" target="_blank" rel="noopener noreferrer">Vídeo original en YouTube ${icon('external')}</a><small>Metadatos verificados mediante oEmbed; el contenido técnico del vídeo no se ha validado.</small></li>`;
-  }
-  const related = (entry.relatedCategories || []).map(cat => `<button class="tech-related-btn" type="button" data-tech-related="${esc(cat.id)}">${esc(cat.title)}</button>`).join('');
-  detail.innerHTML = `
-    <div class="tech-detail-actions">
-      <button class="btn ghost sm tech-back" type="button" data-tech-back>${icon('arrow')} Volver al listado</button>
-      ${actions.join('')}
-    </div>
-    <div class="tech-detail-head">
-      <div>
-        <span class="eyebrow">${category.number ? `CATEGORÍA ${String(category.number).padStart(2, '0')} · ` : ''}${esc(category.title || entry.categoryTitle || '')}</span>
-        <h3>${esc(entry.title)}</h3>
-        <p>${esc(entry.summary || '')}</p>
-      </div>
-      <div class="library-detail-tags">${technicalStatusBadge(entry.status)}<span class="tag">${esc(technicalTypeLabel(entry.type))}</span></div>
-    </div>
-    ${technicalDataHtml(entry)}
-    ${related ? `<div class="tech-cat-related"><small>Categorías relacionadas</small>${related}</div>` : ''}
-    <section class="sheet-section">
-      <h3>${icon('db')} Fuentes y trazabilidad</h3>
-      <ul class="tech-sources">${sources || `<li>Sin fuente externa registrada. ${esc(entry.status === 'generic' ? 'Contenido genérico, no específico de un modelo.' : 'Consulta el estado de la ficha antes de usarla como procedimiento.')}</li>`}</ul>
-    </section>`;
-  setTechnicalDetailMode(true);
-  detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  detail.querySelector('[data-tech-back]')?.addEventListener('click', closeTechnicalDetail);
-  detail.querySelectorAll('[data-tech-related]').forEach(button => {
-    button.addEventListener('click', () => {
-      technicalSelectedCategory = button.dataset.techRelated;
-      renderTechnicalCategories();
-      renderTechnicalCategoryHead();
-      closeTechnicalDetail();
-      fetchTechnicalEntries(true);
-      window.scrollTo({ top: detail.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' });
-    });
-  });
-  detail.querySelectorAll('[data-tech-action]').forEach(button => {
-    button.addEventListener('click', async () => {
-      const action = button.dataset.techAction;
-      if (action === 'vehicle') {
-        showView('vehiculos');
-        await loadVehicles();
-        await openVehicleSheet(button.dataset.techId, { scroll: true });
-      } else if (action === 'symptom') {
-        await openUniversalResult('symptom', button.dataset.techId, entry.title);
-      } else if (action === 'tutorials') {
-        goToTutorials({ q: entry.title });
-      } else if (action === 'obd') {
-        showView('obd');
-      } else if (action === 'dtc') {
-        showView('dtc');
-        const input = $('#dtcSearch');
-        if (input) input.focus();
-      }
-    });
-  });
-}
-
-async function openTechnicalEntry(id, { scroll = false } = {}) {
-  if (!id) return;
-  technicalSelectedId = id;
-  const detail = $('#technicalDetail');
-  if (!detail) return;
-  setTechnicalDetailMode(true);
-  detail.innerHTML = '<div class="notice">Cargando ficha técnica…</div>';
-  try {
-    const entry = await api(`/api/technical/${encodeURIComponent(id)}`);
-    renderTechnicalDetail(entry);
-    if (scroll && window.matchMedia('(max-width: 900px)').matches) {
-      window.requestAnimationFrame(() => {
-        const top = detail.getBoundingClientRect().top + window.scrollY - 78;
-        window.scrollTo({ top, behavior: 'smooth' });
-      });
-    }
-  } catch (err) {
-    detail.innerHTML = `<div class="tech-detail-actions"><button class="btn ghost sm" type="button" data-tech-back>${icon('arrow')} Volver al listado</button></div><div class="notice">No se pudo abrir la ficha: ${esc(err.message)}</div>`;
-    detail.querySelector('[data-tech-back]')?.addEventListener('click', closeTechnicalDetail);
-  }
-}
-
-async function ensureTechnical() {
-  if (!technicalMeta) await loadTechnicalMeta();
-  if (!technicalLoaded) await fetchTechnicalEntries(true);
-}
-
-async function switchLibraryMode(mode) {
-  libraryMode = mode === 'technical' ? 'technical' : 'dossiers';
-  $$('.library-switch-btn').forEach(button => {
-    const active = button.dataset.libraryMode === libraryMode;
-    button.classList.toggle('active', active);
-    button.setAttribute('aria-selected', String(active));
-  });
-  $('#libraryDossiers')?.classList.toggle('hidden', libraryMode !== 'dossiers');
-  $('#libraryTechnical')?.classList.toggle('hidden', libraryMode !== 'technical');
-  if (libraryMode === 'technical') {
-    try {
-      await ensureTechnical();
-    } catch (err) {
-      const list = $('#technicalList');
-      if (list) list.innerHTML = `<div class="notice">No se pudo cargar la biblioteca técnica: ${esc(err.message)}</div>`;
-    }
-  }
-}
-
-function initTechnicalLibrary() {
-  $$('.library-switch-btn').forEach(button => {
-    button.addEventListener('click', () => switchLibraryMode(button.dataset.libraryMode));
-  });
-  const search = $('#technicalSearch');
-  const type = $('#technicalType');
-  const status = $('#technicalStatus');
-  const reset = $('#technicalReset');
-  let timer = null;
-  search?.addEventListener('input', () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fetchTechnicalEntries(true), 220);
-  });
-  ['#technicalType', '#technicalStatus', '#technicalBrand', '#technicalModel', '#technicalGeneration', '#technicalYear', '#technicalEngine', '#technicalSystem'].forEach(selector => {
-    $(selector)?.addEventListener('change', () => fetchTechnicalEntries(true));
-  });
-  reset?.addEventListener('click', () => {
-    if (search) search.value = '';
-    ['#technicalType', '#technicalStatus', '#technicalBrand', '#technicalModel', '#technicalGeneration', '#technicalYear', '#technicalEngine', '#technicalSystem'].forEach(selector => {
-      const select = $(selector);
-      if (select) select.value = '';
-    });
-    technicalSelectedCategory = '';
-    renderTechnicalCategories();
-    renderTechnicalCategoryHead();
-    closeTechnicalDetail();
-    fetchTechnicalEntries(true);
-  });
-  $('#technicalMore')?.addEventListener('click', () => fetchTechnicalEntries(false));
-  loadTechnicalMeta().catch(() => { /* la pestaña mostrará el error al abrirse */ });
 }
 
 // -------------------------------------------------------------
@@ -3182,11 +2613,257 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeProductSheet();
 });
 
+// -------------------------------------------------------------
+// FIABILIDAD POR MOTOR Y GENERACIÓN
+// -------------------------------------------------------------
+const REL_STATUS_LABEL = {
+  confirmada: 'Confirmada',
+  reportada: 'Incidencia reportada',
+  hipotesis: 'Hipótesis de taller'
+};
+
+let relData = null;
+let relOptionsReady = false;
+let relSeq = 0;
+
+function relFilters() {
+  return {
+    q: $('#relQ')?.value.trim() || '',
+    brand: $('#relBrand')?.value || '',
+    engine: $('#relEngine')?.value || '',
+    year: $('#relYear')?.value.trim() || '',
+    status: $('#relStatus')?.value || ''
+  };
+}
+
+function relQuery(filters) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value);
+  const text = params.toString();
+  return text ? `?${text}` : '';
+}
+
+function relSourceLinks(sources = []) {
+  return sources.map(s => {
+    const label = s.publisher || s.title || s.url;
+    return `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;
+  }).join(' ');
+}
+
+async function loadReliability() {
+  const grid = $('#relGrid');
+  if (!grid) return;
+  const seq = ++relSeq;
+  const filters = relFilters();
+  const sinFiltros = !filters.q && !filters.brand && !filters.engine && !filters.year && !filters.status;
+  grid.innerHTML = '<div class="notice">Cargando base de fiabilidad…</div>';
+  try {
+    const slow = new Promise((_, reject) => setTimeout(() => reject(new Error('el servidor tarda demasiado en responder')), 15000));
+    const data = await Promise.race([api(`/api/reliability${relQuery(filters)}`), slow]);
+    if (seq !== relSeq) return;
+    relData = data;
+    if (!relOptionsReady) {
+      fillRelOptions(data);
+      relOptionsReady = sinFiltros;
+    }
+    renderRelLegend(data);
+    renderReliability();
+  } catch (err) {
+    if (seq !== relSeq) return;
+    grid.innerHTML = `<div class="tp-empty">No se pudo cargar la base de fiabilidad: ${esc(err.message)}. <button class="btn ghost sm" type="button" id="relRetry">Reintentar</button></div>`;
+    grid.querySelector('#relRetry')?.addEventListener('click', loadReliability);
+  }
+}
+
+function fillRelOptions(data) {
+  const results = data.results || [];
+  const brandSelect = $('#relBrand');
+  if (brandSelect && brandSelect.options.length <= 1) {
+    const brands = [...new Set(results.flatMap(e => String(e.brand || '').split('/').map(b => b.trim()).filter(Boolean)))]
+      .sort((a, b) => a.localeCompare(b, 'es'));
+    for (const brand of brands) {
+      const opt = document.createElement('option');
+      opt.value = brand;
+      opt.textContent = brand;
+      brandSelect.appendChild(opt);
+    }
+  }
+  const engineSelect = $('#relEngine');
+  if (engineSelect && engineSelect.options.length <= 1) {
+    for (const e of [...results].sort((a, b) => String(a.family).localeCompare(String(b.family), 'es'))) {
+      const opt = document.createElement('option');
+      opt.value = e.id;
+      opt.textContent = `${e.family} · ${e.commercial}`;
+      engineSelect.appendChild(opt);
+    }
+  }
+  const count = $('#relCount');
+  if (count) count.textContent = fmtNum(data.stats?.engines || results.length);
+  const issues = $('#relIssues');
+  if (issues) issues.textContent = fmtNum(data.stats?.issues || 0);
+  const legal = $('#relLegal');
+  if (legal) {
+    const types = (data.sourceTypes || []).map(s => s.label).join(', ');
+    legal.textContent = `${data.notice || ''} Fuentes admitidas: ${types}.`;
+  }
+}
+
+function renderRelLegend(data) {
+  const legend = $('#relLegend');
+  if (!legend) return;
+  legend.innerHTML = (data.statusLegend || []).map(s =>
+    `<span class="rel-status ${esc(s.id)}" title="${esc(s.detail)}">${esc(s.label)}</span>`
+  ).join('');
+}
+
+function renderReliability() {
+  const grid = $('#relGrid');
+  if (!grid || !relData) return;
+  const results = relData.results || [];
+  const totalEngines = relData.stats?.engines ?? results.length;
+  const totalIssues = relData.stats?.issues ?? 0;
+  const counter = $('#relResults');
+  if (counter) counter.textContent = `${results.length} de ${totalEngines} motores · ${fmtNum(totalIssues)} averías documentadas`;
+  if (!results.length) {
+    grid.innerHTML = '<div class="tp-empty">No hay motores con esos filtros. Prueba otra marca, otro año o quita el término de búsqueda.</div>';
+    return;
+  }
+  grid.innerHTML = results.map(e => {
+    const dist = e.distribution || {};
+    const verdict = e.reliability?.verdict || 'sin valorar';
+    return `
+      <article class="rel-card">
+        <h3>${esc(e.family)}</h3>
+        <p class="rel-brand">${esc(e.brand)}</p>
+        <p class="rel-line"><b>${esc(e.commercial)}</b> · ${esc(e.years)}</p>
+        <p class="rel-line">${esc(e.fuel || '')}${e.powerPs ? ` · ${esc(e.powerPs)}` : ''} · ${esc(dist.type || 'Distribución sin dato')}${dist.interval ? ` (${esc(dist.interval)})` : ''}</p>
+        <div class="rel-pills">
+          <span class="rel-pill verdict">Fiabilidad ${esc(verdict)}</span>
+          <span class="rel-pill">${fmtNum(e.issueCount)} de ${fmtNum(e.issuesTotal)} averías</span>
+        </div>
+        ${e.reliability?.note ? `<p class="rel-line">${esc(e.reliability.note)}</p>` : ''}
+        <div class="rel-actions">
+          <button class="btn ghost sm" type="button" data-rel-open="${esc(e.id)}">Ver averías y comprobaciones ${icon('arrow')}</button>
+        </div>
+      </article>`;
+  }).join('');
+  grid.querySelectorAll('[data-rel-open]').forEach(b => b.addEventListener('click', () => openReliability(b.dataset.relOpen)));
+}
+
+function relIssueHTML(issue) {
+  const cost = issue.cost || {};
+  const costRows = [
+    ['Diagnóstico', cost.diagnosis],
+    ['Piezas', cost.parts],
+    ['Mano de obra', cost.labour],
+    ['Coste típico', cost.typical]
+  ].filter(([, value]) => value);
+  const list = (items) => `<ul>${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  return `
+    <article class="rel-issue">
+      <div class="rel-actions">
+        <span class="rel-status ${esc(issue.status)}">${esc(REL_STATUS_LABEL[issue.status] || issue.status)}</span>
+        <span class="rel-pill">Gravedad: ${esc(issue.severity || '—')}</span>
+      </div>
+      <h4>${esc(issue.title)}</h4>
+      ${issue.symptom?.length ? `<p><b>Síntomas:</b></p>${list(issue.symptom)}` : ''}
+      ${issue.cause ? `<p><b>Causa:</b> ${esc(issue.cause)}</p>` : ''}
+      ${issue.checks?.length ? `<p><b>Comprobaciones:</b></p>${list(issue.checks)}` : ''}
+      ${issue.solution ? `<p><b>Solución:</b> ${esc(issue.solution)}</p>` : ''}
+      ${issue.risk ? `<p><b>Riesgo si no se atiende:</b> ${esc(issue.risk)}</p>` : ''}
+      ${costRows.length ? `<p class="rel-cost"><b>Coste orientativo en España:</b> ${costRows.map(([k, v]) => `${k}: ${esc(v)}`).join(' · ')}${cost.note ? `<br><small>${esc(cost.note)}</small>` : ''}</p>` : ''}
+      ${issue.sources?.length ? `<p class="rel-src"><b>Fuentes:</b> ${relSourceLinks(issue.sources)}</p>` : ''}
+    </article>`;
+}
+
+function relDetailHTML(e) {
+  const dist = e.distribution || {};
+  const issues = e.issues || [];
+  const maintenance = e.maintenance || [];
+  return `
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">${esc(e.brand)}</span>
+        <h2>${esc(e.family)}</h2>
+        <p><b>${esc(e.commercial)}</b> · ${esc(e.years)}${e.codes ? ` · Códigos: ${esc(e.codes)}` : ''}</p>
+      </div>
+      <button class="btn ghost sm" type="button" id="relDetailClose">Cerrar ficha</button>
+    </header>
+    ${e.summary ? `<p>${esc(e.summary)}</p>` : ''}
+    <div class="rel-pills">
+      <span class="rel-pill verdict">Fiabilidad ${esc(e.reliability?.verdict || 'sin valorar')}</span>
+      <span class="rel-pill">${esc(dist.type || 'Distribución sin dato')}${dist.interval ? ` · ${esc(dist.interval)}` : ''}</span>
+      <span class="rel-pill">${fmtNum(issues.length)} averías documentadas</span>
+    </div>
+    ${dist.note ? `<p><b>Distribución:</b> ${esc(dist.note)}</p>` : ''}
+    ${e.reliability?.note ? `<p><b>Valoración:</b> ${esc(e.reliability.note)}</p>` : ''}
+    ${e.confidenceNote ? `<p class="micro-note">Confianza ${esc(e.confidence || '')}: ${esc(e.confidenceNote)}</p>` : ''}
+    <div class="rel-actions"><button class="btn primary sm" type="button" data-rel-ai>Preguntar a la IA por este motor ${icon('chat')}</button></div>
+    <div class="rel-detail">${issues.map(relIssueHTML).join('')}</div>
+    ${maintenance.length ? `<h3>Mantenimiento preventivo</h3>${maintenance.map(m => `
+      <article class="rel-issue">
+        <h4>${esc(m.item)}</h4>
+        <p><b>Intervalo:</b> ${esc(m.interval)}</p>
+        ${m.note ? `<p>${esc(m.note)}</p>` : ''}
+        ${m.sources?.length ? `<p class="rel-src"><b>Fuentes:</b> ${relSourceLinks(m.sources)}</p>` : ''}
+      </article>`).join('')}` : ''}
+    ${e.sources?.length ? `<p class="rel-src"><b>Fuentes del motor:</b> ${relSourceLinks(e.sources)}</p>` : ''}`;
+}
+
+async function openReliability(id) {
+  const box = $('#relDetail');
+  if (!box) return;
+  box.classList.remove('hidden');
+  box.innerHTML = '<div class="notice">Cargando ficha del motor…</div>';
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  try {
+    const engine = await api(`/api/reliability/${encodeURIComponent(id)}`);
+    if (!engine || !engine.id) throw new Error('ficha no encontrada');
+    box.innerHTML = relDetailHTML(engine);
+    box.querySelector('#relDetailClose')?.addEventListener('click', closeReliability);
+    box.querySelector('[data-rel-ai]')?.addEventListener('click', () => askAIAboutEngine(engine));
+  } catch (err) {
+    box.innerHTML = `<div class="tp-empty">No se pudo cargar la ficha: ${esc(err.message)}.</div>`;
+  }
+}
+
+function closeReliability() {
+  const box = $('#relDetail');
+  if (!box) return;
+  box.classList.add('hidden');
+  box.innerHTML = '';
+}
+
+function askAIAboutEngine(engine) {
+  const issue = (engine.issues || [])[0];
+  const query = `Tengo un ${String(engine.brand || '').split('/')[0].trim()} con motor ${engine.family} (${engine.commercial}, ${engine.years}). ${issue ? `Síntoma descrito: ${issue.title}. ` : ''}¿Qué comprobaciones debo hacer antes de sustituir piezas y qué coste orientativo tiene en España?`;
+  showView('chat');
+  if (chatInput) {
+    chatInput.value = query;
+    chatInput.focus();
+  }
+  submitChat(query);
+}
+
+const relSearchInput = $('#relQ');
+if (relSearchInput) {
+  let timer = 0;
+  relSearchInput.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(loadReliability, 220);
+  });
+}
+['#relBrand', '#relEngine', '#relStatus', '#relYear'].forEach(selector => {
+  const el = $(selector);
+  if (el) el.addEventListener('change', loadReliability);
+});
+
 // Carga bajo demanda y enlaces desde el buscador universal.
 document.addEventListener('viewchange', e => {
   if (e.detail.name === 'vehiculos') loadVehicles();
   if (e.detail.name === 'tuning') loadTuning();
-  if (e.detail.name === 'biblioteca') loadLibrary();
+  if (e.detail.name === 'tuning-productos') loadTuningProducts();
+  if (e.detail.name === 'fiabilidad') loadReliability();
 });
 
 // -------------------------------------------------------------
@@ -3196,8 +2873,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initVehicleSelector();
   initHomeVehicleSelector();
   initUniversalSearch();
-  initLibraryFilters();
-  initTechnicalLibrary();
   initOBD();
   const initial = location.hash.slice(1);
   if (initial) showView(initial);
@@ -3208,7 +2883,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadComponents(),
     loadVehicles(),
     loadTuning(),
-    loadLibrary(),
+    loadTuningProducts(),
     searchDtc('P0300')
   ]).catch(err => console.error('Error en inicialización:', err));
 });

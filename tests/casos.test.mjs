@@ -109,8 +109,8 @@ test('stats carga los datos JSON', async () => {
   assert.equal(body.symptoms, 454);
   assert.ok(body.products >= 200);
   assert.equal(body.vehicles, 15);
-  assert.equal(body.tuning, 6);
-  assert.equal(body.library, 15);
+  assert.equal(body.tuning, 3);
+  assert.ok(body.tuningProducts >= 120, 'debe incluir el catálogo de recambios de tuning');
   assert.ok(Array.isArray(body.systems) && body.systems.length > 0, 'debe incluir sistemas reales');
   assert.equal(body.severity.Alta + body.severity.Media + body.severity.Baja, body.dtc);
   assert.ok(Array.isArray(body.productCategories) && body.productCategories.length > 0);
@@ -527,6 +527,81 @@ test('obd/analyze procesa códigos y telemetría', async () => {
   assert.ok(body.reply.length > 0);
 });
 
+test('obd/protocols ofrece los ATSP estándar con datos verificables', async () => {
+  const { status, body } = await getJSON('/api/obd/protocols');
+  assert.equal(status, 200);
+  assert.equal(body.recommended, 'ATSP0');
+  assert.ok(body.protocols.length >= 11);
+  const codes = body.protocols.map(p => p.code);
+  for (const code of ['ATSP0', 'ATSP1', 'ATSP2', 'ATSP3', 'ATSP4', 'ATSP5', 'ATSP6', 'ATSP7', 'ATSP8', 'ATSP9', 'ATSPA']) {
+    assert.ok(codes.includes(code), `debe incluir ${code}`);
+  }
+  assert.equal(new Set(codes).size, codes.length, 'no debe haber códigos duplicados');
+  for (const p of body.protocols) {
+    assert.ok(p.id && p.label && p.bus && p.pins && p.era && p.note, `${p.code} debe estar documentado`);
+    assert.match(p.code, /^ATSP[0-9A-C]$/);
+    assert.ok(['recomendado', 'estandar', 'especial'].includes(p.state));
+  }
+});
+
+test('obd/scanners: solo adaptadores web verificables, de más barato a más caro', async () => {
+  const { status, body } = await getJSON('/api/obd/scanners');
+  assert.equal(status, 200);
+  assert.equal(body.total, 5);
+  assert.equal(body.items.length, 5);
+  assert.deepEqual(body.items.map(i => i.rank), [1, 2, 3, 4, 5]);
+  assert.ok(body.protocolCoverageNote, 'debe explicar la cobertura de protocolos');
+
+  const passengerCodes = ['ATSP0', 'ATSP1', 'ATSP2', 'ATSP3', 'ATSP4', 'ATSP5', 'ATSP6', 'ATSP7', 'ATSP8', 'ATSP9'];
+  for (const item of body.items) {
+    const ps = item.protocolSupport;
+    assert.ok(ps, `${item.id} debe declarar protocolos`);
+    assert.deepEqual(ps.passenger, passengerCodes, `${item.id} debe cubrir los 10 protocolos de turismo`);
+    assert.equal(ps.codes.length, ps.heavy ? 11 : 10);
+    assert.equal(ps.heavy, item.forWeb);
+    if (ps.heavy) assert.ok(ps.codes.includes('ATSPA'), `${item.id} debe declarar J1939`);
+    assert.ok(ps.label && ps.note, `${item.id} debe explicar su cobertura`);
+  }
+
+  const priceOrder = [...body.items].sort((a, b) => a.price - b.price).map(i => i.id);
+  assert.deepEqual(body.rankings.price, priceOrder, 'el orden por precio debe ir de más barato a más caro');
+  const prices = priceOrder.map(id => body.items.find(i => i.id === id).price);
+  assert.deepEqual(prices, [...prices].sort((a, b) => a - b));
+
+  const ids = new Set(body.items.map(i => i.id));
+  assert.equal(ids.size, body.items.length);
+  for (const item of body.items) {
+    assert.ok(item.name && item.brand && item.type, `${item.id} debe estar identificado`);
+    assert.ok(item.price > 0, `${item.id} debe tener precio numérico`);
+    assert.match(item.priceText, /€/);
+    assert.match(item.url, /^https:\/\/www\.amazon\.es\/dp\/[A-Z0-9]{10}$/);
+    assert.ok(existsSync(path.join(ROOT, 'public', item.image)), `${item.id} debe tener imagen local`);
+    assert.ok(item.bestFor && item.limits.length, `${item.id} debe explicar uso y límites`);
+    assert.ok(item.verification?.note, `${item.id} debe indicar cómo se verificó`);
+  }
+
+  assert.equal(body.items[0].id, 'elm327-usb-v15', 'el ELM327 USB debe ser el más barato');
+  assert.equal(body.items[0].price, 20.99);
+  assert.equal(body.rankings.price[0], 'elm327-usb-v15');
+  for (const item of body.items) {
+    assert.equal(item.forWeb, true, `${item.id} debe funcionar con esta web`);
+    assert.match(item.connection, /BLE|USB/);
+    assert.match(item.type, /Adaptador/);
+    assert.doesNotMatch(item.type, /escáner|mano/i, `${item.id} no puede ser un escáner de mano`);
+    assert.doesNotMatch(item.name, /X431|MK808|CRP919|CR Pro|NT530|AP200|AD600S|AD410/i);
+  }
+});
+
+test('OBD-II: la lista de adaptadores va arriba y no quedan escáneres de mano', () => {
+  const html = readFileSync(path.join(ROOT, 'public', 'index.html'), 'utf8');
+  const list = html.indexOf('id="obdScannerList"');
+  const config = html.indexOf('id="obdMode"');
+  assert.ok(list > -1, 'debe existir la lista de adaptadores');
+  assert.ok(config > -1, 'debe existir la configuración de conexión');
+  assert.ok(list < config, 'la lista debe ir antes de la configuración');
+  assert.doesNotMatch(html, /obd-scanners-wrap|data-scanner-tab|obdScannerFilter/);
+});
+
 // ---------------------------------------------------------------
 // Parser OBD-II (obd.js) evaluado en un sandbox con window
 // ---------------------------------------------------------------
@@ -611,6 +686,47 @@ test('ELM327Manager en modo simulado: conexión, DTC, telemetría, VIN y borrado
 
   await manager.disconnect();
   assert.equal(manager.status, 'disconnected');
+});
+
+test('ELM327Manager aplica el protocolo elegido y lo reporta en el simulador', async () => {
+  const code = readFileSync(path.join(ROOT, 'public', 'js', 'obd.js'), 'utf8');
+  const sandbox = {
+    window: {}, navigator: {}, console,
+    TextDecoder, TextEncoder, Promise, Date,
+    setTimeout, clearTimeout, setInterval, clearInterval
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(code, sandbox);
+
+  const manager = new sandbox.window.ELM327Manager();
+  const info = await manager.connect('simulated', 38400, 'ATSP3');
+  assert.equal(info.success, true);
+  assert.equal(manager.protocolCode, 'ATSP3');
+  assert.match(manager.protocolName, /9141/);
+
+  await manager.disconnect();
+  await manager.connect('simulated', 38400, 'ATSPA');
+  assert.equal(manager.protocolCode, 'ATSPA');
+  assert.match(manager.protocolName, /J1939/);
+
+  await manager.disconnect();
+});
+
+test('ELM327Manager ignora un protocolo no soportado y vuelve a automático', async () => {
+  const code = readFileSync(path.join(ROOT, 'public', 'js', 'obd.js'), 'utf8');
+  const sandbox = {
+    window: {}, navigator: {}, console,
+    TextDecoder, TextEncoder, Promise, Date,
+    setTimeout, clearTimeout, setInterval, clearInterval
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(code, sandbox);
+
+  const manager = new sandbox.window.ELM327Manager();
+  await manager.connect('simulated', 38400, 'ATSPZZ');
+  assert.equal(manager.protocolCode, 'ATSP0');
+
+  await manager.disconnect();
 });
 
 test('ELM327Manager no declara borrado ni ausencia de averías sin respuesta válida', async () => {
@@ -1024,185 +1140,151 @@ test('vehículos: fichas, guía de compra y relaciones coherentes', async () => 
   assert.equal((await getJSON('/api/vehicles/no-existe')).status, 404);
 });
 
-test('tuning: etapas, paquetes y productos relacionados sin promesas de potencia', async () => {
+test('tuning: tres etapas detalladas, sin fichas de coche y con categorías de piezas', async () => {
   const { status, body } = await getJSON('/api/tuning');
   assert.equal(status, 200);
   assert.equal(body.stages.length, 3);
-  assert.equal(body.packages.length, 6);
+  assert.equal(body.packages.length, 3);
   assert.ok(body.disclaimer);
-  const r = body.packages.find(p => p.id === 'tuning-golf-r-75');
-  assert.ok(r);
-  assert.equal(r.vehicle.id, 'vw-golf-vii-r-75');
-  assert.ok(r.relatedProducts.length > 0);
-  assert.ok(!JSON.stringify(r).match(/\+\s?\d+\s?(cv|ps|nm)/i), 'no debe prometer ganancias');
-  assert.ok(r.legal);
+  assert.ok(body.stages.every(s => s.id && s.name && s.summary && s.legality));
+  assert.ok(body.stages.every(s => Array.isArray(s.powerLevers) && s.powerLevers.length >= 4));
+  assert.ok(body.stages.every(s => Array.isArray(s.limits) && s.limits.length > 0));
+  const sourceIds = new Set((body.sources || []).map(s => s.id));
+  for (const stage of body.stages) {
+    for (const id of stage.sources || []) assert.ok(sourceIds.has(id), `fuente ${id} inexistente`);
+  }
+  assert.ok(body.packages.every(p => !p.vehicle), 'las guías ya no deben colgar de un coche concreto');
+  assert.ok(body.packages.every(p => Array.isArray(p.productCategories) && p.productCategories.length > 0));
+  assert.ok(!JSON.stringify(body).match(/\+\s?\d+\s?(cv|ps|nm)/i), 'no debe prometer ganancias inventadas');
 });
 
-test('buscador universal incluye vehículos, tuning y biblioteca', async () => {
+test('catálogo de recambios de tuning: productos reales, categorías, filtros y enlaces', async () => {
+  const { status, body } = await getJSON('/api/tuning-products');
+  assert.equal(status, 200);
+  assert.ok(body.items.length >= 150, 'debe haber un catálogo amplio de productos reales');
+  assert.equal(body.categories.length, 17);
+  assert.ok(body.cars.length >= 15);
+  assert.equal(body.items.filter(i => !i.image).length, 0, 'toda pieza debe tener imagen');
+  assert.equal(body.items.filter(i => !(i.links || []).length).length, 0, 'toda pieza debe tener enlaces');
+  assert.equal(body.items.filter(i => !(i.fitment || []).length).length, 0, 'toda pieza debe declarar compatibilidad');
+  assert.ok(body.items.every(i => i.links.every(l => /^https:\/\//.test(l.url))));
+  assert.ok(!body.affiliate || body.affiliate.status === 'sin_cuenta');
+  assert.equal(body.stats.store, body.items.length);
+
+  const turbo = await getJSON('/api/tuning-products?category=turbo');
+  assert.equal(turbo.status, 200);
+  assert.ok(turbo.body.items.length >= 8);
+  assert.ok(turbo.body.items.every(i => i.category === 'turbo'));
+
+  const golf = await getJSON('/api/tuning-products?car=vw-golf-7-gti');
+  assert.ok(golf.body.items.length >= 20);
+  assert.ok(golf.body.items.every(i => !(i.cars || []).length || i.cars.includes('vw-golf-7-gti')));
+
+  const search = await getJSON('/api/tuning-products?q=intercooler');
+  assert.ok(search.body.items.length > 0);
+
+  const firstTurbo = body.items.find(i => i.category === 'turbo');
+  const detail = await getJSON(`/api/tuning-products/${firstTurbo.id}`);
+  assert.equal(detail.status, 200);
+  assert.equal(detail.body.category, 'turbo');
+  assert.equal((await getJSON('/api/tuning-products/no-existe')).status, 404);
+
+  // Todas las fichas son de tienda y conservan la ficha antigua que ya era real.
+  const shop = body.items.filter(i => i.source === 'tienda');
+  assert.equal(shop.length, body.items.length);
+  assert.ok(shop.every(i => i.links.some(l => /^https:\/\/www\.amazon\.es\/dp\//.test(l.url))));
+  const legacy = body.items.find(i => i.id === 'tienda-amz-b0gtmbtqf4');
+  assert.ok(legacy, 'la ficha antigua debe seguir en el catálogo');
+  assert.equal(legacy.category, 'admision');
+  assert.equal((await getJSON('/api/tuning-products/tienda-amz-b0gtmbtqf4')).status, 200);
+});
+
+test('catálogo de recambios: foto del vendedor, archivo local y enlaces únicos', async () => {
+  const { body } = await getJSON('/api/tuning-products');
+
+  // Ninguna ficha puede apuntar a una foto que no esté en disco.
+  const sinArchivo = body.items.filter(i => !existsSync(path.join(ROOT, 'public', i.image.replace(/^\//, ''))));
+  assert.deepEqual(sinArchivo.map(i => i.id), [], 'toda foto referenciada debe existir en public/');
+
+  // Todas las fotos son del vendedor: las nuevas, por ASIN; las antiguas, del catálogo de tienda.
+  for (const item of body.items) {
+    assert.equal(item.photoKind, 'tienda', `${item.id} debe usar foto de tienda`);
+    if (item.image.startsWith('/img/tienda/')) {
+      const asin = item.id.slice('tienda-amz-'.length);
+      assert.match(asin, /^[a-z0-9]{10}$/);
+      assert.equal(item.image.toLowerCase(), `/img/tienda/${asin}.jpg`);
+      assert.ok(item.links.some(l => l.url === `https://www.amazon.es/dp/${asin.toUpperCase()}`), `${item.id} debe enlazar a su ASIN`);
+    } else {
+      assert.ok(item.image.startsWith('/img/productos/'), `${item.id} debe conservar su foto de tienda`);
+    }
+  }
+
+  // No puede haber dos piezas compartiendo el mismo archivo.
+  const repetidas = new Map();
+  for (const item of body.items) repetidas.set(item.image, (repetidas.get(item.image) || 0) + 1);
+  assert.deepEqual([...repetidas].filter(([, n]) => n > 1), [], 'ninguna foto puede estar repetida');
+
+  for (const item of body.items) {
+    const urls = item.links.map(l => l.url);
+    assert.equal(new Set(urls).size, urls.length, `${item.id} no debe repetir enlaces`);
+    assert.ok(urls.every(u => /^https:\/\//.test(u)), `${item.id} solo admite enlaces https`);
+    assert.ok(item.query, `${item.id} debe declarar la consulta que se busca`);
+  }
+});
+
+test('buscador universal incluye vehículos y tuning', async () => {
   const v = await getJSON('/api/search?q=golf');
   assert.equal(v.status, 200);
   assert.ok(v.body.groups.vehicles.length > 0);
   const t = await getJSON('/api/search?q=tuning');
   assert.equal(t.status, 200);
   assert.ok(t.body.groups.tuning.length > 0);
-  const l = await getJSON('/api/search?q=golf');
-  assert.equal(l.status, 200);
-  assert.ok(Array.isArray(l.body.groups.library));
-  assert.ok(l.body.groups.library.length > 0);
-  assert.ok(l.body.groups.library.every(x => x.type === 'library' && x.id && x.title));
-  assert.ok(Array.isArray(l.body.groups.technical) && l.body.groups.technical.length > 0);
 });
 
-test('biblioteca técnica: índice, cobertura, carencias y detalle verificable', async () => {
-  const { status, body } = await getJSON('/api/library');
+test('fiabilidad: motores, averías con fuente, estado honesto y filtros', async () => {
+  const { status, body } = await getJSON('/api/reliability');
   assert.equal(status, 200);
-  assert.equal(body.total, 15);
-  assert.equal(body.items.length, 15);
-  assert.equal(body.documentationGaps.length, 8);
-  assert.equal(body.coverage.length, 7);
-  assert.ok(body.notice);
-  assert.ok(body.brands.length >= 8);
-  assert.ok(body.systems.includes('Motor EA888'));
-  assert.ok(body.items.every(i => i.id && i.title && i.brand && i.image?.src));
-  assert.ok(body.items.every(i => i.status === 'parcial' && i.statusLabel));
-  assert.ok(body.items.every(i => i.sourceCount > 0 && i.coveredCount > 0 && i.pendingCount === 8));
+  assert.ok(body.stats.engines >= 6);
+  assert.ok(body.stats.issues >= 20);
+  assert.equal(body.results.length, body.stats.engines);
 
-  const golf = await getJSON('/api/library/vw-golf-vii-r-75');
-  assert.equal(golf.status, 200);
-  assert.equal(golf.body.brand, 'Volkswagen');
-  assert.ok(golf.body.engine?.powerPs === 310 && golf.body.engine?.torqueNm === 400);
-  assert.ok(golf.body.sources.length >= 2);
-  assert.ok(golf.body.inspection.length >= 3);
-  assert.ok(golf.body.documentationGaps.length === 8);
-  assert.ok(golf.body.notice);
+  const estados = new Set((body.statusLegend || []).map(s => s.id));
+  assert.deepEqual([...estados].sort(), ['confirmada', 'hipotesis', 'reportada']);
+  assert.ok(body.notice && /motor/i.test(body.notice), 'la base debe avisar de que los datos son por motor');
 
-  const golfSearch = await getJSON('/api/library?q=golf');
-  assert.equal(golfSearch.status, 200);
-  assert.ok(golfSearch.body.items.length >= 3);
-  const audi = await getJSON('/api/library?brand=Audi');
-  assert.equal(audi.status, 200);
-  assert.ok(audi.body.items.length === 1 && audi.body.items[0].brand === 'Audi');
-  const motor = await getJSON('/api/library?system=Motor%20EA888');
-  assert.equal(motor.status, 200);
-  assert.ok(motor.body.items.every(i => i.systems.includes('Motor EA888')));
-  assert.equal((await getJSON('/api/library/no-existe')).status, 404);
-});
-
-test('biblioteca técnica: 27 categorías, datos importados y fuentes con estados diferenciados', async () => {
-  const meta = await getJSON('/api/technical/meta');
-  assert.equal(meta.status, 200);
-  assert.equal(meta.body.version, 4);
-  assert.equal(meta.body.categories.length, 27);
-  assert.equal(meta.body.counts.total, 37114);
-  assert.equal(meta.body.counts.pids, 132);
-  assert.equal(meta.body.counts.dtc, 9533);
-  assert.equal(meta.body.counts.recalls, 109);
-  assert.equal(meta.body.categories.filter(c => c.coverage === 'data').length, 25);
-  assert.equal(meta.body.categories.filter(c => c.coverage === 'source').length, 2);
-  assert.equal(meta.body.categories.filter(c => c.coverage === 'pending').length, 0);
-  assert.equal(meta.body.counts.byStatus.verified, 241);
-  assert.equal(meta.body.counts.byStatus.metadata_only, 193);
-  assert.equal(meta.body.counts.byStatus.source_only, 53);
-  assert.equal(meta.body.vehicles.length, 15);
-  assert.ok(meta.body.facets.brands.includes('Volkswagen'));
-  assert.ok(meta.body.facets.years.includes(2024));
-
-  const pids = await getJSON('/api/technical/pids');
-  assert.equal(pids.status, 200);
-  assert.equal(pids.body.total, 132);
-  assert.equal(pids.body.pids.length, 132);
-  assert.ok(pids.body.pids.every(p => p.code && p.unit && p.sourceIds.length));
-  assert.ok(pids.body.pids.filter(p => p.formula).length >= 90);
-
-  const pid = await getJSON('/api/technical/pids/010C');
-  assert.equal(pid.status, 200);
-  assert.equal(pid.body.code, '010C');
-  assert.match(pid.body.formula, /256/);
-  assert.equal((await getJSON('/api/technical/pids/NOPE')).status, 404);
-
-  const filters = await getJSON('/api/technical?category=egr-intake&limit=100');
-  assert.equal(filters.status, 200);
-  assert.ok(filters.body.total > 0);
-  assert.ok(filters.body.items.every(item => item.categoryId === 'egr-intake' || item.match));
-
-  const golf = await getJSON('/api/technical?vehicleId=vw-golf-vii-r-75&limit=100');
-  assert.equal(golf.status, 200);
-  assert.ok(golf.body.total >= 7);
-  assert.ok(golf.body.items.every(item => item.vehicleIds.includes('vw-golf-vii-r-75')));
-
-  for (const id of ['vw-golf-iv-19-tdi-110','vw-golf-v-20-tdi-140','peugeot-205-19-gti','peugeot-206-20-hdi-90','peugeot-308-iii-15-bluehdi-130']) {
-    const vehicle = await getJSON(`/api/vehicles/${id}`);
-    assert.equal(vehicle.status, 200);
-    assert.ok(vehicle.body.engine?.powerPs > 0 && vehicle.body.engine?.torqueNm > 0);
-    assert.ok(vehicle.body.inspection.length >= 5);
-    assert.ok(vehicle.body.knownIssues.length >= 1);
-    assert.ok(vehicle.body.sources.length >= 1);
-    const technical = await getJSON(`/api/technical?vehicleId=${id}&limit=100`);
-    assert.equal(technical.status, 200);
-    assert.ok(technical.body.total >= 6, `${id} debe tener entradas técnicas`);
+  for (const engine of body.results) {
+    assert.ok(engine.id && engine.family && engine.brand && engine.years);
+    assert.ok(engine.issuesTotal > 0, `${engine.id} debe tener averías`);
+    assert.ok(engine.distribution?.type, `${engine.id} debe declarar distribución`);
+    assert.ok(engine.reliability?.verdict, `${engine.id} debe declarar fiabilidad`);
   }
 
-  const search = await getJSON('/api/technical?q=P0299&limit=100');
-  assert.equal(search.status, 200);
-  assert.ok(search.body.total > 0);
-
-  const dtcSearch = await getJSON('/api/technical?type=dtc&q=P0299&limit=20');
-  assert.equal(dtcSearch.status, 200);
-  assert.ok(dtcSearch.body.total > 0);
-  assert.ok(dtcSearch.body.items.every(item => item.type === 'dtc'));
-
-  const dtcDetail = await getJSON('/api/technical/dtc-P0299');
-  assert.equal(dtcDetail.status, 200);
-  assert.equal(dtcDetail.body.data.code, 'P0299');
-  assert.ok(dtcDetail.body.data.causes.length > 0);
-
-  const brands = await getJSON('/api/technical?type=vehicle_spec&brand=Volkswagen&limit=100');
-  assert.equal(brands.status, 200);
-  assert.ok(brands.body.total > 0);
-  assert.ok(brands.body.items.every(item => item.brand === 'Volkswagen'));
-
-  const year = await getJSON('/api/technical?type=vehicle_spec&year=2024&limit=100');
-  assert.equal(year.status, 200);
-  assert.ok(year.body.total > 0);
-  assert.ok(year.body.items.every(item => item.yearFrom && item.yearFrom <= 2024 && (!item.yearTo || item.yearTo >= 2024)));
-
-  const systems = await getJSON('/api/technical?system=Turbo&limit=20');
-  assert.equal(systems.status, 200);
-  assert.ok(systems.body.total > 0);
-
-  const recalls = await getJSON('/api/technical?type=recall&limit=100');
-  assert.equal(recalls.status, 200);
-  assert.equal(recalls.body.total, 109);
-  const recallDetail = await getJSON(`/api/technical/${encodeURIComponent(recalls.body.items[0].id)}`);
-  assert.equal(recallDetail.status, 200);
-  assert.ok(recallDetail.body.data.campaign);
-
-  const sources = await getJSON('/api/technical?category=official-sources&type=source&limit=100');
-  assert.equal(sources.status, 200);
-  assert.equal(sources.body.total, 53);
-
-  const detail = await getJSON('/api/technical/pid-010C');
+  const detail = await getJSON(`/api/reliability/${body.results[0].id}`);
   assert.equal(detail.status, 200);
-  assert.equal(detail.body.status, 'verified');
-  assert.ok(detail.body.sources.length >= 1);
-  assert.equal((await getJSON('/api/technical/no-existe')).status, 404);
+  for (const issue of detail.body.issues) {
+    assert.ok(estados.has(issue.status), `estado válido en ${issue.id}`);
+    assert.ok(issue.title && issue.cause && issue.solution && issue.checks?.length, `${issue.id} debe ser accionable`);
+    assert.ok(issue.cost?.typical, `${issue.id} debe declarar coste orientativo`);
+    assert.ok((issue.sources || []).every(s => /^https:\/\//.test(s.url)), `${issue.id} solo admite fuentes https`);
+  }
+  assert.ok(detail.body.sources?.length > 0, 'el motor debe declarar sus fuentes');
+  assert.equal((await getJSON('/api/reliability/no-existe')).status, 404);
 
-  const invalid = await getJSON('/api/technical?category=no-existe');
-  assert.equal(invalid.status, 400);
-  const invalidType = await getJSON('/api/technical?type=no-existe');
-  assert.equal(invalidType.status, 400);
-});
+  const renault = await getJSON('/api/reliability?brand=Renault');
+  assert.ok(renault.body.results.length > 0);
+  assert.ok(renault.body.results.every(e => /renault/i.test(e.brand)));
 
-test('chat local añade referencias de la biblioteca técnica', async () => {
-  const { status, body } = await postJSON('/api/chat', {
-    message: 'Tengo el código P0299 y falta de potencia en un Golf 2.0 TSI',
-    context: { vehicleId: 'vw-golf-vii-r-75' }
-  });
-  assert.equal(status, 200);
-  assert.equal(body.source, 'expert_rules');
-  assert.ok(Array.isArray(body.technical_references));
-  assert.ok(body.technical_references.length > 0);
-  assert.match(body.reply, /Referencias técnicas locales/);
+  const cadena = await getJSON('/api/reliability?q=cadena');
+  assert.ok(cadena.body.results.length > 0);
+  assert.ok(cadena.body.results.some(e => e.issuesTotal > 0));
+
+  const soloConfirmadas = await getJSON('/api/reliability?status=confirmada');
+  assert.ok(soloConfirmadas.body.results.every(e => e.issues.every(i => i.status === 'confirmada')));
+
+  const buscador = await getJSON('/api/search?q=cadena');
+  assert.equal(buscador.status, 200);
+  assert.ok(buscador.body.groups.reliability.length > 0);
+  assert.ok(buscador.body.groups.reliability.every(x => x.type === 'reliability' && x.id && x.title));
 });
 
 test('IA local recibe y devuelve el contexto de una ficha de vehículo', async () => {

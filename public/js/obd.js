@@ -6,6 +6,20 @@
  *  - Simulador Virtual de ECU (para pruebas y navegadores sin soporte hardware)
  */
 
+const ELM_PROTOCOL_NAMES = {
+  ATSP0: 'ISO 15765-4 (CAN 11/500) · automático',
+  ATSP1: 'SAE J1850 PWM',
+  ATSP2: 'SAE J1850 VPW',
+  ATSP3: 'ISO 9141-2',
+  ATSP4: 'ISO 14230-4 (KWP2000, 5 baudios)',
+  ATSP5: 'ISO 14230-4 (KWP2000, rápido)',
+  ATSP6: 'ISO 15765-4 (CAN 11/500)',
+  ATSP7: 'ISO 15765-4 (CAN 29/500)',
+  ATSP8: 'ISO 15765-4 (CAN 11/250)',
+  ATSP9: 'ISO 15765-4 (CAN 29/250)',
+  ATSPA: 'SAE J1939 (CAN)'
+};
+
 class OBDParser {
   // Limpia respuestas de caracteres de control, prompts y ecos
   static clean(raw) {
@@ -280,6 +294,8 @@ class VirtualECUSimulator {
     this.storedDTCs = ['P0299', 'P0300'];
     this.pendingDTCs = ['P0101'];
     this.dtcCleared = false;
+    this.protocolCode = 'ATSP0';
+    this.protocolName = ELM_PROTOCOL_NAMES.ATSP0;
   }
 
   connect() {
@@ -334,8 +350,12 @@ class VirtualECUSimulator {
     if (c === 'ATE0' || c === 'ATE1') return Promise.resolve('OK\r\r>');
     if (c === 'ATL0' || c === 'ATL1') return Promise.resolve('OK\r\r>');
     if (c === 'ATH0' || c === 'ATH1') return Promise.resolve('OK\r\r>');
-    if (c.startsWith('ATSP')) return Promise.resolve('OK\r\r>');
-    if (c === 'ATDP') return Promise.resolve('ISO 15765-4 (CAN 11/500)\r\r>');
+    if (c.startsWith('ATSP')) {
+      this.protocolCode = ELM_PROTOCOL_NAMES[c] ? c : 'ATSP0';
+      this.protocolName = ELM_PROTOCOL_NAMES[this.protocolCode];
+      return Promise.resolve('OK\r\r>');
+    }
+    if (c === 'ATDP' || c === 'ATDPN') return Promise.resolve(`${this.protocolName}\r\r>`);
     if (c === 'ATRV') return Promise.resolve(`${this.voltage.toFixed(1)}V\r\r>`);
     if (c === 'ATI') return Promise.resolve('ELM327 v1.5 (Simulador Virtual)\r\r>');
 
@@ -483,6 +503,7 @@ class ELM327Manager {
     this.bleHandler = null;
     this.simulator = new VirtualECUSimulator();
     this.baudRate = 38400;
+    this.protocolCode = 'ATSP0';
     this.protocolName = 'Desconocido';
     this.version = 'N/A';
     this.voltage = 'N/A';
@@ -527,9 +548,10 @@ class ELM327Manager {
   }
 
   // Conexión principal
-  async connect(mode = 'simulated', baudRate = 38400) {
+  async connect(mode = 'simulated', baudRate = 38400, protocol = 'ATSP0') {
     this.mode = mode;
     this.baudRate = Number(baudRate) || 38400;
+    this.protocolCode = ELM_PROTOCOL_NAMES[protocol] ? protocol : 'ATSP0';
     this.setStatus('connecting', `Iniciando conexión ${mode.toUpperCase()}...`);
 
     try {
@@ -558,12 +580,20 @@ class ELM327Manager {
             { namePrefix: 'OBD' },
             { namePrefix: 'ELM' },
             { namePrefix: 'V-LINK' },
-            { namePrefix: 'Viecar' }
+            { namePrefix: 'V-Link' },
+            { namePrefix: 'Vgate' },
+            { namePrefix: 'VEEPEAK' },
+            { namePrefix: 'Veepeak' },
+            { namePrefix: 'OBDLink' },
+            { namePrefix: 'Viecar' },
+            { namePrefix: 'KONNWEI' },
+            { namePrefix: 'Konnwei' }
           ],
           optionalServices: [
             '0000fff0-0000-1000-8000-00805f9b34fb', // Servicio SPP común
             'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
-            '0000ffe0-0000-1000-8000-00805f9b34fb'
+            '0000ffe0-0000-1000-8000-00805f9b34fb',
+            '6e400001-b5a3-f393-e0a9-e50e24dcca9e' // Nordic UART (BLE serie)
           ]
         });
 
@@ -599,7 +629,7 @@ class ELM327Manager {
       }
 
       // Inicialización AT del ELM327
-      await this.initELM327();
+      await this.initELM327(this.protocolCode);
       this.setStatus('connected', `Conectado exitosamente (${this.version})`);
       return { success: true, mode: this.mode, version: this.version, protocol: this.protocolName, voltage: this.voltage };
 
@@ -669,8 +699,10 @@ class ELM327Manager {
   }
 
   // Secuencia de inicialización homologada ELM327
-  async initELM327() {
-    this.setStatus('connecting', 'Configurando protocolo ATZ/ATSP0...');
+  async initELM327(protocol = 'ATSP0') {
+    const code = ELM_PROTOCOL_NAMES[protocol] ? protocol : 'ATSP0';
+    this.protocolCode = code;
+    this.setStatus('connecting', `Configurando protocolo ATZ/${code}...`);
 
     // 1. Reset
     const rz = await this.send('ATZ', 5000);
@@ -682,14 +714,18 @@ class ELM327Manager {
     await this.send('ATL0', 2000);
     // 4. Desactivar headers (ATH0)
     await this.send('ATH0', 2000);
-    // 5. Configurar protocolo automático (ATSP0)
-    await this.send('ATSP0', 3000);
+    // 5. Configurar el protocolo elegido; si el adaptador no lo acepta, volver a automático.
+    const rp = await this.send(code, 3000);
+    if (OBDParser.isError(rp) && code !== 'ATSP0') {
+      this.protocolCode = 'ATSP0';
+      await this.send('ATSP0', 3000);
+    }
     // 6. Leer tensión de batería (ATRV)
     const rv = await this.send('ATRV', 2000);
     this.voltage = OBDParser.clean(rv);
     // 7. Describir protocolo activo
     const rdp = await this.send('ATDP', 2000);
-    this.protocolName = OBDParser.clean(rdp) || 'Protocolo OBD-II Estándar';
+    this.protocolName = OBDParser.clean(rdp) || ELM_PROTOCOL_NAMES[this.protocolCode] || 'Protocolo OBD-II Estándar';
   }
 
   // Lectura de códigos DTC (Modo 03 Almacenados y Modo 07 Pendientes)

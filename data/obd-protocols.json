@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-27",
+  "notice": "Protocolos que puede seleccionar un adaptador ELM327 compatible. El código ATSP se envía tal cual al adaptador; el vehículo solo responde a los que soporta su centralita. La detección automática es la opción recomendada salvo que se conozca el protocolo exacto.",
+  "recommended": "ATSP0",
+  "protocols": [
+    {
+      "id": "auto",
+      "code": "ATSP0",
+      "order": 0,
+      "label": "Automático (detección de la ECU)",
+      "family": "Automático",
+      "bus": "Detección automática",
+      "pins": "—",
+      "era": "Cualquier vehículo OBD-II / EOBD",
+      "state": "recomendado",
+      "note": "El ELM327 prueba los protocolos disponibles y se queda con el que responde. Es la opción segura para diagnóstico habitual y para no bloquear una ECU con un protocolo incorrecto."
+    },
+    {
+      "id": "sae-j1850-pwm",
+      "code": "ATSP1",
+      "order": 1,
+      "label": "SAE J1850 PWM (11 bits)",
+      "family": "SAE J1850",
+      "bus": "PWM · 41,6 kbit/s",
+      "pins": "2 y 10",
+      "era": "Principalmente Ford y algunos asiáticos anteriores a 2008",
+      "state": "estandar",
+      "note": "Bus de dos hilos con modulación por anchura de pulso. Si el vehículo usa CAN, este protocolo no responderá."
+    },
+    {
+      "id": "sae-j1850-vpw",
+      "code": "ATSP2",
+      "order": 2,
+      "label": "SAE J1850 VPW (11 bits)",
+      "family": "SAE J1850",
+      "bus": "VPW · 10,4 kbit/s",
+      "pins": "2 y 10",
+      "era": "Principalmente General Motors anteriores a 2008",
+      "state": "estandar",
+      "note": "Bus de un solo hilo con modulación por anchura de pulso variable. No es compatible con PWM ni con CAN."
+    },
+    {
+      "id": "iso-9141-2",
+      "code": "ATSP3",
+      "order": 3,
+      "label": "ISO 9141-2 (K-line)",
+      "family": "ISO 9141",
+      "bus": "K-line · 10,4 kbit/s",
+      "pins": "7 y 15",
+      "era": "Europeos y asiáticos de finales de los 90 y principios de los 2000",
+      "state": "estandar",
+      "note": "Un solo hilo de datos (K) y línea L opcional. Muchos vehículos europeos anteriores a CAN lo usan; requiere inicialización de 5 baudios."
+    },
+    {
+      "id": "iso-14230-4-5baud",
+      "code": "ATSP4",
+      "order": 4,
+      "label": "ISO 14230-4 KWP2000 (inicialización 5 baudios)",
+      "family": "ISO 14230 (KWP2000)",
+      "bus": "K-line · 10,4 kbit/s",
+      "pins": "7 y 15",
+      "era": "Europeos y asiáticos de transición, aproximadamente 2000-2007",
+      "state": "estandar",
+      "note": "KWP2000 con inicialización lenta. Es habitual en centralitas de motor y ABS de esa época."
+    },
+    {
+      "id": "iso-14230-4-fast",
+      "code": "ATSP5",
+      "order": 5,
+      "label": "ISO 14230-4 KWP2000 (inicialización rápida)",
+      "family": "ISO 14230 (KWP2000)",
+      "bus": "K-line · 10,4 kbit/s",
+      "pins": "7 y 15",
+      "era": "Europeos y asiáticos de transición, aproximadamente 2000-2007",
+      "state": "estandar",
+      "note": "Misma familia que el anterior, con dirección y formato de cabecera ya conocidos. Si falla la inicialización lenta, probar esta."
+    },
+    {
+      "id": "iso-15765-4-can-11-500",
+      "code": "ATSP6",
+      "order": 6,
+      "label": "ISO 15765-4 CAN (11 bits, 500 kbit/s)",
+      "family": "ISO 15765-4 (CAN)",
+      "bus": "CAN · 500 kbit/s",
+      "pins": "6 y 14",
+      "era": "Turismos europeos, asiáticos y americanos desde aproximadamente 2004-2008",
+      "state": "recomendado",
+      "note": "Es el protocolo OBD-II más común en turismos modernos. Soporta tramas multiframe para VIN y respuestas largas."
+    },
+    {
+      "id": "iso-15765-4-can-29-500",
+      "code": "ATSP7",
+      "order": 7,
+      "label": "ISO 15765-4 CAN (29 bits, 500 kbit/s)",
+      "family": "ISO 15765-4 (CAN)",
+      "bus": "CAN · 500 kbit/s",
+      "pins": "6 y 14",
+      "era": "Vehículos que usan identificadores de 29 bits, habitualmente industriales y algunos turismos",
+      "state": "estandar",
+      "note": "Mismo bus físico que el CAN de 11 bits, pero con identificadores extendidos. No todos los ELM327 lo soportan igual de bien."
+    },
+    {
+      "id": "iso-15765-4-can-11-250",
+      "code": "ATSP8",
+      "order": 8,
+      "label": "ISO 15765-4 CAN (11 bits, 250 kbit/s)",
+      "family": "ISO 15765-4 (CAN)",
+      "bus": "CAN · 250 kbit/s",
+      "pins": "6 y 14",
+      "era": "Algunos vehículos y centralitas de la primera etapa CAN",
+      "state": "estandar",
+      "note": "Variante de menor velocidad. Si el coche es CAN a 500 kbit/s, no responderá por esta."
+    },
+    {
+      "id": "iso-15765-4-can-29-250",
+      "code": "ATSP9",
+      "order": 9,
+      "label": "ISO 15765-4 CAN (29 bits, 250 kbit/s)",
+      "family": "ISO 15765-4 (CAN)",
+      "bus": "CAN · 250 kbit/s",
+      "pins": "6 y 14",
+      "era": "Vehículos con identificadores extendidos y bus lento",
+      "state": "estandar",
+      "note": "Combinación menos frecuente en turismos; comprobar el protocolo antes de forzarlo."
+    },
+    {
+      "id": "sae-j1939-can",
+      "code": "ATSPA",
+      "order": 10,
+      "label": "SAE J1939 CAN (vehículos pesados)",
+      "family": "SAE J1939",
+      "bus": "CAN · 250 kbit/s",
+      "pins": "6 y 14",
+      "era": "Camiones, autobuses y maquinaria; no es OBD-II de turismo",
+      "state": "especial",
+      "note": "Protocolo de vehículo pesado. Un turismo no responde a J1939 aunque comparta conector."
+    }
+  ]
+}

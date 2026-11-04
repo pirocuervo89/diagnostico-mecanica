@@ -1,315 +1,391 @@
 {
+  "updated": "2026-10-25",
+  "disclaimer": "Guía técnica de ingeniería. Las cifras de potencia solo valen si están medidas en banco con el mismo combustible y condiciones. Ninguna pieza de esta guía está homologada por el hecho de aparecer aquí: revisa el certificado de cada referencia y la normativa de tu país antes de circular.",
   "stages": [
     {
       "id": "stage-1",
-      "name": "Stage 1 — calibración de serie",
-      "summary": "Ajuste de software sobre hardware de serie. No requiere cambiar piezas mecánicas, pero sí verificar estado y límites de seguridad.",
-      "requires": [
-        "Diagnóstico previo sin fallos activos",
-        "Combustible adecuado",
-        "Temperaturas y presiones dentro de rango",
-        "Registro de parámetros antes/después"
+      "name": "Stage 1 — software sobre serie",
+      "goal": "Ganar potencia y respuesta sin abrir el motor ni cambiar piezas mecánicas.",
+      "summary": "Se reprograma la ECU manteniendo turbo, inyectores, intercooler y escape de serie. Es la etapa con mejor relación potencia/precio, pero solo es segura si el motor está sano y el combustible acompaña.",
+      "powerLevers": [
+        {
+          "title": "Presión de soplado dentro del margen del turbo",
+          "effect": "Es la palanca principal de par en un turbo de serie.",
+          "detail": "Se sube el objetivo de presión (y el límite de par) hasta donde el compresor sigue en su mapa con rendimiento aceptable. Pasado ese punto solo se calienta el aire y se castiga el turbo."
+        },
+        {
+          "title": "Avance de encendido y lambda",
+          "effect": "Aprovecha el combustible en vez de desperdiciarlo.",
+          "detail": "Con 98 octanos se admite más avance sin picado. Con 95 el mapa debe ser conservador: si el sensor de detonación corrige, la ganancia desaparece."
+        },
+        {
+          "title": "Respuesta del acelerador y gestión de par",
+          "effect": "No da CV, pero cambia por completo la sensación.",
+          "detail": "Mapas de par por marcha, torsión limitada en 1ª y 2ª para no romper transmisión ni neumáticos, y una curva más lineal."
+        },
+        {
+          "title": "Eliminación de restricciones de serie",
+          "effect": "Pequeña, pero gratis en software.",
+          "detail": "Cortes de par en frío, retardos de mariposa y límites de velocidad de serie se ajustan solo si la legislación del país lo permite."
+        }
       ],
-      "avoid": [
-        "Prometer potencia sin banco",
-        "Usar mapas genéricos sin verificar el archivo original",
-        "Ignorar límites de par de la caja"
+      "hardware": [
+        "Bujías en buen estado y con el grado térmico correcto",
+        "Filtro de aire limpio (el de serie basta para Stage 1)",
+        "Aceite y refrigerante al día: la temperatura manda",
+        "Sensores de presión, MAF/MAP y lambda sin derivas",
+        "Embrague o DSG con margen para el par nuevo"
       ],
-      "evidence": "Definición técnica de trabajo; no se publica una ganancia concreta sin medición."
+      "software": [
+        "Lectura y copia del archivo original antes de tocar nada",
+        "Mapa específico para la referencia exacta de ECU, no genérico",
+        "Datalogging antes y después: presión real, IAT, correcciones de encendido, fuel trims",
+        "Registro de la ganancia en banco o con medición repetible"
+      ],
+      "limits": [
+        "Turbo de serie: pasado su caudal útil, subir presión solo genera calor",
+        "Embrague manual y DSG: el par nuevo acelera el desgaste si ya estaba justo",
+        "Bomba de combustible de baja presión: comprobar que mantiene presión en carga",
+        "ITV y seguro: una repro no homologada puede dejarte sin cobertura"
+      ],
+      "checks": [
+        "0 fallos activos y ningún DTC pendiente antes de reprogramar",
+        "Prueba de compresión o de estanqueidad si el motor tiene muchos km",
+        "Correcciones de encendido por cilindro cercanas a cero tras la repro",
+        "Temperatura de admisión estable en tiradas largas"
+      ],
+      "myths": [
+        "Un filtro cónico no da Stage 1: sin calibrar puede incluso perder par",
+        "Una válvula de descarga ruidosa no añade potencia",
+        "Un escape deportivo por sí solo no justifica una etapa"
+      ],
+      "cost": "€",
+      "legality": "La repro cambia las emisiones homolagadas. Sin informe de conformidad puede ser rechazo en ITV y pérdida de garantía del fabricante.",
+      "sources": [
+        "src-garrett-tech",
+        "src-bosch-mobility",
+        "src-tuv"
+      ]
     },
     {
       "id": "stage-2",
-      "name": "Stage 2 — admisión y escape",
-      "summary": "Calibración acompañada de mejoras de flujo de admisión y escape. Exige comprobar que el hardware es compatible y que la ECU puede controlar la carga.",
-      "requires": [
-        "Admisión compatible y sin tomas falsas",
-        "Downpipe/escape con homologación y sensor lambda correcto",
-        "Intercooler con caudal y montaje adecuados",
-        "Calibración específica y datalogging"
+      "name": "Stage 2 — flujo, temperatura y calibración",
+      "goal": "Sostener más carga y repetirla: más aire frío, menos contrapresión y un mapa que lo aproveche.",
+      "summary": "Aquí está el dinero bien gastado después del Stage 1: downpipe de alto flujo, intercooler mayor y admisión con caudal real. Cada pieza debe tener una razón medida, no una promesa de catálogo.",
+      "powerLevers": [
+        {
+          "title": "Downpipe y catalizador de alto flujo",
+          "effect": "Baja la contrapresión y el turbo llena antes y más arriba.",
+          "detail": "Es la pieza que más se nota después de la repro. En vía pública exige catalizador homologado: un downpipe libre es ilegal y huele a ITV desfavorable."
+        },
+        {
+          "title": "Intercooler de mayor volumen y espesor",
+          "effect": "Mantiene la potencia en la segunda y tercera tirada.",
+          "detail": "El de serie se satura: sube la temperatura de admisión, la ECU recorta avance y pierdes lo ganado. Un buen núcleo barato y grande puede empeorar la respuesta por caída de presión."
+        },
+        {
+          "title": "Admisión con caudal y toma de aire real",
+          "effect": "Moderada; su valor está en la temperatura y en la estabilidad.",
+          "detail": "Una caja cerrada que aspire aire fresco del exterior supera a un cónico abierto que aspira calor del vano. Hay que comprobar que el MAF sigue leyendo dentro de rango."
+        },
+        {
+          "title": "Manguitos de presión y abrazaderas",
+          "effect": "No da potencia: evita perder la que tienes.",
+          "detail": "Con más presión, un manguito de serie viejo se hincha o revienta. Silicona con refuerzo y abrazaderas de tornillo sin fin bien apretadas."
+        },
+        {
+          "title": "Calibración específica con datalogging",
+          "effect": "Convierte las piezas en potencia utilizable.",
+          "detail": "Se ajusta el mapa a la nueva caída de presión y a las temperaturas. Sin este paso, las piezas solo hacen ruido."
+        }
       ],
-      "avoid": [
-        "Downpipe sin catalizador para uso en vía pública",
-        "Mezclar piezas sin calibrar",
-        "Sustituir el turbo sin medir presión y contrapresión"
+      "hardware": [
+        "Downpipe con catalizador deportivo homologado y salida para sonda lambda",
+        "Intercooler con núcleo de barra y aleta, y depósito de extremo bien diseñado",
+        "Tubería de admisión rígida o de silicona con derivación correcta",
+        "Manguitos de presión reforzados y abrazaderas de calidad",
+        "Bujías una etapa más frías si la carga sube de forma clara",
+        "Sensor MAP de mayor rango si la ECU lo admite"
       ],
-      "evidence": "Checklist de ingeniería; no se garantiza ninguna cifra de potencia."
+      "software": [
+        "Mapa de Stage 2 adaptado a las piezas montadas",
+        "Ajuste de la válvula de descarga o de la geometría variable",
+        "Comprobación de fuel trims y de presión de rail en carga",
+        "Pruebas de tiradas repetidas para ver si la temperatura se estabiliza"
+      ],
+      "limits": [
+        "Turbo de serie: el límite llega antes que el del motor",
+        "Embrague/DSG: el par de Stage 2 ya castiga de verdad",
+        "Bomba de alta presión: vigilar caída de presión en altas",
+        "Neumáticos y frenos: si no frenan ni agarran, no puedes usar la potencia"
+      ],
+      "checks": [
+        "Temperatura de admisión en carga sostenida frente a ambiente",
+        "Presión real frente a objetivo y ciclo de wastegate",
+        "Contrapresión del escape si hay dudas",
+        "Estanqueidad de todo el circuito de presión con prueba de humo"
+      ],
+      "myths": [
+        "Montar piezas y no calibrar es tirar el dinero",
+        "Un intercooler enorme sin mapa puede aumentar el lag",
+        "El escape completo no sustituye al downpipe en cuanto a ganancia"
+      ],
+      "cost": "€€",
+      "legality": "Downpipe, admisión y escape deben mantener el catalizador y cumplir el nivel sonoro. Guarda facturas y certificados para la ITV.",
+      "sources": [
+        "src-garrett-tech",
+        "src-wagner",
+        "src-forge"
+      ]
     },
     {
       "id": "stage-3",
-      "name": "Stage 3 — hardware mayor",
-      "summary": "Cambios de turbo, inyección, embrague y soportes. Solo tiene sentido con objetivo definido, presupuesto de mantenimiento y uso previsto.",
-      "requires": [
-        "Turbo compatible y control de wastegate/geometría",
-        "Inyección y bomba con margen verificado",
-        "Embrague o DSG reforzado según par",
-        "Frenos, neumáticos y refrigeración dimensionados",
-        "Calibración en banco y validación en pista cerrada"
+      "name": "Stage 3 — turbo, combustible y transmisión",
+      "goal": "Subir el techo de potencia con hardware dimensionado y un objetivo claro de uso.",
+      "summary": "Cambia el turbo y todo lo que lo alimenta y lo aguanta. Sin banco, sin frenos y sin presupuesto de mantenimiento, esta etapa es una avería cara esperando fecha.",
+      "powerLevers": [
+        {
+          "title": "Turbo de mayor caudal",
+          "effect": "Es el salto grande de potencia.",
+          "detail": "Hay que elegir por mapa de compresor y objetivo, no por fama. Un turbo mal dimensionado pierde respuesta abajo y entrega tarde."
+        },
+        {
+          "title": "Alimentación de combustible",
+          "effect": "Sostiene la potencia arriba sin caídas ni mezclas pobres.",
+          "detail": "Bomba de alta presión, inyectores y, según plataforma, bomba de baja. Si no hay margen, la ECU corta y puedes dañar el motor."
+        },
+        {
+          "title": "Refrigeración y admisión de aire",
+          "effect": "Convierte una tirada en una temporada.",
+          "detail": "Intercooler grande, radiador de aceite, refrigeración de agua y admisión que no coja calor del motor."
+        },
+        {
+          "title": "Transmisión reforzada",
+          "effect": "Permite usar el par sin romper.",
+          "detail": "Embrague de mayor par o embragues de DSG, según lo que soporte la caja. El par máximo lo fija la transmisión, no el motor."
+        },
+        {
+          "title": "Escape completo y control de sonido",
+          "effect": "Libera arriba y mantiene la contrapresión controlada.",
+          "detail": "Colector, downpipe, línea y silencioso final pensados para el caudal nuevo."
+        }
       ],
-      "avoid": [
-        "Circular en vía pública sin homologación",
-        "Montar par que la caja no soporta",
-        "Omitir refrigeración y frenos"
+      "hardware": [
+        "Turbo dimensionado al objetivo y a la altitud de uso",
+        "Inyectores y bomba de alta presión con margen medido",
+        "Intercooler, radiador de aceite y tomas de aire",
+        "Embrague reforzado o kit de DSG según par objetivo",
+        "Frenos de mayor diámetro y neumáticos de categoría adecuada",
+        "Soportes de motor y transeje para controlar el movimiento"
       ],
-      "evidence": "Guía de seguridad; no se ofrecen cifras ni compatibilidades no verificadas."
+      "software": [
+        "Calibración a medida en banco de potencia, no mapa comprado a ciegas",
+        "Control de presión por marcha y protección por temperatura",
+        "Registro de detonación, lambda y presión de rail en cada tirada",
+        "Validación en circuito cerrado antes de dar el coche por terminado"
+      ],
+      "limits": [
+        "Bloque y culata: preguntar hasta dónde llega la plataforma antes de comprar",
+        "Caja: el par admisible manda sobre la potencia soñada",
+        "Combustible disponible: 95 frente a 98 cambia el mapa seguro",
+        "Homologación: un Stage 3 rara vez es legal en vía pública sin proyecto"
+      ],
+      "checks": [
+        "Compresión y estanqueidad antes de montar el turbo nuevo",
+        "Presión de aceite y temperatura en carga",
+        "Holgura de turbo y estado de la wastegate tras las primeras tiradas",
+        "Lectura de la caja: temperaturas y desgaste de embragues"
+      ],
+      "myths": [
+        "Más presión no es más potencia si el turbo ya está fuera de mapa",
+        "Un Stage 3 sin frenos ni neumáticos es un proyecto a medias",
+        "La potencia declarada sin banco no vale como prueba"
+      ],
+      "cost": "€€€",
+      "legality": "Cambio de turbo y potencia exigen proyecto y homologación para circular. En circuito cerrado no aplica la ITV, pero sí la seguridad.",
+      "sources": [
+        "src-garrett-tech",
+        "src-brembo",
+        "src-mahle"
+      ]
     }
   ],
   "packages": [
     {
-      "id": "tuning-golf-r-75",
-      "modelId": "vw-golf-vii-r-75",
-      "name": "Golf VII R 7.5 — fast road equilibrado",
-      "tagline": "Más respuesta sin sacrificar fiabilidad ni frenos.",
-      "level": "Stage 1–2",
-      "idealFor": "Uso de carretera con mantenimiento al día y algún tramo de montaña ocasional.",
-      "notFor": "Circuito competitivo, uso diario sin presupuesto de mantenimiento o vehículos con fallos activos.",
-      "stages": [
-        "stage-1",
-        "stage-2"
-      ],
-      "hardware": [
-        "Admisión de alto flujo con carcasa cerrada",
-        "Intercooler de mayor capacidad y montaje verificado",
-        "Downpipe homologado con catalizador deportivo",
-        "Calibración de motor específica y datalogging",
-        "Calibración de DSG dentro del par admisible",
-        "Mantenimiento Haldex y aceite DSG al día",
-        "Frenos y neumáticos acordes al uso"
-      ],
-      "checks": [
-        "Compresión y estanqueidad del motor",
-        "Presión de turbo real vs. objetivo",
-        "Temperaturas de admisión y aceite",
-        "Correcciones de inyección y detonación",
-        "Estado de la caja DSG y del Haldex",
-        "Frenos, líquido DOT 4 y neumáticos"
-      ],
-      "notes": [
-        "La versión R europea de 310 PS ya usa turbo e intercooler específicos. No se promete una potencia final sin banco.",
-        "El pack Performance original de Volkswagen incluye frenos deportivos y escape de titanio Akrapovič; es una referencia OEM, no una receta universal."
-      ],
-      "productQueries": [
-        "admision directa",
-        "intercooler",
-        "escape deportivo",
-        "discos freno perforados",
-        "suspension roscada",
-        "bujias iridio"
-      ],
-      "legal": "Cualquier modificación que altere emisiones, ruido o potencia debe cumplir la homologación y la ITV. No se recomienda circular sin catalizador."
-    },
-    {
-      "id": "tuning-golf-gti-75",
-      "modelId": "vw-golf-vii-gti-performance-75",
-      "name": "Golf VII GTI Performance — tracción delantera",
-      "tagline": "Gestión de par y chasis antes que cifras.",
-      "level": "Stage 1–2",
-      "idealFor": "Quien quiere un GTI ágil en carretera y entiende la limitación de tracción.",
-      "notFor": "Quien busque arrasar en circuito sin presupuesto de frenos, neumáticos y refrigeración.",
-      "stages": [
-        "stage-1",
-        "stage-2"
-      ],
-      "hardware": [
-        "Admisión e intercooler compatibles",
-        "Downpipe homologado",
-        "Calibración específica",
-        "Datalogging de detonación y temperaturas",
-        "Revisión del diferencial delantero",
-        "Frenos y neumáticos de mayor agarre"
-      ],
-      "checks": [
-        "Presión de turbo y fugas de admisión",
-        "Temperaturas de admisión",
-        "Detonación/correcciones",
-        "Estado del DSG y del diferencial",
-        "Desgaste y temperatura de frenos",
-        "Alineación y neumáticos"
-      ],
-      "notes": [
-        "El GTI Performance de 245 PS ya incorpora diferencial autoblocante delantero. El límite real en mojado es la adherencia, no solo la potencia."
-      ],
-      "productQueries": [
-        "admision directa",
-        "intercooler",
-        "escape deportivo",
-        "discos freno perforados",
-        "bujias iridio",
-        "neumaticos deportivos"
-      ],
-      "legal": "Homologar cualquier cambio de escape, admisión o potencia. Verificar ruido y emisiones antes de la ITV."
-    },
-    {
-      "id": "tuning-golf-tdi-75",
-      "modelId": "vw-golf-vii-20-tdi-150",
-      "name": "Golf VII 2.0 TDI — eficiencia",
-      "tagline": "Par utilizable con DPF y EGR funcionando.",
-      "level": "Stage 1",
-      "idealFor": "Carretera y uso mixto con mantenimiento diésel documentado.",
-      "notFor": "Trayectos urbanos cortos, DPF saturado o EGR anulada.",
-      "stages": [
-        "stage-1"
-      ],
-      "hardware": [
-        "Calibración específica con límites de par seguros",
-        "Verificar estado de DPF, EGR y turbo",
-        "Mantenimiento de correa y bomba de agua al día",
-        "Aceite con especificación correcta",
-        "Frenos y neumáticos en buen estado"
-      ],
-      "checks": [
-        "Contrapresión del DPF y regeneraciones",
-        "Retornos y correcciones de inyectores",
-        "Presión de turbo y geometría variable",
-        "Temperatura de aceite y refrigerante",
-        "Estado del volante bimasa",
-        "Humo/opacidad y emisiones"
-      ],
-      "notes": [
-        "No se recomienda eliminar DPF ni EGR: es ilegal en vehículos de uso en vía pública y puede aumentar emisiones.",
-        "El par extra debe respetar los límites del embrague/DSG y del sistema de transmisión."
-      ],
-      "productQueries": [
-        "aceite motor 5w30",
-        "limpiador dpf",
-        "limpiador egr",
-        "bujias",
-        "filtro combustible diesel",
-        "discos freno"
-      ],
-      "legal": "La anulación de DPF/EGR no es legal para uso en carretera. Cualquier aumento de potencia debe declararse y homologarse cuando corresponda."
-    },
-    {
-      "id": "tuning-bmw-320d-f30",
-      "modelId": "bmw-320d-f30",
-      "name": "BMW 320d F30 — eficiencia y par",
-      "tagline": "Software conservador y salud de EGR/DPF primero.",
-      "level": "Stage 1",
-      "idealFor": "Quien hace carretera y quiere respuesta sin comprometer la ZF8.",
-      "notFor": "Unidades con cadena ruidosa, EGR con fugas o DPF degradado.",
-      "stages": [
-        "stage-1"
-      ],
-      "hardware": [
-        "Calibración específica y datalogging",
-        "Revisión de cadena y EGR",
-        "DPF en buen estado",
-        "Mantenimiento de ZF 8HP",
-        "Frenos y neumáticos acordes"
-      ],
-      "checks": [
-        "Ruido de cadena en frío",
-        "Contrapresión y regeneraciones del DPF",
-        "Fugas de EGR/refrigeración",
-        "Temperatura de aceite y agua",
-        "Suavidad y temperatura de la caja ZF",
-        "Humo y emisiones"
-      ],
-      "notes": [
-        "El par debe mantenerse dentro del límite que la ZF 8HP y el embrague puedan soportar.",
-        "No se sustituye la calibración de la caja sin equipo y procedimiento adecuados."
-      ],
-      "productQueries": [
-        "aceite motor 5w30",
-        "limpiador dpf",
-        "limpiador egr",
-        "filtro combustible diesel",
-        "discos freno",
-        "bujias"
-      ],
-      "legal": "La modificación de potencia debe ser compatible con la homologación del vehículo y la normativa de emisiones."
-    },
-    {
       "id": "tuning-gasolina-turbo",
       "modelId": null,
-      "name": "Gasolina turbo — guía Stage 1/2",
-      "tagline": "Primero medir, después calibrar.",
-      "level": "Stage 1–2",
-      "idealFor": "Motores turbo de gasolina con gestión electrónica y soporte de diagnóstico.",
-      "notFor": "Motores con compresión baja, consumo de aceite, detonación o fallos activos.",
-      "stages": [
-        "stage-1",
-        "stage-2"
-      ],
-      "hardware": [
-        "Bujías de grado correcto",
-        "Admisión e intercooler verificados",
-        "Downpipe homologado",
-        "Sensores y actuadores sin fallos",
-        "Datalogging de detonación y lambda"
-      ],
-      "checks": [
-        "Compresión y estanqueidad",
-        "Consumo de aceite",
-        "Presión de combustible",
-        "Presión de turbo real vs. objetivo",
-        "Correcciones de encendido",
-        "Temperaturas de admisión"
-      ],
-      "notes": [
-        "La gasolina de 95 no siempre permite el mismo avance que la de 98. La calibración debe adaptarse al combustible disponible.",
-        "Un filtro de admisión ruidoso no equivale a más potencia."
-      ],
-      "productQueries": [
-        "admision directa",
-        "intercooler",
-        "bujias iridio",
-        "escape deportivo",
-        "aceite motor 5w40",
-        "boroscopio camara inspeccion"
-      ],
-      "legal": "Cualquier kit de admisión o escape debe estar homologado para uso en vía pública. Verificar emisiones y ruido."
-    },
-    {
-      "id": "tuning-seguridad",
-      "modelId": null,
-      "name": "Seguridad, frenos y legalidad",
-      "tagline": "La potencia no sirve si no puedes parar.",
-      "level": "Transversal",
-      "idealFor": "Cualquier preparación, antes de aumentar potencia.",
-      "notFor": "Vehículos con frenos, neumáticos o suspensión defectuosos.",
+      "name": "Gasolina turbo — ruta Stage 1 a 3",
+      "tagline": "Orden de compra sensato: software, luego flujo y temperatura, y solo al final turbo.",
+      "level": "Guía general",
+      "idealFor": "Coches de gasolina con turbo de serie que quieren subir potencia por etapas.",
+      "notFor": "Atmosféricos (la ruta es otra) y motores con mantenimiento atrasado.",
       "stages": [
         "stage-1",
         "stage-2",
         "stage-3"
       ],
       "hardware": [
-        "Líquido de frenos con punto de ebullición adecuado",
-        "Discos y pastillas en buen estado",
-        "Neumáticos con carga/velocidad correctas",
-        "Suspensión sin holguras",
-        "Refrigeración y lubricación verificadas"
+        "Stage 1: nada obligatorio, todo el mantenimiento al día",
+        "Stage 2: downpipe homologado, intercooler, admisión y manguitos",
+        "Stage 3: turbo, combustible, transmisión, frenos y refrigeración"
       ],
       "checks": [
-        "Espesor y alabeo de discos",
-        "Temperatura y humedad del líquido de frenos",
-        "Profundidad y edad de neumáticos",
-        "Holguras de suspensión y dirección",
-        "Fugas de aceite/refrigerante",
-        "Campañas y homologación"
+        "Datalogging en cada etapa y comparación con la anterior",
+        "Temperaturas y detonación en verano, no solo en invierno",
+        "Banco antes/después con el mismo combustible y neumáticos"
       ],
-      "notes": [
-        "No se recomienda modificar la altura o el escape sin verificar la normativa de homologación.",
-        "La seguridad pasiva y los seguros pueden verse afectados por modificaciones no declaradas."
-      ],
+      "notes": "Cada euro invertido en medir ahorra dos en romper.",
       "productQueries": [
-        "liquido de frenos dot 4",
-        "discos freno perforados",
-        "pastillas de freno",
-        "neumaticos deportivos",
-        "suspension roscada",
-        "latiguillos freno metalicos"
+        "turbo",
+        "intercooler",
+        "escape",
+        "admision",
+        "manguitos"
+      ]
+    },
+    {
+      "id": "tuning-diesel-turbo",
+      "modelId": null,
+      "name": "Diésel turbo — par y fiabilidad",
+      "tagline": "El diésel gana por par, no por revoluciones: cuidado con embrague, DPF y EGR.",
+      "level": "Guía general",
+      "idealFor": "Turbo diésel de uso diario que buscan más par y consumo contenido.",
+      "notFor": "Coches con DPF saturado o EGR anulada: primero se repara, luego se optimiza.",
+      "stages": [
+        "stage-1",
+        "stage-2"
       ],
-      "legal": "Las modificaciones deben cumplir la normativa de homologación y la ITV. Esta ficha no sustituye un proyecto técnico."
+      "hardware": [
+        "Stage 1: repro conservadora y mantenimiento estricto",
+        "Stage 2: intercooler, admisión y escape sin tocar la línea legal",
+        "Embrague o DSG dimensionado al par nuevo"
+      ],
+      "checks": [
+        "Presión de turbo y caudal de MAF",
+        "Estado del DPF y de la EGR antes de subir par",
+        "Humos y opacidad dentro de límites de ITV"
+      ],
+      "notes": "El par extra se nota antes que los CV, y castiga antes al embrague.",
+      "productQueries": [
+        "turbo",
+        "intercooler",
+        "manguitos",
+        "admision"
+      ]
+    },
+    {
+      "id": "tuning-seguridad",
+      "modelId": null,
+      "name": "Seguridad, frenos y legalidad",
+      "tagline": "La potencia sin frenos, neumáticos y homologación es una factura pendiente.",
+      "level": "Obligatorio",
+      "idealFor": "Cualquier coche que vaya a subir de potencia.",
+      "notFor": "Nadie: esta guía aplica siempre.",
+      "stages": [
+        "stage-1",
+        "stage-2",
+        "stage-3"
+      ],
+      "hardware": [
+        "Frenos con líquido nuevo y discos/pastillas adecuados",
+        "Neumáticos de categoría y presión correcta",
+        "Suspensión en buen estado: la potencia se apoya en el asfalto",
+        "Iluminación y señalización homologadas"
+      ],
+      "checks": [
+        "Distancia de frenado antes y después",
+        "Holguras de suspensión y dirección",
+        "Documentación de las piezas para ITV"
+      ],
+      "notes": "Si dudas entre turbo y frenos, elige frenos. Siempre.",
+      "productQueries": [
+        "frenos",
+        "suspension",
+        "llantas",
+        "bombillas-led"
+      ]
     }
   ],
   "sources": [
     {
-      "title": "Volkswagen Newsroom — Golf R Performance",
-      "url": "https://www.volkswagen-newsroom.com/en/press-releases/golf-r-golf-r-fuel-consumption-in-l-slash-100-km-10-dot-2-8-dot-6-urban-6-dot-7-5-dot-9-extra-urban-8-dot-0-6-dot-9-combined-co2-emissions-in-g-slash-km-182-157-combined-efficiency-class-e-d-dot-with-performance-technology-from-motorsport-high-performance-brakes-and-titanium-exhaust-system-925",
-      "publisher": "Volkswagen AG",
+      "id": "src-garrett-tech",
+      "title": "Garrett Motion — Turbo technology",
+      "url": "https://www.garrettmotion.com/turbocharger-technology/",
+      "publisher": "Garrett Motion",
       "type": "fabricante",
-      "accessed": "2026-10-23"
+      "accessed": "2026-10-25"
+    },
+    {
+      "id": "src-garrett-boost",
+      "title": "Garrett Motion — Boost advisors",
+      "url": "https://www.garrettmotion.com/racing-and-performance/boost-advisors/",
+      "publisher": "Garrett Motion",
+      "type": "fabricante",
+      "accessed": "2026-10-25"
+    },
+    {
+      "id": "src-wagner",
+      "title": "Wagner Tuning — Intercoolers y desarrollo",
+      "url": "https://www.wagner-tuning.com/",
+      "publisher": "Wagner Tuning",
+      "type": "fabricante",
+      "accessed": "2026-10-25"
+    },
+    {
+      "id": "src-forge",
+      "title": "Forge Motorsport — Válvulas de descarga y manguitos",
+      "url": "https://www.forgemotorsport.co.uk/",
+      "publisher": "Forge Motorsport",
+      "type": "fabricante",
+      "accessed": "2026-10-25"
+    },
+    {
+      "id": "src-bosch-mobility",
+      "title": "Bosch Mobility — Sistemas de gestión de motor",
+      "url": "https://www.bosch-mobility.com/en/",
+      "publisher": "Bosch",
+      "type": "fabricante",
+      "accessed": "2026-10-25"
+    },
+    {
+      "id": "src-brembo",
+      "title": "Brembo — Frenos de altas prestaciones",
+      "url": "https://www.brembo.com/en/car",
+      "publisher": "Brembo",
+      "type": "fabricante",
+      "accessed": "2026-10-25"
+    },
+    {
+      "id": "src-mahle",
+      "title": "MAHLE Aftermarket — Componentes de motor",
+      "url": "https://www.mahle-aftermarket.com/eu/en/",
+      "publisher": "MAHLE",
+      "type": "fabricante",
+      "accessed": "2026-10-25"
+    },
+    {
+      "id": "src-tuv",
+      "title": "TÜV — Evaluación de conformidad y reformas",
+      "url": "https://www.tuv.com/world/en/",
+      "publisher": "TÜV",
+      "type": "certificación",
+      "accessed": "2026-10-25"
+    },
+    {
+      "id": "src-dgt",
+      "title": "DGT — Normativa de vehículos",
+      "url": "https://www.dgt.es/",
+      "publisher": "DGT",
+      "type": "administración",
+      "accessed": "2026-10-25"
+    },
+    {
+      "id": "src-itvasa",
+      "title": "ITVASA — Inspección técnica de vehículos",
+      "url": "https://www.itvasa.es/",
+      "publisher": "ITVASA",
+      "type": "administración",
+      "accessed": "2026-10-25"
     }
-  ],
-  "disclaimer": "Guía técnica y de seguridad. No se publican ganancias de potencia, precios ni compatibilidades no verificadas."
+  ]
 }

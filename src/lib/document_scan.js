@@ -276,6 +276,45 @@ function parseEmission(text) {
   return null;
 }
 
+function parsePlate(text) {
+  const source = String(text || '').toUpperCase();
+  const labelled = source.match(/(?:MATR[I\u00cd]CULA|PLACA(?:\s+DE\s+MATR[I\u00cd]CULA)?|REGISTRATION)\s*[:\-]?\s*([0-9]{4}\s?[A-Z]{3}|[A-Z]{1,2}\s?[0-9]{4}\s?[A-Z]{1,2})\b/);
+  if (labelled) return { value: labelled[1].replace(/\s+/g, ''), explicit: true };
+  const modern = source.match(/\b([0-9]{4})\s?([A-Z]{3})\b/);
+  const old = source.match(/\b([A-Z]{1,2})\s?([0-9]{4})\s?([A-Z]{1,2})\b/);
+  if (modern) return { value: `${modern[1]}${modern[2]}`, explicit: false };
+  if (old) return { value: `${old[1]}${old[2]}${old[3]}`, explicit: false };
+  return null;
+}
+
+function parseFirstRegistration(text) {
+  const source = String(text || '').toUpperCase();
+  const match = source.match(/(?:FECHA\s+DE\s+(?:PRIMERA\s+)?MATRICULACI[O\u00d3]N|PRIMERA\s+MATRICULACI[O\u00d3]N|FECHA\s+DE\s+ALTA|MATRICULACI[O\u00d3]N)\s*[:\-]?\s*([0-9]{1,2})[\/.\-]([0-9]{1,2})[\/.\-]([0-9]{2,4})\b/);
+  if (!match) return null;
+  let year = Number(match[3]);
+  if (year < 100) year += year > 70 ? 1900 : 2000;
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  if (!day || !month || month > 12 || day > 31 || year < 1950 || year > 2100) return null;
+  const iso = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const parsed = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== iso) return null;
+  return { value: iso, explicit: true };
+}
+
+function parseSeats(text) {
+  const match = String(text || '').match(/(?:N[\u00ba\u00b0]?\s*(?:DE\s*)?PLAZAS|PLAZAS|SEATS)\s*[:\-]?\s*([1-9])\b/i);
+  return match ? { value: Number(match[1]), explicit: true } : null;
+}
+
+function parseMass(text) {
+  const match = String(text || '').match(/(?:MASA\s*(?:M[A\u00c1]XIMA\s*)?(?:ADMISIBLE|EN\s+ORDEN\s+DE\s+MARCHA)?|MMA|PESO\s*(?:M[A\u00c1]XIMO)?)\s*[:\-]?\s*([12]?[0-9]{3})\s*(?:KG)?\b/i);
+  if (!match) return null;
+  const value = Number(match[1]);
+  if (value < 500 || value > 5000) return null;
+  return { value, explicit: true };
+}
+
 function field(value, confidence, explicit, note = '') {
   return {
     value: value ?? '',
@@ -325,6 +364,10 @@ export async function scanVehicleDocument({ dataBase64, mimeType, fileName, text
   const transmission = parseTransmission(sourceText);
   const emission = parseEmission(sourceText);
   const vin = parseVin(sourceText);
+  const plate = parsePlate(sourceText);
+  const firstRegistration = parseFirstRegistration(sourceText);
+  const seats = parseSeats(sourceText);
+  const mass = parseMass(sourceText);
   const linkedVehicle = linkVehicle(model, vehicles, { brand, fuel, displacement, power });
 
   const extracted = {
@@ -332,12 +375,15 @@ export async function scanVehicleDocument({ dataBase64, mimeType, fileName, text
     model: field(model?.value || '', model?.explicit ? 'media' : 'baja', model?.explicit, model ? '' : 'Confirma el modelo manualmente.'),
     generation: field(linkedVehicle?.generation || '', linkedVehicle ? 'media' : 'baja', Boolean(linkedVehicle), linkedVehicle ? '' : 'Generación no confirmada.'),
     year: field(year?.value || '', year?.explicit ? 'alta' : 'baja', year?.explicit, year ? (year.explicit ? '' : 'Año detectado sin etiqueta; confírmalo.') : 'Año no detectado.'),
-    registrationDate: field('', 'desconocida', false, 'No se deduce la fecha de matriculación si no aparece escrita.'),
+    firstRegistration: field(firstRegistration?.value || '', 'alta', Boolean(firstRegistration), firstRegistration ? '' : 'Fecha de primera matriculación no detectada.'),
+    plate: field(plate?.value || '', plate?.explicit ? 'alta' : 'baja', Boolean(plate), plate ? (plate.explicit ? '' : 'Matrícula detectada sin etiqueta; confírmala.') : 'Matrícula no detectada.'),
     vin: field(vin, vin ? 'alta' : 'desconocida', Boolean(vin), vin ? 'El VIN se muestra para validación y no se almacena en el servidor.' : 'VIN no detectado.'),
     engineCode: field(engineCode?.value || '', engineCode ? 'media' : 'desconocida', Boolean(engineCode), engineCode ? '' : 'Código de motor no detectado.'),
     displacementCc: field(displacement?.displacementCc || '', displacement ? 'alta' : 'desconocida', Boolean(displacement), displacement ? '' : 'Cilindrada no detectada.'),
     powerPs: field(power?.powerPs || '', power ? 'alta' : 'desconocida', Boolean(power), power ? '' : 'Potencia no detectada.'),
     powerKw: field(power?.powerKw || '', power ? 'alta' : 'desconocida', Boolean(power), ''),
+    seats: field(seats?.value || '', 'alta', Boolean(seats), seats ? '' : 'Número de plazas no detectado.'),
+    massKg: field(mass?.value || '', 'alta', Boolean(mass), mass ? '' : 'Masa no detectada.'),
     fuel: field(fuel?.value || '', fuel ? 'media' : 'desconocida', Boolean(fuel), fuel ? '' : 'Combustible no detectado.'),
     transmission: field(transmission?.detail || transmission?.value || '', transmission ? 'media' : 'desconocida', Boolean(transmission), transmission ? '' : 'Cambio no detectado.'),
     emissionStandard: field(emission?.value || '', emission ? 'alta' : 'desconocida', Boolean(emission), emission ? '' : 'Norma de emisiones no detectada.')
@@ -353,6 +399,7 @@ export async function scanVehicleDocument({ dataBase64, mimeType, fileName, text
     'No se ha enviado el documento a ningún servicio externo: el análisis se ejecuta en el servidor local.'
   ];
   if (!vin) warnings.push('Sin VIN no es posible confirmar la versión exacta ni las campañas pendientes.');
+  if (plate) warnings.push('La matrícula y el bastidor son datos personales: se guardan solo en tu garaje privado y no se publican.');
   if (!engineCode) warnings.push('Sin código de motor, algunas comprobaciones y compatibilidades quedan como no confirmadas.');
   if (linkedVehicle) {
     warnings.push(`Se ha relacionado con ${linkedVehicle.brand} ${linkedVehicle.model} ${linkedVehicle.version} por el texto, no por el VIN. Confirma la versión exacta.`);

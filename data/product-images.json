@@ -1,0 +1,113 @@
+{
+  "updated": "2026-10-25",
+  "images": {
+    "llantas": {
+      "page": "File:BMW Alpina alloy wheel.jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:BMW_Alpina_alloy_wheel.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/BMW_Alpina_alloy_wheel.jpg/1280px-BMW_Alpina_alloy_wheel.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "artist": "Magnus Bäck",
+      "credit": "Own work",
+      "path": "/img/products/llantas.jpg",
+      "bytes": 305931
+    },
+    "espejos": {
+      "page": "File:Wing mirror.jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:Wing_mirror.jpg",
+      "license": "CC BY-SA 4.0",
+      "artist": "Petar Milošević",
+      "path": "/img/products/espejos.jpg",
+      "query": "wing mirror car",
+      "pickedFrom": "espejos-2.jpg"
+    },
+    "suspension": {
+      "page": "File:Jeep Liberty Coilovers 2005.jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:Jeep_Liberty_Coilovers_2005.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Jeep_Liberty_Coilovers_2005.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "CC BY-SA 3.0",
+      "artist": "Michael Robinson (unixxx)",
+      "credit": "Own work",
+      "path": "/img/products/suspension.jpg",
+      "bytes": 147948
+    },
+    "frenos": {
+      "page": "File:Disk brake dsc03682.jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:Disk_brake_dsc03682.jpg",
+      "license": "CC BY-SA 3.0",
+      "artist": "Wikimedia Commons",
+      "path": "/img/products/frenos.jpg",
+      "query": "brake caliper",
+      "pickedFrom": "frenos-0.jpg"
+    },
+    "electronica": {
+      "page": "File:1995 Oldsmobile 88 Royal control chip module.jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:1995_Oldsmobile_88_Royal_control_chip_module.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/1995_Oldsmobile_88_Royal_control_chip_module.jpg/1280px-1995_Oldsmobile_88_Royal_control_chip_module.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "artist": "Bmuscotty88",
+      "credit": "Took a photograph",
+      "path": "/img/products/electronica.jpg",
+      "bytes": 356501
+    },
+    "blow-off": {
+      "page": "File:Dry suit auto dump valve P8170014.jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:Dry_suit_auto_dump_valve_P8170014.jpg",
+      "license": "CC0",
+      "artist": "Peter Southwood",
+      "path": "/img/products/blow-off.jpg",
+      "query": "dump valve",
+      "pickedFrom": "blow-off-2.jpg"
+    },
+    "bombillas-led": {
+      "page": "File:Road-legal H4 LED retrofit (Philips Ultinon Pro6000).jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:Road-legal_H4_LED_retrofit_(Philips_Ultinon_Pro6000).jpg",
+      "license": "CC BY-SA 4.0",
+      "artist": "Phiarc",
+      "path": "/img/products/bombillas-led.jpg",
+      "query": "H4 LED bulb",
+      "pickedFrom": "bombillas-led-0.jpg"
+    },
+    "carroceria": {
+      "page": "File:AMC Javelin 1969 Craig Breedlove roof spoiler detail.jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:AMC_Javelin_1969_Craig_Breedlove_roof_spoiler_detail.jpg",
+      "license": "Public domain",
+      "artist": "CZmarlin — Christopher Ziemnowicz, releases all rights but a photo credit would be appreciated if this image is used anywhere other than Wikipedia. Please leave a note at Wikipedia here. Thank you!",
+      "path": "/img/products/carroceria.jpg",
+      "query": "rear spoiler car",
+      "pickedFrom": "carroceria-0.jpg"
+    },
+    "escape": {
+      "page": "File:Mercedes V12 exhaust manifold.jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:Mercedes_V12_exhaust_manifold.jpg",
+      "license": "CC0",
+      "artist": "Lewis Collard",
+      "path": "/img/products/escape.jpg",
+      "query": "exhaust manifold",
+      "pickedFrom": "escape-5.jpg"
+    },
+    "intercooler": {
+      "page": "File:Front mounted intercooler.jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:Front_mounted_intercooler.jpg",
+      "license": "CC BY-SA 3.0",
+      "artist": "Jredwards at English Wikipedia",
+      "path": "/img/products/intercooler.jpg",
+      "query": "intercooler"
+    },
+    "manguitos": {
+      "page": "File:Two spring Hose Clamps - small.jpg",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:Two_spring_Hose_Clamps_-_small.jpg",
+      "license": "CC BY-SA 3.0",
+      "artist": "Bushytails at English Wikipedia",
+      "path": "/img/products/manguitos.jpg",
+      "query": "hose clamp"
+    },
+    "admision": {
+      "page": "File:Baumwoll-Sportluftfilter BMW E39 2.JPG",
+      "fileUrl": "https://commons.wikimedia.org/wiki/File:Baumwoll-Sportluftfilter_BMW_E39_2.JPG",
+      "license": "CC BY-SA 3.0",
+      "artist": "Fable1981",
+      "path": "/img/products/admision.jpg",
+      "query": "Sportluftfilter"
+    }
+  }
+}

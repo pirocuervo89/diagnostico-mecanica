@@ -7,8 +7,9 @@ import dotenv from 'dotenv';
 import apiRouter from './src/routes/api.js';
 import sintomasRouter from './src/routes/sintomas.js';
 import forumRouter from './src/routes/forum.js';
+import garageRouter from './src/routes/garage.js';
+import testigosRouter from './src/routes/testigos.js';
 import tutorialsRouter from './src/routes/tutorials.js';
-import technicalRouter from './src/routes/technical.js';
 
 dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -31,8 +32,9 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/forum', forumRouter);
+app.use('/api/garage', garageRouter);
+app.use('/api/testigos', testigosRouter);
 app.use('/api/tutorials', tutorialsRouter);
-app.use('/api/technical', technicalRouter);
 app.use('/api', apiRouter);
 app.use('/api/sintomas', sintomasRouter);
 app.use(express.static(path.join(__dirname, 'public'), {

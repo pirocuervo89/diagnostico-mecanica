@@ -1,5 +1,7 @@
 # Informe de cierre — Fase 2
 
+> **Aviso de vigencia (29/10/2026):** la Biblioteca técnica descrita aquí se eliminó de la aplicación. Sus datos, rutas y vista ya no existen; se conserva una copia en `backups/biblioteca-tecnica-20261029.tar.gz`. El resto del documento es histórico.
+
 Fecha: 2026-10-25  
 Proyecto: `/home/selupiro/diagnostico-mecanica`  
 Prompt ejecutado: `/home/selupiro/Escritorio/fase2`  

@@ -12,9 +12,7 @@
     "dev": "node --watch server.js",
     "test": "node --test tests/*.test.mjs",
     "symptoms:build": "node scripts/build-symptoms.mjs",
-    "symptoms:check": "node scripts/verify-symptoms.mjs",
-    "technical:build": "node scripts/build-technical-library.mjs",
-    "technical:check": "node scripts/verify-technical-library.mjs"
+    "symptoms:check": "node scripts/verify-symptoms.mjs"
   },
   "dependencies": {
     "compression": "^1.7.4",

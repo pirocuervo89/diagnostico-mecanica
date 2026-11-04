@@ -1,0 +1,355 @@
+{
+  "version": 2,
+  "updatedAt": "2026-10-29",
+  "priceCheckedAt": "27/10/2026 (4 adaptadores) y 29/10/2026 (ELM327 USB)",
+  "notice": "Adaptadores compactos sin pantalla ni programa propio, verificados para usar esta web por Web Bluetooth (BLE) o Web Serial (USB). Ordenados de más barato a más caro. Precios y stock cambian; se muestran los del día de la comprobación.",
+  "criteria": [
+    "Compatibilidad real con esta web: BLE para Web Bluetooth o USB serie para Web Serial.",
+    "Sin pantalla ni app propietaria: el adaptador debe exponer el protocolo ELM327 al navegador.",
+    "Cobertura de los 10 protocolos OBD-II de turismo y J1939 por comandos AT.",
+    "Precio y formato compacto, sin escáneres de mano ni maletines."
+  ],
+  "compatibilityNote": "Solo se listan adaptadores que exponen una conexión serie ELM327 utilizable por el navegador: BLE con Web Bluetooth o USB con Web Serial. Quedan fuera los escáneres de mano y los ELM327 Bluetooth clásicos, que necesitan app propietaria y no pueden comunicarse con la web.",
+  "rankings": {
+    "price": [
+      "elm327-usb-v15",
+      "vgate-icar-pro-2s",
+      "vgate-vlinker-fs",
+      "veepeak-ble-plus",
+      "vgate-vlinker-mc-plus"
+    ]
+  },
+  "items": [
+    {
+      "id": "elm327-usb-v15",
+      "rank": 1,
+      "name": "ELM327 USB V1.5",
+      "brand": "Alchiauto",
+      "type": "Adaptador OBD-II USB",
+      "price": 20.99,
+      "priceText": "20,99 €",
+      "image": "/img/tienda/scanners/B0BW9DFPWN.jpg",
+      "imageAlt": "Adaptador ELM327 USB V1.5 con cable OBD-II",
+      "url": "https://www.amazon.es/dp/B0BW9DFPWN",
+      "asin": "B0BW9DFPWN",
+      "availability": "En stock (29/10/2026)",
+      "forWeb": true,
+      "connection": "USB serie + ELM327",
+      "coverage": "OBD-II/EOBD estándar",
+      "allSystems": false,
+      "bidirectional": false,
+      "serviceFunctions": "No aplica: las funciones dependen de la web o app que lo use",
+      "bestFor": "La opción más barata verificada para usar esta web por USB desde Chrome o Edge de escritorio.",
+      "highlights": [
+        "Es el ELM327 más barato que hemos verificado para esta web.",
+        "USB serie: no depende de Bluetooth ni de una app propietaria.",
+        "Compatible con Web Serial y con los 10 protocolos OBD-II de turismo."
+      ],
+      "limits": [
+        "Web Serial solo funciona en Chrome/Edge de escritorio, no en móvil.",
+        "Requiere cable USB; no sirve para iPhone/iPad ni para Android por USB.",
+        "Solo OBD-II genérico: no accede a ABS, airbag ni módulos de carrocería."
+      ],
+      "verification": {
+        "listing": "Amazon.es, ficha del vendedor",
+        "checkedAt": "2026-10-29",
+        "note": "Precio 20,99 € y stock comprobados en Amazon.es el 29/10/2026. Se conecta como puerto serie USB (CH340/FTDI); instalar el driver si el sistema no lo detecta. El ELM327 Bluetooth clásico de 8–10 € no se incluye porque Web Bluetooth solo admite BLE."
+      },
+      "protocolSupport": {
+        "passenger": [
+          "ATSP0",
+          "ATSP1",
+          "ATSP2",
+          "ATSP3",
+          "ATSP4",
+          "ATSP5",
+          "ATSP6",
+          "ATSP7",
+          "ATSP8",
+          "ATSP9"
+        ],
+        "heavy": true,
+        "codes": [
+          "ATSP0",
+          "ATSP1",
+          "ATSP2",
+          "ATSP3",
+          "ATSP4",
+          "ATSP5",
+          "ATSP6",
+          "ATSP7",
+          "ATSP8",
+          "ATSP9",
+          "ATSPA"
+        ],
+        "label": "10/10 · OBD-II turismo + J1939",
+        "note": "Cubre los 10 protocolos OBD-II de turismo; J1939 (ATSPA) depende del firmware del ELM327 y se comprueba al conectar."
+      }
+    },
+    {
+      "id": "vgate-icar-pro-2s",
+      "rank": 2,
+      "name": "Vgate iCar Pro 2S",
+      "brand": "Vgate",
+      "type": "Adaptador OBD-II BLE",
+      "price": 39.39,
+      "priceText": "39,39 €",
+      "image": "/img/tienda/scanners/B0D4Y77CYX.jpg",
+      "imageAlt": "Adaptador Vgate iCar Pro 2S",
+      "url": "https://www.amazon.es/dp/B0D4Y77CYX",
+      "asin": "B0D4Y77CYX",
+      "availability": "En stock (27/10/2026)",
+      "forWeb": true,
+      "connection": "Bluetooth BLE + ELM327",
+      "coverage": "OBD-II/EOBD estándar",
+      "allSystems": false,
+      "bidirectional": false,
+      "serviceFunctions": "No aplica: depende de la app",
+      "bestFor": "Entrada económica a esta web y a apps OBD-II, con un adaptador pequeño y compatible con iOS/Android.",
+      "highlights": [
+        "Precio muy bajo para un BLE compatible con ELM327.",
+        "Compatible con Web Bluetooth de esta plataforma.",
+        "Consumo reducido y formato compacto."
+      ],
+      "limits": [
+        "Solo OBD-II genérico.",
+        "Puede ser más lento que el vLinker en vehículos con muchos PIDs.",
+        "No es un escáner autónomo."
+      ],
+      "verification": {
+        "listing": "Amazon.es, ficha del vendedor",
+        "checkedAt": "2026-10-27",
+        "note": "Compatibilidad BLE/ELM327 declarada en la ficha; verificar que la unidad recibida anuncia BLE y no Bluetooth clásico."
+      },
+      "protocolSupport": {
+        "passenger": [
+          "ATSP0",
+          "ATSP1",
+          "ATSP2",
+          "ATSP3",
+          "ATSP4",
+          "ATSP5",
+          "ATSP6",
+          "ATSP7",
+          "ATSP8",
+          "ATSP9"
+        ],
+        "heavy": true,
+        "codes": [
+          "ATSP0",
+          "ATSP1",
+          "ATSP2",
+          "ATSP3",
+          "ATSP4",
+          "ATSP5",
+          "ATSP6",
+          "ATSP7",
+          "ATSP8",
+          "ATSP9",
+          "ATSPA"
+        ],
+        "label": "11/11 · incluye J1939",
+        "note": "ELM327 con los 10 protocolos OBD-II de turismo y J1939 (ATSPA) por ATSP."
+      }
+    },
+    {
+      "id": "vgate-vlinker-fs",
+      "rank": 3,
+      "name": "Vgate vLinker FS (USB)",
+      "brand": "Vgate",
+      "type": "Adaptador OBD-II USB",
+      "price": 39.49,
+      "priceText": "39,49 €",
+      "image": "/img/tienda/scanners/B094Z7PBLS.jpg",
+      "imageAlt": "Adaptador Vgate vLinker FS USB",
+      "url": "https://www.amazon.es/dp/B094Z7PBLS",
+      "asin": "B094Z7PBLS",
+      "availability": "En stock (27/10/2026)",
+      "forWeb": true,
+      "connection": "USB + ELM327",
+      "coverage": "OBD-II/EOBD estándar",
+      "allSystems": false,
+      "bidirectional": false,
+      "serviceFunctions": "No aplica: depende del software",
+      "bestFor": "Diagnóstico con PC y Web Serial, o con software de escritorio tipo FORScan, sin depender del Bluetooth.",
+      "highlights": [
+        "Conexión USB estable, sin emparejamientos ni cortes de Bluetooth.",
+        "Compatible con ELM327 y con Web Serial de esta web.",
+        "Conmutación HS/MS-CAN para vehículos Ford y otros."
+      ],
+      "limits": [
+        "Web Serial solo está disponible en Chrome/Edge de escritorio, no en móvil.",
+        "Solo OBD-II genérico.",
+        "No es un escáner autónomo."
+      ],
+      "verification": {
+        "listing": "Amazon.es, ficha del vendedor",
+        "checkedAt": "2026-10-27",
+        "note": "Compatibilidad USB/ELM327 y conmutación HS/MS-CAN declaradas en la ficha."
+      },
+      "protocolSupport": {
+        "passenger": [
+          "ATSP0",
+          "ATSP1",
+          "ATSP2",
+          "ATSP3",
+          "ATSP4",
+          "ATSP5",
+          "ATSP6",
+          "ATSP7",
+          "ATSP8",
+          "ATSP9"
+        ],
+        "heavy": true,
+        "codes": [
+          "ATSP0",
+          "ATSP1",
+          "ATSP2",
+          "ATSP3",
+          "ATSP4",
+          "ATSP5",
+          "ATSP6",
+          "ATSP7",
+          "ATSP8",
+          "ATSP9",
+          "ATSPA"
+        ],
+        "label": "11/11 · incluye J1939",
+        "note": "ELM327 con los 10 protocolos OBD-II de turismo y J1939 (ATSPA) por ATSP."
+      }
+    },
+    {
+      "id": "veepeak-ble-plus",
+      "rank": 4,
+      "name": "Veepeak OBDCheck BLE+",
+      "brand": "Veepeak",
+      "type": "Adaptador OBD-II BLE",
+      "price": 45.99,
+      "priceText": "45,99 €",
+      "image": "/img/tienda/scanners/B076XVQMVS.jpg",
+      "imageAlt": "Adaptador Veepeak OBDCheck BLE+",
+      "url": "https://www.amazon.es/dp/B076XVQMVS",
+      "asin": "B076XVQMVS",
+      "availability": "En stock (27/10/2026)",
+      "forWeb": true,
+      "connection": "Bluetooth BLE + ELM327",
+      "coverage": "OBD-II/EOBD estándar",
+      "allSystems": false,
+      "bidirectional": false,
+      "serviceFunctions": "No aplica: depende de la app",
+      "bestFor": "Quien prioriza compatibilidad amplia con apps iOS/Android y un precio ajustado.",
+      "highlights": [
+        "BLE compatible con iOS y Android.",
+        "Compatible con ELM327 y con esta web.",
+        "Marca conocida en adaptadores de consumo."
+      ],
+      "limits": [
+        "Solo OBD-II genérico.",
+        "No accede a módulos de ABS/SRS.",
+        "No es un escáner autónomo."
+      ],
+      "verification": {
+        "listing": "Amazon.es, ficha del vendedor",
+        "checkedAt": "2026-10-27",
+        "note": "Compatibilidad BLE/ELM327 declarada en la ficha; comprobar la versión BLE+ frente a la BLE básica."
+      },
+      "protocolSupport": {
+        "passenger": [
+          "ATSP0",
+          "ATSP1",
+          "ATSP2",
+          "ATSP3",
+          "ATSP4",
+          "ATSP5",
+          "ATSP6",
+          "ATSP7",
+          "ATSP8",
+          "ATSP9"
+        ],
+        "heavy": true,
+        "codes": [
+          "ATSP0",
+          "ATSP1",
+          "ATSP2",
+          "ATSP3",
+          "ATSP4",
+          "ATSP5",
+          "ATSP6",
+          "ATSP7",
+          "ATSP8",
+          "ATSP9",
+          "ATSPA"
+        ],
+        "label": "11/11 · incluye J1939",
+        "note": "ELM327 con los 10 protocolos OBD-II de turismo y J1939 (ATSPA) por ATSP."
+      }
+    },
+    {
+      "id": "vgate-vlinker-mc-plus",
+      "rank": 5,
+      "name": "Vgate vLinker MC+",
+      "brand": "Vgate",
+      "type": "Adaptador OBD-II BLE",
+      "price": 70.99,
+      "priceText": "70,99 €",
+      "image": "/img/tienda/scanners/B089KGPDS6.jpg",
+      "imageAlt": "Adaptador Vgate vLinker MC+",
+      "url": "https://www.amazon.es/dp/B089KGPDS6",
+      "asin": "B089KGPDS6",
+      "availability": "En stock (27/10/2026)",
+      "forWeb": true,
+      "connection": "Bluetooth BLE 4.0 + ELM327",
+      "coverage": "OBD-II/EOBD estándar",
+      "allSystems": false,
+      "bidirectional": false,
+      "serviceFunctions": "No aplica: las funciones dependen de la app que lo use",
+      "bestFor": "Usar esta web y apps tipo Car Scanner, Torque o BimmerCode con un adaptador BLE rápido y estable.",
+      "highlights": [
+        "Compatible con ELM327 y con Web Bluetooth de esta plataforma.",
+        "BLE 4.0, válido para iOS y Android.",
+        "Buena velocidad de lectura para datos en vivo."
+      ],
+      "limits": [
+        "Solo diagnosis OBD-II genérica; no accede a ABS, airbag ni módulos de carrocería.",
+        "No es un escáner autónomo: necesita móvil, PC o esta web.",
+        "Las funciones avanzadas dependen de la app de terceros."
+      ],
+      "verification": {
+        "listing": "Amazon.es, ficha del vendedor",
+        "checkedAt": "2026-10-27",
+        "note": "Compatibilidad ELM327/BLE declarada por el fabricante; probar el emparejamiento con el navegador antes de comprar."
+      },
+      "protocolSupport": {
+        "passenger": [
+          "ATSP0",
+          "ATSP1",
+          "ATSP2",
+          "ATSP3",
+          "ATSP4",
+          "ATSP5",
+          "ATSP6",
+          "ATSP7",
+          "ATSP8",
+          "ATSP9"
+        ],
+        "heavy": true,
+        "codes": [
+          "ATSP0",
+          "ATSP1",
+          "ATSP2",
+          "ATSP3",
+          "ATSP4",
+          "ATSP5",
+          "ATSP6",
+          "ATSP7",
+          "ATSP8",
+          "ATSP9",
+          "ATSPA"
+        ],
+        "label": "11/11 · incluye J1939",
+        "note": "ELM327 con los 10 protocolos OBD-II de turismo y J1939 (ATSPA) por ATSP."
+      }
+    }
+  ],
+  "protocolCoverageNote": "Los cinco adaptadores cubren los 10 protocolos OBD-II de turismo (ATSP0–ATSP9) y añaden J1939 (ATSPA) mediante comandos AT. La compatibilidad real con cada vehículo depende del protocolo que soporte su ECU."
+}
