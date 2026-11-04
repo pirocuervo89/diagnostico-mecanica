@@ -1,6 +1,6 @@
 {
-  "updated": "2026-10-30",
-  "version": 2,
+  "updated": "2026-11-04",
+  "version": 3,
   "notice": "Fiabilidad por MOTOR y generación, no por modelo. Una avería descrita aquí solo se aplica a los motores y años indicados; no se deben extrapolar a otras versiones del mismo coche. Cada dato lleva su fuente y su estado. Los costes son orientativos, sin IVA salvo que se indique, y corresponden a talleres españoles; pide siempre presupuesto con la referencia del motor.",
   "statusLegend": [
     {
@@ -4144,6 +4144,1549 @@
       ],
       "confidence": "media",
       "confidenceNote": "Polea, bobinas, correa y sensor TDC aparecen repetidos en talleres y guías especializadas. Los intervalos de correa difieren entre el manual y la práctica de taller. No hay recall general ni estadística oficial de fallos para este motor."
+    },
+    {
+      "id": "mercedes-om642-30-cdi",
+      "brand": "Mercedes-Benz / Jeep / Dodge",
+      "group": "Mercedes-Benz Group",
+      "family": "OM642 (V6 3.0 CDI, 72°)",
+      "commercial": "E 280/320 CDI, C 320 CDI, S 320 CDI, ML 320 CDI, GL 320 CDI, R 320 CDI, Viano, Sprinter 3.0, Jeep Grand Cherokee CRD",
+      "codes": "OM642.920, .940, .950, .960 y variantes según modelo, emisiones y mercado",
+      "years": "2005–2018 (con revisiones de emisiones Euro 5 y Euro 6 a lo largo de la vida)",
+      "displacementCc": 2987,
+      "fuel": "Diésel",
+      "powerPs": "184–265 PS según versión",
+      "aspiration": "Turboalimentado de geometría variable",
+      "injection": "Common rail Bosch, con inyectores piezoeléctricos en las últimas versiones",
+      "transmissionNote": "Automático de 7 velocidades 7G-Tronic en la mayoría de versiones; también manual en furgonetas",
+      "vehicles": [],
+      "distribution": {
+        "type": "Cadena de distribución",
+        "interval": "Sin intervalo oficial de sustitución",
+        "note": "Mercedes no publica intervalo para la cadena del OM642. Se revisa por ruido y por kilometraje alto, no por calendario. Las averías caras de este motor vienen casi siempre de la zona del valle (enfriador de aceite) y de la admisión, no de la distribución.",
+        "sources": [
+          {
+            "title": "Mercedes OM642 3.0 V6 diesel problems: swirl flap, oil cooler & DPF",
+            "url": "https://enginefinders.co.uk/blog/mercedes-om642-3-0-v6-diesel-problems-uk/",
+            "publisher": "Engine Finders",
+            "type": "taller",
+            "accessed": "2026-11-04",
+            "accessNote": "La web bloquea a veces el acceso automático (403); abrir en el navegador para confirmar los datos."
+          }
+        ]
+      },
+      "reliability": {
+        "verdict": "media",
+        "note": "Es un motor potente, suave y con mucha vida si se atiende lo que falla. El problema es que las dos averías típicas —juntas del enfriador de aceite y palomillas— obligan a desmontar media admisión, así que el coste de mano de obra manda. Un ejemplar con esas dos intervenciones ya hechas y facturas es una compra razonable; uno sin historial en la zona del valle, no."
+      },
+      "summary": "V6 diésel de tres litros montado en berlinas, SUV, monovolúmenes y furgonetas del grupo, además de en Jeep y Dodge. Es un motor grande y bien construido cuyo talón de Aquiles está en la parte alta: el enfriador de aceite va alojado en el valle del bloque y sus juntas acaban filtrando, y el mecanismo de palomillas de la admisión se agarrota o se rompe. Ambas cosas se arreglan, pero desmontando mucho.",
+      "issues": [
+        {
+          "id": "om642-oil-cooler-seals",
+          "title": "Juntas del enfriador de aceite con fuga en el valle del motor",
+          "symptom": [
+            "Manchas de aceite en el suelo, habitualmente detrás del motor",
+            "Olor a aceite quemado al parar y humo leve desde abajo",
+            "Consumo de aceite sin fuga visible en la parte alta",
+            "Aceite acumulado en el valle del bloque, visible con linterna"
+          ],
+          "cause": "El enfriador de aceite va montado en el valle del bloque, entre las dos bancadas, con juntas que se endurecen con el calor y los ciclos térmicos. La fuga cae por la parte trasera del motor y se confunde a menudo con el retén del cigüeñal o con la junta del cárter.",
+          "checks": [
+            "Limpiar la zona y rodar unos kilómetros para localizar el origen real de la fuga",
+            "Inspeccionar el valle del bloque con espejo y endoscopio, no solo la parte baja",
+            "Descartar fuga por el retén trasero y por la tapa de válvulas antes de desmontar la admisión",
+            "Comprobar el estado de los manguitos y del sellado del turbo"
+          ],
+          "solution": "Sustituir el juego de juntas del enfriador de aceite (y el enfriador si está deformado), limpiar el valle y renovar los manguitos de aceite y refrigerante que se desmontan. Es una intervención larga: se aprovecha para revisar palomillas y EGR.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "Además del consumo de aceite, la fuga cae sobre el motor de palomillas y los componentes de la parte trasera, y puede provocar averías en cadena. Un nivel bajo de aceite en un V6 diésel es muy caro.",
+          "cost": {
+            "diagnosis": "100–200 €",
+            "parts": "120–350 € (juntas, manguitos y sellos)",
+            "labour": "10–16 h",
+            "typical": "900–1.800 €",
+            "note": "Orientativo. La mano de obra es casi todo el coste, porque hay que desmontar la admisión y parte del sistema de combustible.",
+            "sources": [
+              {
+                "title": "Mercedes OM642 3.0 V6 diesel problems: swirl flap, oil cooler & DPF",
+                "url": "https://enginefinders.co.uk/blog/mercedes-om642-3-0-v6-diesel-problems-uk/",
+                "publisher": "Engine Finders",
+                "type": "taller",
+                "accessed": "2026-11-04",
+                "accessNote": "La web bloquea a veces el acceso automático (403); abrir en el navegador para confirmar."
+              },
+              {
+                "title": "Mercedes oil cooler seals, 642 diesel engine: cause and correction",
+                "url": "https://atlanticmotorcar.com/casestudies/mercedes-oil-cooler-seals-642-diesel-engine-cause-and-correction/",
+                "publisher": "Atlantic Motorcar",
+                "type": "taller",
+                "accessed": "2026-11-04",
+                "accessNote": "El sitio bloquea el acceso automático (403); abrir en el navegador para confirmar."
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Mercedes oil cooler seals, 642 diesel engine: cause and correction",
+              "url": "https://atlanticmotorcar.com/casestudies/mercedes-oil-cooler-seals-642-diesel-engine-cause-and-correction/",
+              "publisher": "Atlantic Motorcar",
+              "type": "taller",
+              "accessed": "2026-11-04",
+              "accessNote": "El sitio bloquea el acceso automático (403); abrir en el navegador para confirmar."
+            },
+            {
+              "title": "OM642 oil cooler leak (foro técnico)",
+              "url": "https://www.peachparts.com/shopforum/diesel-discussion/363973-journey-into-infamous-om642-oil-cooler-leak-2.html",
+              "publisher": "PeachParts",
+              "type": "foro",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "om642-swirl-flaps",
+          "title": "Palomillas de admisión y actuador agarrotados o rotos",
+          "symptom": [
+            "Pérdida de potencia y respuesta lenta a bajo régimen",
+            "Testigo de motor con código de control de palomillas",
+            "Ralentí irregular y humo negro",
+            "Ruido de roce o varillaje suelto en la admisión"
+          ],
+          "cause": "El colector lleva palomillas que regulan el llenado a bajo régimen. El hollín y el aceite que llega desde la admisión las agarrotan; el varillaje de plástico se rompe con el tiempo y el actuador acaba sin poder moverlas. La fuga del enfriador de aceite empeora el problema porque baña el mecanismo.",
+          "checks": [
+            "Comprobar el movimiento del varillaje con el motor en marcha y al parar",
+            "Leer códigos y valores reales de posición de las palomillas",
+            "Inspeccionar el colector con endoscopio: hollín, holgura y restos de aceite",
+            "Revisar si hay fuga de aceite del enfriador o del turbo que esté llegando a la admisión"
+          ],
+          "solution": "Sustituir el colector con las palomillas y el varillaje, o el actuador si solo ha fallado el motor eléctrico. Si hay fuga de aceite hacia la admisión, corregirla a la vez: si no, el mecanismo nuevo se vuelve a atascar.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "Una palomilla desprendida puede entrar en el cilindro y dañar la culata o el pistón. Además, el motor entra en modo de emergencia y pierde potencia.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "350–900 € (colector completo o actuador)",
+            "labour": "5–9 h",
+            "typical": "600–1.400 €",
+            "note": "Orientativo. Si se hace junto con las juntas del enfriador, la mano de obra se comparte y baja el total.",
+            "sources": [
+              {
+                "title": "Mercedes OM642 3.0 V6 diesel problems: swirl flap, oil cooler & DPF",
+                "url": "https://enginefinders.co.uk/blog/mercedes-om642-3-0-v6-diesel-problems-uk/",
+                "publisher": "Engine Finders",
+                "type": "taller",
+                "accessed": "2026-11-04",
+                "accessNote": "La web bloquea a veces el acceso automático (403); abrir en el navegador para confirmar."
+              },
+              {
+                "title": "OM642: sello del turbo y motor de palomillas",
+                "url": "https://forums.mbclub.co.uk/threads/om642.282751/",
+                "publisher": "Mercedes-Benz Club UK",
+                "type": "foro",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Mercedes OM642 3.0 V6 diesel problems: swirl flap, oil cooler & DPF",
+              "url": "https://enginefinders.co.uk/blog/mercedes-om642-3-0-v6-diesel-problems-uk/",
+              "publisher": "Engine Finders",
+              "type": "taller",
+              "accessed": "2026-11-04",
+              "accessNote": "La web bloquea a veces el acceso automático (403); abrir en el navegador para confirmar."
+            }
+          ]
+        },
+        {
+          "id": "om642-turbo-seal",
+          "title": "Sello del turbo al pedestal con fuga de aceite hacia la admisión",
+          "symptom": [
+            "Restos de aceite en la zona del turbo y en la admisión",
+            "Consumo de aceite creciente",
+            "Humo azul al acelerar tras retenciones",
+            "Palomillas que se agarrotan antes de lo esperado"
+          ],
+          "cause": "La junta entre el turbo y el pedestal, y el manguito de unión con el caudalímetro, se endurecen y dejan pasar aceite. La fuga cae directamente en el valle y en la admisión, donde ensucia el mecanismo de palomillas.",
+          "checks": [
+            "Inspeccionar la zona del turbo y el manguito de admisión en busca de aceite fresco",
+            "Comprobar la holgura del eje del turbo y el juego axial",
+            "Revisar el nivel y el consumo de aceite con registro de kilómetros",
+            "Descartar que la fuga venga del enfriador de aceite antes de cambiar el sello"
+          ],
+          "solution": "Sustituir la junta y el manguito afectados; si el eje del turbo tiene holgura, hay que sustituir o reconstruir el turbo. No conviene sellar sin corregir la causa.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "El aceite en la admisión ensucia palomillas y válvulas, y un consumo alto puede llevar a falta de lubricación. No suele ser catastrófico si se atiende a tiempo.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "40–180 € (juntas y manguito); turbo aparte",
+            "labour": "2–4 h",
+            "typical": "200–450 €",
+            "note": "Orientativo sin sustituir el turbo. Con turbo nuevo, suma 700–1.400 €.",
+            "sources": [
+              {
+                "title": "OM642 corner: sello del turbo al pedestal",
+                "url": "https://forums.mbclub.co.uk/threads/om642.282751/",
+                "publisher": "Mercedes-Benz Club UK",
+                "type": "foro",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "OM642 new oil cooler seal life",
+                "url": "https://www.benzworld.org/threads/om642-new-oil-cooler-seal-life.3116030/",
+                "publisher": "BenzWorld",
+                "type": "foro",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "OM642 new oil cooler seal life",
+              "url": "https://www.benzworld.org/threads/om642-new-oil-cooler-seal-life.3116030/",
+              "publisher": "BenzWorld",
+              "type": "foro",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "om642-dpf-egr",
+          "title": "DPF y EGR saturados en uso urbano",
+          "symptom": [
+            "Aviso de filtro de partículas y regeneraciones frecuentes",
+            "Pérdida de potencia y modo de emergencia",
+            "Humo negro y olor fuerte al acelerar",
+            "Ralentí inestable y consumo alto"
+          ],
+          "cause": "Es un motor grande montado en coches pesados que a menudo hacen trayectos cortos. El DPF no alcanza la temperatura necesaria para regenerar, la ceniza se acumula y el EGR se llena de hollín. A esto se suma que la admisión ya recibe aceite de otras fugas.",
+          "checks": [
+            "Leer la presión diferencial y el nivel de ceniza del DPF",
+            "Comprobar el número de regeneraciones y su duración",
+            "Verificar sensores de presión diferencial y de temperatura",
+            "Revisar EGR y admisión con endoscopio"
+          ],
+          "solution": "Regeneración forzada si la saturación lo permite; limpieza del DPF o sustitución si ya hay exceso de cenizas. Limpiar EGR y admisión, y corregir las fugas de aceite que ensucian el sistema. Un uso con recorridos largos periódicos es la mejor prevención.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "El DPF obstruido lleva a modo de emergencia y, si se insiste, a sustitución. En un V6 la pieza y la mano de obra son caras.",
+          "cost": {
+            "diagnosis": "60–150 €",
+            "parts": "150–600 € (limpieza) / 1.200 € o más (DPF nuevo)",
+            "labour": "3–6 h",
+            "typical": "300–900 €",
+            "note": "Orientativo. La limpieza profesional del DPF es mucho más barata que la sustitución.",
+            "sources": [
+              {
+                "title": "Mercedes OM642 3.0 V6 diesel problems: swirl flap, oil cooler & DPF",
+                "url": "https://enginefinders.co.uk/blog/mercedes-om642-3-0-v6-diesel-problems-uk/",
+                "publisher": "Engine Finders",
+                "type": "taller",
+                "accessed": "2026-11-04",
+                "accessNote": "La web bloquea a veces el acceso automático (403); abrir en el navegador para confirmar."
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Mercedes OM642 3.0 V6 diesel problems: swirl flap, oil cooler & DPF",
+              "url": "https://enginefinders.co.uk/blog/mercedes-om642-3-0-v6-diesel-problems-uk/",
+              "publisher": "Engine Finders",
+              "type": "taller",
+              "accessed": "2026-11-04",
+              "accessNote": "La web bloquea a veces el acceso automático (403); abrir en el navegador para confirmar."
+            }
+          ]
+        }
+      ],
+      "maintenance": [
+        {
+          "item": "Aceite y filtro",
+          "interval": "cada 10.000–15.000 km o 12 meses",
+          "note": "Aceite con la especificación MB 229.51/229.52 según versión. En este motor, un nivel bajo por fuga del enfriador es más peligroso que el intervalo.",
+          "sources": [
+            {
+              "title": "Mercedes oil cooler seals, 642 diesel engine: cause and correction",
+              "url": "https://atlanticmotorcar.com/casestudies/mercedes-oil-cooler-seals-642-diesel-engine-cause-and-correction/",
+              "publisher": "Atlantic Motorcar",
+              "type": "taller",
+              "accessed": "2026-11-04",
+              "accessNote": "El sitio bloquea el acceso automático (403); abrir en el navegador para confirmar."
+            }
+          ]
+        },
+        {
+          "item": "Filtro de combustible",
+          "interval": "cada 40.000–60.000 km",
+          "note": "Protege los inyectores, que en las últimas versiones son piezoeléctricos y caros.",
+          "sources": [
+            {
+              "title": "Mercedes OM642 3.0 V6 diesel problems: swirl flap, oil cooler & DPF",
+              "url": "https://enginefinders.co.uk/blog/mercedes-om642-3-0-v6-diesel-problems-uk/",
+              "publisher": "Engine Finders",
+              "type": "taller",
+              "accessed": "2026-11-04",
+              "accessNote": "La web bloquea a veces el acceso automático (403); abrir en el navegador para confirmar."
+            }
+          ]
+        },
+        {
+          "item": "Revisión de la zona del valle",
+          "interval": "en cada cambio de aceite, a partir de 120.000 km",
+          "note": "Buscar restos de aceite en el valle y en la parte trasera del motor. Detectar la fuga del enfriador antes de que bañe las palomillas ahorra una reparación cara.",
+          "sources": [
+            {
+              "title": "Mercedes oil cooler seals, 642 diesel engine: cause and correction",
+              "url": "https://atlanticmotorcar.com/casestudies/mercedes-oil-cooler-seals-642-diesel-engine-cause-and-correction/",
+              "publisher": "Atlantic Motorcar",
+              "type": "taller",
+              "accessed": "2026-11-04",
+              "accessNote": "El sitio bloquea el acceso automático (403); abrir en el navegador para confirmar."
+            }
+          ]
+        },
+        {
+          "item": "Limpieza de admisión, EGR y DPF",
+          "interval": "cada 80.000 km en uso urbano",
+          "note": "Preventivo de taller. En un coche de carretera el intervalo puede alargarse.",
+          "sources": [
+            {
+              "title": "Mercedes OM642 3.0 V6 diesel problems: swirl flap, oil cooler & DPF",
+              "url": "https://enginefinders.co.uk/blog/mercedes-om642-3-0-v6-diesel-problems-uk/",
+              "publisher": "Engine Finders",
+              "type": "taller",
+              "accessed": "2026-11-04",
+              "accessNote": "La web bloquea a veces el acceso automático (403); abrir en el navegador para confirmar."
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Mercedes OM642 3.0 V6 diesel problems: swirl flap, oil cooler & DPF",
+          "url": "https://enginefinders.co.uk/blog/mercedes-om642-3-0-v6-diesel-problems-uk/",
+          "publisher": "Engine Finders",
+          "type": "taller",
+          "accessed": "2026-11-04",
+          "accessNote": "La web bloquea a veces el acceso automático (403); abrir en el navegador para confirmar los datos."
+        },
+        {
+          "title": "Mercedes oil cooler seals, 642 diesel engine: cause and correction",
+          "url": "https://atlanticmotorcar.com/casestudies/mercedes-oil-cooler-seals-642-diesel-engine-cause-and-correction/",
+          "publisher": "Atlantic Motorcar",
+          "type": "taller",
+          "accessed": "2026-11-04",
+          "accessNote": "El sitio bloquea el acceso automático (403); abrir en el navegador para confirmar."
+        },
+        {
+          "title": "OM642 new oil cooler seal life",
+          "url": "https://www.benzworld.org/threads/om642-new-oil-cooler-seal-life.3116030/",
+          "publisher": "BenzWorld",
+          "type": "foro",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "OM642: sello del turbo y motor de palomillas",
+          "url": "https://forums.mbclub.co.uk/threads/om642.282751/",
+          "publisher": "Mercedes-Benz Club UK",
+          "type": "foro",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "OM642 oil cooler leak (foro técnico)",
+          "url": "https://www.peachparts.com/shopforum/diesel-discussion/363973-journey-into-infamous-om642-oil-cooler-leak-2.html",
+          "publisher": "PeachParts",
+          "type": "foro",
+          "accessed": "2026-11-04"
+        }
+      ],
+      "confidence": "media",
+      "confidenceNote": "Las juntas del enfriador, las palomillas y el DPF están documentados por talleres especializados en Mercedes y por foros técnicos con muchos casos. Los importes varían mucho según modelo (el acceso en un ML o un Sprinter no es el mismo que en una berlina) y según servicio oficial o independiente. No hay campaña ni estadística oficial de fallos para este motor."
+    },
+    {
+      "id": "fiat-13-multijet",
+      "brand": "Fiat / Alfa Romeo / Opel / Ford / Suzuki",
+      "group": "Stellantis (origen Fiat Powertrain)",
+      "family": "1.3 Multijet / MultiJet II (SDE, 4 cilindros 16v)",
+      "commercial": "Panda, Punto, 500, 500L, Qubo, Doblo, Fiorino, Ypsilon, Alfa MiTo, Opel Corsa 1.3 CDTI, Ford Ka 1.3 TDCi, Suzuki Ignis/Swift 1.3 DDiS",
+      "codes": "199A3.000, 199A9.000, 199B1.000, 199B4.000, 263A2.000, 552 83 799 y variantes según potencia y emisiones (confirmar por VIN)",
+      "years": "2003–2020 (conviven versiones Euro 4, 5 y 6 con diferencias de admisión y emisiones)",
+      "displacementCc": 1248,
+      "fuel": "Diésel",
+      "powerPs": "70–105 PS según versión",
+      "aspiration": "Turboalimentado, de geometría fija en las versiones básicas y variable en las más potentes",
+      "injection": "Common rail Magneti Marelli",
+      "transmissionNote": "Cambio manual de 5 o 6 velocidades; también robotizado Dualogic en algunas versiones",
+      "vehicles": [],
+      "distribution": {
+        "type": "Cadena de distribución",
+        "interval": "Sin intervalo oficial de sustitución",
+        "note": "El fabricante no publica intervalo para la cadena. En este motor la cadena y, sobre todo, el tensor se estiran con el aceite descuidado y los trayectos cortos, y el desgaste aparece en kilometrajes medios-altos. Se decide por ruido en frío y por diagnóstico de sincronización, no por kilometraje a ciegas.",
+        "sources": [
+          {
+            "title": "1.3 MultiJet / MultiJet II (Fiat SDE)",
+            "url": "https://enginescope.gr/engine/fiat-13mjt/",
+            "publisher": "EngineScope",
+            "type": "taller",
+            "accessed": "2026-11-04"
+          },
+          {
+            "title": "1.3 Multijet engine: problems, faults and reliability",
+            "url": "https://www.motorfiable.app/en/engines/1-3-multijet",
+            "publisher": "MotorFiable",
+            "type": "taller",
+            "accessed": "2026-11-04"
+          }
+        ]
+      },
+      "reliability": {
+        "verdict": "media",
+        "note": "Es un motor pequeño, barato de mantener y montado en medio mercado europeo. Con aceite al día supera los 250.000 km sin dramas; los problemas llegan cuando se estira el intervalo, y entonces la cadena, los asientos de inyector y el turbo se convierten en facturas de cuatro cifras. Es un motor que perdona poco el mantenimiento barato."
+      },
+      "summary": "Cuatro cilindros diésel de 1,25 litros que Fiat extendió a media Europa y que también montaron Opel, Ford, Suzuki y Alfa Romeo. Es ligero, económico y sencillo, con una cadena de distribución que debería durar toda la vida del coche pero que en la práctica se estira si el aceite no se cambia a tiempo. Sus averías típicas no son de diseño catastrófico, sino de desgaste acumulado: cadena, asientos de inyector, EGR y turbo.",
+      "issues": [
+        {
+          "id": "fiat13-chain",
+          "title": "Cadena de distribución y tensor estirados",
+          "symptom": [
+            "Cascabeleo o traqueteo metálico en el arranque en frío, sobre todo tras varias horas parado",
+            "Ruido que desaparece unos segundos después de arrancar y reaparece con el tiempo",
+            "Testigo de motor con código de correlación de árbol de levas (P0016)",
+            "En casos avanzados, pérdida de potencia o motor que no arranca"
+          ],
+          "cause": "La cadena y el tensor se desgastan antes de lo esperado cuando el aceite se estira o no es el especificado. El tensor pierde capacidad de mantener la tensión, la cadena se alarga y la sincronización entre cigüeñal y árbol de levas se desplaza. Si salta un diente, las válvulas pueden golpear los pistones.",
+          "checks": [
+            "Escuchar y grabar el arranque en frío antes de tocar nada",
+            "Leer códigos de sincronización y comprobar los valores reales de árbol y cigüeñal",
+            "Medir el alargamiento de la cadena con el útil específico",
+            "Revisar el estado del aceite y el historial de cambios"
+          ],
+          "solution": "Sustituir el kit completo de cadena, tensor, guías y piñones, con aceite y filtro nuevos. Si la cadena ya ha saltado, hay que comprobar compresiones y daño en válvulas antes de montar.",
+          "severity": "critica",
+          "status": "reportada",
+          "risk": "Una cadena saltada deja el motor sin compresión y la reparación puede superar el valor del coche. El ruido en frío es el único aviso fiable.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "200–400 € (kit de cadena y juntas)",
+            "labour": "6–10 h",
+            "typical": "600–1.200 €; con válvulas dañadas, 1.500–2.500 €",
+            "note": "Orientativo. En un Corsa o un Panda el acceso es más sencillo que en un 500L o un Doblo.",
+            "sources": [
+              {
+                "title": "1.3 MultiJet / MultiJet II (Fiat SDE)",
+                "url": "https://enginescope.gr/engine/fiat-13mjt/",
+                "publisher": "EngineScope",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "Multijet timing chain failure",
+                "url": "https://www.fiatforum.com/threads/multijet-timing-chain-failure.355160/",
+                "publisher": "Fiat Forum",
+                "type": "foro",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Fiat 1.3 MultiJet (SDE) reliability & problems",
+              "url": "https://autoscore.pro/engine/fiat-1.3-multijet-sde",
+              "publisher": "Autoscore",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "1.3 Multijet engine: problems, faults and reliability",
+              "url": "https://www.motorfiable.app/en/engines/1-3-multijet",
+              "publisher": "MotorFiable",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "fiat13-injector-seats",
+          "title": "Fuga de gases por el asiento del inyector (arandela de cobre)",
+          "symptom": [
+            "Olor a escape y a gasóleo en el vano motor",
+            "Humo negro alrededor del inyector y restos carbonosos en la culata",
+            "Ruido de soplido o chasquido cerca de la tapa de válvulas",
+            "Humo negro por el escape y pérdida de potencia"
+          ],
+          "cause": "La arandela de cobre que sella el inyector contra la culata se deforma y deja pasar gases de combustión. El hollín se acumula alrededor del inyector, en el mismo problema que en otros diésel se conoce como «black death», y puede dañar la culata o dejar el inyector agarrotado.",
+          "checks": [
+            "Inspeccionar la zona de cada inyector con el motor en marcha y en frío",
+            "Buscar restos carbonosos y olor a escape en la tapa de válvulas",
+            "Comprobar si el inyector gira o está agarrotado por el hollín",
+            "Medir retornos y correcciones antes de decidir si se sustituye el inyector"
+          ],
+          "solution": "Limpiar el alojamiento, comprobar el plano del asiento y sustituir la arandela y los tornillos de fijación. Si el asiento de la culata está dañado, hay que mecanizarlo o sustituir la culata.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "Además del humo y la pérdida de potencia, la fuga puede degradar la culata y agarrotar el inyector, lo que multiplica el coste.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "20–60 € (arandelas y tornillos)",
+            "labour": "2–4 h",
+            "typical": "120–300 €",
+            "note": "Orientativo si el asiento está sano. Con mecanizado de culata, 500–900 €.",
+            "sources": [
+              {
+                "title": "Don't buy a used 1.3 Multijet before reading this",
+                "url": "https://www.drivisual.tv/en/news/is-1-3-multijet-reliable-common-problems",
+                "publisher": "Drivisual",
+                "type": "prensa",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "Fiat 1.3 Multijet engine guide",
+                "url": "https://autopartswd.com/fiat-1-3-multijet-engine-guide/",
+                "publisher": "AutoParts WD",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Don't buy a used 1.3 Multijet before reading this",
+              "url": "https://www.drivisual.tv/en/news/is-1-3-multijet-reliable-common-problems",
+              "publisher": "Drivisual",
+              "type": "prensa",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "fiat13-turbo",
+          "title": "Turbo y actuador de geometría variable",
+          "symptom": [
+            "Silbido anormal y pérdida de potencia, sobre todo en cuestas",
+            "Modo de emergencia con código de sobrepresión o de geometría",
+            "Humo negro o azulado al acelerar",
+            "Respuesta perezosa hasta las 2.000 rpm"
+          ],
+          "cause": "El turbo de geometría variable se agarrota por carbonilla en uso urbano, y el actuador o su varillaje acaban sin recorrido. Aceite degradado o un conducto de alimentación obstruido desgastan además los cojinetes del eje.",
+          "checks": [
+            "Comprobar el recorrido del actuador y el estado del varillaje",
+            "Medir la holgura del eje y revisar el conducto de alimentación de aceite",
+            "Leer la presión de sobrealimentación real frente a la solicitada",
+            "Comprobar el estado del filtro de aire y del sensor de presión de admisión"
+          ],
+          "solution": "Limpiar la geometría y comprobar el actuador si el eje está sano; sustituir o reconstruir el turbo si hay holgura. Cambiar siempre aceite y filtro, y revisar el conducto de alimentación.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "Un turbo con holgura puede pasar aceite a la admisión y provocar embalamiento del motor, además de dejar el coche sin potencia.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "350–700 €",
+            "labour": "3–6 h",
+            "typical": "550–1.100 €",
+            "note": "Orientativo. El turbo reconstruido baja bastante el precio de la pieza.",
+            "sources": [
+              {
+                "title": "1.3 MultiJet / MultiJet II (Fiat SDE)",
+                "url": "https://enginescope.gr/engine/fiat-13mjt/",
+                "publisher": "EngineScope",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "Fiat 1.3 Multijet engine guide",
+                "url": "https://autopartswd.com/fiat-1-3-multijet-engine-guide/",
+                "publisher": "AutoParts WD",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Fiat 1.3 Multijet engine guide",
+              "url": "https://autopartswd.com/fiat-1-3-multijet-engine-guide/",
+              "publisher": "AutoParts WD",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "fiat13-injectors",
+          "title": "Inyectores con retornos altos y correcciones fuera de rango",
+          "symptom": [
+            "Arranque difícil en frío",
+            "Ralentí inestable con pequeñas sacudidas",
+            "Humo blanco y olor a gasóleo sin quemar",
+            "Modo de emergencia con código de presión de rail"
+          ],
+          "cause": "Los inyectores se desgastan por kilómetros y por gasóleo de baja calidad. La aguja pierde estanqueidad y devuelve más combustible del previsto, de modo que la presión de rail cae y el cilindro dosifica mal.",
+          "checks": [
+            "Test de retornos con probetas y comparación entre los cuatro inyectores",
+            "Leer correcciones de caudal y presión de rail real frente a la solicitada",
+            "Comprobar el filtro de combustible en busca de limaduras",
+            "Verificar compresiones antes de atribuir el fallo solo a la inyección"
+          ],
+          "solution": "Sustituir los inyectores afectados, codificarlos y cambiar el filtro de combustible. Si hay limaduras en el filtro, hay que revisar la bomba de alta presión.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "Un inyector que gotea lava el cilindro y diluye el aceite, lo que acelera el desgaste del motor.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "150–300 € por inyector",
+            "labour": "2–4 h",
+            "typical": "250–900 €",
+            "note": "Orientativo. Incluye codificación; los reconstruidos son más baratos que los nuevos.",
+            "sources": [
+              {
+                "title": "1.3 MultiJet / MultiJet II (Fiat SDE)",
+                "url": "https://enginescope.gr/engine/fiat-13mjt/",
+                "publisher": "EngineScope",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "1.3 MultiJet / MultiJet II (Fiat SDE)",
+              "url": "https://enginescope.gr/engine/fiat-13mjt/",
+              "publisher": "EngineScope",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "fiat13-egr-dpf",
+          "title": "EGR y DPF saturados en uso urbano",
+          "symptom": [
+            "Tirones a bajo régimen y ralentí irregular",
+            "Aviso de filtro de partículas y regeneraciones frecuentes",
+            "Humo negro y pérdida de potencia",
+            "Testigo de motor con P0401 o P2002"
+          ],
+          "cause": "Es un motor muy usado en ciudad, con trayectos cortos que no permiten regenerar el DPF ni limpiar el EGR. El hollín se acumula en la válvula, el colector y el filtro, y el sistema entra en un bucle en el que cada regeneración deja más ceniza.",
+          "checks": [
+            "Leer presión diferencial del DPF y número de regeneraciones",
+            "Comprobar el caudal de EGR solicitado y real",
+            "Inspeccionar la válvula y el colector con endoscopio",
+            "Revisar sensores de presión diferencial y de temperatura"
+          ],
+          "solution": "Limpiar EGR y colector; regeneración forzada si el DPF lo permite y limpieza o sustitución si ya hay exceso de ceniza. Un recorrido largo periódico previene la mitad de estos casos.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "El DPF obstruido lleva a modo de emergencia y, si se insiste, a sustitución, que en este motor cuesta más que el valor de muchas unidades usadas.",
+          "cost": {
+            "diagnosis": "50–100 €",
+            "parts": "80–400 €",
+            "labour": "2–4 h",
+            "typical": "200–700 €",
+            "note": "Orientativo. La limpieza profesional del DPF es mucho más barata que la pieza nueva.",
+            "sources": [
+              {
+                "title": "Fiat 1.3 Multijet engine guide",
+                "url": "https://autopartswd.com/fiat-1-3-multijet-engine-guide/",
+                "publisher": "AutoParts WD",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "Don't buy a used 1.3 Multijet before reading this",
+                "url": "https://www.drivisual.tv/en/news/is-1-3-multijet-reliable-common-problems",
+                "publisher": "Drivisual",
+                "type": "prensa",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Fiat 1.3 Multijet engine guide",
+              "url": "https://autopartswd.com/fiat-1-3-multijet-engine-guide/",
+              "publisher": "AutoParts WD",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "maintenance": [
+        {
+          "item": "Aceite y filtro",
+          "interval": "cada 10.000–15.000 km o 12 meses, sin estirar el intervalo del libro",
+          "note": "Es la mejor protección de la cadena y del turbo. Aceite con la especificación de la versión y filtro de calidad.",
+          "sources": [
+            {
+              "title": "1.3 Multijet engine: problems, faults and reliability",
+              "url": "https://www.motorfiable.app/en/engines/1-3-multijet",
+              "publisher": "MotorFiable",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Filtro de combustible",
+          "interval": "cada 30.000 km",
+          "note": "Protege los inyectores. Al cambiarlo, revisar si hay limaduras o agua en el filtro.",
+          "sources": [
+            {
+              "title": "Fiat 1.3 Multijet engine guide",
+              "url": "https://autopartswd.com/fiat-1-3-multijet-engine-guide/",
+              "publisher": "AutoParts WD",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Comprobación de la cadena",
+          "interval": "a partir de 120.000 km, en cada revisión",
+          "note": "Escuchar el arranque en frío y medir el alargamiento si hay ruido. No hay intervalo oficial.",
+          "sources": [
+            {
+              "title": "Fiat 1.3 MultiJet (SDE) reliability & problems",
+              "url": "https://autoscore.pro/engine/fiat-1.3-multijet-sde",
+              "publisher": "Autoscore",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Limpieza de EGR y admisión",
+          "interval": "cada 60.000–80.000 km en uso urbano",
+          "note": "Preventivo de taller. En coches de carretera puede alargarse.",
+          "sources": [
+            {
+              "title": "Fiat 1.3 Multijet engine guide",
+              "url": "https://autopartswd.com/fiat-1-3-multijet-engine-guide/",
+              "publisher": "AutoParts WD",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "1.3 MultiJet / MultiJet II (Fiat SDE)",
+          "url": "https://enginescope.gr/engine/fiat-13mjt/",
+          "publisher": "EngineScope",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "1.3 Multijet engine: problems, faults and reliability",
+          "url": "https://www.motorfiable.app/en/engines/1-3-multijet",
+          "publisher": "MotorFiable",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Fiat 1.3 Multijet engine guide",
+          "url": "https://autopartswd.com/fiat-1-3-multijet-engine-guide/",
+          "publisher": "AutoParts WD",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Don't buy a used 1.3 Multijet before reading this",
+          "url": "https://www.drivisual.tv/en/news/is-1-3-multijet-reliable-common-problems",
+          "publisher": "Drivisual",
+          "type": "prensa",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Fiat 1.3 MultiJet (SDE) reliability & problems",
+          "url": "https://autoscore.pro/engine/fiat-1.3-multijet-sde",
+          "publisher": "Autoscore",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Multijet timing chain failure",
+          "url": "https://www.fiatforum.com/threads/multijet-timing-chain-failure.355160/",
+          "publisher": "Fiat Forum",
+          "type": "foro",
+          "accessed": "2026-11-04"
+        }
+      ],
+      "confidence": "media",
+      "confidenceNote": "Cadena, asientos de inyector, turbo y EGR están documentados por talleres especializados y foros con muchos casos. Los kilometrajes de fallo varían mucho según el uso y el aceite, y no hay estadística oficial. Los importes son orientativos para taller independiente en España."
+    },
+    {
+      "id": "psa-ep6-16-thp",
+      "brand": "Peugeot / Citroën / DS / Mini",
+      "group": "Stellantis / BMW Group (desarrollo conjunto)",
+      "family": "EP6 Prince (1.6 THP turbo de inyección directa)",
+      "commercial": "207, 208, 308, 408, 508, 3008, 5008, RCZ, C4, C5, DS3, DS4, DS5, Mini R55/R56/R60, Cooper S",
+      "codes": "EP6DT (THP 150), EP6DTS (THP 175), EP6CDT (THP 156), EP6CDTM, EP6FDT (THP 165); en Mini, N14B16 y N18B16",
+      "years": "2006–2018 (las versiones THP 200 y posteriores corrigieron parte de los fallos de las primeras)",
+      "displacementCc": 1598,
+      "fuel": "Gasolina",
+      "powerPs": "150–210 PS según versión",
+      "aspiration": "Turboalimentado",
+      "injection": "Inyección directa a alta presión",
+      "transmissionNote": "Cambio manual de 6 velocidades o automático de 6 según modelo",
+      "vehicles": [],
+      "distribution": {
+        "type": "Cadena de distribución",
+        "interval": "Sin intervalo oficial de sustitución",
+        "note": "El fabricante no publica intervalo. En las primeras series (THP 150/156) la cadena, el tensor y los piñones de árbol de levas fueron el punto débil y provocaron pérdidas de sincronización; las versiones posteriores llevan piezas revisadas. Se decide por ruido en frío y por comprobación de la sincronización.",
+        "sources": [
+          {
+            "title": "Peugeot-Citroën/Mini N14-N18 1.6 THP engine naming, maintenance and servicing 101",
+            "url": "https://www.etuners.gr/portfolio-item/peugeot-citroen-mini-n14-n18-1-6-thp-engine-naming-maintenance-and-servicing-101/",
+            "publisher": "ETuners",
+            "type": "taller",
+            "accessed": "2026-11-04"
+          },
+          {
+            "title": "1.6 THP (Prince) reliability & problems",
+            "url": "https://autoscore.pro/engine/1.6-thp-prince",
+            "publisher": "Autoscore",
+            "type": "taller",
+            "accessed": "2026-11-04"
+          }
+        ]
+      },
+      "reliability": {
+        "verdict": "baja-media",
+        "note": "Es un motor con muy buen rendimiento y consumos contenidos para su potencia, pero con tres facturas conocidas: cadena, bomba de alta presión y carbonilla. Las unidades de las últimas series (THP 165/200) y las que han llevado aceite cada 10.000 km son mucho más fiables. Comprar una de las primeras sin historial es asumir un riesgo alto."
+      },
+      "summary": "Cuatro cilindros turbo de 1.6 litros desarrollado entre PSA y BMW, montado desde el Mini Cooper S hasta el Peugeot 3008. Tiene fama merecida de averías caras, pero conviene separar generaciones: las primeras (THP 150/156) concentran los problemas de cadena y bomba de alta presión, mientras que las últimas son bastante más sólidas. En todas, la inyección directa garantiza carbonilla en válvulas si el coche hace ciudad.",
+      "issues": [
+        {
+          "id": "ep6-timing-chain",
+          "title": "Cadena de distribución estirada y pérdida de sincronización",
+          "symptom": [
+            "Traqueteo metálico en el arranque en frío, más fuerte tras varias horas parado",
+            "Pérdida de potencia y respuesta irregular",
+            "Testigo de motor con P0016 o códigos de árbol de levas",
+            "Arranque difícil o motor que se cala"
+          ],
+          "cause": "En las versiones THP 150/156/165, el tensor pierde eficacia y la cadena se alarga; en algunos casos los piñones de árbol de levas patinan y la distribución se desplaza de forma permanente. El ruido en frío es el primer aviso y suele preceder al testigo de motor.",
+          "checks": [
+            "Escuchar y grabar el arranque en frío",
+            "Leer códigos de sincronización y comprobar los valores reales de árbol y cigüeñal",
+            "Comprobar la referencia del kit montado y si corresponde a la versión revisada",
+            "Verificar el estado de los piñones y del tensor antes de decidir el alcance"
+          ],
+          "solution": "Sustituir el kit completo (cadena, tensor, guías y piñones) por las referencias revisadas, con aceite y filtro nuevos. Si la cadena ha saltado, comprobar compresiones y válvulas: el daño puede obligar a levantar la culata.",
+          "severity": "critica",
+          "status": "reportada",
+          "risk": "Una pérdida de sincronización puede dejar el motor sin compresión. Es la avería más caras del motor y la más frecuente en las primeras series.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "300–600 € (kit de cadena y juntas)",
+            "labour": "8–14 h",
+            "typical": "900–1.800 €; con culata dañada, 2.500–4.000 €",
+            "note": "Orientativo. En el Mini el acceso es más estrecho y la mano de obra sube.",
+            "sources": [
+              {
+                "title": "Peugeot-Citroën/Mini N14-N18 1.6 THP engine naming, maintenance and servicing 101",
+                "url": "https://www.etuners.gr/portfolio-item/peugeot-citroen-mini-n14-n18-1-6-thp-engine-naming-maintenance-and-servicing-101/",
+                "publisher": "ETuners",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "1.6 THP (Prince) reliability & problems",
+                "url": "https://autoscore.pro/engine/1.6-thp-prince",
+                "publisher": "Autoscore",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Overview of quirks, repairs and design advice for Prince N14",
+              "url": "https://www.northamericanmotoring.com/forums/r56-hatch-talk-2007/319032-overview-of-quirks-repairs-and-design-advice-for-prince-n14-s-a-must-read.html",
+              "publisher": "North American Motoring",
+              "type": "foro",
+              "accessed": "2026-11-04"
+            },
+            {
+              "title": "1.6 THP (Prince) reliability & problems",
+              "url": "https://autoscore.pro/engine/1.6-thp-prince",
+              "publisher": "Autoscore",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "ep6-hpfp",
+          "title": "Bomba de alta presión de combustible con desgaste",
+          "symptom": [
+            "Arranque largo o motor que no arranca en caliente",
+            "Pérdida de potencia y tirones al acelerar",
+            "Modo de emergencia con códigos de presión de rail (P0087)",
+            "Consumo alto y olor a gasolina sin quemar"
+          ],
+          "cause": "La bomba de alta presión se desgasta y no alcanza la presión solicitada, sobre todo con el motor caliente. El problema se agrava con combustible sucio o con intervalos de mantenimiento largos, y en los casos peores genera limaduras que recorren el circuito.",
+          "checks": [
+            "Comparar presión de rail real y solicitada en arranque y en carga",
+            "Revisar el filtro de combustible y buscar limaduras",
+            "Comprobar la válvula reguladora de presión y el sensor de rail",
+            "Descartar inyectores con retornos excesivos antes de cambiar la bomba"
+          ],
+          "solution": "Sustituir la bomba y limpiar el circuito si hay contaminación, cambiando filtro y aceite. Si hay limaduras, hay que revisar también inyectores y depósito.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "Un fallo de presión deja el coche sin arrancar o en modo de emergencia, y la contaminación por limaduras puede arrastrar todo el sistema de inyección.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "350–700 €",
+            "labour": "3–6 h",
+            "typical": "600–1.200 €",
+            "note": "Orientativo. Incluye limpieza del circuito; si hay limaduras también entran inyectores.",
+            "sources": [
+              {
+                "title": "1.6 THP (Prince) reliability & problems",
+                "url": "https://autoscore.pro/engine/1.6-thp-prince",
+                "publisher": "Autoscore",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "1.6 THP (Prince) reliability & problems",
+              "url": "https://autoscore.pro/engine/1.6-thp-prince",
+              "publisher": "Autoscore",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "ep6-carbon",
+          "title": "Carbonilla en válvulas de admisión",
+          "symptom": [
+            "Ralentí irregular y vibración",
+            "Tirones al acelerar desde bajo régimen",
+            "Pérdida progresiva de potencia y consumo alto",
+            "Fallos de encendido con testigo de motor"
+          ],
+          "cause": "Al inyectar directamente en la cámara, la gasolina no limpia las válvulas de admisión. Los vapores de aceite del sistema de ventilación del cárter se depositan y forman depósitos duros que reducen el paso de aire.",
+          "checks": [
+            "Leer fallos de encendido por cilindro y correcciones de mezcla",
+            "Inspeccionar la admisión con endoscopio",
+            "Comprobar el sistema de ventilación del cárter y el separador de aceite",
+            "Descartar bujías, bobinas y fugas de admisión"
+          ],
+          "solution": "Limpieza de válvulas y conducto de admisión por vía química o con proyección de material abrasivo, según el depósito. Corregir a la vez las fugas de aceite hacia la admisión.",
+          "severity": "baja",
+          "status": "reportada",
+          "risk": "No destruye el motor, pero empeora consumo, prestaciones y emisiones, y puede encender el testigo por fallos de encendido.",
+          "cost": {
+            "diagnosis": "50–100 €",
+            "parts": "20–80 €",
+            "labour": "3–5 h",
+            "typical": "250–550 €",
+            "note": "Orientativo. La limpieza con material abrasivo es más eficaz y algo más cara.",
+            "sources": [
+              {
+                "title": "Mini 1.6 THP carbon clean",
+                "url": "https://balancemotorworks.co.uk/2021/01/29/mini-1-6-thp-carbon-clean/",
+                "publisher": "Balance Motor Works",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "1.6 THP (Prince) reliability & problems",
+                "url": "https://autoscore.pro/engine/1.6-thp-prince",
+                "publisher": "Autoscore",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Mini 1.6 THP carbon clean",
+              "url": "https://balancemotorworks.co.uk/2021/01/29/mini-1-6-thp-carbon-clean/",
+              "publisher": "Balance Motor Works",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "ep6-oil-consumption",
+          "title": "Consumo de aceite por segmentos y retenes de válvulas",
+          "symptom": [
+            "Consumo de aceite creciente entre cambios",
+            "Humo azulado al acelerar tras retención",
+            "Bujías engrasadas y fallos de encendido",
+            "Carbonilla en válvulas y en la cámara"
+          ],
+          "cause": "Los segmentos y los retenes de válvula se desgastan y dejan pasar aceite a la cámara de combustión. Los intervalos de cambio largos y el aceite incorrecto aceleran el problema, y el aceite quemado acaba formando carbonilla.",
+          "checks": [
+            "Medir el consumo de aceite con registro de kilómetros y litros",
+            "Prueba de compresión y de estanqueidad por cilindro",
+            "Inspeccionar las bujías y el escape en busca de restos de aceite",
+            "Comprobar el sistema de ventilación del cárter antes de abrir el motor"
+          ],
+          "solution": "Si el consumo es alto, hay que abrir el motor: sustituir retenes de válvulas y, si los segmentos están gastados, rectificar o cambiar pistones. Antes, descartar el separador de aceite y las fugas externas.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "Un consumo alto deja el motor sin lubricación entre revisiones y acelera el desgaste de cadena y turbo.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "200–900 € según el alcance",
+            "labour": "8–20 h",
+            "typical": "600–2.000 €",
+            "note": "Orientativo. Cambiar solo retenes es mucho más barato que abrir el bloque.",
+            "sources": [
+              {
+                "title": "The best solution for the THP engine problems",
+                "url": "https://tecflow.com/en/the-best-solution-for-the-thp-engine-problems/",
+                "publisher": "Tecflow",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "The best solution for the THP engine problems",
+              "url": "https://tecflow.com/en/the-best-solution-for-the-thp-engine-problems/",
+              "publisher": "Tecflow",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "ep6-turbo",
+          "title": "Turbo y válvula de descarga con sobrepresión",
+          "symptom": [
+            "Tirones fuertes al acelerar y modo de emergencia",
+            "Silbido anormal o pérdida de potencia",
+            "Códigos de sobrepresión o de regulación del turbo",
+            "Humo azul si el eje tiene holgura"
+          ],
+          "cause": "La válvula de descarga y el actuador del turbo se desgastan y no regulan bien la presión, lo que provoca sobrepresión y protección de la centralita. Con aceite degradado, el eje del turbo también acaba con holgura.",
+          "checks": [
+            "Comparar presión de sobrealimentación real y solicitada",
+            "Comprobar el actuador y la válvula de descarga",
+            "Revisar holgura del eje y presencia de aceite en la admisión",
+            "Descartar fugas en manguitos y en el intercooler"
+          ],
+          "solution": "Sustituir la válvula de descarga o el actuador si el eje está sano; cambiar el turbo si hay holgura. Revisar siempre los manguitos y el estado del aceite.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "La sobrepresión repetida castiga el motor y el turbo; circular en modo de emergencia de forma continua acaba en avería mayor.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "150–800 €",
+            "labour": "2–6 h",
+            "typical": "300–1.200 €",
+            "note": "Orientativo. La válvula de descarga es barata; el turbo completo, no.",
+            "sources": [
+              {
+                "title": "1.6 THP (Prince) reliability & problems",
+                "url": "https://autoscore.pro/engine/1.6-thp-prince",
+                "publisher": "Autoscore",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "1.6 THP (Prince) reliability & problems",
+              "url": "https://autoscore.pro/engine/1.6-thp-prince",
+              "publisher": "Autoscore",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "maintenance": [
+        {
+          "item": "Aceite y filtro",
+          "interval": "cada 10.000 km o 12 meses, aunque el libro alargue el plazo",
+          "note": "Es la medida que más alarga la vida de cadena y turbo. Aceite con la especificación de la versión y filtro de calidad.",
+          "sources": [
+            {
+              "title": "Peugeot-Citroën/Mini N14-N18 1.6 THP engine naming, maintenance and servicing 101",
+              "url": "https://www.etuners.gr/portfolio-item/peugeot-citroen-mini-n14-n18-1-6-thp-engine-naming-maintenance-and-servicing-101/",
+              "publisher": "ETuners",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Bujías",
+          "interval": "cada 40.000–60.000 km",
+          "note": "Bujías con la referencia exacta de la versión. Una bujía gastada imita los síntomas de la carbonilla.",
+          "sources": [
+            {
+              "title": "1.6 THP (Prince) reliability & problems",
+              "url": "https://autoscore.pro/engine/1.6-thp-prince",
+              "publisher": "Autoscore",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Limpieza de admisión",
+          "interval": "cada 60.000–80.000 km en uso urbano",
+          "note": "Preventivo de taller, no oficial. Mejora el ralentí y evita fallos de encendido.",
+          "sources": [
+            {
+              "title": "Mini 1.6 THP carbon clean",
+              "url": "https://balancemotorworks.co.uk/2021/01/29/mini-1-6-thp-carbon-clean/",
+              "publisher": "Balance Motor Works",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Comprobación de la cadena",
+          "interval": "en cada revisión a partir de 100.000 km",
+          "note": "Escuchar el arranque en frío y comprobar la sincronización por diagnóstico. No hay intervalo oficial.",
+          "sources": [
+            {
+              "title": "Peugeot-Citroën/Mini N14-N18 1.6 THP engine naming, maintenance and servicing 101",
+              "url": "https://www.etuners.gr/portfolio-item/peugeot-citroen-mini-n14-n18-1-6-thp-engine-naming-maintenance-and-servicing-101/",
+              "publisher": "ETuners",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Peugeot-Citroën/Mini N14-N18 1.6 THP engine naming, maintenance and servicing 101",
+          "url": "https://www.etuners.gr/portfolio-item/peugeot-citroen-mini-n14-n18-1-6-thp-engine-naming-maintenance-and-servicing-101/",
+          "publisher": "ETuners",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "1.6 THP (Prince) reliability & problems",
+          "url": "https://autoscore.pro/engine/1.6-thp-prince",
+          "publisher": "Autoscore",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Mini 1.6 THP carbon clean",
+          "url": "https://balancemotorworks.co.uk/2021/01/29/mini-1-6-thp-carbon-clean/",
+          "publisher": "Balance Motor Works",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "The best solution for the THP engine problems",
+          "url": "https://tecflow.com/en/the-best-solution-for-the-thp-engine-problems/",
+          "publisher": "Tecflow",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Overview of quirks, repairs and design advice for Prince N14",
+          "url": "https://www.northamericanmotoring.com/forums/r56-hatch-talk-2007/319032-overview-of-quirks-repairs-and-design-advice-for-prince-n14-s-a-must-read.html",
+          "publisher": "North American Motoring",
+          "type": "foro",
+          "accessed": "2026-11-04"
+        }
+      ],
+      "confidence": "media",
+      "confidenceNote": "Cadena, bomba de alta presión y carbonilla están documentados por talleres especializados en PSA y Mini y por foros con muchos casos. Los problemas se concentran en las primeras series y en unidades sin mantenimiento; no hay estadística oficial de tasa de fallo ni campaña europea equivalente."
+    },
+    {
+      "id": "hyundai-kia-16-crdi",
+      "brand": "Hyundai / Kia",
+      "group": "Hyundai Motor Group",
+      "family": "1.6 CRDi (U2 D4FB y Smartstream D4FE)",
+      "commercial": "i20, i30, ix20, ix35, Tucson, Kona, Ceed, Ceed SW, Sportage, Venga, Stonic, xceed",
+      "codes": "D4FB y D4FBL en la generación U2 (cadena); D4FE en la Smartstream (correa de distribución seca y correa de bomba de aceite bañada en aceite). Confirmar por VIN.",
+      "years": "2007–2022 (el cambio de generación llega en 2018 con el D4FE)",
+      "displacementCc": 1598,
+      "fuel": "Diésel",
+      "powerPs": "90–136 PS según versión",
+      "aspiration": "Turboalimentado de geometría variable",
+      "injection": "Common rail Bosch",
+      "transmissionNote": "Cambio manual de 6 velocidades, automático o DCT de 7 según modelo",
+      "vehicles": [],
+      "distribution": {
+        "type": "Cadena de distribución en el D4FB; correa seca con correa de bomba de aceite bañada en aceite en el D4FE",
+        "interval": "El D4FB no tiene intervalo oficial de cadena. En el D4FE hay que seguir el intervalo de correa publicado para la versión: confirmar por VIN.",
+        "note": "Las dos generaciones no comparten sistema de distribución y conviene no confundirlas. En el D4FB la cadena se estira con aceite descuidado; en el D4FE la correa de la bomba de aceite trabaja dentro del cárter y exige el aceite correcto y cambios frecuentes. Ninguna cifra sirve para las dos.",
+        "sources": [
+          {
+            "title": "Problems with the Hyundai i30",
+            "url": "https://www.autodoc.co.uk/info/problems-with-the-hyundai-i30",
+            "publisher": "Autodoc",
+            "type": "prensa",
+            "accessed": "2026-11-04"
+          },
+          {
+            "title": "Kia / Hyundai 1.6 CRDi MHEV engine failures",
+            "url": "https://www.dohc.co.uk/kia-hyundai-1-6-crdi-mhev-engine-failures/",
+            "publisher": "Daves Discoveries",
+            "type": "taller",
+            "accessed": "2026-11-04"
+          }
+        ]
+      },
+      "reliability": {
+        "verdict": "media",
+        "note": "El D4FB es un diésel duro, económico y con fama merecida de aguantar, siempre que la cadena se vigile y el aceite se cambie a tiempo. El D4FE de 2018 en adelante arrastra un problema de diseño en la polea del cigüeñal que, cuando aparece, destruye el motor. Son dos motores con el mismo nombre comercial y comportamientos muy distintos."
+      },
+      "summary": "Cuatro cilindros diésel de 1,6 litros montado en casi toda la gama compacta de Hyundai y Kia. La generación U2 (D4FB) es sencilla y duradera, con la cadena como punto a vigilar. La Smartstream (D4FE), que llega en 2018, cambia a correa de distribución y añade una correa de bomba de aceite bañada en aceite, además de un pasador de la polea del cigüeñal demasiado débil para la carga que soporta en las versiones con hibridación ligera.",
+      "issues": [
+        {
+          "id": "hk16-chain-d4fb",
+          "title": "Cadena de distribución estirada en el D4FB",
+          "symptom": [
+            "Chasquido metálico en el arranque en frío que desaparece a los pocos segundos",
+            "Ruido que se hace más frecuente y más largo con los kilómetros",
+            "Testigo de motor con código de correlación de árbol de levas",
+            "En casos avanzados, pérdida de potencia o motor que no arranca"
+          ],
+          "cause": "La cadena se alarga con el desgaste, sobre todo en unidades de 2009 a 2013 y en coches con trayectos cortos y cambios de aceite irregulares. El tensor no compensa el estiramiento y la sincronización se desplaza hasta que la cadena salta.",
+          "checks": [
+            "Escuchar y grabar el arranque en frío",
+            "Comprobar la sincronización por diagnóstico y la referencia del kit montado",
+            "Medir el alargamiento de la cadena con el útil específico",
+            "Revisar el historial de aceite y el estado del filtro"
+          ],
+          "solution": "Sustituir el kit completo de cadena, tensor, guías y piñones, con aceite y filtro nuevos. Si ha saltado, comprobar compresiones y válvulas antes de montar.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "El desgaste es progresivo y avisa con ruido, pero una cadena que salta deja el motor sin compresión y la reparación se multiplica.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "250–450 €",
+            "labour": "6–10 h",
+            "typical": "700–1.300 €",
+            "note": "Orientativo. En un i30 o un Ceed el acceso es razonable; en un Tucson sube algo la mano de obra.",
+            "sources": [
+              {
+                "title": "Problems with the Hyundai i30",
+                "url": "https://www.autodoc.co.uk/info/problems-with-the-hyundai-i30",
+                "publisher": "Autodoc",
+                "type": "prensa",
+                "accessed": "2026-11-04"
+              },
+              {
+                "title": "Hyundai 1.6 CRDi D4FB engine mods",
+                "url": "https://www.torquecars.com/hyundai/1-6-crdi-d4fb-u-tuning.php",
+                "publisher": "TorqueCars",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Problems with the Hyundai i30",
+              "url": "https://www.autodoc.co.uk/info/problems-with-the-hyundai-i30",
+              "publisher": "Autodoc",
+              "type": "prensa",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "hk16-crank-pulley-d4fe",
+          "title": "Pasador de la polea del cigüeñal que se rompe en el D4FE",
+          "symptom": [
+            "Ruido de golpeteo o chirrido en la parte baja del motor",
+            "Correa de accesorios que se sale o se rompe",
+            "Pérdida de potencia y motor que se para",
+            "Motor que gira sin arrancar o arranca con ruido metálico"
+          ],
+          "cause": "El D4FE fija la polea del cigüeñal con un pasador pequeño que actúa como chavetero. En las versiones con hibridación ligera la polea es más pesada y el motor de arranque/generador añade carga, así que el pasador se fatiga y se rompe. La polea gira entonces sin arrastrar el cigüeñal y la distribución se desfasa.",
+          "checks": [
+            "Comprobar el estado del pasador y de la polea al menor ruido en la parte baja",
+            "Revisar la correa de accesorios y sus tensores",
+            "Leer códigos de sincronización y comprobar compresiones si ya hay fallo de arranque",
+            "Comprobar por VIN si la unidad entra en alguna campaña o boletín del fabricante"
+          ],
+          "solution": "Sustituir la polea y el pasador por la versión revisada, con la correa y el tensor nuevos. Si la distribución se desfasó con el motor en marcha, hay que levantar la culata: las válvulas suelen estar dobladas.",
+          "severity": "critica",
+          "status": "reportada",
+          "risk": "Es un fallo que destruye el motor sin aviso claro: cuando el pasador cede, las válvulas y los pistones se encuentran. La reparación suele ser motor nuevo o reconstruido.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "80–250 € (polea, pasador y correa)",
+            "labour": "2–4 h",
+            "typical": "250–600 € si solo se cambia la polea; 3.000 € o más si el motor ya está dañado",
+            "note": "Orientativo. El coste real depende de si el fallo se detecta antes de que el motor se desfase.",
+            "sources": [
+              {
+                "title": "Kia / Hyundai 1.6 CRDi MHEV engine failures",
+                "url": "https://www.dohc.co.uk/kia-hyundai-1-6-crdi-mhev-engine-failures/",
+                "publisher": "Daves Discoveries",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Kia / Hyundai 1.6 CRDi MHEV engine failures",
+              "url": "https://www.dohc.co.uk/kia-hyundai-1-6-crdi-mhev-engine-failures/",
+              "publisher": "Daves Discoveries",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "hk16-oil-pump-belt-d4fe",
+          "title": "Correa de la bomba de aceite bañada en aceite en el D4FE",
+          "symptom": [
+            "Testigo de presión de aceite encendido o intermitente",
+            "Ruido de golpeteo en la parte baja del motor",
+            "Residuos de goma en el filtro o en el captador",
+            "Consumo de aceite y desgaste acelerado del turbo"
+          ],
+          "cause": "El D4FE mueve la bomba de aceite con una correa de goma sumergida en el cárter. Con aceite degradado, nivel bajo o intervalos largos, la correa se deteriora, se estira o se rompe, y el motor se queda sin lubricación.",
+          "checks": [
+            "Medir la presión de aceite real con manómetro",
+            "Revisar el estado del aceite y buscar residuos de goma en el filtro",
+            "Comprobar el historial de cambios y la especificación usada",
+            "Inspeccionar la correa y el captador si se abre el cárter"
+          ],
+          "solution": "Sustituir la correa de la bomba de aceite y limpiar el circuito, con aceite y filtro nuevos. Si ya hubo pérdida de presión, comprobar casquillos y turbo antes de dar el trabajo por terminado.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "Una correa rota deja el motor sin presión de aceite y lo destruye en pocos segundos, sin aviso fiable más allá del testigo.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "120–300 €",
+            "labour": "6–10 h",
+            "typical": "500–1.100 €",
+            "note": "Orientativo. Incluye aceite, filtro y limpieza del captador.",
+            "sources": [
+              {
+                "title": "Kia / Hyundai 1.6 CRDi MHEV engine failures",
+                "url": "https://www.dohc.co.uk/kia-hyundai-1-6-crdi-mhev-engine-failures/",
+                "publisher": "Daves Discoveries",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "Kia / Hyundai 1.6 CRDi MHEV engine failures",
+              "url": "https://www.dohc.co.uk/kia-hyundai-1-6-crdi-mhev-engine-failures/",
+              "publisher": "Daves Discoveries",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "hk16-injectors",
+          "title": "Inyectores desgastados y baja presión de combustible",
+          "symptom": [
+            "Arranque difícil en frío o motor que no arranca",
+            "Ralentí irregular y tirones",
+            "Modo de emergencia con P0201 (circuito del inyector) o códigos de presión",
+            "Humo blanco y olor a gasóleo sin quemar"
+          ],
+          "cause": "Los inyectores se desgastan con los kilómetros y devuelven más combustible del previsto, lo que hace caer la presión de rail. En algunos casos el fallo es eléctrico y la centralita detecta el circuito del inyector abierto.",
+          "checks": [
+            "Test de retornos por cilindro y comparación entre los cuatro",
+            "Leer correcciones de caudal y presión de rail real frente a la solicitada",
+            "Comprobar el conector y el cableado del inyector señalado por el código",
+            "Revisar el filtro de combustible y buscar limaduras"
+          ],
+          "solution": "Sustituir los inyectores afectados, codificarlos y cambiar el filtro. Si el fallo es de cableado, reparar el conector antes de cambiar la pieza.",
+          "severity": "grave",
+          "status": "reportada",
+          "risk": "Un inyector que gotea lava el cilindro y diluye el aceite, además de dejar el coche en modo de emergencia.",
+          "cost": {
+            "diagnosis": "80–150 €",
+            "parts": "200–400 € por inyector",
+            "labour": "3–5 h",
+            "typical": "400–1.400 €",
+            "note": "Orientativo. Incluye codificación.",
+            "sources": [
+              {
+                "title": "P0201 on 2007–2012 Kia Cee'd 1.6 CRDi",
+                "url": "https://www.go-parts.com/garage/obd-p0201-kia-cee-d-2007-2012-1-6l-crdi",
+                "publisher": "Go-Parts",
+                "type": "taller",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "P0201 on 2007–2012 Kia Cee'd 1.6 CRDi",
+              "url": "https://www.go-parts.com/garage/obd-p0201-kia-cee-d-2007-2012-1-6l-crdi",
+              "publisher": "Go-Parts",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "id": "hk16-dpf-egr",
+          "title": "DPF y EGR en uso urbano",
+          "symptom": [
+            "Aviso de filtro de partículas y regeneraciones frecuentes",
+            "Pérdida de potencia y modo de emergencia",
+            "Humo negro y olor fuerte",
+            "Testigo de motor con códigos de EGR"
+          ],
+          "cause": "El motor está montado en coches que hacen mucha ciudad. Sin trayectos largos, el DPF no regenera y la ceniza se acumula; el EGR se llena de hollín y la admisión se obstruye.",
+          "checks": [
+            "Leer presión diferencial del DPF y nivel de ceniza",
+            "Comprobar el número y la duración de las regeneraciones",
+            "Revisar el caudal de EGR y el estado del colector",
+            "Comprobar los sensores de presión y de temperatura de escape"
+          ],
+          "solution": "Regeneración forzada si el DPF lo permite; limpieza o sustitución si ya hay exceso de ceniza. Limpiar EGR y admisión y corregir hábitos de uso.",
+          "severity": "media",
+          "status": "reportada",
+          "risk": "El DPF obstruido lleva a modo de emergencia y a una factura alta si se sustituye en lugar de limpiarse.",
+          "cost": {
+            "diagnosis": "60–120 €",
+            "parts": "150–500 € (limpieza) / desde 1.000 € (DPF nuevo)",
+            "labour": "3–6 h",
+            "typical": "300–800 €",
+            "note": "Orientativo. La limpieza profesional es mucho más barata que la pieza nueva.",
+            "sources": [
+              {
+                "title": "How bulletproof is the 1.6 CRDi (D4FB) engine",
+                "url": "https://www.reddit.com/r/CarTalkUK/comments/1r8f9vt/how_bulletproof_is_the_16_crdi_d4fb_engine_in_the/",
+                "publisher": "r/CarTalkUK",
+                "type": "foro",
+                "accessed": "2026-11-04"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "title": "How bulletproof is the 1.6 CRDi (D4FB) engine",
+              "url": "https://www.reddit.com/r/CarTalkUK/comments/1r8f9vt/how_bulletproof_is_the_16_crdi_d4fb_engine_in_the/",
+              "publisher": "r/CarTalkUK",
+              "type": "foro",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "maintenance": [
+        {
+          "item": "Aceite y filtro",
+          "interval": "cada 10.000–15.000 km o 12 meses, sin estirar el intervalo",
+          "note": "En el D4FE es crítico: la correa de la bomba de aceite vive en el mismo aceite. Usar la especificación exacta de la versión.",
+          "sources": [
+            {
+              "title": "Kia / Hyundai 1.6 CRDi MHEV engine failures",
+              "url": "https://www.dohc.co.uk/kia-hyundai-1-6-crdi-mhev-engine-failures/",
+              "publisher": "Daves Discoveries",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Filtro de combustible",
+          "interval": "cada 30.000–40.000 km",
+          "note": "Protege inyectores y bomba. Revisar el filtro abierto para detectar limaduras o agua.",
+          "sources": [
+            {
+              "title": "P0201 on 2007–2012 Kia Cee'd 1.6 CRDi",
+              "url": "https://www.go-parts.com/garage/obd-p0201-kia-cee-d-2007-2012-1-6l-crdi",
+              "publisher": "Go-Parts",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Comprobación de la cadena (D4FB)",
+          "interval": "a partir de 80.000 km, en cada revisión",
+          "note": "Escuchar el arranque en frío. El desgaste documentado aparece entre 80.000 y 120.000 km en bastantes casos.",
+          "sources": [
+            {
+              "title": "Problems with the Hyundai i30",
+              "url": "https://www.autodoc.co.uk/info/problems-with-the-hyundai-i30",
+              "publisher": "Autodoc",
+              "type": "prensa",
+              "accessed": "2026-11-04"
+            }
+          ]
+        },
+        {
+          "item": "Correa de distribución y polea del cigüeñal (D4FE)",
+          "interval": "seguir el intervalo publicado para la versión; confirmar por VIN",
+          "note": "Cambiar correa, tensor y revisar la polea y su pasador. No reutilizar la correa aunque parezca buena.",
+          "sources": [
+            {
+              "title": "Kia / Hyundai 1.6 CRDi MHEV engine failures",
+              "url": "https://www.dohc.co.uk/kia-hyundai-1-6-crdi-mhev-engine-failures/",
+              "publisher": "Daves Discoveries",
+              "type": "taller",
+              "accessed": "2026-11-04"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Problems with the Hyundai i30",
+          "url": "https://www.autodoc.co.uk/info/problems-with-the-hyundai-i30",
+          "publisher": "Autodoc",
+          "type": "prensa",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Kia / Hyundai 1.6 CRDi MHEV engine failures",
+          "url": "https://www.dohc.co.uk/kia-hyundai-1-6-crdi-mhev-engine-failures/",
+          "publisher": "Daves Discoveries",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "Hyundai 1.6 CRDi D4FB engine mods",
+          "url": "https://www.torquecars.com/hyundai/1-6-crdi-d4fb-u-tuning.php",
+          "publisher": "TorqueCars",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "P0201 on 2007–2012 Kia Cee'd 1.6 CRDi",
+          "url": "https://www.go-parts.com/garage/obd-p0201-kia-cee-d-2007-2012-1-6l-crdi",
+          "publisher": "Go-Parts",
+          "type": "taller",
+          "accessed": "2026-11-04"
+        },
+        {
+          "title": "How bulletproof is the 1.6 CRDi (D4FB) engine",
+          "url": "https://www.reddit.com/r/CarTalkUK/comments/1r8f9vt/how_bulletproof_is_the_16_crdi_d4fb_engine_in_the/",
+          "publisher": "r/CarTalkUK",
+          "type": "foro",
+          "accessed": "2026-11-04"
+        }
+      ],
+      "confidence": "media-baja",
+      "confidenceNote": "La cadena del D4FB está documentada por prensa técnica y foros, con kilometrajes de desgaste concretos. El fallo del pasador de la polea en el D4FE procede de un análisis de taller y de casos repetidos, pero no consta una campaña europea pública: conviene confirmarlo por VIN. No hay estadística oficial de tasa de fallo para ninguna de las dos generaciones."
     }
   ]
 }

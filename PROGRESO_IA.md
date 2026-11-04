@@ -436,3 +436,57 @@ Misión actual: cierre de `avance 2` — rediseño visual integral y auditoría 
 - **Portada**: la pestaña **Mi garaje pasa a ser la primera** del menú y más grande (14,5 px frente a 8,8 px de Inicio). El nombre de la web sube al héroe y queda **alineado con la parte alta de la foto del coche** (18 px de diferencia medida), con el recuadro de Mi garaje **16 px debajo**: incluye «Tu primer coche, gratis», la opción **Foto de la ficha técnica** (lleva la imagen al OCR del garaje) y el acceso manual. Comprobado que la foto deja el aviso «Tu ficha está lista…» en el acceso a Mi garaje.
 - **Copia de seguridad**: `backups/mod7-testigos-20261030.tar.gz`, con los archivos tocados y este informe.
 - **Pendiente declarado**: la identificación automática depende de un proveedor con visión (no configurado ahora); el catálogo tiene 18 fichas y debe crecer por marca, modelo y generación; falta probar la cámara real en un teléfono físico (se ha probado la subida de archivo y el diseño a 390 px); las fichas marcan sus límites y ninguna sustituye al manual del vehículo.
+
+## Fiabilidad: segundo bloque de ampliación, 4 motores (04/11/2026)
+
+- **Objetivo**: seguir hacia los 30 motores cerrando bloques completos. Este bloque añade **4 motores y 19 averías**.
+- **Criterio de selección**: se descartaron el K9K, el N47 y el 1.0 EcoBoost porque **ya estaban** en la base con bloques anteriores. No se duplican familias: cada bloque entra con motores que faltaban de verdad.
+- **Nuevos motores**:
+  - `mercedes-om642-30-cdi` — V6 3.0 CDI (2005–2018). 4 averías: juntas del enfriador de aceite en el valle, palomillas de admisión, sello del turbo al pedestal y DPF/EGR.
+  - `fiat-13-multijet` — 1.3 Multijet / MultiJet II (2003–2020). 5 averías: cadena de distribución, asientos de inyector, turbo de geometría variable, inyectores y EGR/DPF.
+  - `psa-ep6-16-thp` — EP6 Prince 1.6 THP (2006–2018). 5 averías: cadena y pérdida de sincronización, bomba de alta presión, carbonilla, consumo de aceite y turbo.
+  - `hyundai-kia-16-crdi` — 1.6 CRDi U2 y Smartstream (2007–2022). 5 averías: cadena del D4FB, pasador de la polea del cigüeñal del D4FE, correa de bomba de aceite bañada en aceite, inyectores y DPF/EGR.
+- **Cobertura resultante**: **16 motores**, **69 averías**, **24 marcas** citadas y **81 fuentes únicas** (todas https). Por estado: 67 «incidencia reportada» y 2 «confirmada».
+- **Estados honestos**: el enfriador de EGR del N47 no se ha duplicado, pero el OM642 se queda en 4 averías porque no había una quinta con documentación suficiente. El 1.6 CRDi se marca con `confidence` **media-baja**: el fallo del pasador de la polea está documentado por un taller y casos repetidos, pero no consta campaña europea pública.
+- **Verificado**: `/api/reliability` devuelve `stats.engines = 16` y `stats.issues = 69`; las 16 fichas de detalle responden 200; `brand=Fiat` (1), `q=cadena` (9), `year=2010` (11), `status=confirmada` (2 motores) y el buscador universal devuelve resultados de fiabilidad. `npm test`: **111/111**.
+- **Sin cambios de interfaz**: la vista de Fiabilidad ya pintaba las fichas desde la API, así que no hizo falta tocar HTML ni CSS; los datos se leen del servidor.
+- **Límites declarados**: quedan **14 motores** para llegar a 30. Los costes son orientativos para taller independiente en España y varían por modelo y mercado. No hay estadística oficial de tasa de fallo en ningún caso.
+
+## Visión real para Reconocer testigos (04/11/2026)
+
+- **Qué cambió**: el proveedor de visión es ahora **independiente del de texto**. Se elige con `AI_VISION_PROVIDER` y `AI_VISION_MODEL`, así que se puede chatear con un modelo rápido y leer imágenes con otro multimodal. Sin variables, se usa el proveedor de texto si acepta imágenes y, si no, se busca uno con visión en este orden: Gemini, OpenAI, OpenRouter, Mistral, Groq, compatible.
+- **Código** (`src/lib/ai_provider.js`): nueva `resolveVisionProvider()`, y `aiVisionStatus()` distingue `no_key` de `no_vision` — antes cualquier proveedor de texto se reportaba como «sin visión» aunque hubiera uno multimodal disponible.
+- **Configuración**: la clave de Gemini de `.env` funciona. Se fijó `AI_VISION_PROVIDER=gemini` y `AI_VISION_MODEL=gemini-3.5-flash-lite`. No se usó `gemini-3.8-flash` porque devolvía **503 (servicio saturado)** en todas las pruebas, y `gemini-2.5-flash` ya responde **404: no disponible para cuentas nuevas**. `gemini-3.5-flash-lite` respondió 200 con imagen. Las variables nuevas están documentadas en `.env.example`.
+- **Fallo corregido**: la llamada de visión enviaba `thinkingConfig: { thinkingBudget: 0 }`, que ese modelo rechaza con **400 INVALID_ARGUMENT**. Se omite en visión; el camino de texto no se ha tocado.
+- **Verificado con una foto real**: cuadro de un Fiat 500 Abarth (Wikimedia Commons, dominio público, 960×765) enviado a `POST /api/testigos/analizar` con color rojo y pista de vehículo. Resultado **HTTP 200**, `identified: true`, candidatos **`cinturon`** y **`puerta-abierta`**, con texto para el conductor y texto técnico generados a partir de la foto. Primera llamada 7,3 s; siguientes por debajo de 1 s.
+- **Lo que no cambia**: siguen sin inventarse fichas. El modelo solo puede devolver **ids del catálogo** (18 testigos) y por debajo del umbral de coincidencia se declara que no hay identificación segura. Si el proveedor falla, el módulo filtra candidatos por color y descripción y lo explica.
+- **Pruebas**: `npm test` **111/111**, incluidos `tests/testigos.test.mjs` y `tests/garaje.test.mjs`. `node --check src/lib/ai_provider.js` correcto.
+- **Límites declarados**: el catálogo sigue teniendo 18 testigos y debe crecer por marca, modelo y generación; la identificación es orientativa y pide confirmar el símbolo; los modelos flash pueden volver a dar 503 por saturación del servicio; falta probar la cámara real en un teléfono físico.
+
+## Testigos: bloque 2, 12 fichas nuevas (04/11/2026)
+
+Catálogo de testigos ampliado de **18 a 30 fichas**, todas con las 21 secciones, gravedad y fuentes.
+
+- **Lubricación y combustible**: `nivel-aceite` (amarillo), `agua-combustible` (amarillo, separador diésel), `adblue` (amarillo, SCR/ISO 22241).
+- **Transmisión**: `caja-automatica` (ámbar, modo de emergencia), `traccion-4x4` (Haldex/AWD).
+- **Frenos**: `freno-estacionamiento` (rojo, EPB eléctrico).
+- **ADAS**: `crucero-adaptativo`, `colision-frontal`, `salida-carril`, `punto-ciego`.
+- **Alta tensión**: `bateria-alta-tension` (rojo, riesgo eléctrico), `cable-carga` (fallo de carga EV/PHEV).
+
+Nuevos recuentos: rojo 10, amarillo 18, azul 1, verde 1 · crítico 4, grave 6, precaución 17, informativo 3.
+Verificado: `npm test` 111/111, stats de la API `lights: 30`, detalle 200 en las fichas nuevas, filtro `color=amarillo` → 18.
+
+## Testigos: catálogo completo, 101 fichas (04/11/2026)
+
+Ampliado de 18 a **101 testigos** en siete bloques, todos con las 21 secciones y fuentes normativas o de fabricante.
+
+- **Bloque 1 (18)**: universales — aceite, refrigerante, batería, frenos, ABS, airbag, MIL, calentadores, FAP, neumáticos, ESP, dirección, cinturón, puertas, largas, intermitentes, inmovilizador, Service.
+- **Bloque 2 (12)**: nivel de aceite, AdBlue, agua en combustible, caja automática, freno eléctrico EPB, crucero adaptativo, colisión frontal, salida de carril, punto ciego, batería de alta tensión, cable de carga, tracción total.
+- **Bloque 3 (15)**: posición, cruce, antinieblas, luz de freno, avería de iluminación, intermitente de remolque, limpiaparabrisas, filtro de aire, bujías, Start-Stop, Eco, control de crucero, limitador, Auto Hold.
+- **Bloque 4 (15)**: ESP desconectado, HDC, suspensión neumática, bloqueos, reductora, temperatura de caja, embrague, nivel de refrigerante, tapón de combustible, reserva, filtro de combustible, Run-Flat, fallo TPMS, desgaste de frenos, líquido de frenos.
+- **Bloque 5 (15)**: modo EV, sistema híbrido, frenada regenerativa, convertidor DC/DC, refrigeración del pack, airbag desactivado, cinturones traseros, eCall, aparcamiento, cámara trasera, alarma, avería electrónica, señales de tráfico, eje trasero direccional, modos de terreno.
+- **Bloque 6 (15)**: aditivo del FAP, regeneración del FAP, catalizador, sonda lambda, turbo, EGR, vida del aceite, pila del mando, riesgo de hielo, preacondicionamiento, autonomía eléctrica, potencia limitada por temperatura, faros adaptativos, marcha atrás, monitores OBD.
+- **Bloque 7 (11)**: fatiga, tráfico cruzado trasero, aviso de apertura de puertas, asistente de atasco, manos en el volante, estabilización y modo remolque, control de balanceo, cámara 360, visión nocturna, frenada trasera automática.
+
+Recuento final: rojo 16, amarillo 67, azul 2, verde 15, blanco 1 · crítico 4, grave 23, precaución 54, informativo 20.
+Verificado: `npm test` 111/111, stats de la API `lights: 101`, **las 101 fichas responden 200**, búsqueda (`adblue` 1, `turbo` 2, `remolque` 7, `hielo` 3) y filtro `color=rojo` → 16. El aviso del catálogo se actualizó al total real.

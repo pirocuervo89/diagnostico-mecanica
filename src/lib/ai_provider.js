@@ -314,13 +314,60 @@ function providerSupportsVision(provider) {
   return /vision|llava|pixtral|llama-4|gpt-4o|gpt-4\.1|claude|o4/i.test(String(provider.model || ''));
 }
 
-export function aiVisionStatus(env = process.env) {
-  const provider = resolveProvider(env);
-  if (!provider) return { available: false, reason: 'no_key' };
-  if (!providerSupportsVision(provider)) {
-    return { available: false, reason: 'no_vision', provider: provider.id, model: provider.model };
+// Orden para buscar un proveedor con visión cuando el de texto no la tiene.
+// Gemini se comprueba primero: cubre imágenes en su capa gratuita.
+const AUTO_VISION_ORDER = ['gemini', 'openai', 'openrouter', 'mistral', 'groq', 'compatible'];
+
+/**
+ * Proveedor para analizar imágenes. Es independiente del de texto: así se
+ * puede chatear con un modelo rápido y usar visión con otro sin tocar nada.
+ * Se fuerza con AI_VISION_PROVIDER (y AI_VISION_MODEL para el modelo).
+ */
+export function resolveVisionProvider(env = process.env) {
+  const forced = String(env.AI_VISION_PROVIDER || '').trim().toLowerCase();
+  const visionModel = String(env.AI_VISION_MODEL || '').trim();
+  const baseUrl = String(env.AI_BASE_URL || '').trim();
+
+  const build = (preset) => {
+    const apiKey = String(env[preset.keyEnv] || '').trim();
+    if (!apiKey) return null;
+    const provider = {
+      id: preset.id,
+      label: preset.label,
+      kind: preset.kind,
+      model: visionModel || preset.model,
+      baseUrl: baseUrl || preset.baseUrl,
+      apiKey
+    };
+    // Un servicio compatible sin URL no tiene a dónde enviar la imagen.
+    if (provider.kind === 'openai' && !provider.baseUrl) return null;
+    return providerSupportsVision(provider) ? provider : null;
+  };
+
+  if (forced) {
+    const preset = PRESETS[forced];
+    return preset ? build(preset) : null;
   }
-  return { available: true, provider: provider.id, providerLabel: provider.label, model: provider.model };
+
+  // Si el proveedor de texto ya acepta imágenes, se usa el mismo.
+  const main = resolveProvider(env);
+  if (main && providerSupportsVision(main)) return main;
+
+  for (const id of AUTO_VISION_ORDER) {
+    const provider = build(PRESETS[id]);
+    if (provider) return provider;
+  }
+  return null;
+}
+
+export function aiVisionStatus(env = process.env) {
+  const provider = resolveVisionProvider(env);
+  if (provider) {
+    return { available: true, provider: provider.id, providerLabel: provider.label, model: provider.model };
+  }
+  const any = resolveProvider(env);
+  if (!any) return { available: false, reason: 'no_key' };
+  return { available: false, reason: 'no_vision', provider: any.id, model: any.model };
 }
 
 function splitDataUrl(dataUrl) {
@@ -333,9 +380,13 @@ function splitDataUrl(dataUrl) {
  * Llama al proveedor activo con una imagen. Nunca lanza excepción hacia la ruta.
  */
 export async function callAIVision(prompt, imageDataUrl, opts = {}) {
-  const provider = resolveProvider(opts.env || process.env);
-  if (!provider) return { ok: false, reason: 'no_key' };
-  if (!providerSupportsVision(provider)) return { ok: false, reason: 'no_vision', provider: provider.id, model: provider.model };
+  const provider = resolveVisionProvider(opts.env || process.env);
+  if (!provider) {
+    const any = resolveProvider(opts.env || process.env);
+    return any
+      ? { ok: false, reason: 'no_vision', provider: any.id, model: any.model }
+      : { ok: false, reason: 'no_key' };
+  }
   if (Date.now() < cooldownUntil) return { ok: false, reason: 'cooldown' };
 
   const image = splitDataUrl(imageDataUrl);
@@ -353,7 +404,9 @@ export async function callAIVision(prompt, imageDataUrl, opts = {}) {
   const body = isGemini
     ? {
         contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: image.mime, data: image.base64 } }] }],
-        generationConfig: { temperature, maxOutputTokens, thinkingConfig: { thinkingBudget: 0 } }
+        // Sin thinkingConfig: los modelos ligeros de Gemini rechazan
+        // thinkingBudget 0 con un 400 y la imagen no necesita razonamiento.
+        generationConfig: { temperature, maxOutputTokens }
       }
     : {
         model: provider.model,
@@ -380,8 +433,10 @@ export async function callAIVision(prompt, imageDataUrl, opts = {}) {
     });
 
     if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
       const reason = classifyError(response.status);
-      console.warn(`[IA] ${provider.label} (visión) respondió ${response.status}; se pide selección manual.`);
+      const detail = errData?.error?.message || `HTTP ${response.status}`;
+      console.warn(`[IA] ${provider.label} (visión) respondió ${response.status}: ${detail}; se pide selección manual.`);
       setCooldown(reason, Number(response.headers.get('retry-after') || 0) * 1000);
       return { ok: false, reason, status: response.status };
     }
