@@ -519,3 +519,14 @@ Comprobado en Firefox real con el catálogo de 101 fichas:
 
 - **1360×1000**: 101 tarjetas pintadas, contador de cabecera 101, filtro rojo → 16, gravedad *informativo* → 20, búsqueda `adblue` → 1, detalle abierto con 10 bloques y 4 fuentes, sin desbordamiento horizontal (1354/1360) y 0 errores de consola.
 - **390×844** (iframe de ancho real, porque Firefox headless no baja de 500 px de ventana): 101 tarjetas, filtro rojo → 16, búsqueda `remolque` → 7, detalle con 3 fuentes, sin desbordamiento (384/384) y 0 errores.
+
+## Sala de máquinas: banco de instrumentos y osciloscopio (05/11/2026)
+
+Inicio queda limpio: fuera el HUD de telemetría, el panel de donut/barras y la antigua tira de tres relojes con su gráfica. Toda esa instrumentación vive ahora en la pestaña **Sala de máquinas**.
+
+- **25 relojes** en cinco grupos (motor, temperaturas, presiones, mezcla y encendido, eléctrico y combustible), con el mismo componente `gauge-ring` del resto de la web y filtro por grupo.
+- **Osciloscopio** de doble canal (inyector, primario de encendido, sonda lambda, MAP y cigüeñal), con base de tiempo 1–50 ms/div, amplitud 0,5–10 V/div, disparo y lectura de régimen/periodo. La onda se reconstruye a partir del régimen y la carga de la ECU.
+- **Cuatro gráficas en tiempo real** (régimen y velocidad, temperaturas, presiones, mezcla y eléctrico), con histórico de 60 muestras y ventana temporal.
+- Consola propia: arrancar simulador, pausar/reanudar, detener y borrar registro, reutilizando el gestor ELM327. El origen (simulación o ELM327) se muestra siempre.
+
+Comprobado en Firefox real a 1360 y 390 px: 25/25 relojes con dato, 15/15 series con puntos, osciloscopio pintando ambos canales (píxeles de señal detectados), controles de canal/base/amplitud, filtros, pausa (muestras estables), reanudar, parada (todo a `--` y osciloscopio vacío), sin errores de consola ni desbordamiento horizontal.

@@ -1387,6 +1387,124 @@ select option { background: #0c1014; }
   .cap-card:last-child { grid-column: span 1; }
 }
 
+/* ---------- Sala de máquinas ---------- */
+.home-grid.solo { grid-template-columns: minmax(0, 1fr); }
+
+.sala-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.sala-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: rgba(188, 204, 218, .1);
+  border: 1px solid rgba(188, 204, 218, .1);
+}
+.sala-metrics > div { padding: 10px 12px; background: #0a0e12; }
+.sala-metrics span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 7.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #6b7884;
+}
+.sala-metrics b {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.sala-console .live-disclaimer { margin: 12px 0 0; }
+
+.sala-wall, .sala-scope { margin-top: 16px; }
+.sala-filter { display: flex; flex-wrap: wrap; gap: 6px; }
+.sala-filter .chip.active { border-color: rgba(139, 92, 246, .6); color: var(--accent-bright); }
+.sala-gauges {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(126px, 1fr));
+  gap: 16px 10px;
+}
+.sala-group-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 2px;
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #7f8c97;
+}
+.sala-group-head::after { content: ""; flex: 1; height: 1px; background: rgba(188, 204, 218, .12); }
+.sala-gauges .gauge-ring { max-width: 150px; }
+.sala-gauges .gauge-value b { font-size: clamp(18px, 1.7vw, 25px); }
+
+.scope-ctl { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.scope-ctl label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #778590;
+}
+.scope-ctl select { padding: 7px 9px; font-size: 12px; }
+.scope-ctl .scope-check { flex-direction: row; align-items: center; gap: 6px; padding-bottom: 8px; }
+.scope-ctl .scope-check input { width: 14px; height: 14px; padding: 0; accent-color: var(--accent); }
+.scope-wrap { position: relative; border: 1px solid rgba(188, 204, 218, .09); background: #07090c; }
+.scope-canvas { display: block; width: 100%; height: 300px; }
+.scope-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border: 1px solid rgba(188, 204, 218, .09);
+  border-top: 0;
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #7a8792;
+}
+.scope-foot span:last-child { color: var(--cyan); }
+
+.sala-charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+.sala-chart.wide { grid-column: 1 / -1; }
+.sala-chart .chart-canvas { min-height: 190px; }
+.sala-chart .chart-legend { flex-wrap: wrap; }
+.sala-chart .chart-line { stroke-width: 1.6; opacity: .92; }
+.sala-chart .chart-line.coolant { stroke: var(--cyan); }
+.sala-chart .chart-line.oil { stroke: #ffd166; }
+.sala-chart .chart-line.iat { stroke: #38efa4; }
+.sala-chart .chart-line.catalyst { stroke: #ff5d6c; }
+.sala-chart .chart-line.boost { stroke: var(--violet-2, var(--accent)); }
+.sala-chart .chart-line.map { stroke: var(--cyan); }
+.sala-chart .chart-line.baro { stroke: #7f8c97; }
+.sala-chart .chart-line.lambda { stroke: #ffd166; }
+.sala-chart .chart-line.stft { stroke: #38efa4; }
+.sala-chart .chart-line.ltft { stroke: #ff5d6c; }
+.sala-chart .chart-line.voltage { stroke: var(--accent); }
+.sala-chart .chart-line.speed { stroke: #38efa4; }
+
+@media (max-width: 1100px) {
+  .sala-charts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .sala-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sala-charts { grid-template-columns: minmax(0, 1fr); }
+  .sala-gauges { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px 8px; }
+  .scope-canvas { height: 230px; }
+  .scope-ctl { width: 100%; }
+  .scope-ctl label { flex: 1 1 130px; }
+  .scope-foot { font-size: 7px; }
+}
+
 @media print {
   @page { background: #fff; }
   html, body { background: #fff !important; }

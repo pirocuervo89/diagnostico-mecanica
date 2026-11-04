@@ -1483,7 +1483,7 @@ if (printReportBtn) {
 const obdState = { connected: false, reading: false, live: false, dtcs: [], telemetry: {}, mode: 'simulated' };
 let obdManager = null;
 
-const telemetryHistory = { points: [], max: 48 };
+const telemetryHistory = { points: [], max: 60 };
 
 function telemetrySource() {
   if (!obdState.connected) return { label: 'SIN CONEXIÓN', state: 'offline' };
@@ -1557,22 +1557,7 @@ function paintChart(prefix) {
 }
 
 function renderTelemetry(data = {}) {
-  const source = telemetrySource();
-  paintSourceBadge($('#homeTelemetrySource'), source);
-  paintSourceBadge($('#obdSourceLabel'), source);
-
-  const note = $('#homeTelemetryNotice');
-  if (note) {
-    note.textContent = source.state === 'live'
-      ? 'Datos leídos de la ECU a través del adaptador ELM327. La sesión no se almacena.'
-      : source.state === 'sim'
-        ? 'Datos generados por el simulador virtual, identificados como simulación. No proceden de un vehículo real.'
-        : 'Los indicadores permanecen vacíos hasta recibir datos de la ECU. El simulador se identifica siempre como simulación.';
-  }
-
-  paintGauge('home', 'Rpm', data.rpm, 0, 8000);
-  paintGauge('home', 'Coolant', data.coolant, 40, 120);
-  paintGauge('home', 'Voltage', data.voltage, 10, 16, 1);
+  paintSourceBadge($('#obdSourceLabel'), telemetrySource());
 
   paintGauge('obd', 'Rpm', data.rpm, 0, 8000);
   paintGauge('obd', 'Coolant', data.coolant, 40, 120);
@@ -1583,19 +1568,30 @@ function renderTelemetry(data = {}) {
   paintGauge('obd', 'Boost', data.boost, 0, 200);
   paintGauge('obd', 'Lambda', data.lambda, 0.7, 1.3, 2);
 
-  const rpm = numericValue(data.rpm);
-  const coolant = numericValue(data.coolant);
-  if (rpm !== null || coolant !== null) {
-    telemetryHistory.points.push({ rpm, coolant });
-    if (telemetryHistory.points.length > telemetryHistory.max) telemetryHistory.points.shift();
+  const sample = { at: Date.now() };
+  let hasSample = false;
+  for (const key of SALA_GAUGE_KEYS) {
+    const value = numericValue(data[key]);
+    if (value !== null) {
+      sample[key] = value;
+      hasSample = true;
+    }
   }
-  paintChart('home');
+  if (hasSample) {
+    telemetryHistory.points.push(sample);
+    if (telemetryHistory.points.length > telemetryHistory.max) telemetryHistory.points.shift();
+    salaState.samples += 1;
+    salaState.lastAt = sample.at;
+  }
   paintChart('obd');
+  salaPaintGauges(data);
+  salaPaintCharts();
+  salaSyncControls();
 }
 
 function resetTelemetry() {
   telemetryHistory.points = [];
-  ['home', 'obd'].forEach(prefix => {
+  ['obd'].forEach(prefix => {
     paintGauge(prefix, 'Rpm', null, 0, 8000);
     paintGauge(prefix, 'Coolant', null, 40, 120);
     paintGauge(prefix, 'Voltage', null, 10, 16);
@@ -1609,6 +1605,484 @@ function resetTelemetry() {
   const lastRead = $('#obdLastRead');
   if (lastRead) lastRead.textContent = 'Sin lectura';
   renderTelemetry({});
+}
+
+// -------------------------------------------------------------
+// VISTA: SALA DE MÁQUINAS (banco de instrumentos y osciloscopio)
+// -------------------------------------------------------------
+const SALA_GAUGES = [
+  { group: 'Motor', key: 'rpm', label: 'Revoluciones', unit: 'rpm', min: 0, max: 8000, dec: 0, color: 'var(--accent)' },
+  { group: 'Motor', key: 'load', label: 'Carga motor', unit: '%', min: 0, max: 100, dec: 0, color: '#ffd166' },
+  { group: 'Motor', key: 'throttle', label: 'Mariposa', unit: '%', min: 0, max: 100, dec: 0, color: 'var(--cyan)' },
+  { group: 'Motor', key: 'pedal', label: 'Pedal', unit: '%', min: 0, max: 100, dec: 0, color: 'var(--ok)' },
+  { group: 'Motor', key: 'torque', label: 'Par real', unit: '%', min: 0, max: 100, dec: 0, color: 'var(--accent)' },
+  { group: 'Motor', key: 'speed', label: 'Velocidad', unit: 'km/h', min: 0, max: 240, dec: 0, color: 'var(--cyan)' },
+  { group: 'Temperaturas', key: 'coolant', label: 'Refrigerante', unit: '°C', min: 20, max: 130, dec: 0, color: 'var(--cyan)' },
+  { group: 'Temperaturas', key: 'oil', label: 'Aceite', unit: '°C', min: 20, max: 160, dec: 0, color: '#ffd166' },
+  { group: 'Temperaturas', key: 'iat', label: 'Admisión', unit: '°C', min: -20, max: 90, dec: 0, color: 'var(--ok)' },
+  { group: 'Temperaturas', key: 'ambient', label: 'Ambiente', unit: '°C', min: -20, max: 60, dec: 0, color: 'var(--ok)' },
+  { group: 'Temperaturas', key: 'catalyst', label: 'Catalizador', unit: '°C', min: 0, max: 1000, dec: 0, color: '#ff5d6c' },
+  { group: 'Temperaturas', key: 'dpf', label: 'DPF / FAP', unit: '°C', min: 0, max: 900, dec: 0, color: '#ff5d6c' },
+  { group: 'Presiones', key: 'boost', label: 'Turbo', unit: 'kPa', min: 0, max: 200, dec: 0, color: 'var(--accent)' },
+  { group: 'Presiones', key: 'map', label: 'Colector', unit: 'kPa', min: 0, max: 250, dec: 0, color: 'var(--cyan)' },
+  { group: 'Presiones', key: 'baro', label: 'Barométrica', unit: 'kPa', min: 80, max: 110, dec: 0, color: '#7f8c97' },
+  { group: 'Presiones', key: 'railBar', label: 'Rail', unit: 'bar', min: 0, max: 1600, dec: 0, color: '#ffd166' },
+  { group: 'Mezcla y encendido', key: 'maf', label: 'MAF', unit: 'g/s', min: 0, max: 120, dec: 1, color: 'var(--cyan)' },
+  { group: 'Mezcla y encendido', key: 'lambda', label: 'Lambda', unit: 'λ', min: 0.7, max: 1.3, dec: 3, color: 'var(--ok)' },
+  { group: 'Mezcla y encendido', key: 'o2', label: 'Sonda B1S1', unit: 'V', min: 0, max: 1, dec: 2, color: '#ffd166' },
+  { group: 'Mezcla y encendido', key: 'stft', label: 'Corrección corta', unit: '%', min: -25, max: 25, dec: 1, color: 'var(--ok)' },
+  { group: 'Mezcla y encendido', key: 'ltft', label: 'Corrección larga', unit: '%', min: -25, max: 25, dec: 1, color: '#ff5d6c' },
+  { group: 'Mezcla y encendido', key: 'timing', label: 'Avance', unit: '°', min: -10, max: 50, dec: 1, color: 'var(--accent)' },
+  { group: 'Eléctrico y combustible', key: 'voltage', label: 'Tensión', unit: 'V', min: 10, max: 16, dec: 1, color: 'var(--ok)' },
+  { group: 'Eléctrico y combustible', key: 'fuelLevel', label: 'Nivel', unit: '%', min: 0, max: 100, dec: 0, color: '#ffd166' },
+  { group: 'Eléctrico y combustible', key: 'fuelRate', label: 'Consumo', unit: 'L/h', min: 0, max: 40, dec: 2, color: 'var(--cyan)' }
+];
+const SALA_GAUGE_KEYS = SALA_GAUGES.map(g => g.key);
+
+const SALA_CHARTS = [
+  {
+    id: 'motor', wide: true, title: 'RÉGIMEN Y VELOCIDAD · SESIÓN ACTUAL',
+    series: [
+      { key: 'rpm', label: 'RPM', unit: 'rpm', min: 0, max: 8000, dec: 0, color: 'var(--accent)', cls: 'rpm' },
+      { key: 'speed', label: 'Velocidad', unit: 'km/h', min: 0, max: 240, dec: 0, color: '#38efa4', cls: 'speed' }
+    ]
+  },
+  {
+    id: 'temps', title: 'TEMPERATURAS · °C',
+    series: [
+      { key: 'coolant', label: 'Refrigerante', unit: '°C', min: 0, max: 150, dec: 0, color: 'var(--cyan)', cls: 'coolant' },
+      { key: 'oil', label: 'Aceite', unit: '°C', min: 0, max: 160, dec: 0, color: '#ffd166', cls: 'oil' },
+      { key: 'iat', label: 'Admisión', unit: '°C', min: -20, max: 90, dec: 0, color: '#38efa4', cls: 'iat' },
+      { key: 'catalyst', label: 'Catalizador', unit: '°C', min: 0, max: 1000, dec: 0, color: '#ff5d6c', cls: 'catalyst' }
+    ]
+  },
+  {
+    id: 'press', title: 'PRESIONES · kPa / bar',
+    series: [
+      { key: 'boost', label: 'Turbo', unit: 'kPa', min: 0, max: 200, dec: 0, color: 'var(--accent)', cls: 'boost' },
+      { key: 'map', label: 'Colector', unit: 'kPa', min: 0, max: 250, dec: 0, color: 'var(--cyan)', cls: 'map' },
+      { key: 'baro', label: 'Barométrica', unit: 'kPa', min: 80, max: 110, dec: 0, color: '#7f8c97', cls: 'baro' },
+      { key: 'railBar', label: 'Rail', unit: 'bar', min: 0, max: 1600, dec: 0, color: '#ffd166', cls: 'rail' }
+    ]
+  },
+  {
+    id: 'mix', title: 'MEZCLA Y ELÉCTRICO',
+    series: [
+      { key: 'lambda', label: 'Lambda', unit: 'λ', min: 0.7, max: 1.3, dec: 3, color: '#ffd166', cls: 'lambda' },
+      { key: 'o2', label: 'Sonda', unit: 'V', min: 0, max: 1, dec: 2, color: '#38efa4', cls: 'o2' },
+      { key: 'stft', label: 'Corrección corta', unit: '%', min: -25, max: 25, dec: 1, color: '#38efa4', cls: 'stft' },
+      { key: 'ltft', label: 'Corrección larga', unit: '%', min: -25, max: 25, dec: 1, color: '#ff5d6c', cls: 'ltft' },
+      { key: 'voltage', label: 'Tensión', unit: 'V', min: 10, max: 16, dec: 1, color: 'var(--accent)', cls: 'voltage' }
+    ]
+  }
+];
+
+const SCOPE_CHANNELS = {
+  inyector: {
+    label: 'Inyector · pulso de mando',
+    voltsPerDiv: 5,
+    note: '2 impulsos por vuelta en un 4 cilindros de 4 tiempos',
+    sample: ph => (ph < 0.1 ? 0.9 : ph < 0.118 ? 13.8 + (ph - 0.1) * 1400 : 13.8 + Math.sin(ph * 90) * 0.25)
+  },
+  encendido: {
+    label: 'Primario de encendido',
+    voltsPerDiv: 10,
+    note: 'Dwell, salto de chispa y pico inductivo',
+    sample: ph => (ph > 0.62 && ph < 0.88 ? 0.6 : ph >= 0.88 && ph < 0.9 ? 0.6 + (ph - 0.88) * 1400 : 13.6)
+  },
+  lambda: {
+    label: 'Sonda lambda (zirconio)',
+    voltsPerDiv: 0.5,
+    slow: 8,
+    note: 'Oscilación entre 0,1 y 0,9 V según la mezcla',
+    sample: ph => 0.5 + 0.4 * Math.sin(ph * Math.PI * 2)
+  },
+  map: {
+    label: 'Sensor MAP · analógico',
+    voltsPerDiv: 2,
+    note: 'Tensión proporcional a la presión del colector',
+    sample: (ph, ctx) => 1.1 + (ctx.load / 100) * 2.6 + 0.25 * Math.sin(ph * Math.PI * 2)
+  },
+  ckp: {
+    label: 'Sensor de cigüeñal · inductivo',
+    voltsPerDiv: 2,
+    note: 'Señal alterna generada por la rueda dentada',
+    sample: ph => 2.5 + 2 * Math.sin(ph * Math.PI * 2)
+  }
+};
+
+const salaState = { ready: false, group: 'Todos', samples: 0, lastAt: 0 };
+const scopeState = { channel: 'inyector', channel2: 'ckp', msDiv: 5, voltDiv: 5, trigger: true, running: true };
+let salaRaf = null;
+function salaCapKey(key) {
+  return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+function salaRenderGauges() {
+  const box = $('#salaGauges');
+  if (!box) return;
+  const groups = ['Todos', ...new Set(SALA_GAUGES.map(g => g.group))];
+  const filter = $('#salaFilter');
+  if (filter) {
+    filter.innerHTML = groups.map(g => `<button class="chip${g === salaState.group ? ' active' : ''}" type="button" data-sala-group="${esc(g)}">${esc(g)}</button>`).join('');
+    $$('#salaFilter .chip').forEach(btn => btn.addEventListener('click', () => {
+      salaState.group = btn.dataset.salaGroup;
+      $$('#salaFilter .chip').forEach(b => b.classList.toggle('active', b.dataset.salaGroup === salaState.group));
+      salaRenderGauges();
+      salaPaintGauges(obdState.telemetry || {});
+    }));
+  }
+
+  let html = '';
+  let current = '';
+  for (const gauge of SALA_GAUGES) {
+    if (salaState.group !== 'Todos' && gauge.group !== salaState.group) continue;
+    if (gauge.group !== current) {
+      html += `<div class="sala-group-head">${esc(gauge.group)}</div>`;
+      current = gauge.group;
+    }
+    const cap = salaCapKey(gauge.key);
+    html += `<article class="gauge-ring" id="salaGauge${cap}" style="--p:0;--ring:${gauge.color}" aria-label="${esc(gauge.label)}">
+      <div class="gauge-value"><b id="sala${cap}">--</b><span>${esc(gauge.unit)}</span></div>
+      <small>${esc(gauge.label)}</small>
+    </article>`;
+  }
+  box.innerHTML = html;
+}
+
+function salaRenderCharts() {
+  const box = $('#salaCharts');
+  if (!box) return;
+  box.innerHTML = SALA_CHARTS.map(chart => `
+    <article class="signal-chart sala-chart${chart.wide ? ' wide' : ''}">
+      <div class="chart-head"><span>${esc(chart.title)}</span><span data-chart-state="${chart.id}">SIN DATOS</span></div>
+      <div class="chart-canvas">
+        <svg viewBox="0 0 600 190" preserveAspectRatio="none" role="img" aria-label="${esc(chart.title)}">
+          <g class="chart-grid">
+            <path d="M0 20h600M0 65h600M0 110h600M0 155h600"/>
+            <path d="M100 0v190M200 0v190M300 0v190M400 0v190M500 0v190"/>
+          </g>
+          ${chart.series.map(s => `<polyline class="chart-line ${s.cls}" data-line="${chart.id}-${s.key}" points=""></polyline>`).join('')}
+        </svg>
+      </div>
+      <div class="chart-legend">
+        ${chart.series.map(s => `<span><i style="background:${s.color}"></i> ${esc(s.label)} <b data-val="${chart.id}-${s.key}">--</b></span>`).join('')}
+      </div>
+    </article>`).join('');
+}
+
+function salaPaintGauges(data = {}) {
+  for (const gauge of SALA_GAUGES) {
+    paintGauge('sala', salaCapKey(gauge.key), data[gauge.key], gauge.min, gauge.max, gauge.dec);
+  }
+  const rpm = numericValue(data.rpm);
+  const rpmRead = $('#salaRpmRead');
+  if (rpmRead) rpmRead.textContent = rpm === null ? '--' : `${Math.round(rpm)} rpm`;
+  paintSourceBadge($('#salaSource'), telemetrySource());
+}
+
+function salaPaintCharts() {
+  const points = telemetryHistory.points;
+  const source = telemetrySource();
+  const last = points[points.length - 1] || {};
+
+  for (const chart of SALA_CHARTS) {
+    for (const s of chart.series) {
+      const line = document.querySelector(`[data-line="${chart.id}-${s.key}"]`);
+      if (line) line.setAttribute('points', chartPoints(points, s.key, s.min, s.max));
+      const value = document.querySelector(`[data-val="${chart.id}-${s.key}"]`);
+      const numeric = numericValue(last[s.key]);
+      if (value) value.textContent = numeric === null ? '--' : `${numeric.toFixed(s.dec)} ${s.unit}`;
+    }
+    const state = document.querySelector(`[data-chart-state="${chart.id}"]`);
+    if (state) {
+      state.textContent = points.length > 1
+        ? (source.state === 'sim' ? 'SIMULACIÓN EN VIVO' : 'REGISTRO EN VIVO')
+        : 'SIN DATOS';
+    }
+  }
+
+  const samples = $('#salaSamples');
+  if (samples) samples.textContent = fmtNum(salaState.samples);
+  const windowLabel = $('#salaWindow');
+  if (windowLabel) {
+    const span = points.length > 1 && points[0].at ? (points[points.length - 1].at - points[0].at) / 1000 : 0;
+    windowLabel.textContent = span > 0 ? `${span.toFixed(0)} s` : '--';
+  }
+  const lastRead = $('#salaLastRead');
+  if (lastRead) lastRead.textContent = salaState.lastAt ? new Date(salaState.lastAt).toLocaleTimeString('es-ES') : 'Sin lectura';
+}
+
+function salaSetNotice(text) {
+  const note = $('#salaNotice');
+  if (note) note.textContent = text;
+}
+
+function salaSyncControls() {
+  const start = $('#salaStart');
+  const pause = $('#salaPause');
+  const stop = $('#salaStop');
+  if (start) start.disabled = obdState.connected;
+  if (pause) {
+    pause.disabled = !obdState.connected;
+    pause.textContent = obdState.live ? 'Pausar' : 'Reanudar';
+  }
+  if (stop) stop.disabled = !obdState.connected;
+  const empty = $('#scopeEmpty');
+  if (empty) empty.classList.toggle('hidden', obdState.connected);
+  salaUpdateScopeReadout();
+}
+function salaRenderScopeSelects() {
+  const options = Object.entries(SCOPE_CHANNELS)
+    .map(([key, channel]) => `<option value="${key}">${esc(channel.label)}</option>`)
+    .join('');
+  const first = $('#scopeChannel');
+  const second = $('#scopeChannel2');
+  if (first) {
+    first.innerHTML = options;
+    first.value = scopeState.channel;
+  }
+  if (second) {
+    second.innerHTML = `<option value="">Ninguno</option>${options}`;
+    second.value = scopeState.channel2;
+  }
+  const volts = $('#scopeVolt');
+  if (volts) volts.value = String(scopeState.voltDiv);
+  const time = $('#scopeTime');
+  if (time) time.value = String(scopeState.msDiv);
+}
+
+function salaScopeDraw(now) {
+  const canvas = $('#scopeCanvas');
+  if (!canvas) return;
+  const context = canvas.getContext('2d');
+  if (!context) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const width = Math.max(240, Math.round(rect.width));
+  const height = Math.max(140, Math.round(rect.height || 300));
+  const ratio = Math.min(2, window.devicePixelRatio || 1);
+  if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+  }
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  context.fillStyle = '#07090c';
+  context.fillRect(0, 0, width, height);
+
+  context.lineWidth = 1;
+  context.strokeStyle = 'rgba(188, 204, 218, .09)';
+  for (let i = 1; i < 10; i += 1) {
+    const x = Math.round((width / 10) * i) + 0.5;
+    context.beginPath();
+    context.moveTo(x, 0);
+    context.lineTo(x, height);
+    context.stroke();
+  }
+  for (let i = 1; i < 8; i += 1) {
+    const y = Math.round((height / 8) * i) + 0.5;
+    context.beginPath();
+    context.moveTo(0, y);
+    context.lineTo(width, y);
+    context.stroke();
+  }
+  context.strokeStyle = 'rgba(34, 211, 238, .3)';
+  context.beginPath();
+  context.moveTo(0, height - 0.5);
+  context.lineTo(width, height - 0.5);
+  context.stroke();
+
+  const connected = obdState.connected;
+  const data = obdState.telemetry || {};
+  const rpm = Math.max(600, numericValue(data.rpm) || 0);
+  const load = Math.min(100, Math.max(0, numericValue(data.load) || 0));
+  const eventSec = 30 / rpm;
+  const windowSec = (scopeState.msDiv * 10) / 1000;
+
+  if (connected) {
+    if (scopeState.trigger) {
+      const x = Math.round(width * 0.2) + 0.5;
+      context.strokeStyle = 'rgba(255, 209, 102, .35)';
+      context.beginPath();
+      context.moveTo(x, 0);
+      context.lineTo(x, height);
+      context.stroke();
+    }
+    const drawTrace = (key, color, alpha) => {
+      const channel = SCOPE_CHANNELS[key];
+      if (!channel) return;
+      const maxVolts = scopeState.voltDiv * 8;
+      const period = channel.slow ? eventSec * channel.slow : eventSec;
+      const drift = scopeState.trigger ? 0 : (now / 1000) * period * 0.15;
+      const steps = Math.min(900, Math.max(240, Math.round(width)));
+      context.beginPath();
+      context.globalAlpha = alpha;
+      context.strokeStyle = color;
+      context.lineWidth = 1.8;
+      context.lineJoin = 'round';
+      for (let i = 0; i <= steps; i += 1) {
+        const t = (i / steps) * windowSec;
+        const phase = (((t + drift) / period) % 1 + 1) % 1;
+        const volts = Math.max(0, Math.min(maxVolts, channel.sample(phase, { rpm, load })));
+        const x = (i / steps) * width;
+        const y = height - (volts / maxVolts) * (height - 2);
+        if (i === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+      }
+      context.stroke();
+      context.globalAlpha = 1;
+    };
+    drawTrace(scopeState.channel, '#ffd166', 1);
+    if (scopeState.channel2) drawTrace(scopeState.channel2, '#22d3ee', 0.85);
+  }
+
+  salaUpdateScopeReadout();
+}
+
+function salaUpdateScopeReadout() {
+  const readout = $('#scopeReadout');
+  const connected = obdState.connected;
+  const rpm = Math.max(600, numericValue(obdState.telemetry?.rpm) || 0);
+  const eventSec = 30 / rpm;
+  if (readout) {
+    const eventMs = (eventSec * 1000).toFixed(1).replace('.', ',');
+    const base = String(scopeState.msDiv).replace('.', ',');
+    const amplitude = String(scopeState.voltDiv).replace('.', ',');
+    readout.textContent = connected
+      ? `${Math.round(rpm)} rpm · evento cada ${eventMs} ms · ${base} ms/div · ${amplitude} V/div · ${scopeState.trigger ? 'disparo activo' : 'barrido libre'}`
+      : 'Sin señal: arranca el simulador o conecta la ECU para trazar la forma de onda.';
+  }
+  const legend = $('#scopeLegend');
+  if (legend) {
+    const labels = [scopeState.channel, scopeState.channel2].filter(Boolean).map(key => SCOPE_CHANNELS[key]?.label).filter(Boolean);
+    legend.textContent = `${labels.join(' + ')} · ${telemetrySource().label}`;
+  }
+}
+
+function salaStartLoop() {
+  if (salaRaf) return;
+  const step = () => {
+    const view = document.getElementById('view-sala');
+    if (!view || !view.classList.contains('active')) {
+      salaRaf = null;
+      return;
+    }
+    if (scopeState.running) salaScopeDraw(performance.now());
+    salaRaf = requestAnimationFrame(step);
+  };
+  salaRaf = requestAnimationFrame(step);
+}
+
+async function salaStartSimulator() {
+  if (obdState.connected) return;
+  if (!obdManager) {
+    salaSetNotice('La consola OBD aún se está inicializando. Espera un segundo y vuelve a intentarlo.');
+    return;
+  }
+  const start = $('#salaStart');
+  if (start) start.disabled = true;
+  obdState.mode = 'simulated';
+  salaSetNotice('Conectando el simulador virtual…');
+  try {
+    await obdManager.connect('simulated', 38400, 'ATSP0');
+    obdState.connected = true;
+    obdState.live = true;
+    telemetryHistory.points = [];
+    salaState.samples = 0;
+    salaState.lastAt = 0;
+    obdManager.startLiveMonitoring(1000);
+    obdManager.readSingleTelemetry().then(renderLiveGrid).catch(() => {});
+    salaSetNotice('Simulación en marcha: los valores los genera el simulador virtual y se identifican siempre como simulación.');
+  } catch (err) {
+    salaSetNotice(`No se pudo iniciar el simulador: ${err.message}`);
+  } finally {
+    salaSyncControls();
+  }
+}
+
+async function salaStopSimulator() {
+  if (!obdManager) return;
+  obdManager.stopLiveMonitoring();
+  obdState.live = false;
+  await obdManager.disconnect();
+  obdState.connected = false;
+  resetTelemetry();
+  salaPaintGauges({});
+  salaPaintCharts();
+  salaSetNotice('Lectura detenida. Los relojes, las gráficas y el osciloscopio quedan a la espera de una nueva conexión.');
+  salaSyncControls();
+}
+
+function salaBindControls() {
+  $('#salaStart')?.addEventListener('click', salaStartSimulator);
+  $('#salaStop')?.addEventListener('click', salaStopSimulator);
+  $('#salaPause')?.addEventListener('click', () => {
+    if (!obdManager || !obdState.connected) return;
+    if (obdState.live) {
+      obdManager.stopLiveMonitoring();
+      obdState.live = false;
+      salaSetNotice('Lectura pausada. Los instrumentos conservan la última muestra recibida.');
+    } else {
+      obdManager.startLiveMonitoring(1000);
+      obdState.live = true;
+      obdManager.readSingleTelemetry().then(renderLiveGrid).catch(() => {});
+      salaSetNotice('Lectura reanudada desde la ECU conectada.');
+    }
+    salaSyncControls();
+  });
+  $('#salaReset')?.addEventListener('click', () => {
+    telemetryHistory.points = [];
+    salaState.samples = 0;
+    salaState.lastAt = 0;
+    salaPaintGauges({});
+    salaPaintCharts();
+    salaSetNotice('Registro borrado. La conexión sigue activa y las gráficas vuelven a llenarse con las próximas muestras.');
+  });
+
+  $('#scopeChannel')?.addEventListener('change', event => {
+    scopeState.channel = event.target.value;
+    scopeState.voltDiv = SCOPE_CHANNELS[scopeState.channel]?.voltsPerDiv || 5;
+    const volts = $('#scopeVolt');
+    if (volts) volts.value = String(scopeState.voltDiv);
+    salaUpdateScopeReadout();
+  });
+  $('#scopeChannel2')?.addEventListener('change', event => {
+    scopeState.channel2 = event.target.value;
+    salaUpdateScopeReadout();
+  });
+  $('#scopeTime')?.addEventListener('change', event => {
+    scopeState.msDiv = Number(event.target.value) || 5;
+    salaUpdateScopeReadout();
+  });
+  $('#scopeVolt')?.addEventListener('change', event => {
+    scopeState.voltDiv = Number(event.target.value) || 5;
+    salaUpdateScopeReadout();
+  });
+  $('#scopeTrigger')?.addEventListener('change', event => {
+    scopeState.trigger = event.target.checked;
+    salaUpdateScopeReadout();
+  });
+  $('#scopeRun')?.addEventListener('click', event => {
+    scopeState.running = !scopeState.running;
+    event.currentTarget.textContent = scopeState.running ? 'Pausar barrido' : 'Reanudar barrido';
+    if (scopeState.running) salaStartLoop();
+  });
+}
+
+function salaInit() {
+  if (!salaState.ready) {
+    salaRenderGauges();
+    salaRenderCharts();
+    salaRenderScopeSelects();
+    salaBindControls();
+    const count = $('#salaGaugeCount');
+    if (count) count.textContent = String(SALA_GAUGES.length);
+    salaState.ready = true;
+  }
+  salaPaintGauges(obdState.telemetry || {});
+  salaPaintCharts();
+  salaSyncControls();
+  salaStartLoop();
 }
 
 function obdSetStatus(text, state = 'disconnected') {
@@ -2864,6 +3338,7 @@ document.addEventListener('viewchange', e => {
   if (e.detail.name === 'tuning') loadTuning();
   if (e.detail.name === 'tuning-productos') loadTuningProducts();
   if (e.detail.name === 'fiabilidad') loadReliability();
+  if (e.detail.name === 'sala') salaInit();
 });
 
 // -------------------------------------------------------------

@@ -9,7 +9,7 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/fonts/fonts.css">
   <link rel="stylesheet" href="/css/app.css?v=20261030a">
-  <link rel="stylesheet" href="/css/vision.css?v=20261030a">
+  <link rel="stylesheet" href="/css/vision.css?v=20261105a">
   <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
   <link rel="stylesheet" href="/css/reforma.css?v=20261030d">
 </head>
@@ -90,6 +90,7 @@
     <button data-view="vehiculos" type="button"><svg class="ic"><use href="#i-car"></use></svg>Vehículos</button>
     <button data-view="dtc" type="button"><svg class="ic"><use href="#i-search"></use></svg>Códigos DTC</button>
     <button data-view="obd" type="button"><svg class="ic"><use href="#i-cpu"></use></svg>OBD-II</button>
+    <button data-view="sala" type="button"><svg class="ic"><use href="#i-gauge"></use></svg>Sala de máquinas</button>
     <button data-view="tutoriales" type="button"><svg class="ic"><use href="#i-play"></use></svg>Tutoriales</button>
     <button data-view="productos" type="button"><svg class="ic"><use href="#i-cart"></use></svg>Productos</button>
     <button data-view="tuning" type="button"><svg class="ic"><use href="#i-zap"></use></svg>Tuning</button>
@@ -184,46 +185,6 @@
         <div class="holo-caption">
           <span><i></i> ESTUDIO AZUL · GT4</span>
           <span>Foto: <a href="https://www.pexels.com/photo/37360567/" target="_blank" rel="noopener noreferrer">Ericxon / Pexels</a> · licencia libre</span>
-        </div>
-      </div>
-
-      <div class="hero-hud" aria-label="Panel de telemetría del sistema">
-        <div class="hud-top">
-          <span>TELEMETRÍA DEL SISTEMA</span>
-          <span class="live"><i></i> EN LÍNEA</span>
-        </div>
-        <div class="hud-gauge">
-          <svg viewBox="0 0 320 220" class="gauge-svg" role="img" aria-label="Indicador de cobertura de la base de datos">
-            <defs>
-              <linearGradient id="gaugeStroke" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#22d3ee"/>
-                <stop offset=".55" stop-color="#f39c12"/>
-                <stop offset="1" stop-color="#f39c12"/>
-              </linearGradient>
-            </defs>
-            <path class="gauge-track" d="M30 190a130 130 0 0 1 260 0"/>
-            <path class="gauge-fill" d="M30 190a130 130 0 0 1 260 0"/>
-            <g class="gauge-ticks">
-              <path d="M40 175v-12M70 135v-12M110 108v-12M160 97v-12M210 108v-12M250 135v-12M280 175v-12"/>
-            </g>
-            <path class="gauge-needle" d="M160 180 232 120"/>
-            <circle cx="160" cy="180" r="7" class="gauge-hub"/>
-          </svg>
-          <div class="hud-center">
-            <strong data-stat="dtc">9.201</strong>
-            <span>CÓDIGOS DTC INDEXADOS</span>
-          </div>
-          <div class="hud-foot"><span>OBD / EOBD</span><span>BASE LOCAL</span></div>
-        </div>
-        <div class="hud-metrics">
-          <div><span>SÍNTOMAS</span><b data-stat="symptoms">454</b></div>
-          <div><span>PRODUCTOS</span><b data-stat="products">500</b></div>
-          <div><span>MÓDULOS</span><b>10</b></div>
-        </div>
-        <div class="hud-bars" id="heroSeverity">
-          <div class="hud-bar"><span>Gravedad alta</span><i style="--v:0%"></i><b>—</b></div>
-          <div class="hud-bar"><span>Gravedad media</span><i style="--v:0%"></i><b>—</b></div>
-          <div class="hud-bar"><span>Gravedad baja</span><i style="--v:0%"></i><b>—</b></div>
         </div>
       </div>
 
@@ -363,7 +324,7 @@
       </article>
     </div>
 
-    <div class="home-grid">
+    <div class="home-grid solo">
       <section class="panel capabilities">
         <div class="panel-head">
           <div><span class="eyebrow">MÓDULOS DE MANDO</span><h2>Diez sistemas. Una sola consola.</h2></div>
@@ -439,97 +400,102 @@
         </div>
       </section>
 
-      <aside class="panel telemetry-panel">
-        <div class="panel-head">
-          <div><span class="eyebrow">DATOS REALES</span><h2>Radiografía de la base</h2></div>
-          <span class="tag live-tag"><i></i> Local</span>
-        </div>
-
-        <div class="severity-block">
-          <div id="severityDonut" class="donut" role="img" aria-label="Distribución de códigos DTC por gravedad">
-            <div class="donut-center"><b data-stat="dtc">9.201</b><span>DTC</span></div>
-          </div>
-          <div id="severityLegend" class="legend">
-            <div class="legend-row"><i style="background:#ff5d6c"></i><span>Alta</span><b>—</b></div>
-            <div class="legend-row"><i style="background:#f39c12"></i><span>Media</span><b>—</b></div>
-            <div class="legend-row"><i style="background:#22d3ee"></i><span>Baja</span><b>—</b></div>
-          </div>
-        </div>
-
-        <div class="bars-head"><span>Códigos por sistema</span><span>Total</span></div>
-        <div id="systemBars" class="bars"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
-
-        <div class="bars-head"><span>Catálogo por departamento</span><span>Arts.</span></div>
-        <div id="productCats" class="cats-chart"></div>
-      </aside>
     </div>
-
-    <section class="panel live-station" aria-labelledby="liveStationTitle">
-      <div class="panel-head live-station-head">
-        <div>
-          <span class="eyebrow">TELEMETRÍA EN VIVO</span>
-          <h2 id="liveStationTitle">Sala de máquinas</h2>
-        </div>
-        <div class="live-station-state">
-          <span id="homeTelemetrySource" class="source-badge" data-state="offline"><i></i> OBD SIN CONEXIÓN</span>
-          <button class="btn ghost sm" data-view="obd" type="button">Abrir consola OBD <svg class="ic"><use href="#i-arrow"></use></svg></button>
-        </div>
-      </div>
-
-      <div class="live-station-grid">
-        <div class="gauge-cluster">
-          <article class="gauge-ring" id="homeGaugeRpm" style="--p:0;--ring:var(--accent)" aria-label="Revoluciones del motor">
-            <div class="gauge-value"><b id="homeRpm">--</b><span>RPM</span></div>
-            <small>Revoluciones</small>
-          </article>
-          <article class="gauge-ring" id="homeGaugeCoolant" style="--p:0;--ring:var(--cyan)" aria-label="Temperatura del refrigerante">
-            <div class="gauge-value"><b id="homeCoolant">--</b><span>°C</span></div>
-            <small>Refrigerante</small>
-          </article>
-          <article class="gauge-ring" id="homeGaugeVoltage" style="--p:0;--ring:var(--ok)" aria-label="Tensión de batería">
-            <div class="gauge-value"><b id="homeVoltage">--</b><span>V</span></div>
-            <small>Batería</small>
-          </article>
-        </div>
-
-        <div class="signal-chart">
-          <div class="chart-head">
-            <span>SEÑAL DE MOTOR · ÚLTIMOS 48 REGISTROS</span>
-            <span id="homeChartState">ESPERANDO CONEXIÓN</span>
-          </div>
-          <div class="chart-canvas">
-            <svg id="homeChartSvg" viewBox="0 0 600 190" preserveAspectRatio="none" role="img" aria-label="Gráfica de revoluciones y temperatura del motor">
-              <defs>
-                <linearGradient id="chartFade" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#ff6a00" stop-opacity=".28"/>
-                  <stop offset="1" stop-color="#ff6a00" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <g class="chart-grid">
-                <path d="M0 20h600M0 65h600M0 110h600M0 155h600"/>
-                <path d="M100 0v190M200 0v190M300 0v190M400 0v190M500 0v190"/>
-              </g>
-              <polyline id="homeChartRpm" class="chart-line rpm" points=""></polyline>
-              <polyline id="homeChartCoolant" class="chart-line coolant" points=""></polyline>
-            </svg>
-            <div id="homeChartEmpty" class="chart-empty">
-              <svg class="ic"><use href="#i-pulse"></use></svg>
-              <b>Sin señal de la ECU</b>
-              <span>Conecta un ELM327 o abre el simulador para trazar datos reales.</span>
-            </div>
-          </div>
-          <div class="chart-legend">
-            <span><i class="dot-orange"></i> RPM <b id="homeChartRpmValue">--</b></span>
-            <span><i class="dot-cyan"></i> Refrigerante <b id="homeChartCoolantValue">--</b></span>
-          </div>
-        </div>
-      </div>
-      <p class="live-disclaimer" id="homeTelemetryNotice">Los indicadores permanecen vacíos hasta recibir datos de la ECU. El simulador se identifica siempre como simulación.</p>
-    </section>
 
     <div class="notice">
       <svg class="ic"><use href="#i-alert"></use></svg>
       <div><b>Diagnóstico orientativo profesional.</b> Una pieza no debe sustituirse únicamente por la lectura de un código o síntoma. Verifica siempre con mediciones y comprobaciones físicas de taller.</div>
+    </div>
+  </section>
+
+  <!-- ===================== SALA DE MÁQUINAS ===================== -->
+  <section id="view-sala" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">TELEMETRÍA EN VIVO</span>
+        <h2>Sala de máquinas</h2>
+        <p>Banco de instrumentos completo: todos los relojes de la ECU, osciloscopio de señales y gráficas en tiempo real. Los datos salen de la unidad conectada y el simulador se identifica siempre como simulación.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-gauge"></use></svg> <b id="salaGaugeCount">0</b> relojes · osciloscopio</span>
+    </header>
+
+    <section class="panel sala-console">
+      <div class="panel-head">
+        <div><span class="eyebrow">CONSOLA</span><h3>Fuente de datos</h3></div>
+        <span id="salaSource" class="source-badge" data-state="offline"><i></i> OBD SIN CONEXIÓN</span>
+      </div>
+      <div class="sala-actions">
+        <button id="salaStart" class="btn primary" type="button"><svg class="ic"><use href="#i-zap"></use></svg> Arrancar simulador</button>
+        <button id="salaPause" class="btn ghost" type="button" disabled>Pausar</button>
+        <button id="salaStop" class="btn ghost danger" type="button" disabled>Detener</button>
+        <button id="salaReset" class="btn ghost" type="button">Borrar registro</button>
+        <button class="btn ghost" data-view="obd" type="button">Conectar ELM327 <svg class="ic"><use href="#i-arrow"></use></svg></button>
+      </div>
+      <div class="sala-metrics">
+        <div><span>MUESTRAS</span><b id="salaSamples">0</b></div>
+        <div><span>ÚLTIMA LECTURA</span><b id="salaLastRead">Sin lectura</b></div>
+        <div><span>RÉGIMEN</span><b id="salaRpmRead">--</b></div>
+        <div><span>VENTANA</span><b id="salaWindow">--</b></div>
+      </div>
+      <p class="live-disclaimer" id="salaNotice">Los relojes y las gráficas permanecen vacíos hasta recibir datos de la ECU.</p>
+    </section>
+
+    <section class="panel sala-wall" aria-labelledby="salaWallTitle">
+      <div class="panel-head">
+        <div><span class="eyebrow">BANCO DE INSTRUMENTOS</span><h2 id="salaWallTitle">Todos los relojes</h2></div>
+        <div id="salaFilter" class="sala-filter" role="group" aria-label="Filtrar relojes por grupo"></div>
+      </div>
+      <div id="salaGauges" class="sala-gauges"></div>
+    </section>
+
+    <section class="panel sala-scope" aria-labelledby="salaScopeTitle">
+      <div class="panel-head">
+        <div><span class="eyebrow">OSCILOSCOPIO</span><h3 id="salaScopeTitle">Señales del motor</h3></div>
+        <div class="scope-ctl">
+          <label>Canal A<select id="scopeChannel"></select></label>
+          <label>Canal B<select id="scopeChannel2"></select></label>
+          <label>Base de tiempo
+            <select id="scopeTime">
+              <option value="1">1 ms/div</option>
+              <option value="2">2 ms/div</option>
+              <option value="5" selected>5 ms/div</option>
+              <option value="10">10 ms/div</option>
+              <option value="20">20 ms/div</option>
+              <option value="50">50 ms/div</option>
+            </select>
+          </label>
+          <label>Amplitud
+            <select id="scopeVolt">
+              <option value="0.5">0,5 V/div</option>
+              <option value="1">1 V/div</option>
+              <option value="2">2 V/div</option>
+              <option value="5" selected>5 V/div</option>
+              <option value="10">10 V/div</option>
+            </select>
+          </label>
+          <label class="scope-check"><input id="scopeTrigger" type="checkbox" checked> Disparo</label>
+          <button id="scopeRun" class="btn ghost sm" type="button">Pausar barrido</button>
+        </div>
+      </div>
+      <div class="scope-wrap">
+        <canvas id="scopeCanvas" class="scope-canvas" width="1200" height="420" role="img" aria-label="Osciloscopio de señales del motor"></canvas>
+        <div id="scopeEmpty" class="chart-empty">
+          <svg class="ic"><use href="#i-pulse"></use></svg>
+          <b>Sin señal de la ECU</b>
+          <span>Arranca el simulador o conecta un ELM327 para trazar la señal.</span>
+        </div>
+      </div>
+      <div class="scope-foot">
+        <span id="scopeReadout">—</span>
+        <span id="scopeLegend">CANAL 1 · SEÑAL RECONSTRUIDA DESDE LA ECU</span>
+      </div>
+    </section>
+
+    <div id="salaCharts" class="sala-charts"></div>
+
+    <div class="notice">
+      <svg class="ic"><use href="#i-alert"></use></svg>
+      <div><b>Instrumentación orientativa.</b> Los valores proceden de los PID estándar del vehículo y el osciloscopio reconstruye la forma de onda a partir del régimen y la carga. Para medir una señal real en el conector de un componente hace falta una sonda y un osciloscopio de taller.</div>
     </div>
   </section>
 
@@ -1679,7 +1645,7 @@
 <script src="/js/obd.js?v=20261030a"></script>
 <script src="/js/tutorials.js?v=20261026d"></script>
 
-<script src="/js/app.js?v=20261030a"></script>
+<script src="/js/app.js?v=20261105a"></script>
 <script src="/js/buying.js?v=20261026d"></script>
 <script src="/js/scan.js?v=20261026d"></script>
 <script src="/js/garage.js?v=20261030d"></script>
