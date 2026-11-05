@@ -1491,6 +1491,11 @@ select option { background: #0c1014; }
 .sala-chart .chart-line.ltft { stroke: #ff5d6c; }
 .sala-chart .chart-line.voltage { stroke: var(--accent); }
 .sala-chart .chart-line.speed { stroke: #38efa4; }
+.sala-chart .chart-line.egt { stroke: #ff5d6c; }
+.sala-chart .chart-line.intercooler { stroke: #22d3ee; }
+.sala-chart .chart-line.turbo { stroke: var(--violet-2, var(--accent)); }
+.sala-chart .chart-line.rail { stroke: #ffd166; }
+.sala-chart .chart-line.o2 { stroke: #38efa4; }
 
 @media (max-width: 1100px) {
   .sala-charts { grid-template-columns: repeat(2, minmax(0, 1fr)); }

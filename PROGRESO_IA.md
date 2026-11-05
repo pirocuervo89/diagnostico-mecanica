@@ -530,3 +530,16 @@ Inicio queda limpio: fuera el HUD de telemetría, el panel de donut/barras y la 
 - Consola propia: arrancar simulador, pausar/reanudar, detener y borrar registro, reutilizando el gestor ELM327. El origen (simulación o ELM327) se muestra siempre.
 
 Comprobado en Firefox real a 1360 y 390 px: 25/25 relojes con dato, 15/15 series con puntos, osciloscopio pintando ambos canales (píxeles de señal detectados), controles de canal/base/amplitud, filtros, pausa (muestras estables), reanudar, parada (todo a `--` y osciloscopio vacío), sin errores de consola ni desbordamiento horizontal.
+
+## Sala de máquinas: segunda tanda de relojes (05/11/2026)
+
+De 25 a **39 relojes**, con ocho grupos y catorce magnitudes que antes no estaban en la web:
+
+- **Motor**: demanda del conductor, par de referencia y avance de inyección (PID 0161, 0164, 015D).
+- **Temperaturas**: aire tras el intercooler (0177).
+- **Combustible**: presión de combustible (010A), rail absoluto (0159), vapor del depósito con signo (0132) y porcentaje de etanol (0152).
+- **Escape y turbo**: temperatura de gases de escape (0178) y régimen del turbocompresor (0174).
+- **Eléctrico**: vida de la batería de alta tensión (015B).
+- **Uso y mantenimiento**: horas de motor (017F), distancia desde el borrado (0131) y distancia con testigo encendido (0121).
+
+Los PID se añadieron también al simulador virtual, para que los relojes tengan dato sin hardware, y la gráfica nueva es de escape y admisión (EGT, intercooler y régimen de turbo). Comprobado en Firefox a 1360 y 390 px: 39/39 relojes con valor, 18/18 series, filtro de temperaturas 7, sin errores ni desbordamiento; valores coherentes (EGT 442 °C, turbo 55.788 rpm, EVAP −104 Pa, 412 km desde el borrado).

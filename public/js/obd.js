@@ -183,6 +183,60 @@ class OBDParser {
         if (data.length < 2) return null;
         return { pid: '017C', name: 'Temp. del DPF', value: Number((((data[0] * 256) + data[1]) / 10 - 40).toFixed(1)), unit: '°C' };
       }
+      case '31': { // Distancia recorrida desde el borrado de códigos: 256*A+B
+        if (data.length < 2) return null;
+        return { pid: '0131', name: 'Distancia desde el borrado', value: (data[0] * 256) + data[1], unit: 'km' };
+      }
+      case '21': { // Distancia recorrida con el testigo encendido: 256*A+B
+        if (data.length < 2) return null;
+        return { pid: '0121', name: 'Distancia con testigo', value: (data[0] * 256) + data[1], unit: 'km' };
+      }
+      case '32': { // Presión de vapor del EVAP: (256*A+B)/4, con signo
+        if (data.length < 2) return null;
+        const raw = (data[0] * 256) + data[1];
+        const signed = raw > 32767 ? raw - 65536 : raw;
+        return { pid: '0132', name: 'Presión de vapor EVAP', value: Number((signed / 4).toFixed(1)), unit: 'Pa' };
+      }
+      case '52': { // Porcentaje de etanol: 100/255*A
+        if (data.length < 1) return null;
+        return { pid: '0152', name: 'Etanol en el combustible', value: Number(((100 / 255) * data[0]).toFixed(1)), unit: '%' };
+      }
+      case '59': { // Presión absoluta del rail: 10*(256*A+B) kPa
+        if (data.length < 2) return null;
+        return { pid: '0159', name: 'Presión absoluta del rail', value: 10 * ((data[0] * 256) + data[1]), unit: 'kPa' };
+      }
+      case '5B': { // Vida restante de la batería de alta tensión: 100/255*A
+        if (data.length < 1) return null;
+        return { pid: '015B', name: 'Vida de la batería HV', value: Number(((100 / 255) * data[0]).toFixed(1)), unit: '%' };
+      }
+      case '5D': { // Avance de inyección: (256*A+B)/128 - 210
+        if (data.length < 2) return null;
+        return { pid: '015D', name: 'Avance de inyección', value: Number((((data[0] * 256) + data[1]) / 128 - 210).toFixed(1)), unit: '°' };
+      }
+      case '61': { // Demanda de par del conductor: A - 125
+        if (data.length < 1) return null;
+        return { pid: '0161', name: 'Demanda del conductor', value: data[0] - 125, unit: '%' };
+      }
+      case '64': { // Par de referencia del motor: 256*A+B
+        if (data.length < 2) return null;
+        return { pid: '0164', name: 'Par de referencia', value: (data[0] * 256) + data[1], unit: 'Nm' };
+      }
+      case '74': { // Régimen del turbocompresor: 256*A+B
+        if (data.length < 2) return null;
+        return { pid: '0174', name: 'Régimen del turbo', value: (data[0] * 256) + data[1], unit: 'rpm' };
+      }
+      case '77': { // Temperatura del aire tras el intercooler: A - 40
+        if (data.length < 1) return null;
+        return { pid: '0177', name: 'Aire tras intercooler', value: data[0] - 40, unit: '°C' };
+      }
+      case '78': { // Temperatura de gases de escape B1S1: (256*A+B)/10 - 40
+        if (data.length < 2) return null;
+        return { pid: '0178', name: 'Temp. gases de escape B1S1', value: Number((((data[0] * 256) + data[1]) / 10 - 40).toFixed(1)), unit: '°C' };
+      }
+      case '7F': { // Tiempo de motor en marcha: 256*A+B segundos
+        if (data.length < 2) return null;
+        return { pid: '017F', name: 'Tiempo de motor', value: (data[0] * 256) + data[1], unit: 's' };
+      }
       default:
         return { pid, raw, bytes: data };
     }
@@ -291,6 +345,18 @@ class VirtualECUSimulator {
     this.ambient = 24;
     this.o2 = 0.53;
     this.torque = 22;
+    this.fuelPressure = 340;
+    this.egt = 310;
+    this.intercooler = 32;
+    this.turboRpm = 42000;
+    this.injTiming = -2.5;
+    this.evap = -120;
+    this.ethanol = 0;
+    this.hvBattery = 78;
+    this.refTorque = 250;
+    this.runTime = 4820;
+    this.sinceClear = 412;
+    this.distanceMil = 62;
     this.storedDTCs = ['P0299', 'P0300'];
     this.pendingDTCs = ['P0101'];
     this.dtcCleared = false;
@@ -330,6 +396,13 @@ class VirtualECUSimulator {
     this.dpf = Math.round(180 + this.load * 3);
     this.o2 = Number((0.4 + this.load * 0.006).toFixed(2));
     this.torque = this.load;
+    this.fuelPressure = Math.round(330 + this.load * 1.4);
+    this.egt = Math.round(240 + this.load * 5.6);
+    this.intercooler = Math.round(this.ambient + 6 + this.load * 0.18);
+    this.turboRpm = Math.round(18000 + this.load * 900 + this.rpm * 4);
+    this.injTiming = Number(((this.load * 0.05) + 1.5).toFixed(1));
+    this.evap = Math.round(-(90 + Math.random() * 70));
+    this.runTime += 1;
   }
 
   byte(value) {
@@ -393,7 +466,7 @@ class VirtualECUSimulator {
       return Promise.resolve(`41 07 ${this.byte((this.ltft + 100) * 128 / 100)}\r\r>`);
     }
     if (c === '010A' || c === '01 0A') {
-      return Promise.resolve(`41 0A ${this.byte(100)}\r\r>`);
+      return Promise.resolve(`41 0A ${this.byte(this.fuelPressure / 3)}\r\r>`);
     }
     if (c === '010B' || c === '01 0B') {
       return Promise.resolve(`41 0B ${this.byte(this.map)}\r\r>`);
@@ -448,6 +521,45 @@ class VirtualECUSimulator {
     }
     if (c === '017C' || c === '01 7C') {
       return Promise.resolve(`41 7C ${this.word((this.dpf + 40) * 10).join(' ')}\r\r>`);
+    }
+    if (c === '0131' || c === '01 31') {
+      return Promise.resolve(`41 31 ${this.word(this.sinceClear).join(' ')}\r\r>`);
+    }
+    if (c === '0121' || c === '01 21') {
+      return Promise.resolve(`41 21 ${this.word(this.distanceMil).join(' ')}\r\r>`);
+    }
+    if (c === '0132' || c === '01 32') {
+      return Promise.resolve(`41 32 ${this.word((this.evap * 4) & 0xFFFF).join(' ')}\r\r>`);
+    }
+    if (c === '0152' || c === '01 52') {
+      return Promise.resolve(`41 52 ${this.byte(this.ethanol * 255 / 100)}\r\r>`);
+    }
+    if (c === '0159' || c === '01 59') {
+      return Promise.resolve(`41 59 ${this.word(this.rail / 10).join(' ')}\r\r>`);
+    }
+    if (c === '015B' || c === '01 5B') {
+      return Promise.resolve(`41 5B ${this.byte(this.hvBattery * 255 / 100)}\r\r>`);
+    }
+    if (c === '015D' || c === '01 5D') {
+      return Promise.resolve(`41 5D ${this.word((this.injTiming + 210) * 128).join(' ')}\r\r>`);
+    }
+    if (c === '0161' || c === '01 61') {
+      return Promise.resolve(`41 61 ${this.byte(this.load * 0.9 + 5 + 125)}\r\r>`);
+    }
+    if (c === '0164' || c === '01 64') {
+      return Promise.resolve(`41 64 ${this.word(this.refTorque).join(' ')}\r\r>`);
+    }
+    if (c === '0174' || c === '01 74') {
+      return Promise.resolve(`41 74 ${this.word(this.turboRpm).join(' ')}\r\r>`);
+    }
+    if (c === '0177' || c === '01 77') {
+      return Promise.resolve(`41 77 ${this.byte(this.intercooler + 40)}\r\r>`);
+    }
+    if (c === '0178' || c === '01 78') {
+      return Promise.resolve(`41 78 ${this.word((this.egt + 40) * 10).join(' ')}\r\r>`);
+    }
+    if (c === '017F' || c === '01 7F') {
+      return Promise.resolve(`41 7F ${this.word(this.runTime % 65536).join(' ')}\r\r>`);
     }
 
     // Modo 03 (Códigos almacenados)
@@ -782,7 +894,11 @@ class ELM327Manager {
       ['0107', 'ltft'], ['0144', 'lambda'], ['0114', 'o2'], ['012F', 'fuelLevel'],
       ['015C', 'oil'], ['0123', 'railPressure'], ['0142', 'moduleVoltage'],
       ['015E', 'fuelRate'], ['013C', 'catalyst'], ['017C', 'dpf'],
-      ['0146', 'ambient'], ['0162', 'torque']
+      ['0146', 'ambient'], ['0162', 'torque'],
+      ['010A', 'fuelPressure'], ['0159', 'railAbs'], ['0132', 'evap'], ['0152', 'ethanol'],
+      ['0178', 'egt'], ['0177', 'intercooler'], ['0174', 'turboRpm'], ['015D', 'injTiming'],
+      ['0161', 'driverDemand'], ['0164', 'refTorque'], ['015B', 'hvBattery'],
+      ['017F', 'runTime'], ['0131', 'sinceClear'], ['0121', 'distanceMil']
     ];
 
     try {
@@ -816,6 +932,12 @@ class ELM327Manager {
       }
       if (data.railPressure !== undefined) {
         data.railBar = Math.round(data.railPressure / 100);
+      }
+      if (data.railAbs !== undefined) {
+        data.railAbsBar = Math.round(data.railAbs / 100);
+      }
+      if (data.runTime !== undefined) {
+        data.runHours = Number((data.runTime / 3600).toFixed(1));
       }
 
       data.timestamp = new Date();

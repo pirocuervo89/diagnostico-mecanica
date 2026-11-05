@@ -1616,10 +1616,14 @@ const SALA_GAUGES = [
   { group: 'Motor', key: 'throttle', label: 'Mariposa', unit: '%', min: 0, max: 100, dec: 0, color: 'var(--cyan)' },
   { group: 'Motor', key: 'pedal', label: 'Pedal', unit: '%', min: 0, max: 100, dec: 0, color: 'var(--ok)' },
   { group: 'Motor', key: 'torque', label: 'Par real', unit: '%', min: 0, max: 100, dec: 0, color: 'var(--accent)' },
+  { group: 'Motor', key: 'driverDemand', label: 'Demanda conductor', unit: '%', min: 0, max: 100, dec: 0, color: '#38efa4' },
+  { group: 'Motor', key: 'refTorque', label: 'Par de referencia', unit: 'Nm', min: 0, max: 400, dec: 0, color: 'var(--cyan)' },
+  { group: 'Motor', key: 'injTiming', label: 'Avance inyección', unit: '°', min: -20, max: 40, dec: 1, color: '#ffd166' },
   { group: 'Motor', key: 'speed', label: 'Velocidad', unit: 'km/h', min: 0, max: 240, dec: 0, color: 'var(--cyan)' },
   { group: 'Temperaturas', key: 'coolant', label: 'Refrigerante', unit: '°C', min: 20, max: 130, dec: 0, color: 'var(--cyan)' },
   { group: 'Temperaturas', key: 'oil', label: 'Aceite', unit: '°C', min: 20, max: 160, dec: 0, color: '#ffd166' },
   { group: 'Temperaturas', key: 'iat', label: 'Admisión', unit: '°C', min: -20, max: 90, dec: 0, color: 'var(--ok)' },
+  { group: 'Temperaturas', key: 'intercooler', label: 'Aire tras intercooler', unit: '°C', min: -20, max: 90, dec: 0, color: 'var(--accent)' },
   { group: 'Temperaturas', key: 'ambient', label: 'Ambiente', unit: '°C', min: -20, max: 60, dec: 0, color: 'var(--ok)' },
   { group: 'Temperaturas', key: 'catalyst', label: 'Catalizador', unit: '°C', min: 0, max: 1000, dec: 0, color: '#ff5d6c' },
   { group: 'Temperaturas', key: 'dpf', label: 'DPF / FAP', unit: '°C', min: 0, max: 900, dec: 0, color: '#ff5d6c' },
@@ -1627,15 +1631,25 @@ const SALA_GAUGES = [
   { group: 'Presiones', key: 'map', label: 'Colector', unit: 'kPa', min: 0, max: 250, dec: 0, color: 'var(--cyan)' },
   { group: 'Presiones', key: 'baro', label: 'Barométrica', unit: 'kPa', min: 80, max: 110, dec: 0, color: '#7f8c97' },
   { group: 'Presiones', key: 'railBar', label: 'Rail', unit: 'bar', min: 0, max: 1600, dec: 0, color: '#ffd166' },
+  { group: 'Combustible', key: 'fuelPressure', label: 'Presión de combustible', unit: 'kPa', min: 0, max: 600, dec: 0, color: 'var(--cyan)' },
+  { group: 'Combustible', key: 'railAbsBar', label: 'Rail absoluto', unit: 'bar', min: 0, max: 1600, dec: 0, color: 'var(--accent)' },
+  { group: 'Combustible', key: 'evap', label: 'Vapor del depósito', unit: 'Pa', min: -6000, max: 2000, dec: 0, color: '#38efa4' },
+  { group: 'Combustible', key: 'ethanol', label: 'Etanol', unit: '%', min: 0, max: 100, dec: 0, color: '#ffd166' },
   { group: 'Mezcla y encendido', key: 'maf', label: 'MAF', unit: 'g/s', min: 0, max: 120, dec: 1, color: 'var(--cyan)' },
   { group: 'Mezcla y encendido', key: 'lambda', label: 'Lambda', unit: 'λ', min: 0.7, max: 1.3, dec: 3, color: 'var(--ok)' },
   { group: 'Mezcla y encendido', key: 'o2', label: 'Sonda B1S1', unit: 'V', min: 0, max: 1, dec: 2, color: '#ffd166' },
   { group: 'Mezcla y encendido', key: 'stft', label: 'Corrección corta', unit: '%', min: -25, max: 25, dec: 1, color: 'var(--ok)' },
   { group: 'Mezcla y encendido', key: 'ltft', label: 'Corrección larga', unit: '%', min: -25, max: 25, dec: 1, color: '#ff5d6c' },
   { group: 'Mezcla y encendido', key: 'timing', label: 'Avance', unit: '°', min: -10, max: 50, dec: 1, color: 'var(--accent)' },
-  { group: 'Eléctrico y combustible', key: 'voltage', label: 'Tensión', unit: 'V', min: 10, max: 16, dec: 1, color: 'var(--ok)' },
-  { group: 'Eléctrico y combustible', key: 'fuelLevel', label: 'Nivel', unit: '%', min: 0, max: 100, dec: 0, color: '#ffd166' },
-  { group: 'Eléctrico y combustible', key: 'fuelRate', label: 'Consumo', unit: 'L/h', min: 0, max: 40, dec: 2, color: 'var(--cyan)' }
+  { group: 'Escape y turbo', key: 'egt', label: 'Gases de escape', unit: '°C', min: 0, max: 900, dec: 0, color: '#ff5d6c' },
+  { group: 'Escape y turbo', key: 'turboRpm', label: 'Régimen del turbo', unit: 'rpm', min: 0, max: 200000, dec: 0, color: 'var(--accent)' },
+  { group: 'Eléctrico', key: 'voltage', label: 'Tensión', unit: 'V', min: 10, max: 16, dec: 1, color: 'var(--ok)' },
+  { group: 'Eléctrico', key: 'hvBattery', label: 'Batería HV', unit: '%', min: 0, max: 100, dec: 0, color: '#38efa4' },
+  { group: 'Eléctrico', key: 'fuelLevel', label: 'Nivel', unit: '%', min: 0, max: 100, dec: 0, color: '#ffd166' },
+  { group: 'Eléctrico', key: 'fuelRate', label: 'Consumo', unit: 'L/h', min: 0, max: 40, dec: 2, color: 'var(--cyan)' },
+  { group: 'Uso y mantenimiento', key: 'runHours', label: 'Horas de motor', unit: 'h', min: 0, max: 200, dec: 1, color: 'var(--cyan)' },
+  { group: 'Uso y mantenimiento', key: 'sinceClear', label: 'Desde el borrado', unit: 'km', min: 0, max: 20000, dec: 0, color: 'var(--ok)' },
+  { group: 'Uso y mantenimiento', key: 'distanceMil', label: 'Con testigo encendido', unit: 'km', min: 0, max: 20000, dec: 0, color: '#ff5d6c' }
 ];
 const SALA_GAUGE_KEYS = SALA_GAUGES.map(g => g.key);
 
@@ -1645,6 +1659,14 @@ const SALA_CHARTS = [
     series: [
       { key: 'rpm', label: 'RPM', unit: 'rpm', min: 0, max: 8000, dec: 0, color: 'var(--accent)', cls: 'rpm' },
       { key: 'speed', label: 'Velocidad', unit: 'km/h', min: 0, max: 240, dec: 0, color: '#38efa4', cls: 'speed' }
+    ]
+  },
+  {
+    id: 'escape', wide: true, title: 'ESCAPE Y ADMISIÓN · °C / rpm',
+    series: [
+      { key: 'egt', label: 'Gases de escape', unit: '°C', min: 0, max: 900, dec: 0, color: '#ff5d6c', cls: 'egt' },
+      { key: 'intercooler', label: 'Aire intercooler', unit: '°C', min: -20, max: 90, dec: 0, color: '#22d3ee', cls: 'intercooler' },
+      { key: 'turboRpm', label: 'Régimen turbo', unit: 'rpm', min: 0, max: 200000, dec: 0, color: 'var(--accent)', cls: 'turbo' }
     ]
   },
   {
