@@ -10,6 +10,7 @@
   if (!$('#view-testigos')) return;
 
   const COLORS = [['rojo', 'Rojo'], ['amarillo', 'Amarillo'], ['verde', 'Verde'], ['azul', 'Azul'], ['blanco', 'Blanco']];
+  const EMPTY_PREVIEW = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   const state = { items: [], color: '', severity: '', dataUrl: '', busy: false, loaded: false };
 
   const chip = (value, label) => `<button class="tl-chip${state.color === value ? ' active' : ''}" type="button" data-tl-color="${esc(value)}"><i class="dot-${esc(value)}"></i>${esc(label)}</button>`;
@@ -220,7 +221,7 @@
     state.color = '';
     $('#tlPreviewWrap')?.classList.add('hidden');
     const preview = $('#tlPreview');
-    if (preview) preview.removeAttribute('src');
+    if (preview) preview.src = EMPTY_PREVIEW;
     const hint = $('#tlHint');
     if (hint) hint.value = '';
     const result = $('#tlResult');
@@ -247,7 +248,7 @@
     state.dataUrl = '';
     $('#tlPreviewWrap')?.classList.add('hidden');
     const preview = $('#tlPreview');
-    if (preview) preview.removeAttribute('src');
+    if (preview) preview.src = EMPTY_PREVIEW;
     setStatus('Foto quitada. Puedes elegir el testigo en el catálogo.');
   });
 

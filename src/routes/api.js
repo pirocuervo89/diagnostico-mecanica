@@ -18,6 +18,31 @@ const DTC_PATH = path.join(DATA_DIR, 'dtc.json');
 const SYMPTOMS_PATH = path.join(DATA_DIR, 'symptoms.json');
 const router = express.Router();
 
+// Afiliación: si hay etiqueta configurada, se añade a cada enlace de vendedor.
+// Se lee en cada petición para respetar el .env, que dotenv carga después de
+// evaluar los imports de este módulo.
+function affiliateTag() {
+  return String(process.env.AFFILIATE_TAG_AMAZON || '').trim();
+}
+
+function withAffiliateTag(url) {
+  const tag = affiliateTag();
+  if (!tag || typeof url !== 'string' || !/^https?:\/\//i.test(url)) return url;
+  if (!/amazon\./i.test(url)) return url;
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set('tag', tag);
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
+function tagItem(item) {
+  if (!item || typeof item !== 'object') return item;
+  return item.affiliateUrl ? { ...item, affiliateUrl: withAffiliateTag(item.affiliateUrl) } : item;
+}
+
 // Los JSON son locales y cambian poco: se cachean por mtime/tamaño para no
 // releer y reanalizar 3,4 MB de DTC en cada petición.
 const DATA_CACHE = new Map();
@@ -1086,6 +1111,7 @@ function tuningProductsPayload() {
 router.get('/tuning-products', (req, res) => {
   const { category = '', car = '', q = '', brand = '', limit = '' } = req.query;
   const data = tuningProductsPayload();
+  data.items = data.items.map(tagItem);
   let items = data.items;
 
   if (category && category !== 'all') {
@@ -1167,7 +1193,44 @@ router.get('/products', (req, res) => {
       .sort((a, b) => b.score - a.score)
       .map(x => x.p);
   }
-  res.json(list);
+  res.json(list.map(tagItem));
+});
+
+router.get('/lighting-media', (_req, res) => {
+  const media = readJSON('lighting-media.json');
+  const raw = readJSON('products.json');
+  const catalog = Array.isArray(raw) ? raw : (raw.productos || []);
+  const byId = new Map(catalog.map(p => [p.id, p]));
+  const families = (media.families || []).map(family => {
+    const products = (family.productIds || [])
+      .map(id => byId.get(id))
+      .filter(Boolean)
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        manufacturer: p.manufacturer,
+        subcategory: p.subcategory,
+        description: p.description,
+        price: p.price || '',
+        listingPrice: p.listingPrice || '',
+        image: p.image,
+        asin: p.asin || null,
+        affiliateUrl: withAffiliateTag(p.affiliateUrl),
+        imageStatus: p.imageStatus,
+        linkStatus: p.linkStatus
+      }));
+    return { ...family, products };
+  });
+  res.json({
+    updated: media.updated || null,
+    notice: media.notice || '',
+    families,
+    stats: {
+      families: families.length,
+      products: families.reduce((n, f) => n + f.products.length, 0),
+      verified: families.reduce((n, f) => n + f.products.filter(p => p.imageStatus === 'verified' && p.linkStatus === 'verified').length, 0)
+    }
+  });
 });
 
 router.get('/ai/status', (_req, res) => {
@@ -1179,7 +1242,7 @@ router.get('/products/:id', (req, res) => {
   const list = Array.isArray(data) ? data : (data.productos || []);
   const item = list.find(p => p.id === req.params.id);
   if (!item) return res.status(404).json({ error: 'Producto no encontrado' });
-  res.json(item);
+  res.json(tagItem(item));
 });
 
 function forumReferencesFor(query, context) {

@@ -1478,6 +1478,110 @@ if (printReportBtn) {
 }
 
 // -------------------------------------------------------------
+// PAGOS: informe técnico descargable (Stripe Checkout)
+// -------------------------------------------------------------
+const payState = { status: null };
+
+function payNote(text) {
+  const note = $('#payNote');
+  if (note) note.textContent = text;
+}
+
+function payBadge(text) {
+  const badge = $('#payBadge');
+  if (badge) badge.textContent = text;
+}
+
+function reportFormData() {
+  return {
+    brand: $('#fBrand')?.value || '',
+    model: $('#fModel')?.value || '',
+    year: $('#fYear')?.value || '',
+    engine: $('#fEngine')?.value || '',
+    km: $('#fKm')?.value || '',
+    dtc: $('#fDtc')?.value || '',
+    symptoms: $('#fSymptoms')?.value || ''
+  };
+}
+
+async function verifyPaySession(sessionId) {
+  const download = $('#payDownload');
+  try {
+    const result = await api(`/api/payments/session/${encodeURIComponent(sessionId)}`);
+    if (result.paid && result.downloadUrl) {
+      payBadge('Pagado');
+      if (download) {
+        download.href = result.downloadUrl;
+        download.classList.remove('hidden');
+      }
+      payNote(`Pago confirmado · referencia ${result.orderId}. El informe está listo para descargar o imprimir.`);
+    } else {
+      payNote('El pago todavía no consta como completado. Si acabas de pagar, espera unos segundos y recarga la página.');
+    }
+  } catch (err) {
+    payNote(`No se pudo verificar el pago: ${err.message}`);
+  }
+}
+
+async function buyReport() {
+  const buy = $('#payBuy');
+  const report = reportFormData();
+  if (!report.brand.trim() || !report.model.trim()) {
+    payNote('Indica marca y modelo antes de comprar: aparecen en el informe.');
+    $('#fBrand')?.focus();
+    return;
+  }
+  const original = buy ? buy.textContent : '';
+  if (buy) {
+    buy.disabled = true;
+    buy.textContent = 'Abriendo Stripe…';
+  }
+  try {
+    const result = await api('/api/payments/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ report, email: '' })
+    });
+    if (result.url) {
+      window.location.href = result.url;
+      return;
+    }
+    throw new Error('Stripe no devolvió la dirección de pago.');
+  } catch (err) {
+    payNote(`No se pudo iniciar el pago: ${err.message}`);
+    if (buy) {
+      buy.disabled = false;
+      buy.textContent = original || 'Comprar informe';
+    }
+  }
+}
+
+async function initPayments() {
+  const buy = $('#payBuy');
+  if (!buy) return;
+  try {
+    payState.status = await api('/api/payments/status');
+  } catch (err) {
+    payBadge('No disponible');
+    payNote(`No se pudo consultar la pasarela de pago: ${err.message}`);
+    return;
+  }
+  const status = payState.status;
+  buy.textContent = status.configured ? `Comprar informe · ${status.priceLabel}` : 'Pago no configurado';
+  buy.disabled = !status.configured;
+  payBadge(status.configured ? (status.mode === 'test' ? 'Stripe · pruebas' : 'Stripe · activo') : 'Sin configurar');
+  payNote(status.note || '');
+  buy.addEventListener('click', buyReport);
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('pago') === 'ok' && params.get('session_id')) {
+    await verifyPaySession(params.get('session_id'));
+  } else if (params.get('pago') === 'cancelado') {
+    payNote('Compra cancelada. No se ha realizado ningún cargo.');
+  }
+}
+
+// -------------------------------------------------------------
 // VISTA: LECTURA OBD-II / ELM327
 // -------------------------------------------------------------
 const obdState = { connected: false, reading: false, live: false, dtcs: [], telemetry: {}, mode: 'simulated' };
@@ -1842,9 +1946,11 @@ function salaSetNotice(text) {
 
 function salaSyncControls() {
   const start = $('#salaStart');
+  const demo = $('#salaDemo');
   const pause = $('#salaPause');
   const stop = $('#salaStop');
   if (start) start.disabled = obdState.connected;
+  if (demo) demo.disabled = obdState.connected;
   if (pause) {
     pause.disabled = !obdState.connected;
     pause.textContent = obdState.live ? 'Pausar' : 'Reanudar';
@@ -1995,28 +2101,76 @@ function salaStartLoop() {
   salaRaf = requestAnimationFrame(step);
 }
 
-async function salaStartSimulator() {
+function salaSetBusy(busy) {
+  const start = $('#salaStart');
+  const demo = $('#salaDemo');
+  if (start) start.disabled = busy || obdState.connected;
+  if (demo) demo.disabled = busy || obdState.connected;
+}
+
+function salaPreferredAdapter() {
+  const configured = $('#obdMode')?.value;
+  const support = window.ELM327Manager?.checkBrowserSupport?.() || {};
+  if (configured === 'serial' && support.serial) return 'serial';
+  if (configured === 'bluetooth' && support.bluetooth) return 'bluetooth';
+  if (support.serial) return 'serial';
+  if (support.bluetooth) return 'bluetooth';
+  return '';
+}
+
+async function salaBeginLive(notice) {
+  obdState.connected = true;
+  obdState.live = true;
+  telemetryHistory.points = [];
+  salaState.samples = 0;
+  salaState.lastAt = 0;
+  obdManager.startLiveMonitoring(1000);
+  obdManager.readSingleTelemetry().then(renderLiveGrid).catch(() => {});
+  salaSetNotice(notice);
+}
+
+async function salaStartAdapter() {
   if (obdState.connected) return;
   if (!obdManager) {
     salaSetNotice('La consola OBD aún se está inicializando. Espera un segundo y vuelve a intentarlo.');
     return;
   }
-  const start = $('#salaStart');
-  if (start) start.disabled = true;
+  const mode = salaPreferredAdapter();
+  if (!mode) {
+    salaSetNotice('Este navegador no puede abrir un adaptador ELM327 (necesita Web Serial o Web Bluetooth). Usa Chrome o Edge, o pulsa Modo demostración.');
+    return;
+  }
+  const baud = Number($('#obdBaud')?.value) || 38400;
+  const protocol = $('#obdProtocol')?.value || 'ATSP0';
+  obdState.mode = mode;
+  salaSetBusy(true);
+  salaSetNotice(`Esperando permiso del adaptador ${mode === 'bluetooth' ? 'Bluetooth' : 'USB'}… selecciona tu ELM327 en la ventana del navegador.`);
+  try {
+    await obdManager.connect(mode, baud, protocol);
+    await salaBeginLive('Adaptador conectado: los relojes, las gráficas y el osciloscopio leen de la ECU del vehículo.');
+  } catch (err) {
+    obdState.connected = false;
+    obdState.live = false;
+    salaSetNotice(`No se pudo conectar el adaptador: ${err.message}. Revisa la configuración en la pestaña OBD o usa el Modo demostración.`);
+  } finally {
+    salaSyncControls();
+  }
+}
+
+async function salaStartDemo() {
+  if (obdState.connected) return;
+  if (!obdManager) {
+    salaSetNotice('La consola OBD aún se está inicializando. Espera un segundo y vuelve a intentarlo.');
+    return;
+  }
   obdState.mode = 'simulated';
-  salaSetNotice('Conectando el simulador virtual…');
+  salaSetBusy(true);
+  salaSetNotice('Conectando el modo demostración…');
   try {
     await obdManager.connect('simulated', 38400, 'ATSP0');
-    obdState.connected = true;
-    obdState.live = true;
-    telemetryHistory.points = [];
-    salaState.samples = 0;
-    salaState.lastAt = 0;
-    obdManager.startLiveMonitoring(1000);
-    obdManager.readSingleTelemetry().then(renderLiveGrid).catch(() => {});
-    salaSetNotice('Simulación en marcha: los valores los genera el simulador virtual y se identifican siempre como simulación.');
+    await salaBeginLive('Demostración en marcha: los valores los genera el simulador virtual y se identifican siempre como simulación. Para datos reales, conecta un adaptador ELM327.');
   } catch (err) {
-    salaSetNotice(`No se pudo iniciar el simulador: ${err.message}`);
+    salaSetNotice(`No se pudo iniciar la demostración: ${err.message}`);
   } finally {
     salaSyncControls();
   }
@@ -2036,7 +2190,8 @@ async function salaStopSimulator() {
 }
 
 function salaBindControls() {
-  $('#salaStart')?.addEventListener('click', salaStartSimulator);
+  $('#salaStart')?.addEventListener('click', salaStartAdapter);
+  $('#salaDemo')?.addEventListener('click', salaStartDemo);
   $('#salaStop')?.addEventListener('click', salaStopSimulator);
   $('#salaPause')?.addEventListener('click', () => {
     if (!obdManager || !obdState.connected) return;
@@ -3367,6 +3522,7 @@ document.addEventListener('viewchange', e => {
 // INICIALIZACIÓN
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
+  initPayments();
   initVehicleSelector();
   initHomeVehicleSelector();
   initUniversalSearch();

@@ -10,6 +10,7 @@ import forumRouter from './src/routes/forum.js';
 import garageRouter from './src/routes/garage.js';
 import testigosRouter from './src/routes/testigos.js';
 import tutorialsRouter from './src/routes/tutorials.js';
+import paymentsRouter from './src/routes/payments.js';
 
 dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -20,7 +21,10 @@ const HOST = process.env.HOST || '0.0.0.0';
 app.disable('x-powered-by');
 app.use(compression());
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
-app.use(express.json({ limit: '16mb' }));
+app.use(express.json({
+  limit: '16mb',
+  verify: (req, _res, buf) => { req.rawBody = buf; }
+}));
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 
 app.use((req, res, next) => {
@@ -35,6 +39,7 @@ app.use('/api/forum', forumRouter);
 app.use('/api/garage', garageRouter);
 app.use('/api/testigos', testigosRouter);
 app.use('/api/tutorials', tutorialsRouter);
+app.use('/api/payments', paymentsRouter);
 app.use('/api', apiRouter);
 app.use('/api/sintomas', sintomasRouter);
 app.use(express.static(path.join(__dirname, 'public'), {

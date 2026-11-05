@@ -1,0 +1,202 @@
+{
+  "updated": "2026-11-05",
+  "notice": "Solo se muestran fichas con foto y enlace de vendedor comprobados. Las familias sin stock verificado (xenon y pantallas) se publican como guía de compra, sin inventar referencias ni precios.",
+  "families": [
+    {
+      "id": "bombillas",
+      "name": "Bombillas y faros",
+      "eyebrow": "H7 · H4 · HALÓGENO Y LED",
+      "summary": "Sustitución de la lámpara de cruce y carretera. El casquillo depende del faro del coche: confirmar H7, H4, H1 u H11 en la ficha del vehículo o en la propia lámpara antes de comprar.",
+      "criteria": [
+        "Casquillo correcto (H7 es el más común en cruce; H4 lleva cruce y carretera en una lámpara)",
+        "Potencia y lúmenes reales: desconfía de cifras de marketing sin datos del fabricante",
+        "Canbus / anti-error si el coche comprueba la lámpara por resistencia",
+        "Referencia ECE y homologación para pasar ITV sin sorpresas"
+      ],
+      "productIds": [
+        "amz-b0d845vtg7",
+        "amz-b08rf2p3zt",
+        "amz-b0grvs98v4",
+        "amz-b0fdgnqy72",
+        "amz-b0cy5bktdh",
+        "amz-b09ww5896r",
+        "amz-b0cjj6sj45",
+        "amz-b0gx5wct8t",
+        "amz-b087wzn9zp"
+      ],
+      "guide": {
+        "title": "Antes de cambiar la lámpara",
+        "points": [
+          "Comprueba el casquillo en el manual o en la lámpara retirada; H7 y H4 no son intercambiables.",
+          "Un LED con proyector mal orientado deslumbra al resto aunque ilumine más: revisa la altura de reglaje.",
+          "Si el coche da aviso de lámpara fundida con LED, hace falta resistencia o lámpara con canbus.",
+          "En faros con lupa conviene comprobar el estado del proyector: una lámpara nueva no arregla una parábola quemada."
+        ]
+      }
+    },
+    {
+      "id": "interior",
+      "name": "Iluminación interior y ambiental",
+      "eyebrow": "PLAFÓN · MALETERO · AMBIENTAL USB",
+      "summary": "Kits de sustitución para plafón, guantera y maletero, y tiras ambientales alimentadas por USB. Sirven para mejorar la visibilidad del habitáculo sin tocar el cableado del vehículo.",
+      "criteria": [
+        "Tipo de casquillo del plafón (festoon, T10, bayoneta) y longitud en mm",
+        "Temperatura de color: 4000K neutro para trabajo, 6000K para blanco frío",
+        "Consumo: los kits USB no deben quedarse enchufados con el coche parado",
+        "Que no parpadeen con el atenuador del plafón"
+      ],
+      "productIds": [
+        "amz-b0g7y166jy",
+        "amz-b0gl2g9s7z",
+        "amz-b0fl7h38tj"
+      ],
+      "guide": {
+        "title": "Montaje sin cortocircuitos",
+        "points": [
+          "Desconecta la batería o retira el fusible del circuito de iluminación interior.",
+          "Las tiras USB van a una toma de mechero con corte al apagar el coche.",
+          "Si el plafón tiene atenuación, comprueba que el LED no se queda encendido tenue al cerrar."
+        ]
+      }
+    },
+    {
+      "id": "suspension",
+      "name": "Kits de suspensión",
+      "eyebrow": "MUELLES · AMORTIGUADORES · ROSCADA",
+      "summary": "Muelles de rebaje, amortiguadores de gas, kits roscados y piezas de apoyo. En todos los casos hay que confirmar la referencia por motor y año: dos carrocerías del mismo modelo pueden llevar tren distinto.",
+      "criteria": [
+        "Referencia exacta por marca, modelo, motor y año (no vale 'compatible con Golf')",
+        "Rebaje en mm y si exige amortiguador de recorrido corto",
+        "Certificado TÜV o de homologación para la ITV",
+        "Sustituir los apoyos y copelas al mismo tiempo que el amortiguador",
+        "Alineación y paralelo después de montar"
+      ],
+      "productIds": [
+        "amz-b007g88mpo",
+        "amz-b002nv3tru",
+        "amz-b09vxsnkpn",
+        "amz-b078xc7x71",
+        "amz-b095hcqgmt",
+        "amz-b001gyomvw",
+        "amz-b01m5li4jp",
+        "amz-b01m29tr9t",
+        "amz-b0b213pkts",
+        "amz-b07kvbvlpk",
+        "amz-b07xrw32w2",
+        "amz-b0dhfn28sw",
+        "amz-b09gpxf9y5",
+        "amz-b006dhtyoc",
+        "amz-b07qfdrpg9"
+      ],
+      "guide": {
+        "title": "Antes de comprar el kit",
+        "points": [
+          "Muelles de rebaje: cambian altura y geometría; si el amortiguador está gastado, se acelera su desgaste.",
+          "Roscada: más ajuste y más mantenimiento; revisa ruidos y homocinéticas tras bajar.",
+          "Los kits de suspensión neumática exigen comprobar el compresor y las válvulas, no solo el fuelle.",
+          "Guarda el certificado de homologación en el coche: en ITV lo piden."
+        ]
+      }
+    },
+    {
+      "id": "luz-trabajo",
+      "name": "Luz de trabajo para taller",
+      "eyebrow": "LINTERNA · COB · BASE MAGNÉTICA",
+      "summary": "Linternas recargables con imán y gancho para iluminar la zona de trabajo sin sujetarlas con la mano. Son complementos de taller, no sustituyen la iluminación reglamentaria del vehículo.",
+      "criteria": [
+        "Autonomía real y tiempo de carga: una linterna de 500 lm no dura lo mismo que una de 180 lm",
+        "Base magnética y gancho resistentes para fijarla bajo el capó o en el foso",
+        "Modo rojo para señalización y para no perder la visión nocturna",
+        "Carga USB-C y batería reemplazable siempre que sea posible"
+      ],
+      "productIds": [
+        "pro-add-10",
+        "amz-b0ggbplq82",
+        "amz-b07vlybpb8"
+      ],
+      "guide": {
+        "title": "Luz para trabajar con seguridad",
+        "points": [
+          "No coloques la linterna sobre la batería ni cerca de bornes sin aislar.",
+          "Si trabajas bajo el coche, fija la luz con el gancho o el imán y nunca la dejes suelta.",
+          "Las linternas de taller suelen ser de aluminio; comprueba que la junta aguanta aceite y agua.",
+          "No sustituye la luz de trabajo homologada del taller ni la señalización de la vía."
+        ]
+      }
+    },
+    {
+      "id": "camaras",
+      "name": "Cámaras de inspección",
+      "eyebrow": "BOROSCOPIO · ENDOSCOPIO · PANTALLA O MÓVIL",
+      "summary": "Cámaras con cable semirrígido para inspeccionar cilindros, admisión, DPF o cavidades sin desmontar. Comprueba si funcionan con tu móvil por OTG/UVC o si llevan pantalla propia.",
+      "criteria": [
+        "Diámetro de la sonda: 5,5 mm entra en más sitios que 8 mm, pero suele dar menos luz",
+        "Longitud del cable según la zona a inspeccionar (5 m para bajos, 20 m para tuberías)",
+        "Pantalla propia o conexión al móvil; en Android hace falta OTG y soporte UVC",
+        "Iluminación LED ajustable y grabación de foto/vídeo si se necesita documentar la avería",
+        "Resistencia al agua y al aceite cuando se use en el motor"
+      ],
+      "productIds": [
+        "amz-b0cfl89p38",
+        "amz-b0dnjjyg53",
+        "amz-b0grtkkrhy"
+      ],
+      "guide": {
+        "title": "Antes de meter la cámara",
+        "points": [
+          "Comprueba que el cable es semirrígido: uno blando no permite orientar la lente en un cilindro.",
+          "No fuerces la sonda por una bujía caliente ni por una cavidad con aristas cortantes.",
+          "Limpia la lente antes de cada inspección: una gota de aceite arruina la imagen.",
+          "Si el endoscopio tiene pantalla propia, verifica que graba o al menos que puedes guardar fotos."
+        ]
+      }
+    },
+    {
+      "id": "xenon",
+      "name": "Xenon y kits HID",
+      "eyebrow": "GUÍA DE COMPRA · SIN FICHAS VERIFICADAS",
+      "summary": "Un kit HID sustituye la lámpara halógena por un quemador de xenón con balastro. Es la familia con más riesgo legal y eléctrico: en España un faro halógeno no puede pasar a xenon sin el conjunto homologado (lupa, nivelación automática y lavafaros).",
+      "criteria": [
+        "Temperatura 4300K (máxima luz útil) a 6000K; por encima se pierde visión con lluvia",
+        "Balastro AC en lugar de DC: arranque más estable y menos parpadeo",
+        "Canbus / decodificador si el coche vigila el consumo de la lámpara",
+        "Verificar que el faro es de lupa y está homologado para descarga de gas"
+      ],
+      "productIds": [],
+      "emptyNote": "No publicamos fichas de xenon porque no hemos podido verificar ASIN, foto y vendedor de ninguna referencia concreta. La guía queda disponible y las fichas se añadirán cuando pasen la misma comprobación que el resto del catálogo.",
+      "guide": {
+        "title": "Legalidad y montaje",
+        "points": [
+          "Cambiar solo la lámpara en un faro halógeno no es legal para circular: deslumbra y no pasa ITV.",
+          "La instalación original de xenon incluye nivelación automática y lavafaros; sin eso no hay homologación.",
+          "El balastro consume picos de arranque: comprueba fusible y sección del cableado.",
+          "Si el objetivo es más luz, una lámpara halógena de calidad homologada o un LED con referencia válida es la vía segura."
+        ]
+      }
+    },
+    {
+      "id": "pantallas",
+      "name": "Radios y pantallas compatibles",
+      "eyebrow": "GUÍA DE COMPRA · 2 DIN · ANDROID",
+      "summary": "Para que una pantalla funcione con esta web necesita Android con Chrome y Bluetooth BLE (así puede hablar con un ELM327 BLE desde el propio coche). Además debe encajar en el hueco 2 DIN y respetar el CANBUS del vehículo.",
+      "criteria": [
+        "Hueco 2 DIN (178 × 100 mm) o marco específico para el modelo",
+        "Android 12 o superior con Chrome actualizado y Bluetooth BLE 4.0+",
+        "Android Auto / CarPlay según el móvil que uses",
+        "CANBUS compatible con marca y año para mandos de volante y datos del coche",
+        "Salida de cámara trasera y entrada de micrófono si se va a usar manos libres"
+      ],
+      "productIds": [],
+      "emptyNote": "Sin fichas verificadas: falta comprobar ASIN, foto y vendedor de cada referencia. La guía de compatibilidad sí está lista y es la que decide si la pantalla sirve para esta web.",
+      "guide": {
+        "title": "Cómo saber si la pantalla sirve",
+        "points": [
+          "Abre Chrome en la pantalla y carga esta web: si no hay Chrome actualizado, la lectura OBD desde la propia radio no funcionará.",
+          "El adaptador debe ser BLE (Web Bluetooth), no un ELM327 clásico por USB.",
+          "Comprueba que el marco y el conector del coche coinciden: muchos modelos necesitan interfaz CANBUS adicional.",
+          "Una pantalla con Android Auto por cable no ejecuta la web: hace falta Android propio en la unidad."
+        ]
+      }
+    }
+  ]
+}

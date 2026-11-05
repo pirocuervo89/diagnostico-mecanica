@@ -9,7 +9,7 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/fonts/fonts.css">
   <link rel="stylesheet" href="/css/app.css?v=20261030a">
-  <link rel="stylesheet" href="/css/vision.css?v=20261105b">
+  <link rel="stylesheet" href="/css/vision.css?v=20261105c">
   <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
   <link rel="stylesheet" href="/css/reforma.css?v=20261030d">
 </head>
@@ -93,6 +93,7 @@
     <button data-view="sala" type="button"><svg class="ic"><use href="#i-gauge"></use></svg>Sala de máquinas</button>
     <button data-view="tutoriales" type="button"><svg class="ic"><use href="#i-play"></use></svg>Tutoriales</button>
     <button data-view="productos" type="button"><svg class="ic"><use href="#i-cart"></use></svg>Productos</button>
+    <button data-view="luz" type="button"><svg class="ic"><use href="#i-zap"></use></svg>Luz y multimedia</button>
     <button data-view="tuning" type="button"><svg class="ic"><use href="#i-zap"></use></svg>Tuning</button>
     <button data-view="tuning-productos" type="button"><svg class="ic"><use href="#i-cart"></use></svg>Recambios</button>
     <button data-view="fiabilidad" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Fiabilidad</button>
@@ -425,7 +426,8 @@
         <span id="salaSource" class="source-badge" data-state="offline"><i></i> OBD SIN CONEXIÓN</span>
       </div>
       <div class="sala-actions">
-        <button id="salaStart" class="btn primary" type="button"><svg class="ic"><use href="#i-zap"></use></svg> Arrancar simulador</button>
+        <button id="salaStart" class="btn primary" type="button"><svg class="ic"><use href="#i-zap"></use></svg> Conectar adaptador</button>
+        <button id="salaDemo" class="btn ghost" type="button"><svg class="ic"><use href="#i-pulse"></use></svg> Modo demostración</button>
         <button id="salaPause" class="btn ghost" type="button" disabled>Pausar</button>
         <button id="salaStop" class="btn ghost danger" type="button" disabled>Detener</button>
         <button id="salaReset" class="btn ghost" type="button">Borrar registro</button>
@@ -615,9 +617,9 @@
       <div class="form-grid">
         <label>Tipo de conexión
           <select id="obdMode">
-            <option value="simulated">Simulador virtual (sin hardware)</option>
             <option value="serial">USB / Serie (Web Serial)</option>
             <option value="bluetooth">Bluetooth BLE (Web Bluetooth)</option>
+            <option value="simulated">Demostración sin coche (datos simulados)</option>
           </select>
         </label>
         <label>Velocidad (baudios)
@@ -1013,7 +1015,7 @@
         </label>
         <input id="tlFile" type="file" accept="image/*" capture="environment" hidden>
         <div class="tl-preview-wrap hidden" id="tlPreviewWrap">
-          <img id="tlPreview" alt="Vista previa del cuadro fotografiado">
+          <img id="tlPreview" alt="Vista previa del cuadro fotografiado" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
           <button class="btn ghost sm" type="button" id="tlClearPhoto">Quitar foto</button>
         </div>
 
@@ -1210,6 +1212,22 @@
     <p class="tp-legal" id="relLegal"></p>
   </section>
 
+  <!-- ===================== LUZ Y MULTIMEDIA ===================== -->
+  <section id="view-luz" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">ILUMINACIÓN, SUSPENSIÓN Y PANTALLAS</span>
+        <h2>Luz y multimedia</h2>
+        <p>Familias con foto y enlace de vendedor verificados. Las que aún no tienen fichas comprobadas se publican como guía de compra, sin referencias inventadas.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-zap"></use></svg> <b id="lmProductCount">—</b> fichas verificadas</span>
+    </header>
+
+    <div id="lmNav" class="lm-nav" role="group" aria-label="Familias de producto"></div>
+    <div class="notice" id="lmNotice">Cargando familias verificadas…</div>
+    <div id="lmFamilies" class="lm-families"></div>
+  </section>
+
   <section id="view-productos" class="view">
     <header class="page-head">
       <div>
@@ -1360,6 +1378,20 @@
         </div>
       </aside>
     </div>
+
+    <section class="panel pay-panel" id="payPanel" aria-labelledby="payTitle">
+      <div class="panel-head">
+        <div><span class="eyebrow">INFORME VERIFICADO</span><h3 id="payTitle">Descarga del informe PRO</h3></div>
+        <span id="payBadge" class="tag">Comprobando…</span>
+      </div>
+      <p class="pay-lead">Genera el informe, revísalo y descarga la versión con referencia única y sello de emisión. El cobro se realiza en Stripe Checkout: esta web no almacena datos de tarjeta.</p>
+      <div class="sala-actions">
+        <button id="payBuy" class="btn primary" type="button" disabled>Comprar informe</button>
+        <a id="payDownload" class="btn ghost hidden" href="#informe" target="_blank" rel="noopener">Descargar informe</a>
+        <button class="btn ghost" data-view="contacto" type="button">¿Factura o incidencia?</button>
+      </div>
+      <p class="micro-note" id="payNote">Comprobando la pasarela de pago…</p>
+    </section>
 
     <article id="report" class="report" style="display:none;"></article>
   </section>
@@ -1642,14 +1674,15 @@
 
 <div id="tutToast" class="tut-toast" role="status" aria-live="polite"></div>
 
-<script src="/js/obd.js?v=20261105b"></script>
+<script src="/js/obd.js?v=20261105c"></script>
 <script src="/js/tutorials.js?v=20261026d"></script>
 
-<script src="/js/app.js?v=20261105b"></script>
+<script src="/js/app.js?v=20261105d"></script>
+<script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/buying.js?v=20261026d"></script>
 <script src="/js/scan.js?v=20261026d"></script>
 <script src="/js/garage.js?v=20261030d"></script>
-<script src="/js/testigos.js?v=20261030d"></script>
+<script src="/js/testigos.js?v=20261105a"></script>
 <script src="/js/forum.js?v=20261026d"></script>
 </body>
 </html>
