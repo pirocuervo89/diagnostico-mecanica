@@ -1,11 +1,35 @@
 {
-  "updated": "2026-10-27",
-  "disclaimer": "Catálogo de productos reales de tienda: cada ficha enlaza a su publicación de Amazon y muestra la foto del vendedor. El precio y el stock pueden cambiar. Las piezas son universales o requieren comprobar medida, referencia y compatibilidad con tu motor antes de comprar; la foto no garantiza el ajuste.",
+  "updated": "2026-11-05",
+  "disclaimer": "Catálogo de productos reales de tienda: cada ficha enlaza a su publicación de Amazon y muestra la foto del vendedor. Precios consultados el 5 de noviembre de 2026; pueden cambiar. Las piezas son universales o requieren comprobar medida, referencia, homologación y compatibilidad con tu coche antes de comprar; la foto no garantiza el ajuste.",
   "affiliate": {
     "status": "sin_cuenta",
-    "note": "Los enlaces son directos a Amazon y todavía no llevan identificador de afiliado. Al dar de alta Amazon Associates, añade el parámetro de seguimiento en cada enlace desde data/tuning-products.json."
+    "note": "Los enlaces son directos a Amazon y admiten el parámetro de afiliado. Configura AFFILIATE_TAG_AMAZON y la API añadirá el identificador a todos los enlaces, incluidos los del catálogo."
   },
   "categories": [
+    {
+      "id": "pantallas-carplay",
+      "name": "Pantallas CarPlay y Android",
+      "blurb": "Pantallas de 7, 9 y 10 pulgadas o más, con CarPlay y Android Auto, ordenadas de precio bajo a alto.",
+      "image": "/img/productos/amz-b0gjs7nwcs.webp"
+    },
+    {
+      "id": "iluminacion-ambiente",
+      "name": "Luces neón y ambiente",
+      "blurb": "Tiras RGB, fibra óptica, proyectores de puerta y kits de neón para interior y bajo chasis.",
+      "image": "/img/productos/amz-b07rzb44ql.webp"
+    },
+    {
+      "id": "audio-video",
+      "name": "Audio, cámaras y CarPlay",
+      "blurb": "Altavoces, subwoofers, dashcams y adaptadores inalámbricos de CarPlay y Android Auto.",
+      "image": "/img/productos/amz-b097h8gf34.webp"
+    },
+    {
+      "id": "interior-accesorios",
+      "name": "Accesorios de interior",
+      "blurb": "Volantes, pedales, pomos y soportes para completar la preparación del habitáculo.",
+      "image": "/img/productos/amz-b004qmazjo.webp"
+    },
     {
       "id": "turbo",
       "name": "Turbos",
@@ -217,11 +241,15 @@
     }
   ],
   "stats": {
-    "items": 168,
-    "categories": 17,
+    "items": 236,
+    "categories": 21,
     "cars": 21,
-    "shopItems": 168,
+    "shopItems": 236,
     "byCategory": {
+      "pantallas-carplay": 30,
+      "iluminacion-ambiente": 20,
+      "audio-video": 10,
+      "interior-accesorios": 8,
       "admision": 10,
       "escape": 10,
       "intercooler": 10,
@@ -240,11 +268,1779 @@
       "lubricantes": 10,
       "transmision": 10
     },
-    "photos": 168,
-    "store": 168,
-    "lastSync": "2026-10-27T14:44:17.416Z"
+    "photos": 236,
+    "store": 236,
+    "lastSync": "2026-11-05T15:01:53.910Z"
   },
   "items": [
+    {
+      "id": "tienda-amz-b0hq4fxkjq",
+      "name": "Pantalla táctil para Coche 7 Pulgadas Compatible con CarPlay y Android Auto",
+      "brand": "Genérico",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 7\"] Reproductor multimedia para coche con pantalla táctil HD de 7 pulgadas y resolución de 1024 x 600 píxeles, sin necesidad de instalar una radio 1 DIN o 2 DIN",
+      "price": "38,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0hq4fxkjq.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0HQ4FXKJQ",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0HQ4FXKJQ"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0ddcfjnm1",
+      "name": "Equipo de Sonido portátil para Coche de 7 Pulgadas, versión Mejorada de 2024, Compatible con CarPlay y Android Auto inalámbricos, AirPlay, Sonido estéreo, Control por Voz, conexión WiFi, Bluetooth",
+      "brand": "WEISHAN",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 7\"] 4 tipos de salida de audio. 1. Bluetooth: Conecta «CAR BT» a los altavoces de tu coche a través de Bluetooth.",
+      "price": "40,84 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0ddcfjnm1.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0DDCFJNM1",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0DDCFJNM1"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0hq4h7gj9",
+      "name": "Autorradio 2 DIN 7 Pulgadas Compatible con CarPlay y Android Auto, Negro",
+      "brand": "Genérico",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 7\"] Autorradio 2 DIN con pantalla táctil LCD de 7 pulgadas y resolución de 1024 x 600 píxeles, que permite controlar todas sus funciones con facilidad",
+      "price": "41,97 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0hq4h7gj9.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0HQ4H7GJ9",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0HQ4H7GJ9"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0cltz6rlw",
+      "name": "Pantalla de Coche con Carplay y Android Auto inalambricos: Radio Portatil de 7 Pulgadas con Pantalla Tactil, Mirror Link - Carplay Pantalla para Coche con Control de Asistencia por Voz/Sin Instalacion",
+      "brand": "XINROAM",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 7\"] Carplay Inalambrico/Android Auto. Mirror Link para iOS y Android.",
+      "price": "43,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0cltz6rlw.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0CLTZ6RLW",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0CLTZ6RLW"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b07gt1bnl9",
+      "name": "PolarLander Wired Carplay Android Auto Autoradio 2 DIN Car 7 Pulgadas LCD de Pantalla táctil Car Radio Player Bluetooth Car Audio Support Cámara de visión Trasera",
+      "brand": "PolarLander",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 7\"] CarPlay y Android Auto y Mirror Link: el estéreo de coche de doble din es compatible con CarPlay y Android Auto.",
+      "price": "49,90 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b07gt1bnl9.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B07GT1BNL9",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B07GT1BNL9"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0d1ghkbbd",
+      "name": "Radio estéreo doble DIN 7 pulgadas con pantalla, CarPlay Android Auto Mirror-Link, cámara de radio Bluetooth USB",
+      "brand": "Niniang",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 7\"] Carplay y Android Auto: simplemente conéctese con su teléfono inteligente que le permite acceder a navegación de mapas, contactos telefónicos, correos electrónicos, notificaciones, lo que le permite hacer llamadas telefónicas, navegar…",
+      "price": "50,55 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0d1ghkbbd.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0D1GHKBBD",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0D1GHKBBD"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0cz6tp1k8",
+      "name": "Radio Coche 1 DIN con CarPlay y Android Auto - Pantalla Táctil de 7 Pulgadas, Autoradio con Bluetooth y Soporte Mirror Link para iOS/Android con Cámara de Respaldo",
+      "brand": "XINROAM",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 7\"] Carplay y Android Auto: la radio coche bluetooth pantalla incorporada Carplay y Android Auto deben conectarse mediante un cable USB original.",
+      "price": "50,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0cz6tp1k8.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0CZ6TP1K8",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0CZ6TP1K8"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0gjs7nwcs",
+      "name": "Pantalla Coche 9\" con Carplay y Android Auto Inalámbrico, Cámara Trasera",
+      "brand": "ElecPod",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 9\"] Pantalla Carplay Coche de 9 Pulgadas: Esta pantalla táctil portátil de 9 pulgadas es compatible con Carplay inalámbrico y Android Auto inalámbrico, además de mirroring de pantalla inalámbrica desde tu smartphone.",
+      "price": "50,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0gjs7nwcs.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0GJS7NWCS",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0GJS7NWCS"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0fhx1z1ln",
+      "name": "Radio estéreo para Coche 2 DIN con Bluetooth, CarPlay inalámbrico y Android Auto, Pantalla táctil HD de 7 Pulgadas, Radio FM RDS, Tipo C, Carga rápida, micrófono y cámara de visión Trasera",
+      "brand": "Wootootoo",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 7\"] Compatibilidad con CarPlay y Android Auto. Stereo Auto BT. Esta radio automóvil 2 din con BT se integra perfectamente con Bluetooth integrado para llamadas manos libres y reproducir música BT en cualquier momento y lugar.",
+      "price": "51,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0fhx1z1ln.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0FHX1Z1LN",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0FHX1Z1LN"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0ghqt2mxr",
+      "name": "Rimoody Radio Coche Portátil 7 Pulgadas con CarPlay y Android Auto Inalámbrico - Pantalla Táctil IPS HD, AirPlay/Android Cast, Transmisor FM, Bluetooth para Coche",
+      "brand": "Rimoody",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 7\"] CarPlay y Android Auto Inalámbrico en Pantalla HD de 7 Pulgadas. Duplicación de Pantalla y Conectividad Multifunción.",
+      "price": "52,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0ghqt2mxr.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0GHQT2MXR",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0GHQT2MXR"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0cbs52x7z",
+      "name": "Radio estéreo para Coche 1 DIN Compatible con Carplayer y Android Auto, Pantalla táctil capacitiva de 9 Pulgadas Compatible con Bluetooth Mirror Link Radio FM USB AUX (con cámara 4LED+SWC)",
+      "brand": "BOOMBOOST",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 9\"] Bluetooth y micrófono trasero y entrada USB: conéctese a su teléfono con bluetooth, puede lograr manos libres, escuchar la música de su teléfono.",
+      "price": "59,90 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0cbs52x7z.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0CBS52X7Z",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0CBS52X7Z"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0h329rf5q",
+      "name": "ESSGOO 7 Pulgadas Pantalla Carplay Coche Android Auto con Cámara Trasera HD",
+      "brand": "ESSGOO",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 7\"] Pantalla táctil HD de 7 pulgadas + Salvapantallas inteligente. CarPlay y Android Auto inalámbricos + Wi-Fi de 2,4/5 GHz.",
+      "price": "63,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0h329rf5q.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0H329RF5Q",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0H329RF5Q"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0f3hxr699",
+      "name": "Autorradio 1-DIN con Cableado Apple CarPlay y Android Auto, Pantalla Táctil HD de 9 Pulgadas, Bluetooth, Mirror Link/Control en el Volante/FM/Am, Radio Estéreo con Entrada para Micrófono",
+      "brand": "Motorsi",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 9\"] Pantalla Táctil HD de 9 Pulgadas para una Claridad y un Control óptimos. Perfecta Integración con Cableado Apple CarPlay y Android Auto.",
+      "price": "69,98 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0f3hxr699.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0F3HXR699",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0F3HXR699"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0fkmdf1dw",
+      "name": "AWESAFE 9”Pantalla CarPlay Coche/Android Auto/MirrorLink Inalámbrico, Admite Bluetooth/Mirror Link/Control por Voz/USB/TF/AUX",
+      "brand": "AWESAFE",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 9\"] Conectividad Inalámbrica Total y Pantalla Táctil de 7 Pulgadas: Disfruta de una integración perfecta con tu smartphone a través de CarPlay y Android Auto totalmente inalámbricos, sin necesidad de cables.",
+      "price": "69,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0fkmdf1dw.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0FKMDF1DW",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0FKMDF1DW"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0drcn5brw",
+      "name": "Pantalla Carplay para Coche Compatible con Carplay Inalámbrico y Android Auto, Pantalla CarPlay de 10.26 Pulgadas con Transmisión FM, Navegación GPS, Bluetooth y Control de Voz",
+      "brand": "ETLFUCyber",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 10,26\"] Transmisión Bluetooth y FM. El transmisor FM integrado te permite sincronizar la pantalla CarPlay de 10.26 pulgadas con la radio de tu coche sintonizando la misma frecuencia FM.",
+      "price": "69,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0drcn5brw.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0DRCN5BRW",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0DRCN5BRW"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0dyf8tw7n",
+      "name": "Android 13 Estéreo para Automóvil Inalámbrico Carplay Android Auto, Radio para Automóvil con Pantalla Táctil de 9 Pulgadas 2Din GPS WiFi Bluetooth Cámara de Respaldo",
+      "brand": "Yominerr",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 9\"] Android 13 Estéreo para Automóvil Inalámbrico Carplay Android Auto, Radio para Automóvil con Pantalla Táctil de 9 Pulgadas 2Din GPS WiFi Bluetooth Cámara de Respaldo",
+      "price": "72,00 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0dyf8tw7n.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0DYF8TW7N",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0DYF8TW7N"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0fwkc6j35",
+      "name": "LAMTTO Pantalla CarPlay Coche Inalámbrica de 9 Pulgadas para Apple CarPlay & Android Auto, Autoradio Portátil Car Play con Pantalla Táctil, GPS, Bluetooth, Mirror Link, FM, Siri & G00gle Asistente",
+      "brand": "LAMTTO",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 9\"] Pantalla CarPlay de 9 pulgadas con Mirror Link y pantalla táctil HD. CarPlay y Android Auto inalámbricos.",
+      "price": "72,16 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0fwkc6j35.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0FWKC6J35",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0FWKC6J35"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0g1mt4r89",
+      "name": "ESSGOO 10.26 Pulgadas Pantalla CarPlay Coche Android Auto",
+      "brand": "ESSGOO",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 10,26\"] Pantalla Táctil HD de 10 Pulgadas con Resolución 1600×600. 10 Pulgadas CarPlay y Android Auto Inalámbricos.",
+      "price": "72,19 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0g1mt4r89.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0G1MT4R89",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0G1MT4R89"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0hdnmrtb2",
+      "name": "Pantalla CarPlay y Android Auto Coche Inalámbrica de Portátil,Radio 9 Pulgadas Táctil HD con Navegación GPS,Mirror Link & Control por Voz,Bluetooth Manos Libres, Transmisor FM, AirPlay",
+      "brand": "Moobsnry",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 9\"] CarPlay y Android Auto inalámbricos. Mapas en línea y navegación GPS en tiempo real.",
+      "price": "75,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0hdnmrtb2.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0HDNMRTB2",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0HDNMRTB2"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0d62clvyq",
+      "name": "Hodozzy Radio Portátil Coche Carplay Android Auto Inalámbrica,Pantalla Táctil IPS de 10,26 Pulgadas con Carplay, Manos Libres Bluetooth, Mirrorlink, FM Transmisor,Portable Pantalla Coche TF/AUX",
+      "brand": "Hodozzy",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 10,26\"] Gran Pantalla Táctil IPS: La pantalla del coche carplay adopta 10,26 pulgadas, pantalla de alta resolución 1080P, con buen efecto de visualización, colores brillantes y textura de imagen fina, asegurándose de que puede ver todos los…",
+      "price": "75,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0d62clvyq.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0D62CLVYQ",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0D62CLVYQ"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0fbqw42p6",
+      "name": "Pantalla CarPlay 9\" HD, inalámbrica Apple CarPlay & Android Auto, SuperLink/AirPlay, Dashcam 4K + Cámara Trasera 1080P, grabación en Bucle 64GB, Bluetooth, Siri",
+      "brand": "aphqua",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 9\"] Compartir pantalla dual inalámbricamente: libertad total. Cámaras 4K + 1080P impermeables con visión nocturna.",
+      "price": "79,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0fbqw42p6.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0FBQW42P6",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0FBQW42P6"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0f29kn4w1",
+      "name": "Pantalla Portátil sin Cable 10.26\" CarPlay para Coche, Compatible con Apple CarPlay & Android Auto,con Dash CAM Frontal 4K y Trasera 1080P,Mirror Link,Grabación en Bucle,Audio BT,FM,GPS,Siri",
+      "brand": "Wonsidary",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 10,26\"] Brillo Adaptativo y Pantalla Personalizable. Cámaras Frontal 4K + Trasera 1080P para Máxima Seguridad.",
+      "price": "79,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0f29kn4w1.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0F29KN4W1",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0F29KN4W1"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0gjs284y9",
+      "name": "ESSGOO 10.26 Pulgadas Pantalla Carplay Coche Android Auto Cámara de Reversa",
+      "brand": "ESSGOO",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 10,26\"] Pantalla Táctil HD de 10 Pulgadas con Resolución 1600×600. 10 Pulgadas CarPlay y Android Auto Inalámbricos.",
+      "price": "83,35 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0gjs284y9.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0GJS284Y9",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0GJS284Y9"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0dydkvwhq",
+      "name": "Android 13 2GB+32GB 1 DIN Radio Coche Universal con Pantalla Táctil y Giratoria de 10 Pulgadas, con CarPlay/AndroidAuto/Mirror Link, WiFi/GPS/Bluetooth/RDS/USB/FM/Mandos del Volante",
+      "brand": "Hexinex",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 10\"] Disfrute de CarPlay/Android Auto Inalámbrico: Conexión automática al arrancar el vehículo en <5 segundos, transmisión estable hasta 10 metros de distancia.",
+      "price": "85,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0dydkvwhq.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0DYDKVWHQ",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0DYDKVWHQ"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0f1sbhx86",
+      "name": "Haudio 9 Pulgadas Radio Coche 2 DIN,CarPlay Inalámbrico y Android Auto",
+      "brand": "Haudio",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 9\"] Compatible con CarPlay y Android Auto inalámbricos. Bluetooth 5.0 para coche. Nuestras radios de coche incorporan la avanzada tecnología Bluetooth 5.0.",
+      "price": "89,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0f1sbhx86.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0F1SBHX86",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0F1SBHX86"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0f6283pcj",
+      "name": "Haudio Estéreo para Automóvil 2 DIN con Apple CarPlay y Android Auto, Pantalla IPS 10.1 Pulgadas Admite 25 Juegos UI, Radio para Auto con Cámara Trasera, Mirror Link, Control Voz, SCW/FM/Am/RDS 2+64G",
+      "brand": "Haudio",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 10,1\"] Aplicación Multifuncional. El receptor de AV Haudio 2din carplay integra navegación GPS, cámara de marcha atrás AHD de 720P con un ángulo de visión amplio de 140° para una marcha atrás segura.",
+      "price": "90,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0f6283pcj.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0F6283PCJ",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0F6283PCJ"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0fcmbn2sy",
+      "name": "Volam 10.25 Pulgadas Pantalla Coche Inalámbrico Carplay con Netflix YouTube/TikTok,Carplay y Android Auto,pantalla carplay coche con 1080P Cámara de marcha atrás,Navegador GPS,2.4G/5G WLAN Bluetooth",
+      "brand": "Volam",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 10,25\"] CarPlay de Apple y Android para el coche: Volam CarPlay conecta tu smartphone a CarPlay/Android inalámbrico para el coche a través de una conexión Bluetooth inalámbrica para sincronizar navegación, llamadas, música, etc.",
+      "price": "94,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0fcmbn2sy.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0FCMBN2SY",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0FCMBN2SY"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0fn6wj92c",
+      "name": "AWESAFE Android [2GB+32GB] Radio Coche con Pantalla Táctil 9 Pulgadas para Peugeot 308/408 2007-2013, Autoradio con Carplay/Android auto/WiFi/Bluetooth/GPS/FM/RDS, Admite Mandos Volante y Aparcamiento",
+      "brand": "AWESAFE",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla específica · confirma modelo, año y versión"
+      ],
+      "note": "[Pantalla 9\"] Carplay/Android Auto inalámbrico. Radio Android para Peugeot 308/408.",
+      "price": "99,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0fn6wj92c.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0FN6WJ92C",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0FN6WJ92C"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0g2x7yp64",
+      "name": "Pantalla CarPlay de 11.26\" para Coche, Integrado con Netflix/YouTube/TikTok, Estéreo de Coche con Pantalla Táctil para Apple CarPlay y Android Auto, Control por Voz, Actualización OTA",
+      "brand": "Wonsidary",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 11,26\"] CarPlay y Android Auto Inalámbricos. Pantalla Ultra Panorámica HD de 11.26\".",
+      "price": "99,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0g2x7yp64.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0G2X7YP64",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0G2X7YP64"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0frfn6vkd",
+      "name": "【4+64G】 Hodozzy Android 15 Radio Coche 1 DIN con Removible Pantalla de 10 Pulgadas con Carplay Inalámbrica Android Auto,Radio Coche Bluetooth 5.0 con DSP RDS FM USB WiFi GPS+ Cámara de Visión Trasera",
+      "brand": "Hodozzy",
+      "category": "pantallas-carplay",
+      "cars": [],
+      "fitment": [
+        "Pantalla universal · comprueba medidas, conexiones y hueco"
+      ],
+      "note": "[Pantalla 10\"] ►. Carplay inalámbrico & Android Auto. ►. Android 1 Din 4+64G Pantalla Giratoria.",
+      "price": "209,99 €",
+      "query": "pantalla android carplay coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0frfn6vkd.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0FRFN6VKD",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0FRFN6VKD"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0cmtq8c4j",
+      "name": "JZK 4X Luz Ambiental USB Luz USB Coche Portátiles Luces USB Interior Coche, Luces de Ambiente, LED luz Nocturna USB pequeña inalámbrica, 5 V USB LED para Interior Coche, Morada, Azul, Roja y Amarilla",
+      "brand": "JZK",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] El paquete incluye: 4 unidades mini LED luces USB de 4 colores diferentes: rosa-púrpura, azul, amarillo, rojo.",
+      "price": "6,29 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0cmtq8c4j.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0CMTQ8C4J",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0CMTQ8C4J"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0cmcb5twx",
+      "name": "QUARKZMAN Tira De Luces LED Decorativa Blanco 4pcs para Coche Camión",
+      "brand": "QUARKZMAN",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Decoración personalizada La tira de luces LED está hecha de material impermeable y flexible con un diseño de luz fija, lo que le brinda una decoración de moda a tu dispositivo automotriz.",
+      "price": "6,78 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0cmcb5twx.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0CMCB5TWX",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0CMCB5TWX"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0cgd773xq",
+      "name": "URAQT Luz Ambiental USB, 6Pcs Luz USB Coche, Portátiles Luces USB Interior Coche, Luces de Ambiente LED, Plug-in 5V Mini Kit Luces Ambiente (Rojo/Azul/Rosa/Blanco/Azul Hielo/Violeta)",
+      "brand": "URAQT",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Ahorro de energía. La luz ambiental LED USB no irritará sus ojos, iluminación interna de 5v, consumo de energía ultrabajo, ahorro de energía y protección del medio ambiente.",
+      "price": "6,99 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0cgd773xq.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0CGD773XQ",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0CGD773XQ"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0c4y5nczq",
+      "name": "URAQT Luz Interior del Coche, 2Pcs LED Táctil RGB Ajustable 7 Colores, Sensible al Tacto, Control de Voz, 2 Modos Ajuste para Iluminación de Maletero",
+      "brand": "URAQT",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Luz Ambiente Coche. RGB Ajustable Luces Coche adopta un diseño de interruptor táctil, que puede transmitir luz con solo tocar un botón, sin deslumbrar ni afectar la conducción.",
+      "price": "7,99 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0c4y5nczq.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0C4Y5NCZQ",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0C4Y5NCZQ"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b00l4ch196",
+      "name": "S SUMEX Tiras de Luces Led 12V 2 x 10CM Flexible 100% Impermeable Iluminación Ambiental Coche Color Azul",
+      "brand": "SUMEX",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] 2 Tiras LED de 10cm cada una, son perfectas para una iluminación ambiental dentro del vehículo",
+      "price": "7,99 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b00l4ch196.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B00L4CH196",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B00L4CH196"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b08qck2lsy",
+      "name": "CTRICALVER Luces LED de ambiente y USB para coche (5 unidades: rojo, rosa, morado, azul, blanco, azul hielo, verde)",
+      "brand": "CTRICALVER",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Diferentes colores: juego de luz ambiental USB, la luz se difunde suavemente, no es demasiado brillante y no obstaculiza la conducción nocturna 6 piezas Rojo, rosa violeta, azul, blanco, azul hielo, verde incluido.",
+      "price": "8,79 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b08qck2lsy.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B08QCK2LSY",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B08QCK2LSY"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b08mb39xg6",
+      "name": "Fibra óptica Impermeable Coche Lado Brillo iluminación led Fibra óptica Banda Coche atmósfera Interior neón Luces frías 1 Metro (3.28ft)",
+      "brand": "QAUBEN",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Neón] ▸. Uso. Para todo tipo de motores de iluminación y decoración de fibra óptica LED, como lámparas colgantes de fibra óptica, decoración de interiores AR, adornos artísticos en diseño gráfico y artístico 3D; decoración de luces de fibra…",
+      "price": "8,98 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b08mb39xg6.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B08MB39XG6",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B08MB39XG6"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b09l8nnk2l",
+      "name": "Retoo Luces LED para coche, 4 tiras RGB, 48 LED, 8 colores, mando, 12 V",
+      "brand": "Retoo",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Iluminación interior RGB - Juego de iluminación ambiental para coche compuesto por 4 tiras con 48 LED en total.",
+      "price": "8,99 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b09l8nnk2l.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B09L8NNK2L",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B09L8NNK2L"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0cgv4ff6v",
+      "name": "URAQT 120 LED Tiras Luces para Automóvil,Paquete 1 Luces Cabina Universales,12V Tiras Luces Interiores Interruptor Cable Extensión,Autocaravanas,Cocinas,Baños,Luces Gabinetes 30CM,White-120-1",
+      "brand": "URAQT",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] 2 Formas Instalación. La tira de luz LED para interiores de 12 V incluye instalación adhesiva de doble cara e instalación de tornillos; fácil de conectar e instalar, método uno: pegue el adhesivo de doble cara en la superficie lisa del…",
+      "price": "8,99 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0cgv4ff6v.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0CGV4FF6V",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0CGV4FF6V"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0dpl5pdx3",
+      "name": "A ABSOPRO Tira Luminosa LED Flexible Azul 1pc Para Coche 12v 1m",
+      "brand": "ABSOPRO",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Reemplazo - Para el tablero de instrumentos, necesitas alrededor de 2.5m~5m (dependiendo del tamaño de tu coche), para la puerta del coche, necesitas alrededor de 1.5m.",
+      "price": "8,99 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0dpl5pdx3.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0DPL5PDX3",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0DPL5PDX3"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b09s3bqj7w",
+      "name": "X AUTOHAUX Tira EL Neón Brillante Verde 1pc Para Coche Interior Decorativa",
+      "brand": "X AUTOHAUX",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Neón] Material duradero: hecho de metal y plástico que es suave, duradero y de larga vida útil. Montaje: es un producto universal que se acopla a la mayoría de la decoración del coche.",
+      "price": "9,69 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b09s3bqj7w.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B09S3BQJ7W",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B09S3BQJ7W"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0dpl5cnhx",
+      "name": "A ABSOPRO Luz De Tira LED Flexible 300cm Púrpura Para Coche EL",
+      "brand": "ABSOPRO",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Reemplazo - Para el tablero de instrumentos, se necesitan aproximadamente 2.5m~5m (dependiendo del tamaño de su coche), para la puerta del coche, se necesitan aproximadamente 1.5m.",
+      "price": "9,69 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0dpl5cnhx.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0DPL5CNHX",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0DPL5CNHX"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0ctbny1kc",
+      "name": "Maciun Tira de luz interior de coche, tira de luces LED suaves para el interior del coche, USB | Tira de luz LED multicolor para interior de coche, accesorios de neón USB para consola central y",
+      "brand": "Maciun",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Neón] Material duradero: disfruta de un ambiente sereno con una suave emisión de luz de nuestra tira de luz interior del coche.",
+      "price": "9,87 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0ctbny1kc.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0CTBNY1KC",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0CTBNY1KC"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b09kt2wqlv",
+      "name": "NewL Proyector LED Logo Personalizado Luces de Bienvenida de Cortesía Escalón Puerta Coche (2 Piezas)",
+      "brand": "NewL",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Este es un par (2 piezas) de luz de proyector de logotipo personalizado para puerta de automóvil",
+      "price": "9,99 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b09kt2wqlv.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B09KT2WQLV",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B09KT2WQLV"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0dpl5l57s",
+      "name": "A ABSOPRO Cable EL LED Neón Rojo 1pc Para Coche Interior Flexible 4m",
+      "brand": "ABSOPRO",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Neón] Reemplazo - Para el tablero de instrumentos, se necesitan aproximadamente 2.5m~5m (dependiendo del tamaño de tu coche), para la puerta del coche, se necesitan aproximadamente 1.5m.",
+      "price": "11,49 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0dpl5l57s.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0DPL5L57S",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0DPL5L57S"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b09l7psxxh",
+      "name": "NewL 4 Piezas Láminas Logo Intercambiables Proyector LED Puerta Coche",
+      "brand": "NewL",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Si tienes un faro de puerta de coche y solo deseas una película de logotipo personalizada, órdenalo aquí",
+      "price": "16,99 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b09l7psxxh.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B09L7PSXXH",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B09L7PSXXH"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b07rzb44ql",
+      "name": "Govee Luces LED RGB para coche, aplicación y sincronización de música, 12 V",
+      "brand": "Govee",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Decora el Coche: Govee Tira LED para coche viene con 4 partes de 22 centímetros tiras, 16 millones de colores que soporta viarios modos de bricolaje.",
+      "price": "22,99 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b07rzb44ql.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B07RZB44QL",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B07RZB44QL"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b00ka3lgr8",
+      "name": "Lychee 7 Kit LED Color Bajo Glow Coche Sistema Underbody Luces de neón w/Sonido Función Activa y Control Remoto inalámbrico (90 cm x 2 & 60 cm x 2)",
+      "brand": "Lychee",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Neón] Modo de activación de sonido, los LED se iluminan de acuerdo a ritmo de la música. Produce 7 colores: azul, verde, púrpura, rojo, trullo, blanco y amarillo",
+      "price": "27,99 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b00ka3lgr8.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B00KA3LGR8",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B00KA3LGR8"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0b3jgm48r",
+      "name": "Nilight 4 Luces USB para Interior de Coche, 48 Luces LED RGB con Control de aplicación, Sonido de música, Modo Activo Debajo del salpicadero, Luces ambientales, diseño de 2 líneas para Coche, camión,",
+      "brand": "Nilight",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Iluminación ambiental] Función sensible al sonido: el modo de música y el modo de micrófono permiten que las luces LED del coche sincronicen la música dentro de la aplicación inteligente, y también sincronicen los sonidos exteriores a través del micrófono…",
+      "price": "29,64 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0b3jgm48r.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0B3JGM48R",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0B3JGM48R"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0bzrsjry8",
+      "name": "Riloer 12V Coche RGB LED Chasis Tira de Luz, Neón Automóvil Bajo Resplandor Chasis Barra de Luz Tira Ambiente Decorativo, con Control Remoto de Brillo y Música",
+      "brand": "Riloer",
+      "category": "iluminacion-ambiente",
+      "cars": [],
+      "fitment": [
+        "Iluminación · universal, revisa alimentación 12 V y medidas"
+      ],
+      "note": "[Neón] Función multitri: el control de brillo solo es adecuado para LED blancos. Fácil de instalar: - fácil de instalar, empaquetado con cinta adhesiva de doble cara, disponible para la instalación.",
+      "price": "41,29 €",
+      "query": "luces ambiente coche led",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0bzrsjry8.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0BZRSJRY8",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0BZRSJRY8"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0fx4wdd5r",
+      "name": "Hertz X 165 Fan Edition par de altavoces coaxiales de 2 vías 165 mm 300 W de pico",
+      "brand": "Hertz",
+      "category": "audio-video",
+      "cars": [],
+      "fitment": [
+        "Audio · verifica medidas, impedancia y conexiones"
+      ],
+      "note": "[Audio] Rendimiento y calidad de sonido El Hertz x 165 FE ofrece una potencia máxima de hasta 200 W, con un rodillo de cobre puro de 25 mm móvil que garantiza un alto manejo dinámico.",
+      "price": "34,90 €",
+      "query": "audio y CarPlay para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0fx4wdd5r.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0FX4WDD5R",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0FX4WDD5R"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0f67cp9zd",
+      "name": "CarlinKit 2025 Adaptador inalámbrico CarPlay y Android para coche, mejora la conexión con cable a inalámbrico, Plug & Play con USB-A/Type-C, funciona con iPhone iOS 10+ y Android 11.0+",
+      "brand": "Carlinkit",
+      "category": "audio-video",
+      "cars": [],
+      "fitment": [
+        "Adaptador · comprueba compatibilidad con coche y teléfono"
+      ],
+      "note": "[CarPlay inalámbrico] Un segundo para cambiar a inalámbrico, libera la libertad de conducir: fácil actualización del CarPlay/Android con cable original del coche, enchufa en el USB para conectarse de forma inalámbrica, completamente libre de las cadenas del…",
+      "price": "39,99 €",
+      "query": "audio y CarPlay para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0f67cp9zd.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0F67CP9ZD",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0F67CP9ZD"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0gf8hz4r6",
+      "name": "Ottocast Mini Core Adaptador inalámbrico CarPlay y Android Auto, Cambio de dispositivo con un clic, WiFi 6/BT 5.4 Conexión automática en 5s, Plug & Play para el 98% de coches con CarPlay/AA de fábrica",
+      "brand": "OTTOCAST",
+      "category": "audio-video",
+      "cars": [],
+      "fitment": [
+        "Adaptador · comprueba compatibilidad con coche y teléfono"
+      ],
+      "note": "[CarPlay inalámbrico] Cambio en un clic: se acabó la \"pelea de móviles\". WiFi 6 y BT 5.4: adiós retrasos, hola fluidez.",
+      "price": "39,99 €",
+      "query": "audio y CarPlay para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0gf8hz4r6.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0GF8HZ4R6",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0GF8HZ4R6"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0f5wsbj26",
+      "name": "JBL Stage1 GEN2 62F 6.5 in / 16.5 cm Altavoces Coaxiales 2 Vías Coche",
+      "brand": "JBL",
+      "category": "audio-video",
+      "cars": [],
+      "fitment": [
+        "Audio · verifica medidas, impedancia y conexiones"
+      ],
+      "note": "[Audio] Graves con cuerpo y agudos claros: El cono Plus One de polipropileno tiene más superficie que un altavoz del mismo tamaño y el tweeter PEI reproduce voces y detalles de 55 Hz a 20 kHz",
+      "price": "48,40 €",
+      "query": "audio y CarPlay para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0f5wsbj26.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0F5WSBJ26",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0F5WSBJ26"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0g51527xd",
+      "name": "CAMECHO Dashcam 4K con GPS, Doble Cámara de Coche 3.16 Pulgadas, 4K Delantera + 2K Trasera, Ángulo 150°+120°, WiFi Doble Banda 2.4/5.8GHz, ADAS, Grabación Cíclica, G-Sensor",
+      "brand": "CAMECHO",
+      "category": "audio-video",
+      "cars": [],
+      "fitment": [
+        "Cámara · verifica alimentación, soporte y tarjeta"
+      ],
+      "note": "[Dashcam] Seguimiento 4K Ultra HD y GPS : 2 cámaras funcionales, cámara frontal K 150 ° 4, cámara trasera 2K 120 ° ángulo de visión.Super HD 4K dashcam captura imágenes nítidas a través de la aplicación.",
+      "price": "48,99 €",
+      "query": "audio y CarPlay para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0g51527xd.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0G51527XD",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0G51527XD"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0g511x34r",
+      "name": "OTTOCAST Mini Pico 2026 Adaptador Inalámbrico CarPlay y Android Auto, Botón Inteligente, 5-8s Conexión Automática, USB-A/C, Actualización OTA, Conexión con Cable a Inalámbrica (iOS 10+/Android 11+)",
+      "brand": "OTTOCAST",
+      "category": "audio-video",
+      "cars": [],
+      "fitment": [
+        "Adaptador · comprueba compatibilidad con coche y teléfono"
+      ],
+      "note": "[CarPlay inalámbrico] CarPlay y Android Auto Inalámbricos – Plug & Play. Botón Inteligente – Control Fácil con un Solo Toque.",
+      "price": "51,43 €",
+      "query": "audio y CarPlay para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0g511x34r.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0G511X34R",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0G511X34R"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0053pe21a",
+      "name": "Alpine SWG-1044 Subwoofer Pasivo,150W, Serie G, 10\" (25 cm)",
+      "brand": "Alpine",
+      "category": "audio-video",
+      "cars": [],
+      "fitment": [
+        "Audio · verifica medidas, impedancia y conexiones"
+      ],
+      "note": "[Audio] Marco de acero de buceo profundo de calibre pesado. Entrada de potencia nominal de 150 vatios RMS",
+      "price": "66,70 €",
+      "query": "audio y CarPlay para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0053pe21a.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0053PE21A",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0053PE21A"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0gkgsbwwh",
+      "name": "70mai M310 Plus 4K - Cámara de salpicadero frontal para coche, 2160P Mini Dash Cam con rotación de 360°, WiFi y sensor G, súper visión nocturna y WDR, apertura F1.55, monitorización de aparcamiento",
+      "brand": "70mai",
+      "category": "audio-video",
+      "cars": [],
+      "fitment": [
+        "Cámara · verifica alimentación, soporte y tarjeta"
+      ],
+      "note": "[Dashcam] Mini y flexible de instalar. La 70mai Dashcam M310 Plus es una cámara de salpicadero 4K sin pantalla con una carcasa extremadamente compacta (92,6 × 43,1 × 46,5 mm) que no interfiere con el interior de tu vehículo y no te distrae…",
+      "price": "69,99 €",
+      "query": "audio y CarPlay para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0gkgsbwwh.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0GKGSBWWH",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0GKGSBWWH"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b097h8gf34",
+      "name": "JBL Stage 102 10 in / 25 cm Subwoofer para Coche Pasivo",
+      "brand": "JBL",
+      "category": "audio-video",
+      "cars": [],
+      "fitment": [
+        "Audio · verifica medidas, impedancia y conexiones"
+      ],
+      "note": "[Audio] Bobina ventilada de larga duración: Disipa el calor bajo carga elevada, reduciendo la distorsión y prolongando la vida útil del altavoz subwoofer en cualquier equipo de coche",
+      "price": "89,95 €",
+      "query": "audio y CarPlay para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b097h8gf34.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B097H8GF34",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B097H8GF34"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0gtlsk1cz",
+      "name": "Baseus VD1 Pro Dashcam Coche Delantero Trasero 4K/1080P",
+      "brand": "Baseus",
+      "category": "audio-video",
+      "cars": [],
+      "fitment": [
+        "Cámara · verifica alimentación, soporte y tarjeta"
+      ],
+      "note": "[Dashcam] Nota importante sobre la fuente de alimentación: cómo funciona la grabación: funciona con batería y soporte solar solo para monitoreo de estacionamiento y grabación controlada por eventos.",
+      "price": "119,99 €",
+      "query": "audio y CarPlay para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0gtlsk1cz.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0GTLSK1CZ",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0GTLSK1CZ"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b0d2q5m35y",
+      "name": "UGREEN Soporte Móvil Coche MagSafe 360° Rotación Suporte Telemovel Carro",
+      "brand": "UGREEN",
+      "category": "interior-accesorios",
+      "cars": [],
+      "fitment": [
+        "Soporte · verifica rejilla, móvil y fijación"
+      ],
+      "note": "[Interior] Fuerza Magnética Superior UGREEN soporte movil coche magsafe para coche cuenta con 20 imanes N52 integrados de gran potencia, que proporcionan una fuerza magnética muy superior a la de los soportes tradicionales.",
+      "price": "11,99 €",
+      "query": "accesorios de interior para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b0d2q5m35y.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B0D2Q5M35Y",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B0D2Q5M35Y"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b082bh9thf",
+      "name": "S SUMEX Funda Volante Cuero Real Negro para Coser Cubre Volante Universal 37-38 cm, Kit con Hilo e Instrucciones, Protector Volante Coche",
+      "brand": "SUMEX",
+      "category": "interior-accesorios",
+      "cars": [],
+      "fitment": [
+        "Funda de volante · verifica diámetro 37-39 cm"
+      ],
+      "note": "[Interior] CUERO REAL, NO SINTÉTICO: Funda volante fabricada en cuero auténtico para ofrecer mejor tacto, mayor durabilidad y un acabado más premium en el interior del coche.",
+      "price": "12,99 €",
+      "query": "accesorios de interior para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b082bh9thf.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B082BH9THF",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B082BH9THF"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b075r5vg93",
+      "name": "UGREEN Soporte Móvil Coche por Gravedad",
+      "brand": "UGREEN",
+      "category": "interior-accesorios",
+      "cars": [],
+      "fitment": [
+        "Soporte · verifica rejilla, móvil y fijación"
+      ],
+      "note": "[Interior] Material de Alta Calidad Este soporte móvil coche hecho de aleación de aluminio mate y bien oxidada.",
+      "price": "13,59 €",
+      "query": "accesorios de interior para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b075r5vg93.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B075R5VG93",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B075R5VG93"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b00hvw8jbm",
+      "name": "S SUMEX Full Leather Funda de Volante para Coche Diámetros de 37-39 cm Color Negro",
+      "brand": "SUMEX",
+      "category": "interior-accesorios",
+      "cars": [],
+      "fitment": [
+        "Funda de volante · verifica diámetro 37-39 cm"
+      ],
+      "note": "[Interior] Mejora el Agarre y la Comodidad: Superficie antideslizante que ofrece un mejor control del volante y reduce la fatiga en viajes largos.",
+      "price": "19,24 €",
+      "query": "accesorios de interior para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b00hvw8jbm.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B00HVW8JBM",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B00HVW8JBM"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b015rgtq0q",
+      "name": "Sparco Pomo de Cambio de Marchas Manual Lazio Cromado/Negro Universal",
+      "brand": "Sparco",
+      "category": "interior-accesorios",
+      "cars": [],
+      "fitment": [
+        "Pomo · verifica rosca y adaptadores"
+      ],
+      "note": "[Interior] Pomo de cambio de marchas de la marca Sparco modelo Lazio Cromado y Negro. Muy fácil de instalar, viene con instrucciones de montaje y lo necesario para su correcta instalación.",
+      "price": "19,99 €",
+      "query": "accesorios de interior para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b015rgtq0q.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B015RGTQ0Q",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B015RGTQ0Q"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b01mrzna64",
+      "name": "Sparco Pomo de Cambio de Marchas Manual Racing Negro Universal",
+      "brand": "Sparco",
+      "category": "interior-accesorios",
+      "cars": [],
+      "fitment": [
+        "Pomo · verifica rosca y adaptadores"
+      ],
+      "note": "[Interior] Pomo de cambio de marchas de la marca Sparco modelo Racing Negro. Muy fácil de instalar, viene con instrucciones de montaje y lo necesario para su correcta instalación.",
+      "price": "28,66 €",
+      "query": "accesorios de interior para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b01mrzna64.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B01MRZNA64",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B01MRZNA64"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b00lmzq5n8",
+      "name": "Omp - Juego 3 Pedales Aluminio Arenado, Tratamiento Antideslizante, Incluye Tornillos de Montaje de Acero, Dimensiones Pedal Freno 60×70 mm y Acelerador 85×120 mm, Acabado Natural",
+      "brand": "Omp",
+      "category": "interior-accesorios",
+      "cars": [],
+      "fitment": [
+        "Pedales · verifica medidas y fijación"
+      ],
+      "note": "[Interior] Producto: Juego completo de 3 pedales OMP de aluminio arenado, incluye pedal de acelerador estándar y montaje con tornillos de acero.",
+      "price": "31,99 €",
+      "query": "accesorios de interior para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b00lmzq5n8.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B00LMZQ5N8",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B00LMZQ5N8"
+        }
+      ]
+    },
+    {
+      "id": "tienda-amz-b004qmazjo",
+      "name": "Sparco SPC OPC04060000 Juego de 3 pedales Racing color plata con logo SPARCO en negro Universales, 150 ml",
+      "brand": "Sparco",
+      "category": "interior-accesorios",
+      "cars": [],
+      "fitment": [
+        "Pedales · verifica medidas y fijación"
+      ],
+      "note": "[Interior] Fabricado en aluminio. Uso permitido para circular en vía pública",
+      "price": "36,49 €",
+      "query": "accesorios de interior para coche",
+      "source": "tienda",
+      "image": "/img/productos/amz-b004qmazjo.webp",
+      "photoKind": "tienda",
+      "photoCredit": null,
+      "asin": "B004QMAZJO",
+      "verifiedAt": "2026-11-05",
+      "links": [
+        {
+          "shop": "Amazon",
+          "label": "Ver en Amazon",
+          "url": "https://www.amazon.es/dp/B004QMAZJO"
+        }
+      ]
+    },
     {
       "id": "tienda-amz-b0gtmbtqf4",
       "name": "Kit de admisión de aire frío con filtro (Rojo), Filtro Directo de Admisión, Tubo de Diámetro 76mm Sistema de Admisión de Aire de Fibra con Tubo",
@@ -255,7 +2051,7 @@
         "Admisión · revisa referencia y motor en la ficha"
       ],
       "note": "Materiales premium resistentes Tubos de aleación de aluminio, adaptadores y abrazaderas antióxido garantizan una durabilidad extrema y un acabado sin decoloración - ideal para un rendimiento duradero en condiciones rigurosas. Optimización Rendimiento Multifunción Mejore drásticamente la respuesta a la aceleración, el par motor y la eficiencia energética con el flujo de aire frío de alta densidad. Incluye codos y tubos rectos para personalización DIY.",
-      "price": "Consultar",
+      "price": "28,99 €",
       "query": "Kit de admisión de aire frío con filtro (Rojo), Filtro Directo de Admisión, Tubo de Diámetro 76mm Sistema de Admisión de Aire de Fibra con Tubo",
       "source": "tienda",
       "image": "/img/productos/amz-b0gtmbtqf4.webp",
@@ -267,7 +2063,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0GTMBTQF4"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0dl5v33s5",
@@ -279,7 +2076,7 @@
         "Escape · revisa referencia y motor en la ficha"
       ],
       "note": "Nota: Se trata de una etapa intermedia de las negociaciones para garantizar la seguridad. Las vías de escape incluyen 2,5 puertas (63 mm), 3,5 puertas (89 mm) y 14,2 puertas (360 mm) Diseño acústico industrial: Silenciador de escape de rendimiento de sonido profundo. Diseño directo para reducir eficazmente el ruido",
-      "price": "Consultar",
+      "price": "48,99 €",
       "query": "2,5\"(63MM) Silenciador de Admisión y Escape Tubo de Silenciador",
       "source": "tienda",
       "image": "/img/productos/amz-b0dl5v33s5.webp",
@@ -291,7 +2088,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0DL5V33S5"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b09zrnczxx",
@@ -303,7 +2101,7 @@
         "Intercooler · revisa referencia y motor en la ficha"
       ],
       "note": "Intercooler con dimensiones del núcleo: 550 x 230 x 65 mm Dimensiones totales: 700 x 230 x 65 mm",
-      "price": "Consultar",
+      "price": "125,00 €",
       "query": "Intercooler 550 x 230 x 65 mm FMIC.EU",
       "source": "tienda",
       "image": "/img/productos/amz-b09zrnczxx.webp",
@@ -315,7 +2113,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B09ZRNCZXX"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b095hcqgmt",
@@ -327,7 +2126,7 @@
         "Suspensión · revisa referencia y motor en la ficha"
       ],
       "note": "【Introducción】MXR-SLC basado en coilovers MXR-SNA, que también es ajustable en altura, pero añade la capacidad de ajuste de amortiguación por un mando en la parte superior del eje. También se hacen para el uso de la calle, pero el control de amortiguación de rebote de 24 niveles le permite la capacidad de marcar perfectamente en su configuración coilover. Usted experimentará una mejor calidad de c 【Aplicación】Para BMW 3 (E46) Sedán de 4 puertas; Para BMW 3 Convertible de 2 puertas (E46); Para BMW 3 Coupé de 2 puertas (E46); Para BMW 3 Touring Wagon 5 puertas/estado (E46)",
-      "price": "Consultar",
+      "price": "274,53 €",
       "query": "maXpeedingrods Suspensión tuning Amortiguadores roscados for BMW E46",
       "source": "tienda",
       "image": "/img/productos/amz-b095hcqgmt.webp",
@@ -339,7 +2138,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B095HCQGMT"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b007g88mpo",
@@ -351,7 +2151,7 @@
         "Muelles · revisa referencia y motor en la ficha"
       ],
       "note": "La solución ideal para su vehículo de carretera para suspender el centrodel coche. Eibach maximiza el manejo y le daa su coche una óptica deportiva. Suspensión hasta 40mm",
-      "price": "Consultar",
+      "price": "206,99 €",
       "query": "Eibach E10-15-011-01-22 Muelles de Suspensión Helicoidales para la Reducción de Vehículos",
       "source": "tienda",
       "image": "/img/productos/amz-b007g88mpo.webp",
@@ -363,7 +2163,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B007G88MPO"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b01lzpyiq6",
@@ -375,7 +2176,7 @@
         "Frenos · revisa referencia y motor en la ficha"
       ],
       "note": "Altura [mm]: 40.3 Producto de calidad",
-      "price": "Consultar",
+      "price": "71,49 €",
       "query": "Brembo 08.7165.1X Rotores de Discos de Frenos",
       "source": "tienda",
       "image": "/img/productos/amz-b01lzpyiq6.webp",
@@ -387,7 +2188,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B01LZPYIQ6"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0fqz1z9t2",
@@ -399,7 +2201,7 @@
         "Volante · revisa referencia y motor en la ficha"
       ],
       "note": "Material de primera calidad: ---- Aluminio y material de primera calidad, antidesgaste, antioxidante y duradero, que garantiza longevidad y confiabilidad en diversas condiciones. Tacto cómodo con la mano: ---- Tamaño adecuado, peso ligero y excelente sensación al tacto, perfecto para aplicaciones deportivas y de carreras.",
-      "price": "Consultar",
+      "price": "45,38 €",
       "query": "RASTKY Volante de Carreras Universal 320 Mm/12,5 Pulgadas Volante Deportivo para Automóvil con Botón de Bocina Accesorio Universal de Aluminio - Empuñ",
       "source": "tienda",
       "image": "/img/productos/amz-b0fqz1z9t2.webp",
@@ -411,7 +2213,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0FQZ1Z9T2"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0fn42wfxd",
@@ -423,7 +2226,7 @@
         "Admisión · revisa referencia y motor en la ficha"
       ],
       "note": "Materiales premium resistentes Tubos de aleación de aluminio, adaptadores y abrazaderas antióxido garantizan una durabilidad extrema y un acabado sin decoloración - ideal para un rendimiento duradero en condiciones rigurosas. Optimización Rendimiento Multifunción Mejore drásticamente la respuesta a la aceleración, el par motor y la eficiencia energética con el flujo de aire frío de alta densidad. Incluye codos y tubos rectos para personalización DIY.",
-      "price": "Consultar",
+      "price": "28,99 €",
       "query": "Kit de admisión de aire frío con filtro (Azul), Filtro Directo de Admisión, Tubo de Diámetro 76mm Sistema de Admisión de Aire de Fibra con Tubo",
       "source": "tienda",
       "image": "/img/productos/amz-b0fn42wfxd.webp",
@@ -435,7 +2238,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0FN42WFXD"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0g2rx2bn7",
@@ -447,7 +2251,7 @@
         "Escape · revisa referencia y motor en la ficha"
       ],
       "note": "Diseño inteligente: Nuestro silenciador tiene un diámetro total de 305 mm y una salida de 63 mm, lo que permite su instalación en una amplia variedad de vehículos y sedanes. Su diseño aerodinámico ayuda a reducir eficazmente el ruido no deseado del motor, lo que se traduce en una conducción más silenciosa y placentera. (Nota: Este silenciador requiere soldadura). Materiales de alta calidad: Este silenciador de escape está fabricado en acero inoxidable de alta calidad, conocido por su excepcional resistencia a la corrosión. A diferencia de otros materiales, el acero inoxidable no se oxida ni se corroe, incluso en condiciones climáticas extremas o en contacto con productos químicos. Estas cual",
-      "price": "Consultar",
+      "price": "39,99 €",
       "query": "Silenciador, Silenciador de Escape para Coche de Acero Inoxidable de 305 mm con Salida de Aire de 63 mm Puntas de Escape Universal de Recto para Una V",
       "source": "tienda",
       "image": "/img/productos/amz-b0g2rx2bn7.webp",
@@ -459,7 +2263,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0G2RX2BN7"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0d59wjjg5",
@@ -471,7 +2276,7 @@
         "Intercooler · revisa referencia y motor en la ficha"
       ],
       "note": "Tamaño del núcleo: 600 x 300 x 76 mm. Tamaño total: 775 x 329 x 84 mm. Entrada/salida: 76 mm/76 mm",
-      "price": "Consultar",
+      "price": "116,00 €",
       "query": "Intercooler de aluminio universal de 600 x 300 x 76 mm de entrada/salida FMIC de 76 mm",
       "source": "tienda",
       "image": "/img/productos/amz-b0d59wjjg5.webp",
@@ -483,7 +2288,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0D59WJJG5"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b001gyomvw",
@@ -495,7 +2301,7 @@
         "Suspensión · revisa referencia y motor en la ficha"
       ],
       "note": "Adecuado para VW Golf 3, Vento 10.91-9.97 (1HXO) und Golf 3 Cabrio (1EXO), außer Modelle mit Allradantrieb oder Variant-Modelle",
-      "price": "Consultar",
+      "price": "239,90 €",
       "query": "JOM 741000 BlueLine suspension cuerpo roscado, VA/HA 40-85 mm, amortiguadores/muelles",
       "source": "tienda",
       "image": "/img/productos/amz-b001gyomvw.webp",
@@ -507,7 +2313,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B001GYOMVW"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b09vxsnkpn",
@@ -519,7 +2326,7 @@
         "Muelles · revisa referencia y motor en la ficha"
       ],
       "note": "Compatible con los siguientes modelos: A3 tipo 8L Leon tipo 1M tipo 1M tipo 1M tipo 1J ABE/EG-BE-Nr.: e1*xx/xx*0042*.. e9*xx/xx*0026*.. e9*xx/xx*0052*.. e9*xx/xx*0026*.. e9*xx/xx*0050*.. e9*xx/xx*0070*.. e9*xx/xx*0071*..",
-      "price": "Consultar",
+      "price": "89,00 €",
       "query": "TA Technix Muelles de suspensión con certificado de homologación de piezas 40mm para A3 Tipo 8L Tipo 1M 1J EVOVW060F",
       "source": "tienda",
       "image": "/img/productos/amz-b09vxsnkpn.webp",
@@ -531,7 +2338,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B09VXSNKPN"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b07b2g3yxb",
@@ -543,7 +2351,7 @@
         "Frenos · revisa referencia y motor en la ficha"
       ],
       "note": "Información técnica: Lado de montaje - Eje delantero, izquierda; Altura - 67; Tipo de disco de frenos - ventilado; Espesor de disco de frenos - 28; Material - Hierro fundido; Procesamiento - sin procesar; Número de orificios - 5/9; Diámetro de centrado [mm] - 98; corona de agujeros - Ø [mm] - 130; Superficie - sin recubrimiento; Artículo complementario / información complementaria 2 - sin tornillo Rápida comprobación de compatibilidad en tan solo un día laborable: ¿No está seguro de si la pieza de coche es la adecuada? Solamente tiene que enviarnos el número VIN de su vehículo. ¡Nuestro equipo de expertos comprobará la compatibilidad y le responderá en un plazo de un día laborable!",
-      "price": "Consultar",
+      "price": "55,07 €",
       "query": "RIDEX 82B0825 Disco de freno Delantero Izquierda sin tornillos Compatible con PORSCHE BOXSTER 986",
       "source": "tienda",
       "image": "/img/productos/amz-b07b2g3yxb.webp",
@@ -555,7 +2363,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B07B2G3YXB"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0dqjvm6kn",
@@ -567,7 +2376,7 @@
         "Volante · revisa referencia y motor en la ficha"
       ],
       "note": "※【Universal y compatible】 Este volante de carreras es compatible con la mayoría de los adaptadores de buje estándar, ideal para autos de competición y vehículos modificados. Su diseño universal de 6 agujeros permite una instalación sencilla al elegir el adaptador específico para tu modelo. Perfecto para entusiastas del tuning. ※【Material resistente】 Fabricado con marco de aluminio y revestimiento de cuero PU, este volante deportivo ofrece durabilidad y protección contra impactos. La textura antideslizante garantiza un agarre cómodo incluso en condiciones de conducción intensas.",
-      "price": "Consultar",
+      "price": "69,68 €",
       "query": "KIMISS Volante de carreras de 14 pulgadas para coche, diseño fibra de carbono, universal con botón de claxon y adaptador de 6 agujeros - Volante depor",
       "source": "tienda",
       "image": "/img/productos/amz-b0dqjvm6kn.webp",
@@ -579,7 +2388,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0DQJVM6KN"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b09537kllb",
@@ -591,7 +2401,7 @@
         "Admisión · revisa referencia y motor en la ficha"
       ],
       "note": "Materiali di alta qualità: il kit di induzione della presa d'aria è realizzato in lega di alluminio. Questi tubi, adattatori e morsetti sono molto resistenti, non arrugginiscono o scoloriscono facilmente, prolungando così la durata. Antes de comprar, por favor, compruebe si las especificaciones pertinentes cumplen con los requisitos de su propio coche Multiuso: ottimizza lo stick dell'acceleratore, la risposta, la coppia e il consumo di carburante/gas. Ci sono gomiti e tubi dritti per soddisfare le tue esigenze fai-da-te e fornire una forma adatta al sistema di aspirazione della tua auto. Apto para vehículos con el diámetro de la manguera de admisión de aire mide a 76 mm o 3 pulgadas",
-      "price": "Consultar",
+      "price": "32,29 €",
       "query": "Pindex 76mm Kit de Admisión Directa de Aire Frío, con Filtro de Aire, Rojo",
       "source": "tienda",
       "image": "/img/productos/amz-b09537kllb.webp",
@@ -603,7 +2413,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B09537KLLB"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b09ydmgnbh",
@@ -615,7 +2426,7 @@
         "Escape · revisa referencia y motor en la ficha"
       ],
       "note": "Universal – Silenciador adaptado a la mayoría de vehículos Redonda - doble salida recta - Acero inoxidable",
-      "price": "Consultar",
+      "price": "129,96 €",
       "query": "Simoni Racing ESR633 Rifle Silenciador Deportivo Universal, Silenciador Deportivo, Escape de Coche Universal, Doble Salida Redonda, Acero Inoxidable",
       "source": "tienda",
       "image": "/img/productos/amz-b09ydmgnbh.webp",
@@ -627,7 +2438,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B09YDMGNBH"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0cgj54bwz",
@@ -639,7 +2451,7 @@
         "Intercooler · revisa referencia y motor en la ficha"
       ],
       "note": "Kit FMIC del enfriador de aire del soporte delantero de aluminio, kit de intercooler. Compatible con V- W Golf MK4 1.9TDI 1998-2005 models; Compatible con Au -di A3 8L 1.9TDI 1997-2003 models; Compatible con Seat Leon 1.9TDI 1998-2005 models.",
-      "price": "Consultar",
+      "price": "212,00 €",
       "query": "Kit de intercooler Kit FMIC del enfriador de aire del soporte delantero de aluminio compatible con Le-on Bo-ra Go-lf MK4 A3 8L 1J2 1J6 1.9TDI 1998-200",
       "source": "tienda",
       "image": "/img/productos/amz-b0cgj54bwz.webp",
@@ -651,7 +2463,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0CGJ54BWZ"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b01m29tr9t",
@@ -663,7 +2476,7 @@
         "Suspensión · revisa referencia y motor en la ficha"
       ],
       "note": "Cabe para 01 – 05 BMW 320i; 98 – 00 – BMW 325i/323 ci; 01 – 05 BMW/325 Ci/325 x i; 98 – 00 – BMW 328i/328 ci; 01 – 06 BMW 330i/330 CI; 01 – 06 BMW M3 (apto sólo para BMW Serie 3 E46) 2 x trasero + 2 x delantero",
-      "price": "Consultar",
+      "price": "305,57 €",
       "query": "maXpeedingrods Amortiguadores Suspensión para BMW E46 3 Serie 1998-2005",
       "source": "tienda",
       "image": "/img/productos/amz-b01m29tr9t.webp",
@@ -675,7 +2488,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B01M29TR9T"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b002nv3tru",
@@ -687,7 +2501,7 @@
         "Muelles · revisa referencia y motor en la ficha"
       ],
       "note": "Estilo: Vehicle Specific",
-      "price": "Consultar",
+      "price": "177,99 €",
       "query": "H&R 29526-1 muelles",
       "source": "tienda",
       "image": "/img/productos/amz-b002nv3tru.webp",
@@ -699,7 +2513,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B002NV3TRU"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0cb88k49s",
@@ -711,7 +2526,7 @@
         "Frenos · revisa referencia y motor en la ficha"
       ],
       "note": "Discos de freno compatibles con Peugeot 405 (01.1987 – 10.1996) motores: 1.4 (47 kW, 55 kW) / 1.6 (53 kW, 55 kW, 65 kW, 69 kW) / 1.8 (66 kW) / 1.9 (47 kW, 51 kW, 70 kW) W) Especificaciones técnicas: rotores de disco de freno: delantero (completo) – Número GTR 0506GTR – Diámetro: 266 mm – Máx. Grosor: máx. 10 mm/min: 8 mm. Diámetro del orificio de centrado: 66 mm. Altura: 27 mm. Número de agujeros: 4. Número OEM: 424688, 4246A9, 95575080, 95661746",
-      "price": "Consultar",
+      "price": "41,46 €",
       "query": "Discos de freno de perforación deportivos compatibles con Peugeot 405 1987 1988 1990 1991 1992 1993 1994 1995 1996-0506GTR - Delanteros - completos",
       "source": "tienda",
       "image": "/img/productos/amz-b0cb88k49s.webp",
@@ -723,7 +2538,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0CB88K49S"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0gy9xhbbv",
@@ -735,7 +2551,7 @@
         "Volante · revisa referencia y motor en la ficha"
       ],
       "note": "[Material premium] Construido con fibra de carbono mate 3K y cuero perforado para mayor durabilidad y agarre. [Diseño de carreras] El diseño tipo D de fondo plano aumenta el espacio para las piernas, lo que garantiza comodidad y control durante la conducción.",
-      "price": "Consultar",
+      "price": "344,33 €",
       "query": "Ejoyous Volante de Fibra de Carbono Personalizado, Diseño de Carreras de Cuero Perforado para Sport L494 2014-2022",
       "source": "tienda",
       "image": "/img/productos/amz-b0gy9xhbbv.webp",
@@ -747,7 +2563,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0GY9XHBBV"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b09ch3wq2k",
@@ -759,7 +2576,7 @@
         "Admisión · revisa referencia y motor en la ficha"
       ],
       "note": "[Mayor potencia y eficiencia]: Nuestro filtro de aire de admisión de fibra de carbono está diseñado para aumentar el flujo de aire frío al motor, mejorando la potencia y reduciendo el consumo de combustible. El kit de inducción del filtro de aire optimiza la combustión, disminuyendo los depósitos de carbono y alargando la vida útil del motor [Material de fibra de carbono]: La carcasa del filtro de inducción de admisión está fabricada en fibra de carbono, ofreciendo ligereza, aislamiento térmico y reducción de ruido. Su diseño mantiene bajas temperaturas mientras maximiza el flujo de aire para un rendimiento",
-      "price": "Consultar",
+      "price": "45,39 €",
       "query": "Kit de Filtro de Admisión, 3'' Coche Fibra de Carbono de Filtro de Aire Frío con Alimentación, Kit de Manguera de Tubería de Inducción de Admisión (7.",
       "source": "tienda",
       "image": "/img/productos/amz-b09ch3wq2k.webp",
@@ -771,7 +2588,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B09CH3WQ2K"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0gjs43gq3",
@@ -783,7 +2601,7 @@
         "Escape · revisa referencia y motor en la ficha"
       ],
       "note": "Nota: Antes de comprar, mida la entrada de su vehículo para asegurar la compatibilidad. Este silenciador de escape cuenta con una entrada de 2,5\" (63mm), una salida de 3,5\" (89mm) y una longitud total de 14,17\" (360mm) Tipo de instalación del silenciador de 63mm: Se recomienda la instalación mediante soldadura, con abrazadera en U o abrazadera de junta traslapada como alternativas. Adecuado para varios vehículos (automóviles, turismos, SUVs, camiones, diésel, etc.)",
-      "price": "Consultar",
+      "price": "50,99 €",
       "query": "Catekro 63mm Silenciador de Escape Trasero para Coche, Acero Inoxidable",
       "source": "tienda",
       "image": "/img/productos/amz-b0gjs43gq3.webp",
@@ -795,7 +2613,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0GJS43GQ3"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0fxr5mgms",
@@ -807,7 +2626,7 @@
         "Intercooler · revisa referencia y motor en la ficha"
       ],
       "note": "Intercooler de alto rendimiento – plug & play de aluminio: Este intercooler de aluminio de una pieza, robusto y duradero, es plug & play y compatible con Seat Ibiza Mk4, Volkswagen Polo 9N3 y Fabia Mk1 en versiones diésel y turbo. Un intercooler que mejora el rendimiento sin complicaciones ni modificaciones adicionales. Más potencia y menos consumo – la eficiencia al volante: Mayor densidad del aire = mejor combustión. Este intercooler aumenta significativamente la potencia y el par motor, al tiempo que reduce el consumo de combustible. Perfecto para conducción urbana y aparcamiento – un filtro intercooler que marca la diferencia en el día a día.",
-      "price": "Consultar",
+      "price": "109,99 €",
       "query": "78X40X7 cm Intercooler de Aluminio 60 Psi para Seat Ibiza Mk4 1.9 Tdi 130 Cv, Fabia Vrs, Polo Gti 1.8 T, Diseño de Doble Tubo, Intercooler de Rendimie",
       "source": "tienda",
       "image": "/img/productos/amz-b0fxr5mgms.webp",
@@ -819,7 +2638,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0FXR5MGMS"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b01m5li4jp",
@@ -831,7 +2651,7 @@
         "Suspensión · revisa referencia y motor en la ficha"
       ],
       "note": "【Adoptado Perfecto】Para VW para GOLF IV (1J1) FWD 08/1997-12/2007; Para SEAT LEON (1M1) FWD 11/1999-06/2006; Para VW NEW BEETLE (9C1, 1C1) FWD 01/1998-11/2010 【Excelente Material】 El producto viene con la aleación de aluminio 6061 con T6 para aumentar la dureza, piezas de precisión de alta calidad, alta resistencia y durabilidad. Está completamente cargado y seguro para la instalación.",
-      "price": "Consultar",
+      "price": "259,00 €",
       "query": "maXpeedingrods 4X Coilover Ajustable, Amortiguador para VW Golf 4 para Seat Leon Suspensión Roscada Regulable en Altura y Dureza Dorado",
       "source": "tienda",
       "image": "/img/productos/amz-b01m5li4jp.webp",
@@ -843,7 +2663,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B01M5LI4JP"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b078xc7x71",
@@ -855,7 +2676,7 @@
         "Muelles · revisa referencia y motor en la ficha"
       ],
       "note": "Completamente nuevo sistema de suspensión deportiva 50 mm para VW Bus T4 VW Bus T4 - ¡Todas las versiones EXCEPTO SYNCRO!",
-      "price": "Consultar",
+      "price": "169,00 €",
       "query": "Sistema de suspensión TA Technix 50mm T4 con certificado de calidad TÜV, muelles EVOVW130",
       "source": "tienda",
       "image": "/img/productos/amz-b078xc7x71.webp",
@@ -867,7 +2688,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B078XC7X71"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b074l8c9zh",
@@ -879,7 +2701,7 @@
         "Frenos · revisa referencia y motor en la ficha"
       ],
       "note": "Posición de montaje: EJE DELANTERO, Tipo de disco de freno: PERFORADO / VENTIL. INT., Número de orificios de llanta: 4, Dimensiones (en mm): Diámetro exterior: 258,5, Altura: 41, Espesor del disco de freno: 20,6, Diámetro interior: 124 Rendimiento de Frenado: Nuestros discos de alta calidad han sido elaborados para garantizar una distribución homogénea del calor, evitar la decoloración de los frenos y proporcionar un frenado estable",
-      "price": "Consultar",
+      "price": "47,99 €",
       "query": "Valeo 2x Discos de Freno Aceitados 886208, Eje Delantero",
       "source": "tienda",
       "image": "/img/productos/amz-b074l8c9zh.webp",
@@ -891,7 +2713,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B074L8C9ZH"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0gyyrzs1j",
@@ -903,7 +2726,7 @@
         "Llantas · revisa referencia y motor en la ficha"
       ],
       "note": "Modelos adecuados: estas llantas de 19 pulgadas son adecuadas para el modelo Tesla Model Y de los años 2020-2023. Comprueba el año de fabricación y el equipamiento de tu vehículo antes de comprar para asegurarte de que las especificaciones de las llantas coinciden. Nota: el precio indicado en la página es para una sola llanta. Tapacubos, tapas de llantas, tornillos de llanta, tapas de tornillos de llanta y sensores de presión de neumáticos no incluidos. Si reemplazas una llanta dañada, puedes transferir los tapacubos originales, tornillos de llanta y sensores de presión de neumáticos directamente a esa llanta.",
-      "price": "Consultar",
+      "price": "219,99 €",
       "query": "Llantas de 19 pulgadas, 19 x 9,5 pulgadas ET45 mm, 5 x 114,3 mm, orificio de 64,1 mm, llantas de aluminio, llantas de coche compatibles con Tesla Mode",
       "source": "tienda",
       "image": "/img/productos/amz-b0gyyrzs1j.webp",
@@ -915,7 +2738,8 @@
           "label": "Ver en Amazon",
           "url": "https://www.amazon.es/dp/B0GYYRZS1J"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b09yxykykj",
@@ -1580,14 +3404,14 @@
     {
       "id": "tienda-amz-b098lmbxq9",
       "name": "Válvula de descarga turbo de palanquilla de aluminio, tubo de brida de 2,5 pulgadas TipoRS Válvula de descarga universal Accesorio para automóvil SDDBOVGRSBL FPG250(negro)",
-      "brand": "Válvula",
+      "brand": "Tbest",
       "category": "blow-off",
       "cars": [],
       "fitment": [
         "Universal · comprueba medida, referencia y compatibilidad antes de comprar"
       ],
       "note": "Válvula de descarga. Revisa tipo de brida, muelle y si el motor necesita recirculación para no dar error. Producto real de tienda; el precio y el stock pueden cambiar.",
-      "price": "Consultar",
+      "price": "50,71 €",
       "priceValue": null,
       "query": "Válvula de descarga turbo de palanquilla de aluminio, tubo de brida de 2,5 pulgadas TipoRS",
       "source": "tienda",
@@ -1605,7 +3429,8 @@
           "label": "Buscar en eBay",
           "url": "https://www.ebay.es/sch/i.html?_nkw=V%C3%A1lvula%20de%20descarga%20turbo%20de%20palanquilla%20de%20aluminio%2C%20tubo%20de%20brida%20de%202%2C5%20pulgadas%20TipoRS"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b08g82t3f2",
@@ -4790,14 +6615,14 @@
     {
       "id": "tienda-amz-b01mt1x517",
       "name": "Motul 8100 X-Clean EFE 5W30 - Aceite, 5 L, El embalaje puede variar",
-      "brand": "Motul",
+      "brand": "MOTUL",
       "category": "lubricantes",
       "cars": [],
       "fitment": [
         "Universal · comprueba medida, referencia y compatibilidad antes de comprar"
       ],
       "note": "Aceite o fluido. Confirma viscosidad, norma del fabricante y capacidad del cárter. Producto real de tienda; el precio y el stock pueden cambiar.",
-      "price": "Consultar",
+      "price": "46,99 €",
       "priceValue": null,
       "query": "Motul 8100 X-Clean EFE 5W30 - Aceite, 5 L, El embalaje puede variar",
       "source": "tienda",
@@ -4815,7 +6640,8 @@
           "label": "Buscar en eBay",
           "url": "https://www.ebay.es/sch/i.html?_nkw=Motul%208100%20X-Clean%20EFE%205W30%20-%20Aceite%2C%205%20L%2C%20El%20embalaje%20puede%20variar"
         }
-      ]
+      ],
+      "verifiedAt": "2026-11-05"
     },
     {
       "id": "tienda-amz-b0btj99hgb",

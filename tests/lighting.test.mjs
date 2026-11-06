@@ -109,3 +109,12 @@ test('afiliación: también se aplica al detalle de producto', async () => {
   assert.match(response.body.affiliateUrl, new RegExp(`[?&]tag=${TAG}`));
   assert.match(response.body.affiliateUrl, /^https:\/\/www\.amazon\./);
 });
+
+test('afiliación: se aplica al catálogo de accesorios de tuning', async () => {
+  const list = await call('/api/tuning-products?limit=1');
+  assert.equal(list.status, 200);
+  assert.match(list.body.items[0].links[0].url, new RegExp(`[?&]tag=${TAG}`));
+  const detail = await call(`/api/tuning-products/${list.body.items[0].id}`);
+  assert.equal(detail.status, 200);
+  assert.match(detail.body.links[0].url, new RegExp(`[?&]tag=${TAG}`));
+});

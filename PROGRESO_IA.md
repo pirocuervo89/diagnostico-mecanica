@@ -557,3 +557,46 @@ Los PID se añadieron también al simulador virtual, para que los relojes tengan
 - **Pendiente declarado**: para cobrar de verdad hay que añadir `STRIPE_SECRET_KEY` y `STRIPE_WEBHOOK_SECRET` al `.env` y reiniciar. Sin claves, la compra queda desactivada con aviso y el resto de la web funciona igual. La ficha Philips sin precio de catálogo se queda en «Consultar precio».
 - **Caché del frontend**: `app.js?v=20261105d`, `lighting.js?v=20261105b`, `testigos.js?v=20261105a`.
 - **Copia de seguridad**: `backups/cierre-luz-pagos-20261105.tar.gz` con los archivos tocados y este informe.
+
+## Accesorios dentro de Tuning: pantallas, luces y audio (05/11/2026)
+
+- **Navegación**: eliminada la pestaña **Recambios** (`tuning-productos`) y su vista. El catálogo completo pasa a **Tuning > Accesorios**, con ancla `#tuningAccesorios`; los accesos rápidos de las guías siguen abriendo la categoría correspondiente dentro de Tuning.
+- **Catálogo**: de **168 a 236 productos** y de 17 a **21 categorías**. Se añaden `pantallas-carplay`, `iluminacion-ambiente`, `audio-video` e `interior-accesorios` al principio del listado. Los 168 productos anteriores se conservan.
+- **Nuevos productos**: **68 fichas reales de Amazon** con precio, foto local y enlace directo:
+  - **30 pantallas** CarPlay/Android: 10 de 7", 10 de 9" y 10 de 10"+; **38,99–209,99 €**, todas ≤350 € y ordenadas de barata a cara.
+  - **20 de iluminación**: tiras RGB, neón, fibra óptica, proyectores y luces USB; **6,29–41,29 €**.
+  - **10 de audio/CarPlay/cámaras**: altavoces, subwoofer, dashcam y adaptadores inalámbricos; **34,90–119,99 €**.
+  - **8 de interior**: volantes, pedales, pomos y soportes; **11,99–36,49 €**.
+- **Precios**: recuperados los **30 productos que estaban en «Consultar»**; ahora **236/236 tienen precio real** y no queda ninguno pendiente. Precios consultados el 05/11/2026.
+- **Imágenes**: **68 WEBP nuevos** en `public/img/productos/amz-{asin}.webp`, descargados de la ficha del vendedor y normalizados a 900 px de lado máximo y calidad 82. Todas las fichas del catálogo apuntan a una imagen local existente.
+- **Afiliación**: `tagItem()` ahora aplica `AFFILIATE_TAG_AMAZON` tanto a `affiliateUrl` como a `links[].url`; el detalle `/api/tuning-products/:id` también devuelve el enlace etiquetado. Sin etiqueta configurada, los enlaces siguen siendo directos.
+- **Enlaces**: verificados **376 enlaces únicos**: **236 de Amazon responden 200**, 140 de eBay quedan *bloqueados* (403 por robots, no rotos) y **0 rotos**. Los 68 productos nuevos y los 30 precios recuperados respondieron 200 en su ficha.
+- **Pruebas**: `npm test` **124/124**. Se actualizan los tests del catálogo (236 items, 21 categorías, 30 pantallas, precios ≤350 €, cero «Consultar») y se añade la comprobación de afiliación de `links[]` en el catálogo y en el detalle.
+- **Navegador real (Firefox)**:
+  - **1360×1000**: 236 tarjetas, 236/236 con precio, 30 pantallas filtradas y ordenadas, 0 imágenes rotas, sin desbordamiento (1354/1354), 0 enlaces vacíos, 0 IDs duplicados y 0 errores de consola.
+  - **390×844**: 236 tarjetas, 30 pantallas, sin desbordamiento (384/384), 0 imágenes rotas y 0 errores de consola. El ancla de Accesorios queda a 84 px de la cabecera tras el desplazamiento.
+- **Caché del frontend**: `reforma.css?v=20261105a`, `app.js?v=20261105e`.
+- **Copia de seguridad**: `backups/pre-accesorios-20261105.tar.gz` con datos, HTML, JS, CSS y API previos al cambio, más su `.sha256`.
+- **Pendiente declarado**: las piezas que citan un modelo concreto (por ejemplo, pantallas para Peugeot o Ford) muestran el aviso de comprobar modelo, año y versión; no se ha inventado una tabla de compatibilidades. No se ha hecho commit.
+
+## Ajuste de navegación: Accesorios Tuning como pestaña (05/11/2026)
+
+- El catálogo ya no aparece como bloque inferior dentro de Tuning. Ahora Tuning tiene dos **pestañas superiores**: **Guías de preparación** y **Accesorios Tuning**.
+- Al entrar en Tuning se abre **Guías de preparación**; los accesos rápidos de las guías siguen abriendo directamente **Accesorios Tuning** con la categoría elegida.
+- El catálogo se carga al activar la pestaña (caché en memoria después). Se mantienen buscador, filtro por coche, categorías, precios, fotos locales y legal.
+- Comprobado en Firefox a **1360×1000** y **390×844**: pestañas correctas, 236 tarjetas al activar Accesorios, 30 pantallas ordenadas, 0 imágenes rotas, 0 errores de consola y sin desbordamiento (1354/1354 y 384/384).
+- `npm test`: **124/124**. Caché del frontend: `reforma.css?v=20261105b`, `app.js?v=20261105f`.
+
+## Neumáticos y llantas (2026-11-06)
+
+Módulo nuevo `Neumáticos` en la navegación, entre Luz y multimedia y Productos.
+
+- Buscador por medida (ancho/perfil/llanta) y temporada contra `/api/tyres`.
+- Calculadora de equivalencias con diámetro exterior, ±3 %, anchura máxima +30 mm,
+  garganta orientativa y avisos por fila (`/api/tyres/equivalents`).
+- Comparador de hasta tres fichas con etiqueta UE, índices, precio y tienda.
+- Comprobador de llantas por PCD, buje, ET y garganta (`POST /api/wheels/fit`).
+- Catálogo real: 48 neumáticos en 8 medidas, ASIN y foto descargada a
+  `public/img/neumaticos/`; 13 con etiqueta europea publicada por el vendedor.
+- Lógica en `src/lib/tyres.js`, vista en `public/js/tyres.js`, datos en
+  `data/tyres.json`. Tests en `tests/tyres.test.mjs`.

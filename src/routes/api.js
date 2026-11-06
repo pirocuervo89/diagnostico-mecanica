@@ -8,6 +8,7 @@ import { enrichDTC, deriveSystem, deriveSeverity, normSeverity } from '../lib/dt
 import { findKnowledgeCases } from '../lib/forum_db.js';
 import { listTutorials } from '../lib/tutorial_db.js';
 import { scanVehicleDocument } from '../lib/document_scan.js';
+import { findEquivalents, sizeSummary, rimWidthRange, checkWheelFit } from '../lib/tyres.js';
 
 // Búsqueda insensible a mayúsculas y acentos.
 const fold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -40,7 +41,16 @@ function withAffiliateTag(url) {
 
 function tagItem(item) {
   if (!item || typeof item !== 'object') return item;
-  return item.affiliateUrl ? { ...item, affiliateUrl: withAffiliateTag(item.affiliateUrl) } : item;
+  const next = item.affiliateUrl ? { ...item, affiliateUrl: withAffiliateTag(item.affiliateUrl) } : item;
+  if (Array.isArray(next.links) && next.links.length) {
+    return {
+      ...next,
+      links: next.links.map(link => link && typeof link === 'object'
+        ? { ...link, url: withAffiliateTag(link.url) }
+        : link)
+    };
+  }
+  return next;
 }
 
 // Los JSON son locales y cambian poco: se cachean por mtime/tamaño para no
@@ -1143,7 +1153,7 @@ router.get('/tuning-products', (req, res) => {
 router.get('/tuning-products/:id', (req, res) => {
   const item = tuningProductsPayload().items.find(i => i.id === req.params.id);
   if (!item) return res.status(404).json({ error: 'Producto no encontrado' });
-  res.json(item);
+  res.json(tagItem(item));
 });
 
 router.get('/products', (req, res) => {
@@ -1194,6 +1204,130 @@ router.get('/products', (req, res) => {
       .map(x => x.p);
   }
   res.json(list.map(tagItem));
+});
+
+// ---------------------------------------------------------------------
+// NEUMÁTICOS Y LLANTAS
+// ---------------------------------------------------------------------
+function tyreStore() {
+  const data = readJSON('tyres.json');
+  const tyres = Array.isArray(data) ? data : (data.tyres || []);
+  const wheels = Array.isArray(data) ? [] : (data.wheels || []);
+  return {
+    updated: data?.updated || '',
+    notice: data?.notice || '',
+    tyres: tyres.filter(t => t && t.id),
+    wheels: wheels.filter(w => w && w.id)
+  };
+}
+
+function tyreCard(t) {
+  return {
+    id: t.id,
+    brand: t.brand || '',
+    model: t.model || '',
+    size: t.size || `${t.width}/${t.profile} R${t.rim}`,
+    width: Number(t.width) || null,
+    profile: Number(t.profile) || null,
+    rim: Number(t.rim) || null,
+    load: t.load || '',
+    speed: t.speed || '',
+    season: t.season || '',
+    type: t.type || 'turismo',
+    labels: t.labels || null,
+    price: Number.isFinite(Number(t.price)) ? Number(t.price) : null,
+    priceSeen: t.priceSeen || '',
+    shop: t.shop || '',
+    url: withAffiliateTag(t.url || ''),
+    image: t.image || '',
+    imageStatus: t.imageStatus || (t.image ? 'verified' : 'pending'),
+    linkStatus: t.linkStatus || (t.url ? 'verified' : 'pending'),
+    asin: t.asin || null,
+    notes: t.notes || '',
+    verifiedAt: t.verifiedAt || ''
+  };
+}
+
+router.get('/tyres/meta', (_req, res) => {
+  const store = tyreStore();
+  const brands = [...new Set(store.tyres.map(t => t.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  const sizes = [...new Set(store.tyres.map(t => tyreCard(t).size).filter(Boolean))];
+  const seasons = [...new Set(store.tyres.map(t => t.season).filter(Boolean))];
+  res.json({
+    updated: store.updated,
+    notice: store.notice,
+    stats: {
+      tyres: store.tyres.length,
+      verified: store.tyres.filter(t => t.imageStatus === 'verified' && t.linkStatus === 'verified').length,
+      wheels: store.wheels.length,
+      brands: brands.length,
+      sizes: sizes.length
+    },
+    brands,
+    sizes,
+    seasons
+  });
+});
+
+router.get('/tyres/equivalents', (req, res) => {
+  const { w, p, r } = req.query;
+  const result = findEquivalents(w, p, r);
+  if (!result.valid) return res.status(400).json({ error: result.errors[0], errors: result.errors });
+  res.json(result);
+});
+
+router.get('/tyres', (req, res) => {
+  const store = tyreStore();
+  const { w, p, r, season, brand, q } = req.query;
+  const width = Number(w) || null;
+  const profile = Number(p) || null;
+  const rim = Number(r) || null;
+  const seasonFold = fold(season);
+  const brandFold = fold(brand);
+  const query = fold(q);
+
+  let items = store.tyres.map(tyreCard).filter(t => {
+    if (width && t.width !== width) return false;
+    if (profile && t.profile !== profile) return false;
+    if (rim && t.rim !== rim) return false;
+    if (seasonFold && fold(t.season) !== seasonFold) return false;
+    if (brandFold && fold(t.brand) !== brandFold) return false;
+    if (query) {
+      const hay = fold(`${t.brand} ${t.model} ${t.size} ${t.shop} ${t.notes}`);
+      if (!hay.includes(query)) return false;
+    }
+    return true;
+  });
+
+  const sort = String(req.query.sort || '').toLowerCase();
+  if (sort === 'price') {
+    items.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+  } else if (sort === 'brand') {
+    items.sort((a, b) => a.brand.localeCompare(b.brand, 'es') || a.model.localeCompare(b.model, 'es'));
+  } else if (sort === 'wet') {
+    const rank = v => ({ A: 0, B: 1, C: 2, D: 3, E: 4 }[String(v || '').toUpperCase()] ?? 9);
+    items.sort((a, b) => rank(a.labels?.wet) - rank(b.labels?.wet));
+  } else {
+    items.sort((a, b) => (b.imageStatus === 'verified') - (a.imageStatus === 'verified') || (a.price ?? Infinity) - (b.price ?? Infinity));
+  }
+
+  const sizeInfo = width && profile && rim ? sizeSummary(width, profile, rim) : null;
+  res.json({
+    updated: store.updated,
+    notice: store.notice,
+    size: sizeInfo ? sizeInfo.size : '',
+    sizeInfo,
+    rimRange: width ? rimWidthRange(width) : null,
+    count: items.length,
+    available: items.length > 0,
+    items: items.slice(0, 120)
+  });
+});
+
+router.post('/wheels/fit', (req, res) => {
+  const result = checkWheelFit(req.body?.current || {}, req.body?.candidate || {});
+  if (!result.valid) return res.status(400).json({ error: result.errors[0], errors: result.errors });
+  res.json(result);
 });
 
 router.get('/lighting-media', (_req, res) => {

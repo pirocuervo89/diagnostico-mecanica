@@ -110,7 +110,7 @@ test('stats carga los datos JSON', async () => {
   assert.ok(body.products >= 200);
   assert.equal(body.vehicles, 15);
   assert.equal(body.tuning, 3);
-  assert.ok(body.tuningProducts >= 120, 'debe incluir el catálogo de recambios de tuning');
+  assert.ok(body.tuningProducts >= 230, 'debe incluir el catálogo de accesorios de tuning');
   assert.ok(Array.isArray(body.systems) && body.systems.length > 0, 'debe incluir sistemas reales');
   assert.equal(body.severity.Alta + body.severity.Media + body.severity.Baja, body.dtc);
   assert.ok(Array.isArray(body.productCategories) && body.productCategories.length > 0);
@@ -1158,11 +1158,23 @@ test('tuning: tres etapas detalladas, sin fichas de coche y con categorías de p
   assert.ok(!JSON.stringify(body).match(/\+\s?\d+\s?(cv|ps|nm)/i), 'no debe prometer ganancias inventadas');
 });
 
-test('catálogo de recambios de tuning: productos reales, categorías, filtros y enlaces', async () => {
+test('catálogo de accesorios de tuning: productos reales, categorías, filtros y enlaces', async () => {
   const { status, body } = await getJSON('/api/tuning-products');
   assert.equal(status, 200);
-  assert.ok(body.items.length >= 150, 'debe haber un catálogo amplio de productos reales');
-  assert.equal(body.categories.length, 17);
+  assert.ok(body.items.length >= 230, 'debe haber un catálogo amplio de productos reales');
+  assert.equal(body.categories.length, 21);
+  const categoryIds = new Set(body.categories.map(c => c.id));
+  for (const id of ['pantallas-carplay', 'iluminacion-ambiente', 'audio-video', 'interior-accesorios']) {
+    assert.ok(categoryIds.has(id), `debe existir la categoría ${id}`);
+  }
+  const pantallas = body.items.filter(i => i.category === 'pantallas-carplay');
+  assert.equal(pantallas.length, 30, 'debe haber 30 pantallas CarPlay/Android');
+  assert.ok(pantallas.every(i => /\d+,\d{2} €/.test(i.price)), 'las pantallas deben tener precio real');
+  assert.ok(pantallas.every(i => Number(i.price.replace('.', '').replace(',', '.').replace(' €', '')) <= 350), 'las pantallas no deben superar 350 €');
+  assert.equal(body.items.filter(i => i.price === 'Consultar').length, 0, 'ninguna ficha debe quedar sin precio');
+  assert.ok(body.items.filter(i => i.category === 'iluminacion-ambiente').length >= 15);
+  assert.ok(body.items.filter(i => i.category === 'audio-video').length >= 8);
+  assert.ok(body.items.filter(i => i.category === 'interior-accesorios').length >= 6);
   assert.ok(body.cars.length >= 15);
   assert.equal(body.items.filter(i => !i.image).length, 0, 'toda pieza debe tener imagen');
   assert.equal(body.items.filter(i => !(i.links || []).length).length, 0, 'toda pieza debe tener enlaces');
@@ -1199,7 +1211,7 @@ test('catálogo de recambios de tuning: productos reales, categorías, filtros y
   assert.equal((await getJSON('/api/tuning-products/tienda-amz-b0gtmbtqf4')).status, 200);
 });
 
-test('catálogo de recambios: foto del vendedor, archivo local y enlaces únicos', async () => {
+test('catálogo de accesorios: foto del vendedor, archivo local y enlaces únicos', async () => {
   const { body } = await getJSON('/api/tuning-products');
 
   // Ninguna ficha puede apuntar a una foto que no esté en disco.

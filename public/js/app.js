@@ -3047,14 +3047,37 @@ function renderTuning() {
   box.querySelectorAll('[data-tp-open]').forEach(b => b.addEventListener('click', () => openTuningProducts(b.dataset.tpOpen)));
 }
 
-function openTuningProducts(category = 'all') {
-  tpCategory = category;
-  showView('tuning-productos');
-  loadTuningProducts();
+function setTuningTab(name = 'guias') {
+  const tabs = $$('[data-tuning-tab]');
+  if (!tabs.length) return;
+  const panes = {
+    guias: $('#tuningPaneGuias'),
+    accesorios: $('#tuningPaneAccesorios')
+  };
+  tabs.forEach(tab => {
+    const active = tab.dataset.tuningTab === name;
+    tab.classList.toggle('active', active);
+    tab.setAttribute('aria-selected', String(active));
+    tab.tabIndex = active ? 0 : -1;
+  });
+  Object.entries(panes).forEach(([key, pane]) => {
+    if (pane) pane.hidden = key !== name;
+  });
+  if (name === 'accesorios') loadTuningProducts();
 }
 
+function openTuningProducts(category = 'all') {
+  tpCategory = category;
+  showView('tuning');
+  setTuningTab('accesorios');
+}
+
+$$('[data-tuning-tab]').forEach(tab => {
+  tab.addEventListener('click', () => setTuningTab(tab.dataset.tuningTab));
+});
+
 // -------------------------------------------------------------
-// CATÁLOGO DE RECAMBIOS DE TUNING
+// CATÁLOGO DE ACCESORIOS DE TUNING
 // -------------------------------------------------------------
 // De dónde sale la foto de cada ficha: la del vendedor, una foto libre de esa
 // pieza concreta o, si Commons no tiene ninguna, la imagen de su categoría.
@@ -3077,7 +3100,7 @@ async function loadTuningProducts(force = false) {
     renderTpGrid();
     return;
   }
-  grid.innerHTML = '<div class="notice">Cargando catálogo…</div>';
+  grid.innerHTML = '<div class="notice">Cargando accesorios…</div>';
   try {
     const slow = new Promise((_, reject) => setTimeout(() => reject(new Error('el servidor tarda demasiado en responder')), 15000));
     tpCache = await Promise.race([api('/api/tuning-products'), slow]);
@@ -3101,7 +3124,7 @@ async function loadTuningProducts(force = false) {
     renderTpTabs();
     renderTpGrid();
   } catch (err) {
-    grid.innerHTML = `<div class="tp-empty">No se pudo cargar el catálogo: ${esc(err.message)}. <button class="btn ghost sm" type="button" id="tpRetry">Reintentar</button></div>`;
+    grid.innerHTML = `<div class="tp-empty">No se pudieron cargar los accesorios: ${esc(err.message)}. <button class="btn ghost sm" type="button" id="tpRetry">Reintentar</button></div>`;
     grid.querySelector('#tpRetry')?.addEventListener('click', () => loadTuningProducts(true));
   }
 }
@@ -3141,9 +3164,9 @@ function renderTpGrid() {
   if (!grid || !tpCache) return;
   const items = (tpCache.items || []).filter(tpMatches);
   const counter = $('#tpResults');
-  if (counter) counter.textContent = `${items.length} de ${tpCache.items.length} piezas`;
+  if (counter) counter.textContent = `${items.length} de ${tpCache.items.length} accesorios`;
   if (!items.length) {
-    grid.innerHTML = '<div class="tp-empty">No hay piezas con esos filtros. Prueba otra categoría o quita el filtro de coche.</div>';
+    grid.innerHTML = '<div class="tp-empty">No hay accesorios con esos filtros. Prueba otra categoría o quita el filtro de coche.</div>';
     return;
   }
   grid.innerHTML = items.map((item, index) => {
@@ -3512,8 +3535,10 @@ if (relSearchInput) {
 // Carga bajo demanda y enlaces desde el buscador universal.
 document.addEventListener('viewchange', e => {
   if (e.detail.name === 'vehiculos') loadVehicles();
-  if (e.detail.name === 'tuning') loadTuning();
-  if (e.detail.name === 'tuning-productos') loadTuningProducts();
+  if (e.detail.name === 'tuning') {
+    loadTuning();
+    if (document.querySelector('[data-tuning-tab="accesorios"].active')) loadTuningProducts();
+  }
   if (e.detail.name === 'fiabilidad') loadReliability();
   if (e.detail.name === 'sala') salaInit();
 });
@@ -3536,7 +3561,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadComponents(),
     loadVehicles(),
     loadTuning(),
-    loadTuningProducts(),
     searchDtc('P0300')
   ]).catch(err => console.error('Error en inicialización:', err));
 });

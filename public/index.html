@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/css/app.css?v=20261030a">
   <link rel="stylesheet" href="/css/vision.css?v=20261105c">
   <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
-  <link rel="stylesheet" href="/css/reforma.css?v=20261030d">
+  <link rel="stylesheet" href="/css/reforma.css?v=20261105c">
 </head>
 <body>
 
@@ -94,8 +94,8 @@
     <button data-view="tutoriales" type="button"><svg class="ic"><use href="#i-play"></use></svg>Tutoriales</button>
     <button data-view="productos" type="button"><svg class="ic"><use href="#i-cart"></use></svg>Productos</button>
     <button data-view="luz" type="button"><svg class="ic"><use href="#i-zap"></use></svg>Luz y multimedia</button>
+    <button data-view="neumaticos" type="button"><svg class="ic"><use href="#i-tire"></use></svg>Neumáticos</button>
     <button data-view="tuning" type="button"><svg class="ic"><use href="#i-zap"></use></svg>Tuning</button>
-    <button data-view="tuning-productos" type="button"><svg class="ic"><use href="#i-cart"></use></svg>Recambios</button>
     <button data-view="fiabilidad" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Fiabilidad</button>
     <button data-view="chat" type="button"><svg class="ic"><use href="#i-chat"></use></svg>Chat IA</button>
     <button data-view="informe" type="button"><svg class="ic"><use href="#i-file"></use></svg>Informe</button>
@@ -1145,40 +1145,52 @@
       </div>
       <span class="page-meta"><svg class="ic"><use href="#i-zap"></use></svg> <b id="tuningCount">—</b> guías · Stage 1–3</span>
     </header>
-    <div class="tuning-warning panel">
-      <svg class="ic"><use href="#i-shield"></use></svg>
-      <div><b>La potencia no es el primer paso.</b><p>Antes de calibrar: diagnóstico sin fallos, compresión, presión de combustible, temperaturas, frenos y neumáticos. Cualquier cambio debe cumplir la homologación y la ITV.</p></div>
-    </div>
-    <div id="tuningStages" class="tuning-stages"></div>
-    <div id="tuningPackages" class="tuning-grid"><div class="notice">Cargando guías…</div></div>
-  </section>
-
-  <!-- ===================== RECAMBIOS DE TUNING ===================== -->
-  <section id="view-tuning-productos" class="view">
-    <header class="page-head">
-      <div>
-        <span class="eyebrow">CATÁLOGO DE PREPARACIÓN</span>
-        <h2>Piezas y accesorios de tuning</h2>
-        <p>Turbo, intercooler, válvulas de descarga, manguitos, admisión, escape, carrocería, llantas, luces y frenos. Todas las fichas son productos reales de tienda, con foto del vendedor y enlace directo a Amazon. Son piezas universales o de aplicación amplia: comprueba medida, referencia y compatibilidad antes de comprar.</p>
-      </div>
-      <span class="page-meta"><svg class="ic"><use href="#i-cart"></use></svg> <b id="tpCount">—</b> piezas · <span id="tpCats">—</span> categorías</span>
-    </header>
-
-    <div class="tp-controls panel">
-      <div class="tp-search">
-        <svg class="ic"><use href="#i-search"></use></svg>
-        <input id="tpSearch" type="search" autocomplete="off" placeholder="Busca: turbo, downpipe, LED, llanta 19…" aria-label="Buscar en el catálogo de tuning">
-      </div>
-      <label class="tp-car">
-        <span>Mi coche</span>
-        <select id="tpCar" aria-label="Filtrar por coche" title="Las piezas universales se muestran con cualquier modelo"><option value="all">Todos los modelos</option></select>
-      </label>
-      <span class="tp-results" id="tpResults">—</span>
+    <div class="tuning-subtabs" role="tablist" aria-label="Secciones de tuning">
+      <button class="tuning-subtab active" type="button" role="tab" aria-selected="true" aria-controls="tuningPaneGuias" data-tuning-tab="guias" id="tuningTabGuias">
+        <svg class="ic"><use href="#i-zap"></use></svg>Guías de preparación
+      </button>
+      <button class="tuning-subtab" type="button" role="tab" aria-selected="false" aria-controls="tuningPaneAccesorios" data-tuning-tab="accesorios" id="tuningTabAccesorios" tabindex="-1">
+        <svg class="ic"><use href="#i-cart"></use></svg>Accesorios Tuning
+      </button>
     </div>
 
-    <div id="tpTabs" class="tp-tabs" role="tablist" aria-label="Categorías de productos"></div>
-    <div id="tpGrid" class="tp-grid"><div class="notice">Cargando catálogo…</div></div>
-    <p class="tp-legal" id="tpLegal"></p>
+    <div id="tuningPaneGuias" class="tuning-pane" role="tabpanel" aria-labelledby="tuningTabGuias">
+      <div class="tuning-warning panel">
+        <svg class="ic"><use href="#i-shield"></use></svg>
+        <div><b>La potencia no es el primer paso.</b><p>Antes de calibrar: diagnóstico sin fallos, compresión, presión de combustible, temperaturas, frenos y neumáticos. Cualquier cambio debe cumplir la homologación y la ITV.</p></div>
+      </div>
+      <div id="tuningStages" class="tuning-stages"></div>
+      <div id="tuningPackages" class="tuning-grid"><div class="notice">Cargando guías…</div></div>
+    </div>
+
+    <div id="tuningPaneAccesorios" class="tuning-pane" role="tabpanel" aria-labelledby="tuningTabAccesorios" hidden>
+      <div id="tuningAccesorios" class="tuning-accessories">
+        <header class="page-head">
+          <div>
+            <span class="eyebrow">ACCESORIOS TUNING</span>
+            <h2>Pantallas, luces y accesorios</h2>
+            <p>Pantallas CarPlay/Android, luces neón y ambiente, audio, cámaras y accesorios de interior. Cada ficha enlaza a un producto real de Amazon, con foto del vendedor y precio consultado. Comprueba medidas, referencia y compatibilidad antes de comprar.</p>
+          </div>
+          <span class="page-meta"><svg class="ic"><use href="#i-cart"></use></svg> <b id="tpCount">—</b> accesorios · <span id="tpCats">—</span> categorías</span>
+        </header>
+
+        <div class="tp-controls panel">
+          <div class="tp-search">
+            <svg class="ic"><use href="#i-search"></use></svg>
+            <input id="tpSearch" type="search" autocomplete="off" placeholder="Busca: pantalla, LED, neón, CarPlay, altavoz…" aria-label="Buscar en el catálogo de accesorios">
+          </div>
+          <label class="tp-car">
+            <span>Mi coche</span>
+            <select id="tpCar" aria-label="Filtrar por coche" title="Las piezas universales se muestran con cualquier modelo"><option value="all">Todos los modelos</option></select>
+          </label>
+          <span class="tp-results" id="tpResults">—</span>
+        </div>
+
+        <div id="tpTabs" class="tp-tabs" role="tablist" aria-label="Categorías de accesorios"></div>
+        <div id="tpGrid" class="tp-grid"><div class="notice">Cargando accesorios…</div></div>
+        <p class="tp-legal" id="tpLegal"></p>
+      </div>
+    </div>
   </section>
 
   <!-- ===================== FIABILIDAD POR MOTOR ===================== -->
@@ -1226,6 +1238,101 @@
     <div id="lmNav" class="lm-nav" role="group" aria-label="Familias de producto"></div>
     <div class="notice" id="lmNotice">Cargando familias verificadas…</div>
     <div id="lmFamilies" class="lm-families"></div>
+  </section>
+
+  <!-- ===================== NEUMÁTICOS Y LLANTAS ===================== -->
+  <section id="view-neumaticos" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">NEUMÁTICOS, LLANTAS Y EQUIVALENCIAS</span>
+        <h2>Neumáticos y llantas</h2>
+        <p>Busca por medida exacta, comprueba qué medidas alternativas quedan dentro del ±3 % de diámetro y compara antes de comprar. Solo se publican fichas con foto y enlace de vendedor comprobados.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-tire"></use></svg> <b id="tyreCount">—</b> fichas verificadas</span>
+    </header>
+
+    <div class="panel tyre-search">
+      <div class="panel-head">
+        <div><span class="eyebrow">BUSCADOR POR MEDIDA</span><h3>¿Qué medida llevas?</h3></div>
+        <span class="tag" id="tyreSizeTag">205/55 R16</span>
+      </div>
+      <form id="tyreForm" class="tyre-form" autocomplete="off">
+        <label>Anchura (mm)
+          <input id="tyreW" type="number" inputmode="numeric" min="125" max="355" step="5" value="205" required>
+        </label>
+        <span class="tyre-sep" aria-hidden="true">/</span>
+        <label>Perfil (%)
+          <input id="tyreP" type="number" inputmode="numeric" min="25" max="85" step="5" value="55" required>
+        </label>
+        <label>Llanta (″)
+          <select id="tyreR"><option value="16">16″</option></select>
+        </label>
+        <label>Temporada
+          <select id="tyreSeason">
+            <option value="">Todas</option>
+            <option value="verano">Verano</option>
+            <option value="invierno">Invierno</option>
+            <option value="todo tiempo">Todo tiempo</option>
+          </select>
+        </label>
+        <button class="btn primary" type="submit">Buscar neumáticos <svg class="ic"><use href="#i-search"></use></svg></button>
+        <button class="btn ghost" id="tyreEquivBtn" type="button">Calcular equivalencias</button>
+      </form>
+      <div id="tyreError" class="notice hidden"></div>
+      <p class="tyre-meta" id="tyreUpdated"></p>
+    </div>
+
+    <div class="tyre-results-head" id="tyreResultsHead"></div>
+    <div class="product-grid tyre-grid" id="tyreResults"><div class="notice">Cargando catálogo de neumáticos…</div></div>
+
+    <section class="panel tyre-equiv" id="tyreEquivalents">
+      <div class="panel-head">
+        <div><span class="eyebrow">MEDIDAS ALTERNATIVAS · ITV</span><h3>¿Qué otras medidas puedo montar?</h3></div>
+        <span class="tag" id="equivBase">—</span>
+      </div>
+      <p class="lm-summary">Se comparan todas las combinaciones de anchura y perfil para llantas de 13″ a 24″, descartando las que se alejan más del 3 % del diámetro original. Cada fila indica cuánto cambia el diámetro y si la anchura o la llanta dan algún aviso.</p>
+      <div class="equiv-summary" id="equivSummary"></div>
+      <div id="equivGroups"><div class="notice">Calcula una medida para ver sus alternativas.</div></div>
+      <p class="tp-legal">Cálculo orientativo según los criterios habituales de equivalencia (diámetro ±3 %, anchura +30 mm máximo, índices iguales o superiores). La equivalencia válida para circular es la que figure en la ficha técnica del vehículo o la que confirme la ITV. Cambiar de medida afecta a velocímetro, consumo y presión de inflado.</p>
+    </section>
+
+    <section class="panel tyre-compare hidden" id="tyreCompare">
+      <div class="panel-head">
+        <div><span class="eyebrow">COMPARADOR</span><h3>Comparar neumáticos</h3></div>
+        <button class="btn ghost sm" id="compareClear" type="button">Vaciar comparador</button>
+      </div>
+      <p class="lm-summary">Marca «Comparar» en hasta tres fichas. Solo se enfrentan datos publicados: precio visto, etiqueta europea, índices y temporada. Donde no hay dato se indica, no se estima.</p>
+      <div id="compareBody"><div class="notice">Selecciona fichas del resultado para compararlas.</div></div>
+    </section>
+
+    <section class="panel tyre-wheels" id="tyreWheels">
+      <div class="panel-head">
+        <div><span class="eyebrow">LLANTAS · PCD · ET · BUJE</span><h3>¿Me vale esta llanta?</h3></div>
+        <span class="tag">Comprobación de cotas</span>
+      </div>
+      <p class="lm-summary">Compara la llanta que llevas con la que quieres montar: se validan tornillería (PCD), diámetro del buje, desplazamiento (ET) y anchura de garganta. Comprueba cotas, no homologación.</p>
+      <form id="wheelForm" class="wheel-form" autocomplete="off">
+        <fieldset class="wheel-col">
+          <legend>Llanta actual</legend>
+          <label>Garganta (″)<input id="wCurWidth" type="number" step="0.5" min="3" max="13" value="7"></label>
+          <label>Diámetro (″)<input id="wCurDia" type="number" step="1" min="13" max="24" value="17"></label>
+          <label>Tornillería<input id="wCurPcd" type="text" placeholder="5x112" value="5x112"></label>
+          <label>ET (mm)<input id="wCurEt" type="number" step="1" min="-50" max="100" value="45"></label>
+          <label>Buje (mm)<input id="wCurBore" type="number" step="0.1" min="40" max="120" value="57.1"></label>
+        </fieldset>
+        <fieldset class="wheel-col">
+          <legend>Llanta candidata</legend>
+          <label>Garganta (″)<input id="wNewWidth" type="number" step="0.5" min="3" max="13" value="8"></label>
+          <label>Diámetro (″)<input id="wNewDia" type="number" step="1" min="13" max="24" value="18"></label>
+          <label>Tornillería<input id="wNewPcd" type="text" placeholder="5x112" value="5x112"></label>
+          <label>ET (mm)<input id="wNewEt" type="number" step="1" min="-50" max="100" value="35"></label>
+          <label>Buje (mm)<input id="wNewBore" type="number" step="0.1" min="40" max="120" value="66.6"></label>
+        </fieldset>
+        <button class="btn primary wheel-submit" type="submit">Comprobar compatibilidad</button>
+      </form>
+      <div id="wheelResult"><div class="notice">Rellena las dos columnas y comprueba.</div></div>
+      <p class="tp-legal">La comprobación es orientativa y no sustituye la ficha de homologación ni la ITV. Antes de montar hay que girar la dirección a tope y verificar separación real con pinza, amortiguador y paso de rueda.</p>
+    </section>
   </section>
 
   <section id="view-productos" class="view">
@@ -1677,8 +1784,9 @@
 <script src="/js/obd.js?v=20261105c"></script>
 <script src="/js/tutorials.js?v=20261026d"></script>
 
-<script src="/js/app.js?v=20261105d"></script>
+<script src="/js/app.js?v=20261105f"></script>
 <script src="/js/lighting.js?v=20261105b"></script>
+<script src="/js/tyres.js?v=20261106a"></script>
 <script src="/js/buying.js?v=20261026d"></script>
 <script src="/js/scan.js?v=20261026d"></script>
 <script src="/js/garage.js?v=20261030d"></script>
