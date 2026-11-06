@@ -1759,3 +1759,24 @@ select option { background: #0c1014; }
   .wheel-checks li { grid-template-columns: 16px 1fr; }
   .wheel-checks li span { grid-column: 2; }
 }
+
+/* ---------- Navegación: una sola línea visible ---------- */
+/* Con 18 apartados, los iconos solo caben por encima de 1920 px. Por debajo se
+   ocultan y se compacta el espaciado para que Tuning, Fiabilidad, Chat, Informe,
+   Foro y Contacto queden dentro de la pantalla en lugar de salirse por la derecha. */
+@media (max-width: 1920px) {
+  #nav button {
+    gap: 0;
+    padding: 27px 7px 25px;
+    font-size: 9.5px;
+    letter-spacing: .04em;
+  }
+  #nav button .ic { display: none; }
+}
+/* En portátiles de 1366 y menos el CTA superior no cabe con los 18 apartados. */
+@media (max-width: 1366px) {
+  .topbar-actions { display: none; }
+}
+@media (min-width: 1921px) {
+  #nav button { padding: 29px 10px 27px; }
+}
