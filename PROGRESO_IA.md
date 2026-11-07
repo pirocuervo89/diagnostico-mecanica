@@ -600,3 +600,31 @@ Módulo nuevo `Neumáticos` en la navegación, entre Luz y multimedia y Producto
   `public/img/neumaticos/`; 13 con etiqueta europea publicada por el vendedor.
 - Lógica en `src/lib/tyres.js`, vista en `public/js/tyres.js`, datos en
   `data/tyres.json`. Tests en `tests/tyres.test.mjs`.
+
+## Ajuste visual: imágenes de accesorios más pequeñas (05/11/2026)
+
+- La rejilla de **Accesorios Tuning** pasa de 3 columnas fijas a `auto-fill` con mínimo de 280 px: 4 columnas en escritorio ancho y más columnas en pantallas grandes.
+- La imagen de cada ficha baja de **158 px a 120 px** de alto en escritorio y a **110 px** en móvil; además pasa de `object-fit: cover` a `contain` para que el producto se vea completo y no se estire.
+- En móvil se mantiene una sola columna por debajo de ~454 px y dos columnas cuando caben.
+- Medido en Firefox: escritorio **310×120** por imagen y móvil **354×110**, sin desbordamiento (1354/1354 y 384/384), 0 imágenes rotas y 0 errores de consola.
+- `npm test`: **124/124**. Caché: `reforma.css?v=20261105c`.
+
+## Fiabilidad: 30 motores más (2026-11-06)
+
+- La base pasa de **20 a 50 motores** y de **87 a 218 averías**; **140 URLs únicas**.
+- Nuevos bloques: VAG (EA111 1.2/1.4 TSI, 2.0 TDI BKD, 1.9 TDI PD ASZ, 1.6 TDI
+  CAYC, EA113 2.0 TFSI, 1.9 TDI VE ALH), PSA/Ford/Renault (DW10 2.0 HDi, M9R,
+  2.0 EcoBlue, 0.9 TCe, 2.2 TDCi, A20DTH), BMW (M57, N52, N13), Mercedes
+  (OM646, M271, M274), Mazda (Skyactiv-D 2.2, Skyactiv-G 2.0), Toyota (1CD-FTV,
+  2AD-FHV), Honda N22A, Hyundai/Kia D4FD, Subaru EJ25, Volvo D5244T y VEA D4,
+  Land Rover Ingenium 204DTA, Alfa 2.2 JTDm y Nissan YD25.
+- Cada ficha lleva distribución con intervalo, mantenimiento, averías con
+  comprobaciones, coste orientativo en España y fuentes por avería.
+- Los motores con una sola fuente verificada (M274, Skyactiv-G, 1CD-FTV, 2AD,
+  N22A, D4FD, EJ25, D5, VEA, Ingenium, JTDm, YD25) van con `confidence` media o
+  baja y sus averías marcadas como reportadas o hipótesis, no como confirmadas.
+- Pipeline: `.tmp/rel-b*.json` → `.tmp/rel-merge.mjs`, que valida campos, IDs
+  duplicados, severidades, estados y que cada fuente exista en `.tmp/rel-src.json`.
+- Enlaces comprobados uno a uno: **140 URLs, 0 rotas**; 20 responden 402/403/429
+  por bloqueo anti-robot y abren en navegador.
+- `npm test`: **134/134**. La API sirve `stats.engines = 50` e `issues = 218`.
