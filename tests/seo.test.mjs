@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
+  productMeta,
+  engineMeta,
   productPage,
   enginePage,
   tyrePage,
@@ -82,6 +85,32 @@ test('los índices enlazan al contenido y paginan sin duplicar canónicos', () =
 
   assert.match(enginesIndex().html, /href="\/motor\//);
   assert.match(tyresIndex().html, /href="\/neumatico\//);
+});
+
+test('ningún título ni descripción se repite, y todos caben en Google', () => {
+  const titles = new Map();
+  const descriptions = new Map();
+  const check = (id, meta, kind) => {
+    assert.ok(meta.title.length <= 70, `${kind} ${id}: título de ${meta.title.length} caracteres`);
+    assert.ok(meta.description.length >= 50, `${kind} ${id}: descripción de ${meta.description.length} caracteres`);
+    assert.ok(meta.description.length <= 170, `${kind} ${id}: descripción de ${meta.description.length} caracteres`);
+    const titleKey = meta.title.toLowerCase();
+    assert.equal(titles.has(titleKey), false, `título repetido entre ${kind} ${id} y ${titles.get(titleKey)}`);
+    titles.set(titleKey, `${kind} ${id}`);
+    const descKey = meta.description.toLowerCase();
+    assert.equal(descriptions.has(descKey), false, `descripción repetida entre ${kind} ${id} y ${descriptions.get(descKey)}`);
+    descriptions.set(descKey, `${kind} ${id}`);
+  };
+  for (const item of products()) check(item.id, productMeta().get(item.id), 'producto');
+  for (const engine of engines()) check(engine.id, engineMeta().get(engine.id), 'motor');
+});
+
+test('la portada declara el mismo dominio que el resto del sitio', () => {
+  const html = fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
+  const canonical = (html.match(/rel="canonical" href="([^"]+)"/) || [])[1];
+  assert.equal(canonical, `${baseUrl()}/`, 'el canonical de la portada debe salir de data/legal.json');
+  assert.ok(html.includes(`property="og:url" content="${baseUrl()}/"`), 'og:url debe coincidir');
+  assert.ok(html.includes('name="robots" content="index,follow'), 'la portada debe ser indexable');
 });
 
 test('la etiqueta de afiliado se añade solo a enlaces de Amazon', () => {

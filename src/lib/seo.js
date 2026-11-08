@@ -113,6 +113,87 @@ export function findTyre(id) {
   return byId(tyres()).get(String(id)) || null;
 }
 
+// ------------------------------------------------------- metadatos únicos
+
+// Google penaliza los títulos repetidos y las descripciones clonadas, y el
+// catálogo trae fichas de Amazon que comparten texto. Aquí se generan una sola
+// vez, con deduplicación real: si dos fichas coinciden, la segunda se distingue
+// con su marca o su subcategoría.
+let productMetaCache = null;
+let engineMetaCache = null;
+
+const MAX_TITLE = 65;
+const MAX_DESC = 155;
+
+function fillDescription(text, fallback) {
+  let description = clip(text, MAX_DESC);
+  if (description.length < 50) description = clip(`${description} ${fallback}`.trim(), MAX_DESC);
+  return description;
+}
+
+export function productMeta() {
+  if (productMetaCache) return productMetaCache;
+  const titles = new Set();
+  const descriptions = new Set();
+  const map = new Map();
+
+  for (const item of products()) {
+    const name = strip(item.name);
+    const brand = strip(item.manufacturer || '');
+    const shelf = [item.category, item.subcategory].filter(Boolean).map(strip).join(' › ');
+
+    let title = `${name} · precio`;
+    if (title.length > MAX_TITLE) title = clip(name, MAX_TITLE - 3);
+    if (titles.has(title.toLowerCase())) title = clip(`${name} · ${brand || item.category || 'catálogo'}`, MAX_TITLE);
+    if (titles.has(title.toLowerCase())) title = clip(`${name} · ${item.subcategory || item.asin || item.id}`, MAX_TITLE);
+    titles.add(title.toLowerCase());
+
+    let description = fillDescription(
+      `${name}${brand ? ` de ${brand}` : ''}${shelf ? `, en ${shelf}` : ''}. ${strip(item.description || '')}`,
+      'Ficha con precio comprobado, fotografía y enlace al vendedor.'
+    );
+    if (descriptions.has(description)) description = fillDescription(`${name}${brand ? ` (${brand})` : ''}. ${description}`, 'Consulta precio y compatibilidad.');
+    if (descriptions.has(description)) description = clip(`${description} Ref. ${item.asin || item.id}.`, MAX_DESC);
+    descriptions.add(description);
+
+    map.set(item.id, { title, description });
+  }
+
+  productMetaCache = map;
+  return map;
+}
+
+export function engineMeta() {
+  if (engineMetaCache) return engineMetaCache;
+  const titles = new Set();
+  const descriptions = new Set();
+  const map = new Map();
+
+  for (const engine of engines()) {
+    const commercial = strip(engine.commercial || '');
+    const family = strip(engine.family || '');
+    const model = commercial || family || engine.id;
+
+    let title = `Motor ${model}: averías y fiabilidad`;
+    if (title.length > MAX_TITLE) title = clip(`Motor ${model}: averías`, MAX_TITLE);
+    if (titles.has(title.toLowerCase())) title = clip(`Motor ${model} (${family}): averías`, MAX_TITLE);
+    if (titles.has(title.toLowerCase())) title = clip(`Motor ${family || model}: averías y fiabilidad`, MAX_TITLE);
+    titles.add(title.toLowerCase());
+
+    let description = fillDescription(
+      `${engine.summary || ''} ${engine.reliability?.note || ''}`.trim() || `${model}: averías frecuentes y mantenimiento`,
+      `${model}: averías frecuentes, cómo comprobarlas, coste orientativo y fuentes.`
+    );
+    if (descriptions.has(description)) description = fillDescription(`${family}: ${description}`, `${model}: averías y mantenimiento.`);
+    descriptions.add(description);
+
+    map.set(engine.id, { title, description });
+  }
+
+  engineMetaCache = map;
+  return map;
+}
+
 // ---------------------------------------------------------------- plantilla
 
 const NAV = [
@@ -249,14 +330,15 @@ export function productPage(id) {
   const price = money(item.price);
   const canonical = abs(`/producto/${item.id}`);
   const buy = item.affiliateUrl ? affiliateUrl(item.affiliateUrl) : '';
-  const description = clip(item.description || `${item.name} de ${item.manufacturer || 'fabricante'} en la sección ${item.category || 'recambios'}.`, 155);
+  const description = (productMeta().get(item.id) || {}).description
+    || clip(item.description || `${item.name} de ${item.manufacturer || 'fabricante'}.`, MAX_DESC);
   const checked = item.priceCheckedAt ? fmtDate(item.priceCheckedAt) : '';
   const sameShelf = products()
     .filter(other => other.id !== item.id && other.category === item.category)
     .slice(0, 8);
 
-  const withBrand = `${item.name}${item.manufacturer ? ` · ${item.manufacturer}` : ''}`;
-  const pageTitle = withBrand.length <= 66 ? `${withBrand} · precio` : clip(item.name, 66);
+  const meta = productMeta().get(item.id) || {};
+  const pageTitle = meta.title || clip(item.name, MAX_TITLE);
 
   const specs = [
     ['Fabricante', item.manufacturer],
@@ -375,10 +457,11 @@ export function enginePage(id) {
   const label = engine.commercial && engine.family && engine.commercial !== engine.family
     ? `${engine.commercial} · ${engine.family}`
     : (engine.commercial || engine.family || engine.id);
-  const heading = `Motor ${label}: averías, fiabilidad y mantenimiento`;
-  const pageTitle = heading.length > 68 ? `Motor ${engine.commercial || engine.family}: averías y fiabilidad` : heading;
+  const meta = engineMeta().get(engine.id) || {};
+  const heading = clip(`Motor ${engine.commercial || label}: averías, fiabilidad y mantenimiento`, 96);
+  const pageTitle = meta.title || clip(heading, MAX_TITLE);
   const issues = Array.isArray(engine.issues) ? engine.issues : [];
-  const description = clip(engine.summary || `${label}: averías conocidas, mantenimiento y fiabilidad.`, 155);
+  const description = meta.description || clip(engine.summary || `${label}: averías conocidas.`, MAX_DESC);
 
   const facts = [
     ['Marca', engine.brand],
@@ -611,7 +694,7 @@ export function tyrePage(id) {
 
   return {
     html: layout({
-      title: `${name} · precio y características`,
+      title: name.length <= 58 ? `${name} · precio` : clip(name, MAX_TITLE),
       description,
       canonical,
       image: tyre.image ? abs(tyre.image) : '',
