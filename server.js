@@ -12,6 +12,7 @@ import testigosRouter from './src/routes/testigos.js';
 import tutorialsRouter from './src/routes/tutorials.js';
 import paymentsRouter from './src/routes/payments.js';
 import pricesRouter from './src/routes/prices.js';
+import seoRouter from './src/routes/seo.js';
 import { startPriceSync } from './src/lib/price_sync.js';
 
 dotenv.config();
@@ -45,6 +46,9 @@ app.use('/api/payments', paymentsRouter);
 app.use('/api/prices', pricesRouter);
 app.use('/api', apiRouter);
 app.use('/api/sintomas', sintomasRouter);
+// Páginas con URL propia para buscadores. Va antes del estático porque también
+// sirve el /sitemap.xml generado (debe sustituir al archivo fijo).
+app.use(seoRouter);
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
   extensions: ['html']
