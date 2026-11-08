@@ -628,3 +628,25 @@ Módulo nuevo `Neumáticos` en la navegación, entre Luz y multimedia y Producto
 - Enlaces comprobados uno a uno: **140 URLs, 0 rotas**; 20 responden 402/403/429
   por bloqueo anti-robot y abren en navegador.
 - `npm test`: **134/134**. La API sirve `stats.engines = 50` e `issues = 218`.
+
+## Precios visibles en todo el catálogo (2026-11-08)
+
+- Las **500 fichas de Recambios** mostraban «Consultar» aunque 263 ya tenían el
+  precio real guardado en `listingPrice`. Ahora `price` lleva la cifra y se
+  muestra directamente en la tarjeta, en la ficha y en los productos
+  recomendados del Chat IA.
+- Se añadió `scripts/sync-prices.mjs`, que promociona el precio observado y
+  consulta Amazon.es por ASIN para las fichas sin cifra. Guarda `price`,
+  `priceCheckedAt` y `priceSource`, con copia de seguridad en
+  `data/products.json.bak-prices`.
+- Resultado: **499/500 con precio**. La única ficha sin cifra es el aditivo
+  Motul `liq-motul-stabil`: su anuncio está **sin stock** ("No disponible"),
+  así que se marca como tal en vez de inventar un importe.
+- Las tarjetas llevan ahora la etiqueta `Precio Amazon · dd/mm/aa` y la ficha
+  avisa de la fecha de consulta y de que el importe puede variar.
+- `Luz y multimedia` (33 fichas) hereda el precio del catálogo: la API
+  `/api/lighting-media` ya no recorta `priceCheckedAt` ni `priceSource`.
+- Neumáticos (48) y Tuning (236) ya tenían precio real; el de neumáticos pasa de
+  `2026-11-06` a `06/11/26` en la etiqueta.
+- Comprobado en Firefox real: 500 tarjetas con 499 precios, Luz 33/33, Tuning
+  236/236, neumáticos con precio y **0 errores de consola**. `npm test`: 134/134.

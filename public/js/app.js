@@ -1143,6 +1143,20 @@ async function loadProducts() {
   }
 }
 
+// Etiqueta del precio: indica la tienda y la fecha en que se consultó.
+function priceCaption(p) {
+  if (!/\d/.test(String(p.price || ''))) return 'Precio';
+  const source = String(p.priceSource || '');
+  const date = String(p.priceCheckedAt || '');
+  if (!source && !date) return 'Precio';
+  return `Precio${/amazon/i.test(source) ? ' Amazon' : ''}${date ? ` · ${priceDate(date)}` : ''}`;
+}
+
+function priceDate(value) {
+  const m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}/${m[1].slice(2)}` : String(value || '');
+}
+
 function renderProducts(category) {
   const grid = $('#productGrid');
   if (!grid) return;
@@ -1183,7 +1197,7 @@ function renderProducts(category) {
           <small class="product-brand">${esc(p.manufacturer || 'Fabricante no confirmado')}${p.asin ? ` · ASIN ${esc(p.asin)}` : ''}</small>
           <p>${esc(p.description)}</p>
           <div class="product-foot">
-            <span class="product-price"><small>Precio</small>${esc(p.price || 'Consultar')}</span>
+            <span class="product-price${/\d/.test(String(p.price || '')) ? '' : ' pending'}" title="${esc(p.priceSource || 'Precio del catálogo')}"><small>${esc(priceCaption(p))}</small>${esc(p.price || 'Consultar precio')}</span>
             ${cta}
           </div>
           <button class="product-sheet-link" type="button" data-product-id="${esc(p.id)}">Ver ficha y compatibilidad ${icon('arrow')}</button>
@@ -3257,10 +3271,10 @@ async function openProductSheet(id) {
         <div class="product-sheet-facts">
           <div><small>Referencia</small><b>${esc(p.reference || 'No publicada en la ficha')}</b></div>
           <div><small>Vendedor</small><b>${esc(p.seller || 'No indicado')}</b></div>
-          <div><small>Precio</small><b>${esc(p.price || 'Consultar')}</b></div>
+          <div><small>Precio</small><b>${esc(p.price || 'Consultar precio')}</b></div>
           <div><small>Verificado</small><b>${esc(p.verifiedAt || 'No indicado')}</b></div>
         </div>
-        ${p.listingPrice ? `<p class="micro-note">Precio observado en la búsqueda: ${esc(p.listingPrice)}. No es una oferta garantizada; consulta la ficha del vendedor.</p>` : ''}
+        ${/\d/.test(String(p.price || '')) ? `<p class="micro-note">Precio de ${esc((p.priceSource || 'la tienda').replace(/\s*·\s*[A-Z0-9]{10}$/i, ''))} consultado el ${esc(priceDate(p.priceCheckedAt || p.verifiedAt))}. Puede variar: confirma el importe final en la ficha del vendedor.</p>` : `<p class="micro-note">${esc(p.priceNote || 'Sin precio publicado por el vendedor: no se muestra una cifra sin verificar.')}</p>`}
         ${features.length ? `<h4>Características publicadas por el vendedor</h4><ul class="check-list">${features.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
         <div class="compat-note"><b>${icon('alert')} Compatibilidad</b><p>${esc(p.compatibility?.note || 'No verificada para un vehículo concreto.')}</p></div>
         ${p.verificationNote ? `<p class="micro-note">${esc(p.verificationNote)}</p>` : ''}

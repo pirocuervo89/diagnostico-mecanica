@@ -5,12 +5,22 @@
 (() => {
   const state = { loaded: false };
 
+  function priceDate(value) {
+    const m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? `${m[3]}/${m[2]}/${m[1].slice(2)}` : '';
+  }
+
   function priceOf(product) {
+    const date = priceDate(product.priceCheckedAt || product.verifiedAt);
+    const caption = product.priceSource && /amazon/i.test(product.priceSource)
+      ? `Precio Amazon${date ? ` · ${date}` : ''}`
+      : 'Precio';
     const live = String(product.price || '').trim();
-    if (live && live !== 'Consultar') return { text: live, observed: false };
+    if (/\d/.test(live)) return { text: live, caption, observed: false };
+    if (live && live !== 'Consultar') return { text: live, caption: 'Precio', observed: false };
     const observed = String(product.listingPrice || '').trim();
-    if (observed) return { text: observed, observed: true };
-    return { text: 'Consultar precio', observed: false };
+    if (observed) return { text: observed, caption: 'Precio observado', observed: true };
+    return { text: 'Consultar precio', caption: 'Precio', observed: false };
   }
 
   function card(product) {
@@ -31,7 +41,7 @@
         <small class="product-brand">${esc(product.manufacturer || 'Fabricante no confirmado')}${product.asin ? ` · ASIN ${esc(product.asin)}` : ''}</small>
         <p>${esc(product.description || '')}</p>
         <div class="product-foot">
-          <span class="product-price"><small>${price.observed ? 'Precio observado' : 'Precio'}</small>${esc(price.text)}</span>
+          <span class="product-price${/\d/.test(price.text) ? '' : ' pending'}" title="${esc(product.priceSource || 'Precio del catálogo')}"><small>${esc(price.caption)}</small>${esc(price.text)}</span>
           ${link
             ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener sponsored">Ver oferta ${icon('external')}</a>`
             : '<span class="btn ghost">Enlace pendiente</span>'}

@@ -75,7 +75,9 @@
       ? `<img class="product-photo" src="${esc(t.image)}" alt="Neumático ${esc(t.brand)} ${esc(t.model)} ${esc(t.size)}" loading="lazy" referrerpolicy="no-referrer">`
       : `<span class="product-placeholder" title="Foto pendiente"><svg class="ic"><use href="#i-tire"></use></svg><b>Foto pendiente</b></span>`;
     const link = /^https?:\/\//i.test(t.url || '') ? t.url : '';
-    const priceNote = t.priceSeen ? `Consultado el ${esc(t.priceSeen)}` : 'Precio orientativo';
+    const seen = String(t.priceSeen || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    const seenLabel = seen ? `${seen[3]}/${seen[2]}/${seen[1].slice(2)}` : '';
+    const priceNote = seenLabel ? `Precio · ${esc(t.shop || 'tienda')} · ${seenLabel}` : 'Precio orientativo';
     return `<article class="product tyre-card">
       <div class="product-media">${photo}
         <span class="tyre-size-badge">${esc(t.size)}</span>

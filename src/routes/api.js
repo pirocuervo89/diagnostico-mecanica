@@ -1347,6 +1347,8 @@ router.get('/lighting-media', (_req, res) => {
         description: p.description,
         price: p.price || '',
         listingPrice: p.listingPrice || '',
+        priceCheckedAt: p.priceCheckedAt || '',
+        priceSource: p.priceSource || '',
         image: p.image,
         asin: p.asin || null,
         affiliateUrl: withAffiliateTag(p.affiliateUrl),

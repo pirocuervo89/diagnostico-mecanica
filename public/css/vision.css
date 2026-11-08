@@ -1058,7 +1058,8 @@ select option { background: #0c1014; }
 .product p { font-size: 11.8px; line-height: 1.55; color: #8e9aa5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .product-foot { border-top-color: rgba(188, 204, 218, .09); }
 .product-price { font-family: var(--display); font-size: 18px; color: #f3f1ff; }
-.product-price small { font-family: var(--mono); font-size: 7px; color: #66737e; }
+.product-price small { font-family: var(--mono); font-size: 8px; letter-spacing: .06em; color: #66737e; }
+.product-price.pending { color: #8e9aa5; font-family: var(--body, inherit); font-size: 13px; }
 .product .btn { padding: 9px 11px; font-size: 8.5px; }
 .product .btn.ghost { color: #76838e; }
 
