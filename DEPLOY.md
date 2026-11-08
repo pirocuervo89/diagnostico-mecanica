@@ -80,6 +80,28 @@ Cuando la tengas, hay que ponerla en `data/legal.json` (`siteUrl`), en
 Cuando haya visitas reales, la migración natural es Oracle Always Free o un VPS
 barato: el mismo `Dockerfile` sirve, solo cambia dónde se ejecuta.
 
+## Sin dormir: Oracle Cloud Always Free (gratis, siempre encendido)
+
+Render Free se duerme a los 15 minutos. La migración ya está preparada
+en `deploy/oracle/` (docker-compose con datos persistentes + Caddy con
+HTTPS automático + scripts de instalación y actualización).
+
+Guía completa en **`deploy/oracle/README.md`**:
+
+```bash
+# dentro de la VM de Oracle (Ubuntu 24.04)
+git clone https://github.com/pirocuervo89/diagnostico-mecanica.git
+cd diagnostico-mecanica
+cp .env.example .env   # rellena tus claves
+bash deploy/oracle/setup.sh
+```
+
+El alta en Oracle la hace el titular (identidad + tarjeta solo para
+verificar, sin cargo en el plan Always Free). Al cambiar de servidor
+hay que actualizar `PUBLIC_BASE_URL`, `data/legal.json` (`siteUrl` +
+`npm run legal:build`), el webhook de Stripe, Search Console y
+`SITE_URL` de IndexNow.
+
 ## Actualizar la web publicada
 
 ```bash

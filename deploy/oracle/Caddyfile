@@ -1,0 +1,8 @@
+# Sustituye TU-DOMINIO por tu dominio o la IP pública de la VM.
+# Con un dominio, Caddy saca y renueva solo el certificado HTTPS (Let's Encrypt).
+# Con solo la IP, sirve HTTP en el puerto 80.
+TU-DOMINIO {
+	reverse_proxy 127.0.0.1:3000
+	encode gzip
+	log
+}
