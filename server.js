@@ -13,6 +13,7 @@ import tutorialsRouter from './src/routes/tutorials.js';
 import paymentsRouter from './src/routes/payments.js';
 import pricesRouter from './src/routes/prices.js';
 import seoRouter from './src/routes/seo.js';
+import affiliatesRouter from './src/routes/affiliates.js';
 import { startPriceSync } from './src/lib/price_sync.js';
 
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/api/testigos', testigosRouter);
 app.use('/api/tutorials', tutorialsRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/prices', pricesRouter);
+app.use('/api/afiliados', affiliatesRouter);
 app.use('/api', apiRouter);
 app.use('/api/sintomas', sintomasRouter);
 // Páginas con URL propia para buscadores. Va antes del estático porque también

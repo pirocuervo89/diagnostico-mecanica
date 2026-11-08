@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#08090b">
+<title>Panel de afiliados · Diagnóstico y Mecánica</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  :root {
+    --bg: #08090b; --panel: #12141a; --line: #23262f; --text: #e7e9ee;
+    --muted: #9aa0ae; --muted-2: #6f7686; --accent: #a78bfa; --ok: #34d399; --warn: #fbbf24;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  a { color: var(--accent); }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 28px 18px 70px; }
+  h1 { font-size: clamp(22px, 3vw, 30px); margin: 0 0 6px; letter-spacing: -.02em; }
+  .lead { color: var(--muted); margin: 0 0 22px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 0 0 26px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .card .k { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted-2); }
+  .card .v { font-size: 22px; font-weight: 700; margin-top: 8px; }
+  .card .v.ok { color: var(--ok); }
+  .card .v.warn { color: var(--warn); }
+  .card .s { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+  h2 { font-size: 18px; margin: 30px 0 12px; }
+  ul.links { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  ul.links li { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 13px 16px; }
+  ul.links a { font-weight: 650; text-decoration: none; }
+  ul.links a:hover { text-decoration: underline; }
+  ul.links span { display: block; color: var(--muted); font-size: 12.5px; margin-top: 3px; }
+  .steps { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; }
+  .steps ol { margin: 8px 0 0; padding-left: 20px; color: var(--muted); }
+  .steps li { margin: 6px 0; }
+  .tagline { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+  code { font-family: var(--mono); background: #1b1e26; padding: 1px 5px; border-radius: 5px; font-size: 12.5px; }
+  .foot { color: var(--muted-2); font-size: 12.5px; margin-top: 30px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Panel de afiliados</h1>
+  <p class="lead">Estado real de las comisiones de la web y atajos a los paneles donde se ve el dinero. Guarda esta página en marcadores con <strong>Ctrl + D</strong> (⌘ + D en Mac).</p>
+
+  <section class="grid" id="status" aria-live="polite">
+    <div class="card"><div class="k">Etiqueta Amazon</div><div class="v warn" id="tagValue">Comprobando…</div><div class="s" id="tagSource"></div></div>
+    <div class="card"><div class="k">Enlaces con comisión</div><div class="v" id="linked">—</div><div class="s" id="linkedDetail"></div></div>
+    <div class="card"><div class="k">Awin (Autodoc)</div><div class="v warn" id="awin">Comprobando…</div><div class="s">Identificador de editor</div></div>
+  </section>
+
+  <h2>Dónde se ve lo que has ganado</h2>
+  <ul class="links">
+    <li><a href="https://afiliados.amazon.es/" target="_blank" rel="noopener">Amazon Afiliados → informes y pagos</a><span>Comisiones, clics, pedidos y fecha de transferencia. El banco se configura aquí, no en la web.</span></li>
+    <li><a href="https://ui.awin.com/" target="_blank" rel="noopener">Awin → Autodoc y otras tiendas</a><span>Editor: aquí salen los clics y las comisiones de Autodoc (merchant 120163).</span></li>
+    <li><a href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console</a><span>Si las páginas se están indexando. Es lo que trae el tráfico que luego compra.</span></li>
+    <li><a href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Stripe</a><span>Cobros del informe PRO. Los ingresos llegan al banco que configures dentro de Stripe.</span></li>
+    <li><a href="https://dashboard.render.com/" target="_blank" rel="noopener">Render</a><span>Servidor, variables de entorno y despliegues.</span></li>
+    <li><a href="/" target="_blank" rel="noopener">Ver la web publicada</a><span>Comprueba que las fichas y los botones de compra se ven bien.</span></li>
+  </ul>
+
+  <h2>Cómo saber si lo estás haciendo bien</h2>
+  <div class="steps">
+    <ol>
+      <li>Si la etiqueta Amazon sale en <strong>verde</strong>, cada clic de compra ya se atribuye a tu cuenta. En <strong>ámbar</strong>, los enlaces funcionan pero no generan comisión.</li>
+      <li>En Amazon, un clic sin pedido no paga: mira <em>pedidos</em> e <em>ingresos</em>, no las visitas.</li>
+      <li>Las comisiones de Amazon se confirman al cerrar el mes y se transfieren cuando el saldo supera el mínimo del programa.</li>
+      <li>Si en Search Console no aparecen páginas indexadas, no habrá tráfico: envía el sitemap <code>https://diagnostico-mecanica.onrender.com/sitemap.xml</code>.</li>
+    </ol>
+  </div>
+
+  <p class="foot">Página privada para el titular: no está enlazada desde la web ni se indexa en buscadores. <span class="tagline" id="checked"></span></p>
+</main>
+<script>
+(async () => {
+  const set = (id, text, cls) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    if (cls) el.className = 'v ' + cls;
+  };
+  try {
+    const response = await fetch('/api/afiliados', { headers: { accept: 'application/json' } });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const data = await response.json();
+
+    set('tagValue', data.tagActive ? 'Activa' : 'Sin activar', data.tagActive ? 'ok' : 'warn');
+    document.getElementById('tagSource').textContent = data.tagActive
+      ? 'Etiqueta ' + data.tag + ' · origen: ' + data.tagSource
+      : 'Falta la etiqueta que da Amazon (formato nombre-21)';
+
+    set('linked', String(data.linkedItems));
+    document.getElementById('linkedDetail').textContent = (data.catalogue || [])
+      .map(entry => entry.name + ': ' + entry.withLink + '/' + entry.items)
+      .join(' · ');
+
+    set('awin', data.awinPublisher ? 'Configurado' : 'Sin configurar', data.awinPublisher ? 'ok' : 'warn');
+
+    if (data.checkedAt) {
+      document.getElementById('checked').textContent = 'Comprobado el ' + new Date(data.checkedAt).toLocaleString('es-ES');
+    }
+  } catch (error) {
+    set('tagValue', 'Error', 'warn');
+    document.getElementById('tagSource').textContent = 'No se pudo consultar /api/afiliados: ' + error.message;
+  }
+})();
+</script>
+</body>
+</html>
