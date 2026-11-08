@@ -17,10 +17,10 @@ function ordersPath() {
 }
 
 function reportConfig() {
-  const price = Number(process.env.REPORT_PRICE_CENTS || 490);
+  const price = Number(process.env.REPORT_PRICE_CENTS || 990);
   return {
     currency: (process.env.REPORT_CURRENCY || 'eur').toLowerCase(),
-    priceCents: Number.isFinite(price) ? Math.max(50, Math.round(price)) : 490,
+    priceCents: Number.isFinite(price) ? Math.max(50, Math.round(price)) : 990,
     productName: process.env.REPORT_PRODUCT_NAME || 'Informe técnico PRO',
     webhookSecret: String(process.env.STRIPE_WEBHOOK_SECRET || '').trim()
   };
