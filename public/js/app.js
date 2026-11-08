@@ -3534,6 +3534,7 @@ function relDetailHTML(e) {
   const dist = e.distribution || {};
   const issues = e.issues || [];
   const maintenance = e.maintenance || [];
+  const autodoc = autodocSearchUrl({ reference: e.codes, name: e.family });
   return `
     <header class="page-head">
       <div>
@@ -3552,7 +3553,10 @@ function relDetailHTML(e) {
     ${dist.note ? `<p><b>Distribución:</b> ${esc(dist.note)}</p>` : ''}
     ${e.reliability?.note ? `<p><b>Valoración:</b> ${esc(e.reliability.note)}</p>` : ''}
     ${e.confidenceNote ? `<p class="micro-note">Confianza ${esc(e.confidence || '')}: ${esc(e.confidenceNote)}</p>` : ''}
-    <div class="rel-actions"><button class="btn primary sm" type="button" data-rel-ai>Preguntar a la IA por este motor ${icon('chat')}</button></div>
+    <div class="rel-actions">
+      <button class="btn primary sm" type="button" data-rel-ai>Preguntar a la IA por este motor ${icon('chat')}</button>
+      ${autodoc ? `<a class="btn ghost sm" href="${esc(autodoc)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Buscar recambios en Autodoc ${icon('external')}</a>` : ''}
+    </div>
     <div class="rel-detail">${issues.map(relIssueHTML).join('')}</div>
     ${maintenance.length ? `<h3>Mantenimiento preventivo</h3>${maintenance.map(m => `
       <article class="rel-issue">
