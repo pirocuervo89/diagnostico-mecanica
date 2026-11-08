@@ -13,6 +13,7 @@
     "test": "node --test tests/*.test.mjs",
     "legal:build": "node scripts/build-legal.mjs",
     "affiliates:audit": "node scripts/audit-affiliates.mjs",
+    "indexnow": "node scripts/indexnow.mjs",
     "prices:sync": "node scripts/sync-prices.mjs",
     "symptoms:build": "node scripts/build-symptoms.mjs",
     "symptoms:check": "node scripts/verify-symptoms.mjs"
