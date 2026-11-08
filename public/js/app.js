@@ -3319,6 +3319,7 @@ async function openProductSheet(id) {
         ${p.verificationNote ? `<p class="micro-note">${esc(p.verificationNote)}</p>` : ''}
         <div class="product-sheet-actions">
           ${link ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener noreferrer">Abrir en la tienda ${icon('external')}</a>` : '<span class="btn ghost">Enlace no disponible</span>'}
+          <a class="btn ghost" href="/producto/${encodeURIComponent(p.id)}">Ver ficha completa</a>
           <button class="btn ghost" type="button" data-product-close>Cerrar</button>
         </div>
         ${p.listingTitle && p.listingTitle !== p.name ? `<p class="micro-note">Título de la ficha: ${esc(p.listingTitle)}</p>` : ''}
