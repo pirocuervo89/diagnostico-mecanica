@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://diagnosticoymecanica.es/sitemap.xml
+Sitemap: https://diagnostico-mecanica.onrender.com/sitemap.xml
