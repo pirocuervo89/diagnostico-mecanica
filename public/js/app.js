@@ -1220,7 +1220,7 @@ function renderProducts(category) {
       : `<span class="product-placeholder" title="Foto pendiente: no hay imagen verificada del vendedor">${icon(productIcon(p.category))}<b>Foto pendiente</b></span>`;
 
     const cta = hasRealLink
-      ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener noreferrer">Ver oferta ${icon('external')}</a>`
+      ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Ver oferta ${icon('external')}</a>`
       : `<span class="btn ghost" title="Enlace pendiente: no se localizó una ficha de vendedor verificada">Enlace pendiente ${icon('search')}</span>`;
 
     return `
@@ -1392,7 +1392,7 @@ async function submitChat(text) {
               ${hasLink ? icon('external') : icon('search')}
             `;
             return hasLink
-              ? `<a class="recommended-item" href="${esc(link)}" target="_blank" rel="noopener noreferrer" title="${esc(note)}">${inner}</a>`
+              ? `<a class="recommended-item" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer" title="${esc(note)}">${inner}</a>`
               : `<span class="recommended-item pending" title="${esc(note)}">${inner}</span>`;
           }).join('')}
         </div>
@@ -3223,7 +3223,7 @@ function renderTpGrid() {
     return;
   }
   grid.innerHTML = items.map((item, index) => {
-    const links = (item.links || []).map(l => `<a class="tp-link" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.shop)} ${icon('arrow')}</a>`).join('');
+    const links = (item.links || []).map(l => `<a class="tp-link" href="${esc(l.url)}" target="_blank" rel="sponsored nofollow noopener noreferrer">${esc(l.shop)} ${icon('arrow')}</a>`).join('');
     const fits = (item.fitment || []).slice(0, 2).map(f => `<span class="tp-fit">${esc(f)}</span>`).join('');
     const more = (item.fitment || []).length > 2 ? `<span class="tp-fit more">+${item.fitment.length - 2}</span>` : '';
     return `
@@ -3279,6 +3279,16 @@ function openTuningPackage(id) {
 // -------------------------------------------------------------
 // FICHA DE PRODUCTO
 // -------------------------------------------------------------
+function autodocSearchUrl(product) {
+  const id = (document.querySelector('meta[name="awin-publisher-id"]')?.getAttribute('content') || '').trim();
+  if (!id) return '';
+  const brand = product?.manufacturer && !/no confirmado/i.test(product.manufacturer) ? product.manufacturer : '';
+  const query = [brand, product?.reference, product?.name].filter(Boolean).join(' ').slice(0, 120);
+  if (!query) return '';
+  const destination = `https://www.autodoc.es/search?keyword=${encodeURIComponent(query)}`;
+  return `https://www.awin1.com/cread.php?awinmid=120163&awinaffid=${encodeURIComponent(id)}&ued=${encodeURIComponent(destination)}`;
+}
+
 async function openProductSheet(id) {
   const modal = $('#productModal');
   const body = $('#productSheetBody');
@@ -3292,6 +3302,7 @@ async function openProductSheet(id) {
     }
   }
   const link = p.linkStatus === 'verified' ? p.affiliateUrl : '';
+  const autodoc = p.autodocUrl || autodocSearchUrl(p);
   const features = Array.isArray(p.features) ? p.features : [];
   body.innerHTML = `
     <div class="product-sheet-grid">
@@ -3318,7 +3329,8 @@ async function openProductSheet(id) {
         <div class="compat-note"><b>${icon('alert')} Compatibilidad</b><p>${esc(p.compatibility?.note || 'No verificada para un vehículo concreto.')}</p></div>
         ${p.verificationNote ? `<p class="micro-note">${esc(p.verificationNote)}</p>` : ''}
         <div class="product-sheet-actions">
-          ${link ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener noreferrer">Abrir en la tienda ${icon('external')}</a>` : '<span class="btn ghost">Enlace no disponible</span>'}
+          ${link ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Abrir en la tienda ${icon('external')}</a>` : '<span class="btn ghost">Enlace no disponible</span>'}
+          ${autodoc ? `<a class="btn ghost" href="${esc(autodoc)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Buscar en Autodoc ${icon('external')}</a>` : ''}
           <a class="btn ghost" href="/producto/${encodeURIComponent(p.id)}">Ver ficha completa</a>
           <button class="btn ghost" type="button" data-product-close>Cerrar</button>
         </div>
