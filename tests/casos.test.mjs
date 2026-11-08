@@ -1103,7 +1103,7 @@ test('catálogo final: 500 productos con imagen y enlace locales verificados', a
   const cats = new Set(body.map(p => p.category));
   for (const c of ['Herramientas', 'Diagnosis', 'Líquidos y Químicos', 'Repuestos', 'Maquinaria', 'Tuning']) assert.ok(cats.has(c), `falta categoría ${c}`);
   assert.ok(body.every(p => p.imageStatus === 'verified' && p.image));
-  assert.ok(body.every(p => p.linkStatus === 'verified' && /^https:\/\/www\.amazon\.es\/dp\/[A-Z0-9]{10}$/.test(p.affiliateUrl)));
+  assert.ok(body.every(p => p.linkStatus === 'verified' && /^https:\/\/www\.amazon\.es\/dp\/[A-Z0-9]{10}(\?tag=[^&\s]+)?$/.test(p.affiliateUrl)));
   assert.ok(body.every(p => p.compatibility?.type && p.compatibility?.note));
   assert.ok(body.every(p => !/^(Profesional|Línea Económica|Genérico|Universal)$/i.test(p.manufacturer || '')));
   const tuning = await getJSON('/api/products?category=Tuning');
@@ -1225,7 +1225,7 @@ test('catálogo de accesorios: foto del vendedor, archivo local y enlaces único
       const asin = item.id.slice('tienda-amz-'.length);
       assert.match(asin, /^[a-z0-9]{10}$/);
       assert.equal(item.image.toLowerCase(), `/img/tienda/${asin}.jpg`);
-      assert.ok(item.links.some(l => l.url === `https://www.amazon.es/dp/${asin.toUpperCase()}`), `${item.id} debe enlazar a su ASIN`);
+      assert.ok(item.links.some(l => /^https:\/\/www\.amazon\.es\/dp\/[A-Z0-9]{10}(\?tag=[^&\s]+)?$/.test(l.url) && l.url.includes(`/dp/${asin.toUpperCase()}`)), `${item.id} debe enlazar a su ASIN`);
     } else {
       assert.ok(item.image.startsWith('/img/productos/'), `${item.id} debe conservar su foto de tienda`);
     }

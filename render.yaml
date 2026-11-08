@@ -19,3 +19,18 @@ services:
       # El refresco de precios corre mientras el servicio está despierto.
       - key: PRICE_SYNC
         value: "1"
+      # --- Monetización (sin secretos; las claves van en el panel de Render) ---
+      - key: PUBLIC_BASE_URL
+        value: https://diagnostico-mecanica.onrender.com
+      - key: AFFILIATE_TAG_AMAZON
+        value: selupirootools-21
+      - key: REPORT_PRICE_CENTS
+        value: "990"
+      - key: REPORT_CURRENCY
+        value: eur
+      - key: REPORT_PRODUCT_NAME
+        value: Informe técnico PRO
+      # Secretas — añadir SOLO en el panel de Render (Environment), nunca aquí:
+      # STRIPE_SECRET_KEY=sk_live_...        (clave Live, no de test, para cobrar de verdad)
+      # STRIPE_WEBHOOK_SECRET=whsec_...      (webhook Live de /api/payments/webhook)
+      # AWIN_PUBLISHER_ID=                    (cuando te des de alta en Awin)
