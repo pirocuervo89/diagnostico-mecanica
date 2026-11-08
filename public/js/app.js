@@ -1535,6 +1535,14 @@ if (printReportBtn) {
 // -------------------------------------------------------------
 const payState = { status: null };
 
+function payLink() {
+  return (document.querySelector('meta[name="stripe-payment-link"]')?.getAttribute('content') || '').trim();
+}
+
+function payLinkReady() {
+  return /^https:\/\/(buy\.stripe\.com|checkout\.stripe\.com)\//.test(payLink());
+}
+
 function payNote(text) {
   const note = $('#payNote');
   if (note) note.textContent = text;
@@ -1585,6 +1593,11 @@ async function buyReport() {
     return;
   }
   const original = buy ? buy.textContent : '';
+  if (!payState.status?.configured && payLinkReady()) {
+    payNote('Abriendo la pasarela segura de Stripe. Tras pagar, envía los datos del vehículo a selupiro@gmail.com para recibir el informe.');
+    window.open(payLink(), '_blank', 'noopener');
+    return;
+  }
   if (buy) {
     buy.disabled = true;
     buy.textContent = 'Abriendo Stripe…';
@@ -1620,10 +1633,11 @@ async function initPayments() {
     return;
   }
   const status = payState.status;
-  buy.textContent = status.configured ? `Comprar informe · ${status.priceLabel}` : 'Pago no configurado';
-  buy.disabled = !status.configured;
-  payBadge(status.configured ? (status.mode === 'test' ? 'Stripe · pruebas' : 'Stripe · activo') : 'Sin configurar');
-  payNote(status.note || '');
+  const link = payLinkReady();
+  buy.textContent = status.configured || link ? `Comprar informe · ${status.priceLabel}` : 'Pago no configurado';
+  buy.disabled = !status.configured && !link;
+  payBadge(status.configured ? (status.mode === 'test' ? 'Stripe · pruebas' : 'Stripe · activo') : (link ? 'Stripe · enlace de pago' : 'Sin configurar'));
+  payNote(status.configured ? (status.note || '') : (link ? 'Pago seguro con Stripe. Tras pagar, envía los datos del vehículo a selupiro@gmail.com para recibir el informe.' : (status.note || '')));
   buy.addEventListener('click', buyReport);
 
   const params = new URLSearchParams(window.location.search);
