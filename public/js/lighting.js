@@ -41,7 +41,7 @@
         <small class="product-brand">${esc(product.manufacturer || 'Fabricante no confirmado')}${product.asin ? ` · ASIN ${esc(product.asin)}` : ''}</small>
         <p>${esc(product.description || '')}</p>
         <div class="product-foot">
-          <span class="product-price${/\d/.test(price.text) ? '' : ' pending'}" title="${esc(product.priceSource || 'Precio del catálogo')}"><small>${esc(price.caption)}</small>${esc(price.text)}</span>
+          <span class="product-price${/\d/.test(price.text) ? '' : ' pending'}" title="${esc(product.priceSource || 'Precio del catálogo')}" data-price-id="${esc(product.id)}"><small>${esc(price.caption)}</small><span class="price-value">${esc(price.text)}</span></span>
           ${link
             ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener sponsored">Ver oferta ${icon('external')}</a>`
             : '<span class="btn ghost">Enlace pendiente</span>'}

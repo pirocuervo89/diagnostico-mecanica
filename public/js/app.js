@@ -1157,6 +1157,45 @@ function priceDate(value) {
   return m ? `${m[3]}/${m[2]}/${m[1].slice(2)}` : String(value || '');
 }
 
+// El servidor refresca los precios de Amazon por su cuenta; aquí se aplican a
+// las tarjetas visibles sin recargar ni volver a pintar la rejilla.
+function priceCaptionFrom(info) {
+  if (!/\d/.test(String(info?.price || ''))) return 'Precio';
+  const source = String(info.source || '');
+  const m = String(info.checkedAt || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const date = m ? `${m[3]}/${m[2]}/${m[1].slice(2)}` : '';
+  return `Precio${/amazon/i.test(source) ? ' Amazon' : ''}${date ? ` · ${date}` : ''}`;
+}
+
+async function refreshVisiblePrices() {
+  if (document.hidden) return;
+  const cards = $$('[data-price-id]');
+  if (!cards.length) return;
+  try {
+    const data = await api('/api/prices/current');
+    const map = data.prices || {};
+    cards.forEach(card => {
+      const next = map[card.dataset.priceId];
+      if (!next || !next.price) return;
+      const value = card.querySelector('.price-value');
+      const label = card.querySelector('small');
+      if (value && value.textContent.trim() !== next.price) value.textContent = next.price;
+      if (label) label.textContent = priceCaptionFrom(next);
+      card.classList.toggle('pending', !/\d/.test(next.price));
+      const cached = productsCache.find(x => x.id === card.dataset.priceId);
+      if (cached) {
+        cached.price = next.price;
+        cached.priceCheckedAt = next.checkedAt;
+        cached.priceSource = next.source;
+      }
+    });
+  } catch { /* sin conexión: se mantiene el precio que ya se ve */ }
+}
+setInterval(refreshVisiblePrices, 120000);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) refreshVisiblePrices();
+});
+
 function renderProducts(category) {
   const grid = $('#productGrid');
   if (!grid) return;
@@ -1197,7 +1236,7 @@ function renderProducts(category) {
           <small class="product-brand">${esc(p.manufacturer || 'Fabricante no confirmado')}${p.asin ? ` · ASIN ${esc(p.asin)}` : ''}</small>
           <p>${esc(p.description)}</p>
           <div class="product-foot">
-            <span class="product-price${/\d/.test(String(p.price || '')) ? '' : ' pending'}" title="${esc(p.priceSource || 'Precio del catálogo')}"><small>${esc(priceCaption(p))}</small>${esc(p.price || 'Consultar precio')}</span>
+            <span class="product-price${/\d/.test(String(p.price || '')) ? '' : ' pending'}" title="${esc(p.priceSource || 'Precio del catálogo')}" data-price-id="${esc(p.id)}"><small>${esc(priceCaption(p))}</small><span class="price-value">${esc(p.price || 'Consultar precio')}</span></span>
             ${cta}
           </div>
           <button class="product-sheet-link" type="button" data-product-id="${esc(p.id)}">Ver ficha y compatibilidad ${icon('arrow')}</button>

@@ -650,3 +650,26 @@ Módulo nuevo `Neumáticos` en la navegación, entre Luz y multimedia y Producto
   `2026-11-06` a `06/11/26` en la etiqueta.
 - Comprobado en Firefox real: 500 tarjetas con 499 precios, Luz 33/33, Tuning
   236/236, neumáticos con precio y **0 errores de consola**. `npm test`: 134/134.
+
+## Refresco automático de precios (2026-11-08)
+
+- El servidor revisa los precios de Amazon por su cuenta: **30 fichas cada
+  20 minutos**, priorizando las más antiguas, con caducidad de 24 h. Todos los
+  precios se renuevan solos sin intervención.
+- `src/lib/price_sync.js`: descarga la ficha por ASIN, normaliza el importe,
+  escribe `data/products.json` de forma atómica (tmp + rename) y guarda estado
+  en `data/price-sync-state.json`. Un cerrojo de 30 min impide que dos pasadas
+  se pisen.
+- Si una ficha no devuelve precio (sin stock o bloqueo) **no se inventa nada**:
+  se mantiene el importe anterior y se anota la fecha de comprobación.
+- Rutas nuevas: `GET /api/prices/status`, `GET /api/prices/current` y
+  `POST /api/prices/refresh` (con espera de 5 min y token opcional
+  `PRICE_SYNC_ADMIN_TOKEN`).
+- La página consulta `/api/prices/current` cada 2 minutos y al volver a la
+  pestaña, y actualiza las tarjetas **sin recargar**: cambia el importe y la
+  etiqueta `Precio Amazon · dd/mm/aa`, y refresca la ficha abierta.
+- Variables: `PRICE_SYNC=0` lo desactiva, `PRICE_SYNC_INTERVAL_MIN`,
+  `PRICE_SYNC_BATCH`, `PRICE_SYNC_MAX_AGE_HOURS`.
+- Comprobado en real: primera pasada **30/30 actualizadas**, manual 2/2,
+  `429` al repetir. En Firefox, un precio nuevo del servidor pasa a la tarjeta
+  y a la ficha sin recargar, con 0 errores. `npm test`: **138/138**.

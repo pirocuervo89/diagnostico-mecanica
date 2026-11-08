@@ -15,6 +15,12 @@ data/ocr/*.traineddata
 data/ocr/*.traineddata.gz
 .DS_Store
 data/contact_messages.json
+
+# Estado y copias del refresco de precios (se regeneran solos)
+data/price-sync-state.json
+data/.price-sync.lock
+data/products.json.tmp-*
+data/products.json.bak-prices
 data/orders.json
 data/orders.json.tmp
 data/forum.sqlite

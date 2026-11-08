@@ -11,6 +11,8 @@ import garageRouter from './src/routes/garage.js';
 import testigosRouter from './src/routes/testigos.js';
 import tutorialsRouter from './src/routes/tutorials.js';
 import paymentsRouter from './src/routes/payments.js';
+import pricesRouter from './src/routes/prices.js';
+import { startPriceSync } from './src/lib/price_sync.js';
 
 dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -40,6 +42,7 @@ app.use('/api/garage', garageRouter);
 app.use('/api/testigos', testigosRouter);
 app.use('/api/tutorials', tutorialsRouter);
 app.use('/api/payments', paymentsRouter);
+app.use('/api/prices', pricesRouter);
 app.use('/api', apiRouter);
 app.use('/api/sintomas', sintomasRouter);
 app.use(express.static(path.join(__dirname, 'public'), {
@@ -83,4 +86,5 @@ app.listen(PORT, HOST, () => {
   console.log(` Local: http://localhost:${PORT}`);
   console.log(` Red:   http://<tu-ip-local>:${PORT}`);
   console.log('');
+  startPriceSync();
 });
