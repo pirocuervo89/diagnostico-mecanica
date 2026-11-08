@@ -696,3 +696,20 @@ Módulo nuevo `Neumáticos` en la navegación, entre Luz y multimedia y Producto
 - Comprobado en Firefox: 5 enlaces legales en el pie, 4 avisos de afiliación,
   consentimiento guardado, puerta de vídeo activa y luego iframe correcto,
   páginas legales a 200 y **0 errores de consola**. `npm test`: **145/145**.
+
+## Web publicada (Render, plan Free)
+
+La web está en producción en **https://diagnostico-mecanica.onrender.com**
+(servicio `diagnostico-mecanica`, Frankfurt, Docker, plan free, sin tarjeta).
+
+- Repositorio: https://github.com/pirocuervo89/diagnostico-mecanica (público).
+- `data/legal.json` lleva el titular real y el alojamiento; `siteUrl` apunta a la
+  URL de Render, así que canónicos, sitemap y `robots.txt` son correctos.
+- Despliegue automático con cada push a `master` (`render.yaml` + `Dockerfile`).
+- Pendiente: etiqueta de afiliado de Amazon (`AFFILIATE_TAG_AMAZON` y
+  `amazonTag` en `data/legal.json`) y las claves de IA y Stripe en el panel.
+
+Limitaciones conocidas del plan free: el servicio se duerme a los 15 minutos sin
+visitas (la primera visita tarda ~50 s) y el disco es efímero, así que el foro,
+las fotos del garaje y los pedidos se pierden en cada reinicio. Los precios se
+regeneran solos.
