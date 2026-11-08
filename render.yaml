@@ -1,5 +1,7 @@
 # Blueprint de Render (plan Free, sin tarjeta).
 # Con este archivo el servicio se crea solo al conectar el repositorio.
+# Las claves sensibles (IA, Stripe, afiliación) se añaden después en el panel:
+# Environment → Add Environment Variable, sin volver a desplegar el blueprint.
 services:
   - type: web
     name: diagnostico-mecanica
@@ -17,12 +19,3 @@ services:
       # El refresco de precios corre mientras el servicio está despierto.
       - key: PRICE_SYNC
         value: "1"
-      # Se piden al crear el servicio; se pueden dejar vacíos y rellenar después.
-      - key: PUBLIC_BASE_URL
-        sync: false
-      - key: AFFILIATE_TAG_AMAZON
-        sync: false
-      - key: AI_API_KEY
-        sync: false
-      - key: STRIPE_SECRET_KEY
-        sync: false
