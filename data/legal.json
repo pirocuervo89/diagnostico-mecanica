@@ -1,0 +1,18 @@
+{
+  "brand": "Diagnóstico y Mecánica",
+  "siteUrl": "https://diagnosticoymecanica.es",
+  "ownerName": "PENDIENTE: nombre y apellidos o razón social del titular",
+  "nif": "PENDIENTE: NIF/NIE/CIF",
+  "address": "PENDIENTE: dirección completa (calle, número, CP, ciudad, provincia, país)",
+  "email": "PENDIENTE: correo de contacto",
+  "phone": "",
+  "activity": "Divulgación técnica del automóvil y herramientas de diagnóstico, mantenimiento y compra de recambios",
+  "hostingName": "PENDIENTE: proveedor de alojamiento",
+  "hostingAddress": "PENDIENTE: dirección del proveedor de alojamiento",
+  "aiProvider": "el proveedor de inteligencia artificial configurado en la plataforma",
+  "paymentProvider": "Stripe Payments Europe, Ltd.",
+  "amazonTag": "PENDIENTE: etiqueta de afiliado de Amazon",
+  "updated": "2026-11-08",
+  "minAge": "14",
+  "country": "España"
+}

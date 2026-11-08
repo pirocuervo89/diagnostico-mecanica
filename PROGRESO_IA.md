@@ -673,3 +673,26 @@ Módulo nuevo `Neumáticos` en la navegación, entre Luz y multimedia y Producto
 - Comprobado en real: primera pasada **30/30 actualizadas**, manual 2/2,
   `429` al repetir. En Firefox, un precio nuevo del servidor pasa a la tarjeta
   y a la ficha sin recargar, con 0 errores. `npm test`: **138/138**.
+
+## Cumplimiento legal y cookies (2026-11-08)
+
+- Cinco páginas legales estáticas, pensadas para la revisión de Amazon Afiliados:
+  **aviso legal** (art. 10 LSSI), **privacidad** (RGPD/LOPDGDD), **cookies**,
+  **afiliación** y **términos y compra** del informe PRO.
+- Se generan con `npm run legal:build` a partir de `data/legal.json`: rellenar
+  nombre, NIF, domicilio, correo y proveedor de alojamiento es editar un fichero.
+  Mientras falten, las páginas muestran el hueco entre corchetes en ámbar.
+- **Consentimiento real**: `public/js/consent.js` muestra el aviso con «Aceptar
+  todas», «Solo necesarias» y «Configurar». La decisión se guarda y se puede
+  cambiar desde el pie de la web o desde la política de cookies.
+- **YouTube no se carga sin permiso**: el reproductor queda detrás de una puerta
+  con la miniatura hasta que aceptas o pulsas reproducir. Sin consentimiento no
+  hay peticiones a `youtube-nocookie.com`.
+- Aviso de afiliación visible en Productos, Luz, Neumáticos y Tuning, y la
+  divulgación literal de Amazon en el pie de todas las páginas.
+- `robots.txt`, `sitemap.xml`, `description`, Open Graph y datos estructurados
+  `WebSite`. Las páginas legales son HTML servido, no vistas del SPA, para que
+  los buscadores las lean.
+- Comprobado en Firefox: 5 enlaces legales en el pie, 4 avisos de afiliación,
+  consentimiento guardado, puerta de vídeo activa y luego iframe correcto,
+  páginas legales a 200 y **0 errores de consola**. `npm test`: **145/145**.

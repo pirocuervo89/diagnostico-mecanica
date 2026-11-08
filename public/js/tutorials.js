@@ -559,6 +559,15 @@
   function videoHtml(item) {
     if (item.embeddable && item.videoId) {
       const src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(item.videoId)}?rel=0&modestbranding=1`;
+      // El reproductor de YouTube no se carga hasta que hay consentimiento:
+      // así no se instalan cookies de terceros antes de aceptar.
+      if (!window.dymConsent?.has('embeds')) {
+        return `<div class="tut-video"><button class="tut-video-gate" type="button" data-tut-load-video="${esc(item.videoId)}" aria-label="Cargar el vídeo de YouTube: ${esc(item.title)}">
+          <img src="${esc(item.thumbnail)}" alt="" loading="lazy">
+          <span class="tut-video-gate-play" aria-hidden="true">▶</span>
+          <span class="tut-video-gate-note">Cargar vídeo de YouTube<small>Se conectará con youtube-nocookie.com</small></span>
+        </button></div>`;
+      }
       return `<div class="tut-video"><iframe src="${esc(src)}" title="${esc(item.title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
     }
     return `<div class="tut-video"><div class="tut-video-fallback"><img src="${esc(item.thumbnail)}" alt=""><div><p>Este vídeo no permite reproducción integrada.</p><a class="btn primary" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">${icon('external')} Abrir en YouTube</a></div></div></div>`;
@@ -1182,6 +1191,31 @@
       if (!initialized) init();
       else if (!state.loaded) loadResults(true);
     }
+  });
+
+  // Carga diferida del reproductor: solo tras el consentimiento de cookies.
+  function loadVideoGate(gate) {
+    const id = gate?.dataset?.tutLoadVideo;
+    const wrap = gate?.closest('.tut-video');
+    if (!id || !wrap) return;
+    const holder = document.createElement('div');
+    holder.innerHTML = `<div class="tut-video"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?rel=0&modestbranding=1&autoplay=1" title="Vídeo del tutorial" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
+    wrap.replaceWith(holder.firstElementChild);
+  }
+
+  document.addEventListener('click', event => {
+    const gate = event.target.closest('[data-tut-load-video]');
+    if (!gate) return;
+    if (!window.dymConsent?.has('embeds')) {
+      if (!window.dymConsent) return;
+      window.dymConsent.allowEmbeds();
+    }
+    loadVideoGate(gate);
+  });
+
+  window.addEventListener('dym:consent', event => {
+    if (!event.detail?.embeds) return;
+    document.querySelectorAll('[data-tut-load-video]').forEach(loadVideoGate);
   });
 
   window.openTutorialSearch = openFromContext;
