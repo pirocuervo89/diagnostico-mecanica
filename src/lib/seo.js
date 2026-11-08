@@ -200,7 +200,8 @@ const NAV = [
   ['/productos', 'Productos'],
   ['/motores', 'Motores y averías'],
   ['/coches', 'Fichas de coche'],
-  ['/neumaticos', 'Neumáticos']
+  ['/neumaticos', 'Neumáticos'],
+  ['/contacto', 'Contacto']
 ];
 
 function layout({ title, description, canonical, image, robots, jsonLd, crumbs, body, published }) {
@@ -708,6 +709,70 @@ export function tyrePage(id) {
   };
 }
 
+// ---------------------------------------------------------------- contacto
+
+export function contactPage() {
+  const data = legal();
+  const canonical = abs('/contacto');
+  const email = String(data.email || '').trim();
+
+  const rows = [
+    ['Titular', data.ownerName],
+    ['NIF', data.nif],
+    ['Correo electrónico', email],
+    ['Teléfono', data.phone],
+    ['Domicilio', data.address],
+    ['Actividad', data.activity]
+  ].filter(([, value]) => value);
+
+  const body = `
+    <p class="legal-kicker">Contacto</p>
+    <h1 class="seo-h1">Contacto y datos del titular</h1>
+    <p class="seo-lead">Para dudas técnicas, sugerencias, correcciones de fichas o cualquier cuestión sobre la web, escribe a <a href="mailto:${esc(email)}">${esc(email)}</a>. Respondemos en un plazo máximo de 48 horas laborables.</p>
+
+    <h2 class="seo-h2">Quién está detrás</h2>
+    <table class="legal-table"><tbody>
+      ${rows.map(([key, value]) => `<tr><th scope="row">${esc(key)}</th><td>${esc(value)}</td></tr>`).join('\n      ')}
+    </tbody></table>
+
+    <h2 class="seo-h2">Qué puedes consultarnos</h2>
+    <ul class="seo-list">
+      <li><strong>Corrección de datos técnicos:</strong> si una ficha de motor, avería o producto no coincide con la documentación oficial, indícalo y se revisa.</li>
+      <li><strong>Problemas con el informe PRO:</strong> incidencias de pago o de entrega, con el correo del pedido.</li>
+      <li><strong>Protección de datos:</strong> ejercicio de derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad.</li>
+      <li><strong>Sugerencias de producto y colaboraciones.</strong></li>
+    </ul>
+
+    <h2 class="seo-h2">Antes de escribir</h2>
+    <p>Muchas dudas de diagnóstico se resuelven antes con las herramientas: busca tu avería por síntoma, lee la ficha de tu motor o consulta el significado de un código DTC. Si aun así no lo tienes claro, escríbenos con marca, modelo, año y código de motor: así la respuesta es útil a la primera.</p>
+    <p><a href="/">Abrir las herramientas gratuitas</a> · <a href="/motores">Fichas de motor</a> · <a href="/productos">Catálogo</a></p>
+  `;
+
+  return {
+    html: layout({
+      title: 'Contacto y datos del titular | Diagnóstico y Mecánica',
+      description: clip('Contacto del titular de la web: correo, domicilio y actividad. Para dudas técnicas, correcciones de fichas, incidencias del informe PRO o protección de datos.', MAX_DESC),
+      canonical,
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'ContactPage',
+        url: canonical,
+        name: 'Contacto',
+        inLanguage: 'es-ES',
+        mainEntity: {
+          '@type': 'Organization',
+          name: data.brand || 'Diagnóstico y Mecánica',
+          email: email || undefined,
+          telephone: data.phone || undefined,
+          address: data.address ? { '@type': 'PostalAddress', streetAddress: data.address, addressCountry: 'ES' } : undefined
+        }
+      },
+      crumbs: crumbsFor([{ label: 'Contacto' }]),
+      body
+    })
+  };
+}
+
 // ---------------------------------------------------------------- coches
 
 export function vehicles() {
@@ -1047,6 +1112,7 @@ export function sitemapXml() {
     { loc: '/productos', priority: '0.9', changefreq: 'daily' },
     { loc: '/motores', priority: '0.9', changefreq: 'weekly' },
     { loc: '/coches', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/contacto', priority: '0.5', changefreq: 'yearly' },
     { loc: '/neumaticos', priority: '0.8', changefreq: 'weekly' },
     ...products().map(item => ({ loc: `/producto/${item.id}`, priority: '0.7', changefreq: 'weekly' })),
     ...engines().map(engine => ({ loc: `/motor/${engine.id}`, priority: '0.8', changefreq: 'monthly' })),
@@ -1062,5 +1128,5 @@ export function sitemapXml() {
 }
 
 export function urlCount() {
-  return 5 + products().length + engines().length + vehicles().length + tyres().length + 5;
+  return 6 + products().length + engines().length + vehicles().length + tyres().length + 5;
 }

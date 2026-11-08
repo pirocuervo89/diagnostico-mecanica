@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
+  contactPage,
   vehiclePage,
   vehicles,
   vehiclesIndex,
@@ -30,7 +31,7 @@ test('el sitemap incluye todo el contenido y es XML válido', () => {
   assert.ok(xml.startsWith('<?xml'));
   assert.ok(xml.trim().endsWith('</urlset>'));
   const locs = xml.match(/<loc>/g) || [];
-  assert.equal(locs.length, 5 + products().length + engines().length + vehicles().length + tyres().length + 5);
+  assert.equal(locs.length, 6 + products().length + engines().length + vehicles().length + tyres().length + 5);
   assert.ok(xml.includes('/productos</loc>'));
   assert.ok(xml.includes(`/producto/${firstProduct.id}</loc>`));
   assert.ok(xml.includes(`/motor/${firstEngine.id}</loc>`));
@@ -125,6 +126,15 @@ test('las fichas de coche llevan datos técnicos, inspección y fuentes', () => 
   assert.match(page.html, /<link rel="canonical" href="[^"]+\/coche\//);
   assert.equal(vehiclePage('coche-que-no-existe'), null);
   assert.match(vehiclesIndex().html, /href="\/coche\//);
+});
+
+test('la página de contacto publica los datos del titular que exige Amazon', () => {
+  const html = contactPage().html;
+  assert.match(html, /Contacto/);
+  assert.match(html, /selupiro@gmail\.com/);
+  assert.match(html, /80151266S/);
+  assert.match(html, /Ciudad Real/);
+  assert.match(html, /"@type":"ContactPage"/);
 });
 
 test('la etiqueta de afiliado se añade solo a enlaces de Amazon', () => {
