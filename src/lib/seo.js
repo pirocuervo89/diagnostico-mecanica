@@ -296,7 +296,7 @@ function layout({ title, description, canonical, image, robots, jsonLd, crumbs, 
     </aside>
   </main>
   <footer class="legal-foot">
-    <p class="affiliate-note">Como afiliados de Amazon, Autodoc y otras tiendas, podemos recibir una comisión por las compras que se hagan desde estos enlaces, sin coste adicional para el comprador. El precio y la disponibilidad son los de la tienda en el momento de la compra.</p>
+    <p class="affiliate-note">Como Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables. También podemos recibir comisiones de Autodoc y otras tiendas, sin coste adicional para el comprador. El precio y la disponibilidad son los de la tienda en el momento de la compra. <a href="/legal/afiliacion.html">Más información</a>.</p>
     <p>© ${new Date().getFullYear()} ${esc(site)}${published ? ` · Datos revisados el ${esc(published)}` : ''}</p>
     <nav aria-label="Enlaces del pie">
       <a href="/legal/aviso-legal.html">Aviso legal</a>
