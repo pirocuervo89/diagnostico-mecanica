@@ -23,7 +23,11 @@ const router = express.Router();
 // Se lee en cada petición para respetar el .env, que dotenv carga después de
 // evaluar los imports de este módulo.
 function affiliateTag() {
-  return String(process.env.AFFILIATE_TAG_AMAZON || '').trim();
+  const fromEnv = String(process.env.AFFILIATE_TAG_AMAZON || '').trim();
+  if (fromEnv) return fromEnv;
+  const stored = readJSON('legal.json');
+  const tag = String((stored && !Array.isArray(stored) && stored.amazonTag) || '').trim();
+  return /^[a-z0-9][a-z0-9-]*?-[0-9]{2}$/i.test(tag) ? tag : '';
 }
 
 function withAffiliateTag(url) {

@@ -67,8 +67,14 @@ function money(raw) {
   return { amount: amount.toFixed(2), display: `${amount.toFixed(2).replace('.', ',')} €` };
 }
 
+// La etiqueta se puede fijar por entorno (Render) o quedar escrita en
+// data/legal.json, que es el mismo sitio donde consta el aviso de afiliación.
+// Así basta un cambio de datos, sin tocar código ni variables del servidor.
 function affiliateTag() {
-  return String(process.env.AFFILIATE_TAG_AMAZON || '').trim();
+  const fromEnv = String(process.env.AFFILIATE_TAG_AMAZON || '').trim();
+  if (fromEnv) return fromEnv;
+  const stored = String(legal().amazonTag || '').trim();
+  return /^[a-z0-9][a-z0-9-]*?-[0-9]{2}$/i.test(stored) ? stored : '';
 }
 
 export function affiliateUrl(url) {
@@ -290,6 +296,7 @@ function layout({ title, description, canonical, image, robots, jsonLd, crumbs, 
     </aside>
   </main>
   <footer class="legal-foot">
+    <p class="affiliate-note">Como afiliados de Amazon, Autodoc y otras tiendas, podemos recibir una comisión por las compras que se hagan desde estos enlaces, sin coste adicional para el comprador. El precio y la disponibilidad son los de la tienda en el momento de la compra.</p>
     <p>© ${new Date().getFullYear()} ${esc(site)}${published ? ` · Datos revisados el ${esc(published)}` : ''}</p>
     <nav aria-label="Enlaces del pie">
       <a href="/legal/aviso-legal.html">Aviso legal</a>
