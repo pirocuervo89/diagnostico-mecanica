@@ -1,5 +1,7 @@
 import express from 'express';
 import {
+  vehiclePage,
+  vehiclesIndex,
   productPage,
   enginePage,
   tyrePage,
@@ -44,6 +46,12 @@ router.get('/productos', (req, res) => {
 
 router.get('/motores', (_req, res) => sendHtml(res, enginesIndex()));
 router.get('/neumaticos', (_req, res) => sendHtml(res, tyresIndex()));
+router.get('/coches', (_req, res) => sendHtml(res, vehiclesIndex()));
+
+router.get('/coche/:id', (req, res) => {
+  const page = vehiclePage(req.params.id);
+  return page ? sendHtml(res, page) : notFound(res, 'Ese coche no está en nuestras fichas de vehículos.');
+});
 
 router.get('/producto/:id', (req, res) => {
   const page = productPage(req.params.id);

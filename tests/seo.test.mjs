@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
+  vehiclePage,
+  vehicles,
+  vehiclesIndex,
   productMeta,
   engineMeta,
   productPage,
@@ -27,7 +30,7 @@ test('el sitemap incluye todo el contenido y es XML válido', () => {
   assert.ok(xml.startsWith('<?xml'));
   assert.ok(xml.trim().endsWith('</urlset>'));
   const locs = xml.match(/<loc>/g) || [];
-  assert.equal(locs.length, 4 + products().length + engines().length + tyres().length + 5);
+  assert.equal(locs.length, 5 + products().length + engines().length + vehicles().length + tyres().length + 5);
   assert.ok(xml.includes('/productos</loc>'));
   assert.ok(xml.includes(`/producto/${firstProduct.id}</loc>`));
   assert.ok(xml.includes(`/motor/${firstEngine.id}</loc>`));
@@ -111,6 +114,17 @@ test('la portada declara el mismo dominio que el resto del sitio', () => {
   assert.equal(canonical, `${baseUrl()}/`, 'el canonical de la portada debe salir de data/legal.json');
   assert.ok(html.includes(`property="og:url" content="${baseUrl()}/"`), 'og:url debe coincidir');
   assert.ok(html.includes('name="robots" content="index,follow'), 'la portada debe ser indexable');
+});
+
+test('las fichas de coche llevan datos técnicos, inspección y fuentes', () => {
+  const car = vehicles()[0];
+  const page = vehiclePage(car.id);
+  assert.match(page.html, /"@type":"Article"/);
+  assert.match(page.html, /Datos técnicos/);
+  assert.match(page.html, /Qué revisar antes de comprar/);
+  assert.match(page.html, /<link rel="canonical" href="[^"]+\/coche\//);
+  assert.equal(vehiclePage('coche-que-no-existe'), null);
+  assert.match(vehiclesIndex().html, /href="\/coche\//);
 });
 
 test('la etiqueta de afiliado se añade solo a enlaces de Amazon', () => {

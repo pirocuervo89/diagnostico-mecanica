@@ -199,6 +199,7 @@ export function engineMeta() {
 const NAV = [
   ['/productos', 'Productos'],
   ['/motores', 'Motores y averías'],
+  ['/coches', 'Fichas de coche'],
   ['/neumaticos', 'Neumáticos']
 ];
 
@@ -707,6 +708,197 @@ export function tyrePage(id) {
   };
 }
 
+// ---------------------------------------------------------------- coches
+
+export function vehicles() {
+  const raw = readJSON('vehicles.json');
+  return (Array.isArray(raw) ? raw : raw?.vehicles || raw?.items || []).filter(item => item && item.id);
+}
+
+export function findVehicle(id) {
+  return vehicles().find(item => String(item.id) === String(id)) || null;
+}
+
+let vehicleMetaCache = null;
+export function vehicleMeta() {
+  if (vehicleMetaCache) return vehicleMetaCache;
+  const titles = new Set();
+  const descriptions = new Set();
+  const map = new Map();
+  for (const car of vehicles()) {
+    const name = [car.brand, car.model, car.generation, car.version].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+    let title = `${name}: averías y qué revisar`;
+    if (title.length > MAX_TITLE) title = clip(name, MAX_TITLE);
+    if (titles.has(title.toLowerCase())) title = clip(`${name} (${car.years || car.id})`, MAX_TITLE);
+    titles.add(title.toLowerCase());
+
+    let description = fillDescription(
+      `${name}${car.years ? ` (${car.years})` : ''}. ${car.buyingGuide?.idealFor || ''} Averías conocidas, puntos de inspección y datos técnicos.`,
+      `Ficha de ${car.brand} ${car.model}: datos técnicos, averías conocidas y qué revisar antes de comprar.`
+    );
+    if (descriptions.has(description)) description = fillDescription(`${description} ${car.id}.`, 'Ficha técnica y averías.');
+    descriptions.add(description);
+    map.set(car.id, { title, description });
+  }
+  vehicleMetaCache = map;
+  return map;
+}
+
+export function vehiclePage(id) {
+  const car = findVehicle(id);
+  if (!car) return null;
+
+  const canonical = abs(`/coche/${car.id}`);
+  const meta = vehicleMeta().get(car.id) || {};
+  const name = [car.brand, car.model].filter(Boolean).join(' ');
+  const full = [car.brand, car.model, car.generation, car.version].filter(Boolean).join(' ');
+  const engine = car.engine || {};
+  const transmission = car.transmission || {};
+
+  const facts = [
+    ['Generación', car.generation],
+    ['Versión', car.version],
+    ['Años', car.years],
+    ['Carrocería', car.body],
+    ['Motor', engine.code],
+    ['Cilindrada', engine.displacementCc ? `${engine.displacementCc} cc` : ''],
+    ['Combustible', engine.fuel],
+    ['Potencia', engine.powerPs ? `${engine.powerPs} PS${engine.powerKw ? ` (${engine.powerKw} kW)` : ''}` : ''],
+    ['Par máximo', engine.torqueNm ? `${engine.torqueNm} Nm` : ''],
+    ['Alimentación', engine.aspiration],
+    ['Inyección', engine.injection],
+    ['Distribución', engine.distribution],
+    ['Cambio', transmission.type],
+    ['Marchas', transmission.gears],
+    ['Tracción', transmission.drive],
+    ['Emisiones', car.emissions?.standard],
+    ['Postratamiento', car.emissions?.aftertreatment],
+    ['Confianza de la ficha', car.confidence]
+  ].filter(([, value]) => value);
+
+  const issues = Array.isArray(car.knownIssues) ? car.knownIssues : [];
+  const inspection = Array.isArray(car.inspection) ? car.inspection : [];
+  const guide = car.buyingGuide || {};
+  const related = vehicles().filter(other => other.id !== car.id && other.brand === car.brand).slice(0, 6);
+
+  const faq = [
+    guide.idealFor ? { q: `¿Para quién es recomendable el ${name}?`, a: guide.idealFor } : null,
+    guide.notIdealFor ? { q: `¿Cuándo no conviene comprar un ${name}?`, a: guide.notIdealFor } : null,
+    inspection.length ? {
+      q: `¿Qué hay que revisar antes de comprar un ${name}${car.generation ? ` ${car.generation}` : ''}?`,
+      a: inspection.map(row => `${row.area}: ${row.check}`).join('. ') + '.'
+    } : null
+  ].filter(Boolean);
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        '@id': `${canonical}#article`,
+        headline: meta.title || full,
+        description: strip(meta.description || ''),
+        about: { '@type': 'Product', name: full },
+        articleSection: 'Fichas de coche',
+        inLanguage: 'es-ES',
+        author: { '@type': 'Organization', name: legal().brand || 'Diagnóstico y Mecánica' },
+        publisher: { '@type': 'Organization', name: legal().brand || 'Diagnóstico y Mecánica' }
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Inicio', item: abs('/') },
+          { '@type': 'ListItem', position: 2, name: 'Coches', item: abs('/coches') },
+          { '@type': 'ListItem', position: 3, name: full, item: canonical }
+        ]
+      },
+      ...(faq.length ? [{
+        '@type': 'FAQPage',
+        mainEntity: faq.map(entry => ({
+          '@type': 'Question',
+          name: entry.q,
+          acceptedAnswer: { '@type': 'Answer', text: strip(entry.a) }
+        }))
+      }] : [])
+    ]
+  };
+
+  const body = `
+    <p class="legal-kicker">Ficha de coche</p>
+    <h1 class="seo-h1">${esc(full)}</h1>
+    <p class="seo-lead">${esc(guide.idealFor || `${name}: datos técnicos, averías conocidas y puntos de inspección.`)}</p>
+    ${car.image?.src ? `<figure class="seo-figure" style="max-width:520px">
+      <img src="${esc(car.image.src)}" alt="${esc(car.image.alt || full)}" width="520" height="340">
+      <figcaption class="seo-note">${esc(car.image.alt || full)}${car.image.credit ? ` · Foto: ${esc(car.image.credit)}` : ''}${car.image.license ? ` · ${esc(car.image.license)}` : ''}${car.image.sourceUrl ? ` · <a href="${esc(car.image.sourceUrl)}" target="_blank" rel="nofollow noopener">fuente</a>` : ''}</figcaption>
+    </figure>` : ''}
+
+    <h2 class="seo-h2">Datos técnicos</h2>
+    <table class="legal-table"><tbody>
+      ${facts.map(([key, value]) => `<tr><th scope="row">${esc(key)}</th><td>${esc(value)}</td></tr>`).join('\n      ')}
+    </tbody></table>
+    ${engine.notes ? `<p class="seo-note">${esc(engine.notes)}</p>` : ''}
+
+    ${issues.length ? `<h2 class="seo-h2">Averías y puntos débiles</h2>
+      ${issues.map(issue => `<article><h3 class="seo-h3">${esc(issue.title)}</h3><p>${esc(issue.detail || '')}</p>${issue.source ? `<p class="seo-note">Fuente: ${esc(issue.source)}</p>` : ''}</article>`).join('\n')}` : ''}
+
+    ${inspection.length ? `<h2 class="seo-h2">Qué revisar antes de comprar</h2>
+      <table class="legal-table">
+        <thead><tr><th>Zona</th><th>Comprobación</th><th>Por qué</th></tr></thead>
+        <tbody>${inspection.map(row => `<tr><td>${esc(row.area)}</td><td>${esc(row.check)}</td><td>${esc(row.why || '')}${row.level ? ` <span class="seo-badge">${esc(row.level)}</span>` : ''}</td></tr>`).join('')}</tbody>
+      </table>` : ''}
+
+    ${(guide.idealFor || guide.notIdealFor) ? `<h2 class="seo-h2">¿Merece la pena?</h2>
+      ${guide.idealFor ? `<p><strong>Recomendable para:</strong> ${esc(guide.idealFor)}</p>` : ''}
+      ${guide.notIdealFor ? `<p><strong>No recomendable para:</strong> ${esc(guide.notIdealFor)}</p>` : ''}
+      ${guide.budgetNote ? `<p>${esc(guide.budgetNote)}</p>` : ''}` : ''}
+
+    ${car.systems?.length ? `<h2 class="seo-h2">Sistemas del vehículo</h2><p>${car.systems.map(s => `<span class="seo-badge">${esc(s)}</span>`).join('')}</p>` : ''}
+
+    ${car.sources?.length ? `<h2 class="seo-h2">Fuentes consultadas</h2><ul class="seo-list">
+      ${car.sources.map(source => `<li><a href="${esc(source.url)}" target="_blank" rel="nofollow noopener">${esc(source.title || source.url)}</a>${source.publisher ? ` · ${esc(source.publisher)}` : ''}${source.accessed ? ` · consultado el ${esc(fmtDate(source.accessed))}` : ''}</li>`).join('')}
+    </ul>` : ''}
+
+    ${car.notes ? `<p class="seo-note">${esc(car.notes)}</p>` : ''}
+    ${related.length ? `<h2 class="seo-h2">Otros ${esc(car.brand)}</h2><ul class="seo-list">${related.map(other => `<li><a href="/coche/${esc(other.id)}">${esc([other.brand, other.model, other.generation, other.version].filter(Boolean).join(' '))}</a></li>`).join('')}</ul>` : ''}
+  `;
+
+  return {
+    html: layout({
+      title: meta.title || clip(`${full}: averías y qué revisar`, MAX_TITLE),
+      description: meta.description || clip(full, MAX_DESC),
+      canonical,
+      image: car.image?.src ? abs(car.image.src) : '',
+      jsonLd,
+      crumbs: crumbsFor([{ label: 'Coches', href: '/coches' }, { label: full }]),
+      body
+    }),
+    canonical
+  };
+}
+
+export function vehiclesIndex() {
+  const all = vehicles();
+  const cards = all.map(car => {
+    const title = [car.brand, car.model, car.generation, car.version].filter(Boolean).join(' ');
+    return `<li class="seo-card"><a href="/coche/${esc(car.id)}">${esc(title)}</a><span class="p">${esc(car.years || '')}</span></li>`;
+  }).join('');
+
+  return {
+    html: layout({
+      title: 'Fichas de coche: averías y qué revisar antes de comprar',
+      description: clip('Fichas de vehículos con datos técnicos verificados, averías conocidas, puntos de inspección y fuentes. Ordenadas por marca.', MAX_DESC),
+      canonical: abs('/coches'),
+      crumbs: crumbsFor([{ label: 'Coches' }]),
+      body: `
+        <p class="legal-kicker">Coches</p>
+        <h1 class="seo-h1">Fichas de coche: averías y qué revisar</h1>
+        <p class="seo-lead">${all.length} versiones documentadas con datos técnicos, averías conocidas y lista de comprobación para la compra de segunda mano.</p>
+        <ul class="seo-grid">${cards}</ul>
+      `
+    })
+  };
+}
+
 // ---------------------------------------------------------------- índices
 
 const PER_PAGE = 60;
@@ -854,9 +1046,11 @@ export function sitemapXml() {
     { loc: '/', priority: '1.0', changefreq: 'daily' },
     { loc: '/productos', priority: '0.9', changefreq: 'daily' },
     { loc: '/motores', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/coches', priority: '0.8', changefreq: 'weekly' },
     { loc: '/neumaticos', priority: '0.8', changefreq: 'weekly' },
     ...products().map(item => ({ loc: `/producto/${item.id}`, priority: '0.7', changefreq: 'weekly' })),
     ...engines().map(engine => ({ loc: `/motor/${engine.id}`, priority: '0.8', changefreq: 'monthly' })),
+    ...vehicles().map(car => ({ loc: `/coche/${car.id}`, priority: '0.7', changefreq: 'monthly' })),
     ...tyres().map(tyre => ({ loc: `/neumatico/${tyre.id}`, priority: '0.6', changefreq: 'weekly' })),
     ...[['aviso-legal', 'Aviso legal'], ['privacidad', 'Privacidad'], ['cookies', 'Cookies'], ['afiliacion', 'Afiliación'], ['terminos', 'Términos']]
       .map(([slug]) => ({ loc: `/legal/${slug}.html`, priority: '0.3', changefreq: 'yearly' }))
@@ -868,5 +1062,5 @@ export function sitemapXml() {
 }
 
 export function urlCount() {
-  return 4 + products().length + engines().length + tyres().length + 5;
+  return 5 + products().length + engines().length + vehicles().length + tyres().length + 5;
 }
