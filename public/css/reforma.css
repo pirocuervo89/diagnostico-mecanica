@@ -2741,3 +2741,38 @@ body.modal-open { overflow: hidden; }
   .tl-filters { flex-wrap: wrap; }
   .tl-filters input, .tl-filters select { width: 100%; }
 }
+
+/* PWA: botón de instalación en Android */
+.pwa-install {
+  position: fixed;
+  right: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border: 1px solid rgba(196, 181, 253, .55);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #7c3aed, #4c1d95);
+  color: #fff;
+  font: 700 13px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: .01em;
+  box-shadow: 0 12px 32px rgba(76, 29, 149, .5);
+  cursor: pointer;
+}
+.pwa-install:hover { filter: brightness(1.08); }
+.pwa-install:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 3px; }
+@media (min-width: 900px) {
+  .pwa-install { right: 22px; bottom: 22px; }
+}
+
+/* Evita tapar el aviso de cookies */
+body:has(.consent-bar:not([hidden])) .pwa-install {
+  bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+}
+@media (max-width: 700px) {
+  body:has(.consent-bar:not([hidden])) .pwa-install {
+    bottom: calc(165px + env(safe-area-inset-bottom, 0px));
+  }
+}

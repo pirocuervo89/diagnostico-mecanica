@@ -3650,3 +3650,51 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
+
+// -------------------------------------------------------------
+// PWA: instalación en Android y funcionamiento sin conexión
+// -------------------------------------------------------------
+let pwaInstallEvent = null;
+
+function pwaStandalone() {
+  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function hidePwaInstall() {
+  document.getElementById('pwaInstall')?.remove();
+}
+
+function showPwaInstall() {
+  if (pwaStandalone() || document.getElementById('pwaInstall')) return;
+  const button = document.createElement('button');
+  button.id = 'pwaInstall';
+  button.className = 'pwa-install';
+  button.type = 'button';
+  button.textContent = 'Instalar app';
+  button.setAttribute('aria-label', 'Instalar Diagnóstico y Mecánica como aplicación');
+  button.addEventListener('click', async () => {
+    if (!pwaInstallEvent) return;
+    pwaInstallEvent.prompt();
+    try { await pwaInstallEvent.userChoice; } catch {}
+    pwaInstallEvent = null;
+    hidePwaInstall();
+  });
+  document.body.appendChild(button);
+}
+
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  pwaInstallEvent = event;
+  showPwaInstall();
+});
+
+window.addEventListener('appinstalled', () => {
+  pwaInstallEvent = null;
+  hidePwaInstall();
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
