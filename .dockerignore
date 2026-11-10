@@ -21,3 +21,6 @@ data/products.json.tmp-*
 README.md
 DEPLOY.md
 PROGRESO_IA.md
+# Proyecto Android y artefactos de compilación: no se usan en producción
+android
+.tools

@@ -86,8 +86,9 @@ function severityClass(value) {
 // -------------------------------------------------------------
 // NAVEGACIÓN Y VISTAS
 // -------------------------------------------------------------
-function showView(name) {
+function showView(name, fromHistory = false) {
   if (!name || !document.getElementById(`view-${name}`)) name = 'home';
+  closeAppMenu();
   $$('.view').forEach(v => v.classList.toggle('active', v.id === `view-${name}`));
   $$('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === name));
   const nav = $('#nav');
@@ -96,11 +97,77 @@ function showView(name) {
     menuBtn.setAttribute('aria-expanded', 'false');
     menuBtn.setAttribute('aria-label', 'Abrir menú');
   }
-  if (location.hash.slice(1) !== name) {
-    history.replaceState(null, '', `#${name}`);
+  const tabbarMore = $('#tabbarMore');
+  if (tabbarMore) {
+    const mainViews = ['home', 'diagnostico', 'dtc', 'productos', 'informe'];
+    tabbarMore.classList.toggle('active', !mainViews.includes(name));
+    tabbarMore.setAttribute('aria-expanded', 'false');
+  }
+  if (!fromHistory && location.hash.slice(1) !== name) {
+    history.pushState(null, '', `#${name}`);
   }
   document.dispatchEvent(new CustomEvent('viewchange', { detail: { name } }));
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const appMenu = $('#appMenu');
+const appMenuGrid = $('#appMenuGrid');
+let appMenuBuilt = false;
+let appMenuPrevOverflow = '';
+let appMenuTrigger = null;
+
+function buildAppMenu() {
+  if (!appMenuGrid || appMenuBuilt) return;
+  const nav = $('#nav');
+  if (!nav) return;
+  nav.querySelectorAll('button[data-view]').forEach(src => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.dataset.view = src.dataset.view;
+    btn.innerHTML = src.innerHTML;
+    btn.addEventListener('click', () => {
+      showView(src.dataset.view);
+      closeAppMenu();
+    });
+    appMenuGrid.appendChild(btn);
+  });
+  appMenuBuilt = true;
+}
+
+function openAppMenu() {
+  if (!appMenu) return;
+  buildAppMenu();
+  appMenuTrigger = document.activeElement;
+  appMenuPrevOverflow = document.body.style.overflow;
+  appMenu.hidden = false;
+  document.body.style.overflow = 'hidden';
+  $('#tabbarMore')?.setAttribute('aria-expanded', 'true');
+  menuBtn?.setAttribute('aria-expanded', 'true');
+  menuBtn?.setAttribute('aria-label', 'Cerrar menú');
+  appMenu.querySelector('.app-menu-close')?.focus();
+}
+
+function closeAppMenu() {
+  if (!appMenu || appMenu.hidden) return;
+  appMenu.hidden = true;
+  document.body.style.overflow = appMenuPrevOverflow;
+  $('#tabbarMore')?.setAttribute('aria-expanded', 'false');
+  menuBtn?.setAttribute('aria-expanded', 'false');
+  menuBtn?.setAttribute('aria-label', 'Abrir menú');
+  if (appMenuTrigger && typeof appMenuTrigger.focus === 'function') appMenuTrigger.focus();
+  appMenuTrigger = null;
+}
+
+if (appMenu) {
+  appMenu.addEventListener('click', e => {
+    if (e.target.closest('[data-app-menu-close]')) closeAppMenu();
+  });
+  $('#tabbarMore')?.addEventListener('click', () => {
+    if (appMenu.hidden) openAppMenu(); else closeAppMenu();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !appMenu.hidden) closeAppMenu();
+  });
 }
 
 $$('[data-view]').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
@@ -113,11 +180,7 @@ function goToTutorials(params = {}) {
 const menuBtn = $('#menuBtn');
 if (menuBtn) {
   menuBtn.addEventListener('click', () => {
-    const nav = $('#nav');
-    if (!nav) return;
-    const open = nav.classList.toggle('open');
-    menuBtn.setAttribute('aria-expanded', String(open));
-    menuBtn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+    if (appMenu && appMenu.hidden) openAppMenu(); else closeAppMenu();
   });
 }
 
@@ -1623,6 +1686,11 @@ async function buyReport() {
 }
 
 async function initPayments() {
+  const storeMode = new URLSearchParams(window.location.search).get('store') === 'play';
+  if (storeMode) {
+    $('#payPanel')?.remove();
+    return;
+  }
   const buy = $('#payBuy');
   if (!buy) return;
   try {
@@ -3649,7 +3717,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ]).catch(err => console.error('Error en inicialización:', err));
 });
 
-window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
+window.addEventListener('hashchange', () => showView(location.hash.slice(1), true));
 
 // -------------------------------------------------------------
 // PWA: instalación en Android y funcionamiento sin conexión

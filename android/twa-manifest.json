@@ -1,0 +1,60 @@
+{
+  "packageId": "com.diagnosticomecanica.app",
+  "host": "diagnostico-mecanica.onrender.com",
+  "name": "Diagnóstico y Mecánica",
+  "launcherName": "Diagnóstico",
+  "display": "standalone",
+  "themeColor": "#08090b",
+  "themeColorDark": "#08090b",
+  "navigationColor": "#08090b",
+  "navigationColorDark": "#08090b",
+  "navigationDividerColor": "#08090b",
+  "navigationDividerColorDark": "#08090b",
+  "backgroundColor": "#060708",
+  "enableNotifications": false,
+  "startUrl": "/?store=play",
+  "iconUrl": "https://diagnostico-mecanica.onrender.com/img/app/icon-512.png",
+  "maskableIconUrl": "https://diagnostico-mecanica.onrender.com/img/app/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersion": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Mi garaje",
+      "shortName": "Garaje",
+      "url": "https://diagnostico-mecanica.onrender.com/#garaje",
+      "chosenIconUrl": "https://diagnostico-mecanica.onrender.com/img/app/icon-192.png"
+    },
+    {
+      "name": "Nuevo diagnóstico",
+      "shortName": "Diagnóstico",
+      "url": "https://diagnostico-mecanica.onrender.com/#diagnostico",
+      "chosenIconUrl": "https://diagnostico-mecanica.onrender.com/img/app/icon-192.png"
+    },
+    {
+      "name": "Testigos del cuadro",
+      "shortName": "Testigos",
+      "url": "https://diagnostico-mecanica.onrender.com/#testigos",
+      "chosenIconUrl": "https://diagnostico-mecanica.onrender.com/img/app/icon-192.png"
+    }
+  ],
+  "webManifestUrl": "https://diagnostico-mecanica.onrender.com/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://diagnostico-mecanica.onrender.com/",
+  "minSdkVersion": 24,
+  "orientation": "portrait-primary",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}

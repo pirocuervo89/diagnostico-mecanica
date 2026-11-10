@@ -2,6 +2,7 @@ import express from 'express';
 import compression from 'compression';
 import cors from 'cors';
 import path from 'path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import apiRouter from './src/routes/api.js';
@@ -21,6 +22,25 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
+
+// Verificación de Android: la app solo abre el dominio sin barra de direcciones
+// si este archivo declara la huella SHA-256 de su firma. La huella es pública y
+// vive en data/android.json; la variable de entorno la sustituye cuando se usa
+// Play App Signing (la clave que firma en Play no es la del APK local).
+let androidConfig = {};
+try {
+  androidConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'android.json'), 'utf8'));
+} catch {
+  androidConfig = {};
+}
+const ANDROID_PACKAGE_NAME = process.env.ANDROID_PACKAGE_NAME || androidConfig.packageName || 'com.diagnosticomecanica.app';
+const ANDROID_ENV_FINGERPRINTS = String(process.env.ANDROID_SHA256_FINGERPRINT || '')
+  .split(',')
+  .map(value => value.trim())
+  .filter(Boolean);
+const ANDROID_SHA256_FINGERPRINTS = ANDROID_ENV_FINGERPRINTS.length
+  ? ANDROID_ENV_FINGERPRINTS
+  : (Array.isArray(androidConfig.sha256Fingerprints) ? androidConfig.sha256Fingerprints : []);
 
 app.disable('x-powered-by');
 app.use(compression());
@@ -51,6 +71,25 @@ app.use('/api/sintomas', sintomasRouter);
 // Páginas con URL propia para buscadores. Va antes del estático porque también
 // sirve el /sitemap.xml generado (debe sustituir al archivo fijo).
 app.use(seoRouter);
+
+app.get('/.well-known/assetlinks.json', (_req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.type('application/json').send(JSON.stringify([{
+    relation: ['delegate_permission/common.handle_all_urls'],
+    target: {
+      namespace: 'android_app',
+      package_name: ANDROID_PACKAGE_NAME,
+      sha256_cert_fingerprints: ANDROID_SHA256_FINGERPRINTS
+    }
+  }]));
+});
+
+// El service worker debe poder actualizarse aunque el resto del sitio se cachee.
+app.get('/sw.js', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache');
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
   extensions: ['html']

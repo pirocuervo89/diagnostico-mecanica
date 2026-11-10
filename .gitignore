@@ -32,6 +32,28 @@ data/garage/uploads/
 # Artefactos de depuración y pruebas locales (perfiles de navegador, scripts sueltos)
 .dbg/
 .tmp/
+# Toolchain local de Android (JDK 17 + SDK): se descarga, no se versiona
+.tools/
 data/tutorials.sqlite
 data/tutorials.sqlite-shm
 data/tutorials.sqlite-wal
+
+# Android: clave de firma y proyecto generado por Bubblewrap (se regenera)
+android/android.keystore
+android/keystore.env
+android/*.jks
+android/store_icon.png
+android/manifest-checksum.txt
+android/settings.gradle
+android/gradle.properties
+android/build.gradle
+android/gradlew
+android/gradlew.bat
+android/gradle/
+android/app/
+android/.gradle/
+android/local.properties
+android/app-release*.apk
+android/app-release*.aab
+android/*.idsig
+android/build/

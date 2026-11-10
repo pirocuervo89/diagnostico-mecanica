@@ -18,5 +18,19 @@
     { "src": "/img/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/img/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
+  "shortcuts": [
+    { "name": "Diagnóstico del coche", "short_name": "Diagnóstico", "url": "/#diagnostico", "icons": [{ "src": "/img/app/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Códigos DTC", "short_name": "DTC", "url": "/#dtc", "icons": [{ "src": "/img/app/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Catálogo de productos", "short_name": "Productos", "url": "/#productos", "icons": [{ "src": "/img/app/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Informe técnico PRO", "short_name": "Informe", "url": "/#informe", "icons": [{ "src": "/img/app/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ],
+  "screenshots": [
+    { "src": "/img/store/telefono-home.png", "sizes": "720x1280", "type": "image/png", "form_factor": "narrow", "label": "Diagnóstico y Mecánica en Android" },
+    { "src": "/img/store/telefono-diagnostico.png", "sizes": "720x1280", "type": "image/png", "form_factor": "narrow", "label": "Síntomas y diagnóstico guiado" },
+    { "src": "/img/store/telefono-dtc.png", "sizes": "720x1280", "type": "image/png", "form_factor": "narrow", "label": "Buscador de códigos DTC" },
+    { "src": "/img/store/telefono-productos.png", "sizes": "720x1280", "type": "image/png", "form_factor": "narrow", "label": "Catálogo de productos de taller" },
+    { "src": "/img/store/telefono-chat.png", "sizes": "720x1280", "type": "image/png", "form_factor": "narrow", "label": "Asistente técnico IA" },
+    { "src": "/img/store/telefono-menu.png", "sizes": "720x1280", "type": "image/png", "form_factor": "narrow", "label": "Todas las secciones de la app" }
+  ],
   "prefer_related_applications": false
 }

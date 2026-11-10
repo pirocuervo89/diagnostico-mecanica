@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#08090b">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,8 +21,8 @@
   <link rel="stylesheet" href="/css/app.css?v=20261030a">
   <link rel="stylesheet" href="/css/vision.css?v=20261105c">
   <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
-  <link rel="stylesheet" href="/css/reforma.css?v=20261109a">
-  <link rel="stylesheet" href="/css/legal.css?v=20261108a">
+  <link rel="stylesheet" href="/css/reforma.css?v=20261110a">
+  <link rel="stylesheet" href="/css/legal.css?v=20261110a">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Diagnóstico y Mecánica">
   <meta property="og:title" content="Diagnóstico y Mecánica · Plataforma Automotriz">
@@ -1119,6 +1119,13 @@
       <div id="garageList" class="garage-grid"></div>
       <div id="garageAdd" class="panel garage-add hidden"></div>
       <div id="garageDetail" class="garage-detail hidden"></div>
+      <div class="garage-danger">
+        <div>
+          <strong>Eliminar cuenta y datos</strong>
+          <p>Borra tu cuenta, tus vehículos, fotos, documentos, mensajes y publicaciones. Es irreversible. También puedes solicitarlo por email desde la <a href="/legal/eliminar-cuenta.html">página de eliminación de cuenta</a>.</p>
+        </div>
+        <button id="garageDeleteAccount" class="btn ghost sm" type="button">Eliminar mi cuenta</button>
+      </div>
     </div>
 
     <p class="garage-legal">Los documentos se guardan solo en este servidor y se sirven únicamente a la cuenta propietaria. El OCR puede equivocarse: revisa y corrige los datos antes de guardar. No se inventan intervalos de mantenimiento: los que se muestran proceden de la base documentada del motor, con su fuente.</p>
@@ -1802,11 +1809,32 @@
       <a href="/legal/cookies.html">Cookies</a>
       <a href="/legal/afiliacion.html">Afiliación</a>
       <a href="/legal/terminos.html">Términos y compra</a>
+      <a href="/legal/eliminar-cuenta.html">Eliminar cuenta</a>
       <button type="button" data-consent-open>Configurar cookies</button>
     </nav>
     <span class="footer-affiliate">Como Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables.</span>
   </div>
 </footer>
+
+<nav class="tabbar" id="tabbar" aria-label="Navegación de la app">
+  <button class="tabbar-btn active" data-view="home" type="button" aria-label="Inicio"><svg class="ic"><use href="#i-gauge"></use></svg><span>Inicio</span></button>
+  <button class="tabbar-btn" data-view="diagnostico" type="button" aria-label="Diagnóstico"><svg class="ic"><use href="#i-pulse"></use></svg><span>Diagnóstico</span></button>
+  <button class="tabbar-btn" data-view="dtc" type="button" aria-label="Códigos DTC"><svg class="ic"><use href="#i-search"></use></svg><span>DTC</span></button>
+  <button class="tabbar-btn" data-view="productos" type="button" aria-label="Productos"><svg class="ic"><use href="#i-cart"></use></svg><span>Productos</span></button>
+  <button class="tabbar-btn" data-view="informe" type="button" aria-label="Informe técnico"><svg class="ic"><use href="#i-file"></use></svg><span>Informe</span></button>
+  <button class="tabbar-btn" id="tabbarMore" type="button" aria-label="Más secciones" aria-expanded="false" aria-controls="appMenu"><svg class="ic"><use href="#i-menu"></use></svg><span>Más</span></button>
+</nav>
+
+<div id="appMenu" class="app-menu" hidden>
+  <div class="app-menu-backdrop" data-app-menu-close></div>
+  <section class="app-menu-sheet" role="dialog" aria-modal="true" aria-labelledby="appMenuTitle">
+    <header class="app-menu-head">
+      <div><span class="app-menu-kicker">Diagnóstico y Mecánica</span><h2 id="appMenuTitle">Todas las secciones</h2></div>
+      <button class="app-menu-close" type="button" data-app-menu-close aria-label="Cerrar menú"><svg class="ic"><use href="#i-close"></use></svg></button>
+    </header>
+    <div class="app-menu-grid" id="appMenuGrid"></div>
+  </section>
+</div>
 
 <div id="tutModal" class="tut-modal" hidden>
   <div class="tut-modal-backdrop" data-tut-close></div>
@@ -1818,16 +1846,16 @@
 
 <div id="tutToast" class="tut-toast" role="status" aria-live="polite"></div>
 
-<script src="/js/consent.js?v=20261108a"></script>
+<script src="/js/consent.js?v=20261110a"></script>
 <script src="/js/obd.js?v=20261105c"></script>
 <script src="/js/tutorials.js?v=20261026d"></script>
 
-<script src="/js/app.js?v=20261109a"></script>
+<script src="/js/app.js?v=20261109c"></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>
 <script src="/js/buying.js?v=20261026d"></script>
 <script src="/js/scan.js?v=20261026d"></script>
-<script src="/js/garage.js?v=20261030d"></script>
+<script src="/js/garage.js?v=20261110a"></script>
 <script src="/js/testigos.js?v=20261105a"></script>
 <script src="/js/forum.js?v=20261026d"></script>
 </body>

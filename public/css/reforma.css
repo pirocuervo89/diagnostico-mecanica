@@ -2270,6 +2270,26 @@ body.modal-open { overflow: hidden; }
 .garage-privacy .ic { width: 14px; height: 14px; margin-top: 2px; flex: none; color: var(--violet-2); }
 .garage-legal { margin-top: 20px; font-size: 11px; line-height: 1.7; color: #6f6a94; max-width: 88ch; }
 
+.garage-danger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 28px;
+  padding: 16px 18px;
+  border: 1px solid rgba(248, 113, 113, .28);
+  background: rgba(248, 113, 113, .05);
+}
+.garage-danger strong { display: block; font-family: var(--display); font-size: 14px; color: #fecaca; }
+.garage-danger p { margin: 5px 0 0; max-width: 78ch; font-size: 11px; line-height: 1.6; color: #9b8f9f; }
+.garage-danger a { color: #fca5a5; }
+.garage-danger .btn { flex: none; color: #fca5a5; border-color: rgba(248, 113, 113, .35); }
+.garage-danger .btn:hover { color: #fff; border-color: #f87171; }
+@media (max-width: 640px) {
+  .garage-danger { flex-direction: column; align-items: flex-start; }
+  .garage-danger .btn { width: 100%; }
+}
+
 .garage-detail { display: grid; gap: 14px; margin-bottom: 24px; }
 .garage-detail-head {
   display: grid;
@@ -2775,4 +2795,177 @@ body:has(.consent-bar:not([hidden])) .pwa-install {
   body:has(.consent-bar:not([hidden])) .pwa-install {
     bottom: calc(165px + env(safe-area-inset-bottom, 0px));
   }
+}
+
+/* -------------------------------------------------------------
+   App Android: barra inferior, menú táctil y tamaño de app
+   ------------------------------------------------------------- */
+.tabbar { display: none; }
+.tabbar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 50px;
+  padding: 5px 2px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #8f8db3;
+  font: 600 9px/1.1 var(--font);
+  letter-spacing: -.01em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.tabbar-btn .ic { width: 21px; height: 21px; stroke-width: 1.8; }
+.tabbar-btn span {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tabbar-btn.active {
+  color: #ddd6fe;
+  background: linear-gradient(180deg, rgba(139, 92, 246, .18), rgba(139, 92, 246, .03));
+}
+.tabbar-btn.active .ic {
+  color: #c4b5fd;
+  filter: drop-shadow(0 0 6px rgba(167, 139, 250, .65));
+}
+.tabbar-btn#tabbarMore.active { color: #67e8f9; }
+
+.app-menu { display: none; position: fixed; inset: 0; z-index: 1300; }
+.app-menu[hidden] { display: none !important; }
+.app-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 2, 10, .78);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.app-menu-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 16px 16px calc(22px + env(safe-area-inset-bottom, 0px));
+  border-radius: 22px 22px 0 0;
+  border-top: 1px solid rgba(167, 139, 250, .3);
+  background: linear-gradient(180deg, #0d0a20, #070614);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, .6);
+}
+.app-menu-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.app-menu-kicker {
+  color: #67e8f9;
+  font: 700 9px/1 var(--mono);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.app-menu-head h2 {
+  margin: 6px 0 0;
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: -.01em;
+}
+.app-menu-close {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(167, 139, 250, .26);
+  border-radius: 12px;
+  background: rgba(139, 92, 246, .09);
+  color: #ddd6fe;
+  cursor: pointer;
+}
+.app-menu-close .ic { width: 20px; height: 20px; }
+.app-menu-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.app-menu-grid button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 10px 12px;
+  border: 1px solid rgba(167, 139, 250, .14);
+  border-radius: 12px;
+  background: rgba(14, 12, 36, .82);
+  color: #d8d5f2;
+  font: 600 13px/1.2 var(--font);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.app-menu-grid button .ic { width: 20px; height: 20px; color: #a78bfa; flex: 0 0 auto; }
+.app-menu-grid button.active {
+  border-color: rgba(34, 211, 238, .5);
+  background: rgba(34, 211, 238, .09);
+  color: #f5f3ff;
+}
+@media (min-width: 901px) {
+  .app-menu { display: none !important; }
+}
+
+@media (max-width: 900px) {
+  #nav { display: none !important; }
+  /* En móvil el menú vive en la pestaña "Más": el botón hamburguesa sobra. */
+  #menuBtn { display: none; }
+  .tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 80;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 2px;
+    padding: 5px 6px calc(5px + env(safe-area-inset-bottom, 0px));
+    background: rgba(8, 7, 22, .97);
+    border-top: 1px solid rgba(167, 139, 250, .24);
+    box-shadow: 0 -12px 34px rgba(2, 2, 12, .5);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+  .app-menu:not([hidden]) { display: block; }
+  body { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  .pwa-install { right: 12px; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
+  /* Antes de decidir las cookies no se ofrece instalar: taparía los botones. */
+  body:has(.consent-bar:not([hidden])) .pwa-install { display: none; }
+  .page-head h2 { font-size: clamp(1.55rem, 7vw, 2.1rem); }
+  .page-head p { font-size: 13.5px; line-height: 1.6; }
+  .product p,
+  .card p,
+  .solution-function,
+  .contact-card p,
+  .notice p { font-size: 13.5px; line-height: 1.6; }
+  .product h3,
+  .card h3 { font-size: 16px; }
+  .btn { min-height: 46px; }
+  .form-grid input,
+  .form-grid select,
+  .form-grid textarea,
+  .search-shell input,
+  .search-shell select,
+  .universal-search input { font-size: 16px; }
+  .chip { min-height: 34px; }
+}
+
+@media (display-mode: standalone) {
+  .topbar {
+    height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  body { overscroll-behavior-y: contain; }
 }

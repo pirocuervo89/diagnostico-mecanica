@@ -1,0 +1,7 @@
+{
+  "_comment": "Datos públicos de la app Android. Aquí va la huella SHA-256 del certificado de firma para Digital Asset Links. Es información pública (no es una clave privada), pero solo debe contener certificados que firmen de verdad la app.",
+  "packageName": "com.diagnosticomecanica.app",
+  "sha256Fingerprints": [
+    "2F:62:BC:B6:5B:DB:BB:A8:3E:FA:2B:F2:1E:07:45:2D:73:74:BC:51:DC:C2:9D:7A:0D:39:A6:DE:3A:DE:C1:73"
+  ]
+}

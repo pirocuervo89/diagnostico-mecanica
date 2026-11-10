@@ -16,7 +16,10 @@
     "indexnow": "node scripts/indexnow.mjs",
     "prices:sync": "node scripts/sync-prices.mjs",
     "symptoms:build": "node scripts/build-symptoms.mjs",
-    "symptoms:check": "node scripts/verify-symptoms.mjs"
+    "symptoms:check": "node scripts/verify-symptoms.mjs",
+    "android:update": "cd android && npx @bubblewrap/cli update --manifest=twa-manifest.json --skipVersionUpgrade",
+    "android:build": "cd android && npx @bubblewrap/cli build --manifest=twa-manifest.json",
+    "android:install": "npx @bubblewrap/cli install --apkFile=android/app-release-signed.apk"
   },
   "dependencies": {
     "compression": "^1.7.4",

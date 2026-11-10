@@ -206,6 +206,18 @@ body:has(.consent-bar:not([hidden])) { padding-bottom: 120px; }
 .consent-dialog .consent-actions { margin-top: 20px; }
 .consent-saved { margin: 12px 0 0; color: var(--ok); font-size: 12px; }
 
+/* App Android: el aviso de cookies se coloca encima de la barra inferior para
+   que la navegación siga disponible desde el primer arranque. Va aquí y no en
+   reforma.css porque este archivo se carga después y define el aviso. */
+@media (max-width: 900px) {
+  body:has(.consent-bar:not([hidden])) { padding-bottom: calc(280px + env(safe-area-inset-bottom, 0px)); }
+  body:has(.consent-bar:not([hidden])) .consent-bar {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+  }
+}
+
 @media (max-width: 760px) {
   .footer-legal-links { justify-content: flex-start; }
   .consent-bar { grid-template-columns: 1fr; }
