@@ -412,21 +412,31 @@ router.get('/report/:token', (req, res) => {
   // El token firmado es la prueba de compra: no depende de que el pedido siga
   // en disco, así que el informe pagado se sirve también después de reinicios.
   const payload = verifyReportToken(req.params.token);
-  if (!payload) return res.status(404).json({ error: 'Informe no encontrado.' });
+  if (!payload) {
+    // Compatibilidad con pedidos antiguos: token aleatorio guardado en disco.
+    // Sigue exigiendo pago y no abre la puerta a tokens inventados.
+    const stored = readOrders().find(o => o.token === req.params.token);
+    if (!stored) return res.status(404).json({ error: 'Informe no encontrado.' });
+    if (!stored.paid) return res.status(402).json({ error: 'El informe aún no está pagado.' });
+    return sendReport(res, stored);
+  }
   if (payload.exp && Date.now() > payload.exp) {
     return res.status(410).json({ error: 'La prueba de 15 días ha caducado. Compra el informe para conservarlo.' });
   }
-  const order = {
+  sendReport(res, {
     id: payload.id,
     report: payload.r,
     createdAt: new Date(payload.iat || Date.now()).toISOString(),
     paidAt: null
-  };
+  });
+});
+
+function sendReport(res, order) {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'private, no-store');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   res.setHeader('Content-Disposition', `inline; filename="informe-${order.id}.html"`);
   res.send(reportHtml(order));
-});
+}
 
 export default router;
