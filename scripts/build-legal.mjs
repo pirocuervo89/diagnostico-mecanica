@@ -31,7 +31,8 @@ const NAV = [
   ['privacidad', 'Privacidad'],
   ['cookies', 'Cookies'],
   ['afiliacion', 'Afiliación'],
-  ['terminos', 'Términos y compra']
+  ['terminos', 'Términos y compra'],
+  ['eliminar-cuenta', 'Eliminar cuenta']
 ];
 
 const page = ({ slug, title, description, body }) => `<!doctype html>
