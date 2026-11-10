@@ -89,6 +89,12 @@ function severityClass(value) {
 function showView(name, fromHistory = false) {
   if (!name || !document.getElementById(`view-${name}`)) name = 'home';
   closeAppMenu();
+  // Si se cierra una ficha con el gesto "atrás", el bloqueo de scroll podía
+  // quedarse activo y la página solo se movía dentro de listas internas.
+  document.body.classList.remove('modal-open');
+  const stuckModal = $('#productModal');
+  if (stuckModal) stuckModal.hidden = true;
+  if (document.body.style.overflow === 'hidden') document.body.style.overflow = '';
   $$('.view').forEach(v => v.classList.toggle('active', v.id === `view-${name}`));
   $$('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === name));
   const nav = $('#nav');
@@ -1707,12 +1713,57 @@ async function initPayments() {
   payBadge(status.configured ? (status.mode === 'test' ? 'Stripe · pruebas' : 'Stripe · activo') : (link ? 'Stripe · enlace de pago' : 'Sin configurar'));
   payNote(status.configured ? (status.note || '') : (link ? 'Pago seguro con Stripe. Tras pagar, envía los datos del vehículo a selupiro@gmail.com para recibir el informe.' : (status.note || '')));
   buy.addEventListener('click', buyReport);
+  addTrialButton(buy, status);
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('pago') === 'ok' && params.get('session_id')) {
     await verifyPaySession(params.get('session_id'));
   } else if (params.get('pago') === 'cancelado') {
     payNote('Compra cancelada. No se ha realizado ningún cargo.');
+  }
+}
+
+// Prueba de 15 días: el informe es gratis una vez por dispositivo. Los
+// productos siguen siendo enlaces de compra, así que la prueba no regala nada
+// que cueste dinero al negocio y sirve para que el usuario vea el valor real.
+function addTrialButton(buy, status) {
+  if (!buy || !buy.parentElement || document.getElementById('payTrial')) return;
+  if (status?.mode === 'live' || status?.mode === 'test') {
+    const btn = document.createElement('button');
+    btn.id = 'payTrial';
+    btn.type = 'button';
+    btn.className = 'btn ghost';
+    btn.textContent = 'Probar 15 días gratis (1 informe)';
+    btn.addEventListener('click', async () => {
+      const report = reportFormData();
+      if (!report.brand.trim() || !report.model.trim()) {
+        payNote('Indica marca y modelo para generar el informe de prueba.');
+        $('#fBrand')?.focus();
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Generando informe de prueba…';
+      try {
+        const result = await api('/api/payments/trial', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ report })
+        });
+        const download = $('#payDownload');
+        if (download && result.downloadUrl) {
+          download.href = result.downloadUrl;
+          download.classList.remove('hidden');
+        }
+        payBadge('Prueba 15 días');
+        payNote(`Informe de prueba listo. Podrás descargarlo hasta el ${new Date(result.expiresAt).toLocaleDateString('es-ES')}.`);
+        btn.remove();
+      } catch (err) {
+        payNote(`No se pudo activar la prueba: ${err.message}`);
+        btn.disabled = false;
+        btn.textContent = 'Probar 15 días gratis (1 informe)';
+      }
+    });
+    buy.after(btn);
   }
 }
 

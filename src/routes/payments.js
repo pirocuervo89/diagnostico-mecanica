@@ -347,6 +347,41 @@ router.get('/session/:id', async (req, res, next) => {
   }
 });
 
+// Prueba de 15 días: un informe gratis por IP y periodo. No regala productos
+// (siguen siendo enlaces de compra), solo deja probar el valor del informe.
+const trialSeen = new Map();
+const TRIAL_MS = 15 * 24 * 60 * 60 * 1000;
+
+router.post('/trial', (req, res) => {
+  const report = cleanReport(req.body?.report);
+  if (!report.brand || !report.model) {
+    return res.status(400).json({ error: 'Indica al menos marca y modelo para generar el informe de prueba.' });
+  }
+  const secret = reportSecret();
+  if (!secret) return res.status(503).json({ error: 'La prueba no está disponible ahora mismo.' });
+
+  const ip = req.ip || 'desconocida';
+  const now = Date.now();
+  const previous = trialSeen.get(ip);
+  if (previous && now - previous < TRIAL_MS) {
+    const days = Math.ceil((TRIAL_MS - (now - previous)) / (24 * 60 * 60 * 1000));
+    return res.status(429).json({ error: `La prueba de 15 días ya se usó en este dispositivo. Podrás repetirla en ${days} día(s) o comprar el informe completo.` });
+  }
+  if (trialSeen.size > 5000) trialSeen.clear();
+  trialSeen.set(ip, now);
+
+  const expiresAt = now + TRIAL_MS;
+  const token = signReport({
+    v: 1,
+    id: `PRUEBA-${now.toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`,
+    r: report,
+    iat: now,
+    exp: expiresAt,
+    trial: true
+  });
+  res.json({ downloadUrl: `/api/payments/report/${token}`, expiresAt: new Date(expiresAt).toISOString(), trial: true });
+});
+
 // Stripe firma el cuerpo sin procesar. server.js guarda req.rawBody en el
 // parser JSON para poder verificar la firma sin cambiar el orden de los routers.
 router.post('/webhook', (req, res) => {
@@ -378,6 +413,9 @@ router.get('/report/:token', (req, res) => {
   // en disco, así que el informe pagado se sirve también después de reinicios.
   const payload = verifyReportToken(req.params.token);
   if (!payload) return res.status(404).json({ error: 'Informe no encontrado.' });
+  if (payload.exp && Date.now() > payload.exp) {
+    return res.status(410).json({ error: 'La prueba de 15 días ha caducado. Compra el informe para conservarlo.' });
+  }
   const order = {
     id: payload.id,
     report: payload.r,
