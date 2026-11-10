@@ -50,6 +50,58 @@ function stripeClient() {
   return new Stripe(key);
 }
 
+// El disco de Render Free es efímero: un pedido pagado se perdería en cada
+// reinicio o despliegue. Por eso el derecho al informe viaja en un token
+// firmado (HMAC), guardado también en los metadatos de la sesión de Stripe.
+// Así el cliente puede descargar lo que ha pagado aunque el servidor se haya
+// reiniciado entre el pago y la descarga.
+function reportSecret() {
+  return String(process.env.REPORT_TOKEN_SECRET || process.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_SECRET_KEY || '').trim();
+}
+
+function signReport(payload) {
+  const secret = reportSecret();
+  if (!secret) return null;
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const mac = crypto.createHmac('sha256', secret).update(body).digest('base64url');
+  return `${body}.${mac}`;
+}
+
+function verifyReportToken(token) {
+  const secret = reportSecret();
+  if (!secret || typeof token !== 'string') return null;
+  const [body, mac] = token.split('.');
+  if (!body || !mac) return null;
+  const expected = crypto.createHmac('sha256', secret).update(body).digest('base64url');
+  const a = Buffer.from(mac);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+    if (!payload || payload.v !== 1 || !payload.id || !payload.r) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+// Stripe limita cada valor de metadata a 500 caracteres: el token se reparte.
+function tokenMetadata(token) {
+  const chunks = [];
+  for (let i = 0; i < token.length && chunks.length < 40; i += 460) {
+    chunks.push(token.slice(i, i + 460));
+  }
+  return Object.fromEntries(chunks.map((chunk, index) => [`rt${index}`, chunk]));
+}
+
+function tokenFromSession(session) {
+  const meta = session?.metadata || {};
+  const chunks = [];
+  for (let i = 0; meta[`rt${i}`]; i += 1) chunks.push(meta[`rt${i}`]);
+  const token = chunks.join('');
+  return token && verifyReportToken(token) ? token : null;
+}
+
 function markOrderPaid(orderId, sessionId) {
   const orders = readOrders();
   let changed = false;
@@ -210,9 +262,19 @@ router.post('/checkout', async (req, res, next) => {
     }
     const config = reportConfig();
 
+    const orderId = `INF-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+    const token = signReport({ v: 1, id: orderId, r: report, iat: Date.now() });
+    if (!token) {
+      return res.status(503).json({
+        error: 'El cobro no está configurado por completo.',
+        detail: 'Falta STRIPE_WEBHOOK_SECRET (o REPORT_TOKEN_SECRET) para firmar el acceso al informe.',
+        missing: ['STRIPE_WEBHOOK_SECRET']
+      });
+    }
+
     const order = {
-      id: `INF-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`,
-      token: crypto.randomBytes(24).toString('hex'),
+      id: orderId,
+      token,
       paid: false,
       createdAt: new Date().toISOString(),
       paidAt: null,
@@ -231,7 +293,7 @@ router.post('/checkout', async (req, res, next) => {
       mode: 'payment',
       customer_email: order.email || undefined,
       client_reference_id: order.id,
-      metadata: { orderId: order.id, kind: 'informe-tecnico' },
+      metadata: { orderId: order.id, kind: 'informe-tecnico', ...tokenMetadata(token) },
       line_items: [{
         quantity: 1,
         price_data: {
@@ -264,14 +326,18 @@ router.get('/session/:id', async (req, res, next) => {
     const order = paid
       ? markOrderPaid(session.client_reference_id, session.id)
       : (readOrders().find(o => o.sessionId === session.id) || readOrders().find(o => o.id === session.client_reference_id) || null);
+    // El token de los metadatos sobrevive a reinicios del servidor; el pedido en
+    // disco no. Sin esto, un cliente que paga y vuelve tras un despliegue se
+    // encontraría con que su informe no existe.
+    const token = order?.token || tokenFromSession(session);
     const config = reportConfig();
     res.json({
       id: session.id,
       paid,
       status: session.status,
       paymentStatus: session.payment_status,
-      orderId: order?.id || null,
-      downloadUrl: paid && order ? `/api/payments/report/${order.token}` : null,
+      orderId: order?.id || session.client_reference_id || null,
+      downloadUrl: paid && token ? `/api/payments/report/${token}` : null,
       product: config.productName,
       amount: order?.amount ?? config.priceCents,
       currency: order?.currency ?? config.currency
@@ -308,9 +374,16 @@ router.post('/webhook', (req, res) => {
 });
 
 router.get('/report/:token', (req, res) => {
-  const order = readOrders().find(o => o.token === req.params.token);
-  if (!order) return res.status(404).json({ error: 'Informe no encontrado.' });
-  if (!order.paid) return res.status(402).json({ error: 'El informe aún no está pagado.' });
+  // El token firmado es la prueba de compra: no depende de que el pedido siga
+  // en disco, así que el informe pagado se sirve también después de reinicios.
+  const payload = verifyReportToken(req.params.token);
+  if (!payload) return res.status(404).json({ error: 'Informe no encontrado.' });
+  const order = {
+    id: payload.id,
+    report: payload.r,
+    createdAt: new Date(payload.iat || Date.now()).toISOString(),
+    paidAt: null
+  };
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'private, no-store');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
