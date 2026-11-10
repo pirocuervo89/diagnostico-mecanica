@@ -2892,7 +2892,8 @@ body:has(.consent-bar:not([hidden])) .pwa-install {
 }
 .app-menu-close .ic { width: 20px; height: 20px; }
 .app-menu-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.app-menu-grid button {
+.app-menu-grid button,
+.app-menu-grid .app-menu-update {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -2908,7 +2909,14 @@ body:has(.consent-bar:not([hidden])) .pwa-install {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
-.app-menu-grid button .ic { width: 20px; height: 20px; color: #a78bfa; flex: 0 0 auto; }
+.app-menu-grid button .ic,
+.app-menu-grid .app-menu-update .ic { width: 20px; height: 20px; color: #a78bfa; flex: 0 0 auto; }
+.app-menu-grid .app-menu-update {
+  grid-column: 1 / -1;
+  text-decoration: none;
+  border-color: rgba(34, 211, 238, .35);
+  color: #a5f3fc;
+}
 .app-menu-grid button.active {
   border-color: rgba(34, 211, 238, .5);
   background: rgba(34, 211, 238, .09);

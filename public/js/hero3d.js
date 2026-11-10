@@ -144,6 +144,9 @@ if (canvas && frame) {
       dragging: false,
       lastX: 0,
       lastY: 0,
+      startX: 0,
+      startY: 0,
+      axisLocked: false,
       pointerId: null,
       loaded: false
     };
@@ -173,15 +176,32 @@ if (canvas && frame) {
     const ro = new ResizeObserver(setSize);
     ro.observe(frame);
 
+    // En el móvil el gesto puede ser girar el coche o desplazar la página. Solo
+    // se gira si el dedo se mueve en horizontal: si va en vertical se suelta el
+    // gesto para que el navegador haga scroll. Antes se capturaba el puntero al
+    // primer toque y el scroll moría en toda la zona del hero.
     canvas.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
       state.dragging = true;
+      state.axisLocked = false;
       state.pointerId = e.pointerId;
-      state.lastX = e.clientX;
-      state.lastY = e.clientY;
-      canvas.setPointerCapture?.(e.pointerId);
+      state.startX = state.lastX = e.clientX;
+      state.startY = state.lastY = e.clientY;
     });
     canvas.addEventListener('pointermove', e => {
       if (!state.dragging || e.pointerId !== state.pointerId) return;
+      if (!state.axisLocked) {
+        const totalX = Math.abs(e.clientX - state.startX);
+        const totalY = Math.abs(e.clientY - state.startY);
+        if (totalX < 6 && totalY < 6) return;
+        if (totalY > totalX) {
+          state.dragging = false;
+          state.pointerId = null;
+          return;
+        }
+        state.axisLocked = true;
+        canvas.setPointerCapture?.(e.pointerId);
+      }
       const dx = e.clientX - state.lastX;
       const dy = e.clientY - state.lastY;
       state.lastX = e.clientX;
@@ -191,7 +211,10 @@ if (canvas && frame) {
     });
     const endDrag = e => {
       state.dragging = false;
-      if (e?.pointerId !== undefined) canvas.releasePointerCapture?.(e.pointerId);
+      state.axisLocked = false;
+      if (e?.pointerId !== undefined && canvas.hasPointerCapture?.(e.pointerId)) {
+        canvas.releasePointerCapture?.(e.pointerId);
+      }
       state.pointerId = null;
     };
     canvas.addEventListener('pointerup', endDrag);

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Actualizar la app · Diagnóstico y Mecánica</title>
+<meta name="description" content="Descarga la última versión de la app de Diagnóstico y Mecánica e instálala encima de la que ya tienes, sin perder tus datos.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#08090b">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 18px calc(40px + env(safe-area-inset-bottom, 0px));
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: #eceafd;
+    background:
+      radial-gradient(900px 600px at 80% -10%, rgba(124, 58, 237, .28), transparent 62%),
+      #05040c;
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: clamp(1.6rem, 6vw, 2.1rem); line-height: 1.15; margin: 0 0 8px; letter-spacing: -.02em; }
+  .lead { margin: 0 0 22px; color: #a7a3c9; font-size: 15px; }
+  .version {
+    display: inline-block; margin-bottom: 18px; padding: 5px 11px; border-radius: 999px;
+    background: rgba(34, 211, 238, .12); border: 1px solid rgba(34, 211, 238, .35);
+    color: #a5f3fc; font-size: 12.5px; font-weight: 700; letter-spacing: .02em;
+  }
+  .download {
+    display: block; width: 100%; text-align: center; text-decoration: none;
+    padding: 17px 20px; border-radius: 16px;
+    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+    border: 1px solid rgba(196, 181, 253, .5);
+    color: #fff; font-weight: 800; font-size: 17px;
+    box-shadow: 0 14px 34px rgba(76, 29, 149, .45);
+  }
+  .download small { display: block; font-weight: 600; font-size: 12.5px; opacity: .85; margin-top: 3px; }
+  h2 { font-size: 15px; margin: 30px 0 12px; text-transform: uppercase; letter-spacing: .1em; color: #b9b4e0; }
+  ol { margin: 0; padding-left: 22px; }
+  li { margin-bottom: 12px; }
+  li b { color: #fff; }
+  .note {
+    margin-top: 24px; padding: 14px 16px; border-radius: 14px;
+    background: rgba(167, 139, 250, .08); border: 1px solid rgba(167, 139, 250, .22);
+    font-size: 14px; color: #c9c5e8;
+  }
+  a { color: #a5b4fc; }
+  .back { display: inline-block; margin-top: 26px; font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <span class="version">Versión 1.2 · versionCode 3</span>
+  <h1>Actualizar la app</h1>
+  <p class="lead">Descarga el archivo e instálalo <b>encima</b> de la app que ya tienes. No borres la app antes: si la borras, pierdes la sesión y los datos guardados en el teléfono.</p>
+
+  <a class="download" href="/download/Diagnostico-Mecanica.apk" download>
+    Descargar la app actualizada
+    <small>APK · 1,1 MB · Android 7.0 o superior</small>
+  </a>
+
+  <h2>Qué hacer después</h2>
+  <ol>
+    <li><b>Pulsa el botón de arriba.</b> Chrome te avisará de que el archivo puede ser dañino: es normal en archivos que no vienen de Play Store. Elige <b>Descargar de todos modos</b>.</li>
+    <li><b>Abre la descarga.</b> Toca el aviso de descarga completada, o abre <b>Chrome → Descargas</b> y toca el archivo.</li>
+    <li>Si Android pregunta, <b>permite instalar apps de esta fuente</b> (Chrome). Es un permiso por app y solo se pide la primera vez.</li>
+    <li>Pulsa <b>Actualizar</b> (a veces pone <b>Instalar</b>). No te pedirá contraseña ni borrará nada.</li>
+  </ol>
+
+  <div class="note">
+    <b>Si sale “Aplicación no instalada”:</b> significa que en el teléfono hay una copia firmada con otra clave. Desinstala la app vieja, instala esta y vuelve a entrar con tu cuenta: el garaje y tus diagnósticos están guardados en el servidor, no en el teléfono.
+  </div>
+
+  <div class="note">
+    <b>No hace falta actualizar para ver las mejoras de contenido.</b> La app abre la web en directo, así que las fichas, los precios y las correcciones aparecen solas. El APK solo cambia el icono, la pantalla de arranque y el comportamiento del contenedor.
+  </div>
+
+  <a class="back" href="/">← Volver a la app</a>
+</main>
+</body>
+</html>

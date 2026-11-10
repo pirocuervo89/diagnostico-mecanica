@@ -137,6 +137,12 @@ function buildAppMenu() {
     });
     appMenuGrid.appendChild(btn);
   });
+  // Actualizar el contenedor Android (APK) sin depender de la tienda.
+  const update = document.createElement('a');
+  update.href = '/actualizar.html';
+  update.className = 'app-menu-update';
+  update.innerHTML = `${icon('download')}<span>Actualizar app</span>`;
+  appMenuGrid.appendChild(update);
   appMenuBuilt = true;
 }
 
