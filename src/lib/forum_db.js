@@ -376,6 +376,41 @@ export function updateProfile(userId, data) {
   return publicUser(userById(userId));
 }
 
+export function deleteAccount(userId) {
+  const user = userById(userId);
+  if (!user) throw Object.assign(new Error('Usuario no encontrado'), { status: 404 });
+
+  const attachments = db.prepare(`
+    SELECT stored_name FROM attachments
+    WHERE user_id = ?
+       OR case_id IN (SELECT id FROM cases WHERE user_id = ?)
+       OR reply_id IN (SELECT id FROM replies WHERE user_id = ?)
+  `).all(userId, userId, userId);
+
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    db.prepare('UPDATE replies SET verified_by = NULL WHERE verified_by = ?').run(userId);
+    db.prepare('UPDATE cases SET solution_reply_id = NULL WHERE solution_reply_id IN (SELECT id FROM replies WHERE user_id = ?)').run(userId);
+    db.prepare('UPDATE case_history SET user_id = NULL WHERE user_id = ?').run(userId);
+    db.prepare('UPDATE reports SET resolved_by = NULL WHERE resolved_by = ?').run(userId);
+    db.prepare('DELETE FROM dm_threads WHERE user_low = ? OR user_high = ?').run(userId, userId);
+    db.prepare('DELETE FROM reports WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM attachments WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM replies WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM cases WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+    db.exec('COMMIT');
+  } catch (error) {
+    db.exec('ROLLBACK');
+    throw error;
+  }
+
+  for (const attachment of attachments) {
+    try { fs.unlinkSync(path.join(UPLOAD_DIR, path.basename(String(attachment.stored_name)))); } catch { /* ya no existe */ }
+  }
+  return { ok: true, deleted: Number(userId) };
+}
+
 export function listCategories() {
   return db.prepare(`
     SELECT c.*, (

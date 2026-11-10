@@ -1983,11 +1983,11 @@ body.modal-open { overflow: hidden; }
 .scanner-media { position: relative; align-self: start; }
 .scanner-cheapest { position: absolute; top: 4px; left: 0; font-size: 9px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #041018; background: #34d399; border-radius: 4px; padding: 2px 5px; }
 .scanner-img { width: 120px; height: 120px; max-width: 100%; object-fit: contain; border-radius: 8px; background: #fff; padding: 4px; }
-.scanner-body { display: grid; gap: 7px; align-content: start; }
-.scanner-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.scanner-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 7px; align-content: start; min-width: 0; overflow-wrap: anywhere; }
+.scanner-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; min-width: 0; }
 .scanner-head b { font-size: 14px; line-height: 1.3; }
 .scanner-price { font-family: var(--mono); font-size: 13px; color: var(--cyan-2); white-space: nowrap; }
-.scanner-meta { font-size: 11px; color: var(--muted); }
+.scanner-meta { font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
 .scanner-best { margin: 0; font-size: 12px; line-height: 1.5; }
 .scanner-tags { display: flex; flex-wrap: wrap; gap: 5px; }
 .scanner-tags span { font-size: 10px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 7px; }
@@ -1998,7 +1998,7 @@ body.modal-open { overflow: hidden; }
 .scanner-pros, .scanner-cons { margin: 7px 0 0; padding-left: 18px; display: grid; gap: 3px; color: var(--muted); }
 .scanner-pros li::marker { color: var(--ok, #34d399); }
 .scanner-cons li::marker { color: var(--warn, #f0be3c); }
-.scanner-buy { justify-self: start; margin-top: 2px; font-size: 11.5px; text-decoration: none; }
+.scanner-buy { justify-self: start; max-width: 100%; margin-top: 2px; font-size: 11.5px; text-decoration: none; white-space: normal; text-align: center; }
 @media (max-width: 620px) {
   .obd-web-adapters .panel-head { flex-direction: column; }
   .obd-scanner { grid-template-columns: 84px minmax(0, 1fr); gap: 10px; }

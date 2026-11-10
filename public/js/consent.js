@@ -94,10 +94,12 @@
   function showBar() {
     if (!document.body.contains(bar)) document.body.appendChild(bar);
     bar.hidden = false;
+    bar.style.display = '';
   }
 
   function hideBar() {
     bar.hidden = true;
+    bar.style.display = 'none';
   }
 
   function open() {

@@ -1333,3 +1333,45 @@ test('un JSON malformado devuelve 400 y no un error interno', async () => {
   const body = await r.json().catch(() => null);
   assert.match(body?.error || '', /JSON/i);
 });
+
+test('cuenta: eliminar exige confirmación, borra usuario y cierra sesión', async () => {
+  const username = `borrame_${Date.now().toString().slice(-8)}`;
+  const created = await forumRequest('/api/forum/auth/register', {
+    method: 'POST',
+    body: { username, displayName: 'Cuenta de prueba', password: 'clave-segura-123' }
+  });
+  assert.equal(created.status, 201);
+  const cookie = created.cookie;
+  assert.ok(cookie.startsWith('dym_forum_session='));
+
+  const vehicle = await forumRequest('/api/garage/vehicles', {
+    method: 'POST', cookie,
+    body: { brand: 'Seat', model: 'Ibiza', version: '1.0 TSI', year: 2019, mileage: 60000 }
+  });
+  assert.equal(vehicle.status, 201);
+  const photo = await forumRequest(`/api/garage/vehicles/${vehicle.body.vehicle.id}/photo`, {
+    method: 'POST', cookie,
+    body: { data: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=' }
+  });
+  assert.equal(photo.status, 200);
+
+  const bad = await forumRequest('/api/forum/auth/account', {
+    method: 'DELETE', cookie, body: { confirm: 'NO' }
+  });
+  assert.equal(bad.status, 400);
+
+  const deleted = await forumRequest('/api/forum/auth/account', {
+    method: 'DELETE', cookie, body: { confirm: 'ELIMINAR' }
+  });
+  assert.equal(deleted.status, 200);
+  assert.equal(deleted.body.ok, true);
+  assert.equal(deleted.body.deleted, true);
+
+  const me = await forumRequest('/api/forum/auth/me', { cookie });
+  assert.equal(me.body.user, null);
+
+  const login = await forumRequest('/api/forum/auth/login', {
+    method: 'POST', body: { username, password: 'clave-segura-123' }
+  });
+  assert.equal(login.status, 401);
+});

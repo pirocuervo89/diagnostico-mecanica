@@ -5,8 +5,10 @@ import {
   updateCase, hideCase, createReply, hideReply, markReplyProposal, verifySolution, unverifySolution,
   vote, rateReply, reportContent, listReports, resolveReport, banUser, setUserRole,
   getProfile, sendMessage, listMessages, getThread, forumStats, findKnowledgeCases,
-  saveAttachments, discardAttachments, getAttachment, isDuplicateRecent, cleanText, isBanned, CASE_STATUSES
+  saveAttachments, discardAttachments, getAttachment, isDuplicateRecent, cleanText, isBanned,
+  deleteAccount, CASE_STATUSES
 } from '../lib/forum_db.js';
+import { listVehicles, deleteVehicle } from '../lib/garage_db.js';
 
 const router = express.Router();
 const COOKIE = 'dym_forum_session';
@@ -314,6 +316,20 @@ router.post('/auth/logout', route((req, res) => {
   deleteSession(req.authToken);
   clearSessionCookie(res, isSecureRequest(req));
   res.json({ ok: true });
+}));
+
+router.delete('/auth/account', limitRequests('account-delete', 3, 15 * 60000), route((req, res) => {
+  if (!req.user) return fail(res, 401, 'Inicia sesión para eliminar tu cuenta.');
+  if (String(req.body?.confirm || '').trim().toUpperCase() !== 'ELIMINAR') {
+    return fail(res, 400, 'Escribe ELIMINAR para confirmar la eliminación de la cuenta.');
+  }
+  const vehicles = listVehicles(Number(req.user.id));
+  for (const vehicle of vehicles) {
+    deleteVehicle(Number(req.user.id), vehicle.id, { confirm: true });
+  }
+  deleteAccount(Number(req.user.id));
+  clearSessionCookie(res, isSecureRequest(req));
+  res.json({ ok: true, deleted: true });
 }));
 
 router.get('/auth/me', route((req, res) => {

@@ -121,6 +121,38 @@
     });
   });
 
+  $('#garageDeleteAccount')?.addEventListener('click', async () => {
+    const first = window.confirm('Se eliminarán tu cuenta, vehículos, fotos, documentos, mensajes y publicaciones. Esta acción no se puede deshacer. ¿Continuar?');
+    if (!first) return;
+    const typed = window.prompt('Escribe ELIMINAR para confirmar definitivamente:');
+    if (String(typed || '').trim().toUpperCase() !== 'ELIMINAR') {
+      notify('Eliminación cancelada: no se ha borrado nada.', 'error');
+      return;
+    }
+    const button = $('#garageDeleteAccount');
+    if (button) { button.disabled = true; button.textContent = 'Eliminando…'; }
+    try {
+      await api('/api/forum/auth/account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: 'ELIMINAR' })
+      });
+      state.user = null;
+      state.vehicles = [];
+      state.vehicle = null;
+      setHidden('#garageApp', true);
+      setHidden('#garageAuth', true);
+      setHidden('#garageLoading', false);
+      notify('Cuenta y datos eliminados.', 'ok');
+      window.alert('Tu cuenta y tus datos se han eliminado. Se ha cerrado la sesión.');
+      if (typeof window.showView === 'function') window.showView('home');
+      await bootstrap();
+    } catch (error) {
+      notify(error.message || 'No se pudo eliminar la cuenta.', 'error');
+      if (button) { button.disabled = false; button.textContent = 'Eliminar mi cuenta'; }
+    }
+  });
+
   // ----------------------------------------------------------------
   // Lista de vehículos
   // ----------------------------------------------------------------
