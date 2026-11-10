@@ -99,7 +99,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
 // a un archivo con extensión (js, css, imagen, modelo...) que no existe debe
 // dar 404: si devolviera index.html, un recurso roto pasaría por correcto y el
 // navegador intentaría ejecutar HTML como JavaScript.
-const ASSET_PATH = /\.(?:js|mjs|css|map|png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|otf|eot|glb|gltf|bin|wasm|json|txt|xml|pdf|mp4|webm)$/i;
+const ASSET_PATH = /\.(?:js|mjs|css|map|png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|otf|eot|glb|gltf|bin|wasm|json|txt|xml|pdf|mp4|webm|apk|aab)$/i;
 
 app.use((req, res, next) => {
   if (req.method !== 'GET' || req.path.startsWith('/api')) return next();
