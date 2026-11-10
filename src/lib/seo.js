@@ -1125,7 +1125,7 @@ export function sitemapXml() {
     ...engines().map(engine => ({ loc: `/motor/${engine.id}`, priority: '0.8', changefreq: 'monthly' })),
     ...vehicles().map(car => ({ loc: `/coche/${car.id}`, priority: '0.7', changefreq: 'monthly' })),
     ...tyres().map(tyre => ({ loc: `/neumatico/${tyre.id}`, priority: '0.6', changefreq: 'weekly' })),
-    ...[['aviso-legal', 'Aviso legal'], ['privacidad', 'Privacidad'], ['cookies', 'Cookies'], ['afiliacion', 'Afiliación'], ['terminos', 'Términos']]
+    ...[['aviso-legal', 'Aviso legal'], ['privacidad', 'Privacidad'], ['cookies', 'Cookies'], ['afiliacion', 'Afiliación'], ['terminos', 'Términos'], ['eliminar-cuenta', 'Eliminar cuenta']]
       .map(([slug]) => ({ loc: `/legal/${slug}.html`, priority: '0.3', changefreq: 'yearly' }))
   ];
 
@@ -1135,5 +1135,5 @@ export function sitemapXml() {
 }
 
 export function urlCount() {
-  return 6 + products().length + engines().length + vehicles().length + tyres().length + 5;
+  return 6 + products().length + engines().length + vehicles().length + tyres().length + 6;
 }

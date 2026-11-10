@@ -6,9 +6,9 @@ import path from 'node:path';
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
-const PAGES = ['aviso-legal', 'privacidad', 'cookies', 'afiliacion', 'terminos'];
+const PAGES = ['aviso-legal', 'privacidad', 'cookies', 'afiliacion', 'terminos', 'eliminar-cuenta'];
 
-test('las cinco páginas legales existen y tienen título y navegación', () => {
+test('las páginas legales existen y tienen título y navegación', () => {
   for (const page of PAGES) {
     const html = read(`public/legal/${page}.html`);
     assert.match(html, /<html lang="es">/, `${page}: idioma`);
