@@ -1,17 +1,19 @@
 # Diagnóstico y Mecánica — preparación para Google Play
 
-Estado: **web/PWA lista; falta empaquetar el AAB firmado, subirlo a Play Console y completar las fichas.** La app de Play se publica como TWA (Trusted Web Activity) de la web, sin tienda propia de digitales.
+Estado: **web/PWA y APK firmado listos; falta la cuenta de Play Console y decidir el sistema de cobro dentro de la app.** La app se publica como TWA (Trusted Web Activity) y **vende lo mismo que la web**: planes e Informe PRO.
 
-QA hecha: `npm test` 157/157; navegación atrás móvil sin bucle; modo `?store=play` verificado (panel Stripe y botón de compra ausentes; informe gratuito y tabbar presentes; sin errores de consola).
+QA hecha: `npm test` 157/157; navegación atrás móvil sin bucle; APK 1.1 (`versionCode 2`) abre la web normal con el panel de pago; assetlinks verificado con la huella de la firma.
 
 ## 1. Decisiones de producto
 
-- La app de Play es **gratuita**, sin anuncios y sin compras integradas.
-- El **Informe PRO** de pago se sigue vendiendo **solo en la web** con Stripe.
-- En la build de Play se abre `https://diagnostico-mecanica.onrender.com/?store=play`; `public/js/app.js` detecta `store=play` y elimina el panel de compra del informe. El generador gratuito de informe sigue disponible.
-- Los productos de taller enlazan a **Amazon/Awin** (bienes físicos). Son enlaces de afiliado y se muestran con `rel="sponsored nofollow noopener noreferrer"`.
-- No se enlaza desde la app a un checkout externo de contenido digital. Esto evita el conflicto con Google Play Billing.
-- Si en el futuro se quiere vender el Informe PRO dentro de la app, hay que integrar **Google Play Billing** (no Stripe) y verificar las compras en backend.
+- **La app es gratis de descargar, pero monetiza igual que la web**: planes de pago e Informe PRO al mismo precio. El objetivo es facturar en los dos canales, no regalar el PRO.
+- **Distribución directa (APK/PWA)**: abre la web normal y cobra con **Stripe**, sin comisión de Google. Es el canal activo hoy y el que menos cuesta.
+- **Google Play**: los pagos por contenido digital dentro de la app están regulados. Hay dos vías válidas:
+  1. **Google Play Billing** para planes e informe, con verificación de compras en backend. Comisión: 10 % + 5 % de billing fee en suscripciones y 20 % + 5 % en pagos únicos (instalaciones nuevas, tramo estándar; 15 %/20 % con los programas de Google).
+  2. **Programa *billing choice* de la UE** (disponible en el EEA desde el 30/06/2026): ofrecer Stripe dentro de la app **además** de Play Billing, con inscripción previa en Play Console y pago de la comisión de servicio (10 % suscripciones, 20 % pagos únicos en instalaciones nuevas). No exime de ofrecer Play Billing.
+- Sin inscripción en esos programas, Play **prohíbe** dirigir al usuario a un pago externo (anti-steering). Por eso la build de Play no puede ser la misma que el APK directo.
+- El modo `/?store=play` existe como base de una futura build de Play: oculta el panel Stripe mientras se integra el cobro permitido.
+- Los productos de taller enlazan a **Amazon/Awin** (bienes físicos): eso sí puede usar enlaces externos sin restricción, con `rel="sponsored nofollow noopener noreferrer"`.
 
 ## 2. Ficha de Play Store
 
@@ -124,8 +126,11 @@ No hay Android SDK/Gradle instalado en este equipo. La vía recomendada es **Bub
 ### Opción Bubblewrap (configuración ya preparada)
 
 La configuración vive en `android/twa-manifest.json` (paquete, colores, iconos,
-`startUrl: /?store=play`, pantalla completa y firma). Guía completa en
-**`android/README.md`**.
+`startUrl: /`, pantalla completa y firma). Guía completa en
+**`android/README.md`**. La build publicada como APK abre la web normal y cobra
+con Stripe; para Play hay que crear una variante con Play Billing o inscribirse
+en el programa de billing choice de la UE y cambiar el `startUrl` a
+`/?store=play` mientras se integra.
 
 ```bash
 npm run android:update   # genera el proyecto Gradle desde la configuración
@@ -177,14 +182,16 @@ esto la TWA muestra barra de navegador y Play puede rechazarla.
 - No hay AAB firmado todavía (requiere JDK 17 + Android SDK).
 - `assetlinks.json` ya está implementado en el servidor; falta añadir el SHA-256 real en Render.
 - Falta el borrado real de cuenta en backend (la página legal explica el proceso por email).
-- Stripe sigue en modo test y sin cobros reales; el informe PRO no debe promocionarse como compra activa en la app.
+- Stripe sigue en modo test: los cobros reales de planes e informe hay que activarlos con las claves Live antes de promocionar la venta.
+- Para Play falta integrar Play Billing (o inscribirse en el programa EEA) y verificar compras en backend.
 - Falta `GEMINI_API_KEY` en Render para el asistente en producción.
 - Falta `AWIN_PUBLISHER_ID` para completar enlaces de afiliado de Autodoc.
 
 ## 9. Criterio para avisar al usuario de que está listo para subir
 
 Se avisará cuando:
-- La build de Play abra en modo `?store=play` sin panel de compra.
+- El cobro dentro de la app esté resuelto: Stripe en el APK directo y Play Billing o billing choice en la build de Play.
+- Stripe esté en modo Live con al menos una compra real verificada de punta a punta.
 - El AAB esté firmado y subido a pruebas internas.
 - `assetlinks.json` responda 200 con el SHA-256 correcto.
 - Las capturas definitivas estén validadas (sin sello de pruebas).

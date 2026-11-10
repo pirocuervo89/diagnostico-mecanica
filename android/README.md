@@ -10,8 +10,10 @@ Render aparece en las dos.
 - Dominio: `diagnostico-mecanica.onrender.com`
 - Configuración: [`twa-manifest.json`](./twa-manifest.json)
 
-The build de Play abre `/?store=play`, el modo que oculta la compra con Stripe
-(ver `PLAY-STORE.md`). La PWA instalada desde Chrome abre la web normal.
+La app abre la web normal, con los mismos planes y el mismo informe PRO de pago
+que en la web (Stripe). El modo `/?store=play`, que oculta la compra, queda solo
+para una futura build de Google Play: allí los pagos digitales exigen Google
+Play Billing o el programa de billing choice de la UE (ver `PLAY-STORE.md`).
 
 ## Instalar la app ahora (sin compilar)
 
@@ -45,6 +47,24 @@ Resultado dentro de `android/`:
 
 - `app-release-signed.apk`: para probar en el móvil.
 - `app-release-bundle.aab`: para subir a Google Play.
+
+## Build ya generado
+
+La primera build está hecha con este equipo: `android/app-release-signed.apk`
+(1,1 MB, `versionCode 1`, `minSdk 24`, Android 7.0+), firmado con
+`android/android.keystore` y con la huella
+`2F:62:BC:B6:5B:DB:BB:A8:3E:FA:2B:F2:1E:07:45:2D:73:74:BC:51:DC:C2:9D:7A:0D:39:A6:DE:3A:DE:C1:73`,
+que es la que publica `/.well-known/assetlinks.json`.
+
+- La contraseña del keystore está en `android/keystore.env` (ignorado por Git).
+  **Copia de seguridad obligatoria**: sin ese archivo y el `.keystore` no se
+  pueden firmar actualizaciones con la misma identidad.
+- El toolchain local vive en `.tools/` (JDK 17 + Android SDK, ignorado por Git).
+  Bubblewrap se configura con `--config=../.tools/bubblewrap-config.json`; en
+  otro equipo se responde a sus preguntas indicando el JDK 17 y el SDK propios.
+- Para probar en el móvil sin cable: `public/download/Diagnostico-Mecanica-1.0.apk`
+  se sirve en `http://<tu-ip-local>:3000/download/Diagnostico-Mecanica-1.0.apk`
+  mientras el servidor esté arrancado.
 
 El proyecto Gradle generado también se puede abrir con Android Studio. No edites
 a mano los archivos que genera Bubblewrap: se regeneran desde `twa-manifest.json`.
