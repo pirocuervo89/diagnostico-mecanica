@@ -616,7 +616,9 @@ export async function callAI(prompt, opts = {}) {
     }
     const remaining = budgetMs - elapsed;
     const requestedMax = Number(opts.maxOutputTokens) || 1200;
-    const hardCap = provider.free ? 24000 : 20000;
+    // Un proveedor gratuito que no contesta en 12 s está en cola: seguir
+    // esperando solo alarga la pantalla. Se corta y se cae al motor local.
+    const hardCap = provider.free ? 12000 : 20000;
     const wantedTimeout = provider.free
       ? Math.max(Number(opts.timeoutMs) || 0, requestedMax > 600 ? 24000 : 16000)
       : (Number(opts.timeoutMs) || 15000);

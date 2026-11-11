@@ -146,7 +146,7 @@ function collectResults(links, snippets, limit) {
     // DuckDuckGo mete publicidad (duckduckgo.com/y.js?ad_domain=...) entre los
     // resultados. No es una fuente: se descarta sin romper el emparejamiento de
     // fragmentos, que va por índice.
-    if (!domain || domain === 'duckduckgo.com' || /\/y\.js$/i.test(new URL(url).pathname)) continue;
+    if (!domain || /(^|\.)duckduckgo\.com$/i.test(domain) || /\/y\.js$/i.test(new URL(url).pathname)) continue;
     seen.add(url);
     results.push({
       title: title || domain,
