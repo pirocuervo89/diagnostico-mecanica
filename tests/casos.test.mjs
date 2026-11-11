@@ -79,6 +79,9 @@ before(async () => {
       AI_PROVIDER: '', AI_API_KEY: '', AI_BASE_URL: '', AI_MODEL: '',
       GROQ_API_KEY: '', OPENROUTER_API_KEY: '', MISTRAL_API_KEY: '',
       CEREBRAS_API_KEY: '', OPENAI_API_KEY: '', GEMINI_API_KEY: '',
+      // La cadena incluye Pollinations sin clave; en pruebas se desactiva para
+      // no salir a Internet ni depender de un servicio externo.
+      POLLINATIONS_ENABLED: '0',
       FORUM_DB_PATH: FORUM_DB, FORUM_UPLOAD_DIR: FORUM_UPLOADS
     },
     stdio: 'ignore'
@@ -148,6 +151,26 @@ test('scanner de vehículo: extrae y relaciona una ficha de texto', async () => 
     text: 'Marca: Peugeot\nModelo: 205 GTI\nAño: 1990\nMotorización: 1.9 GTI 130 CV\nCilindrada: 1905 cc'
   });
   assert.equal(peugeot.body.linkedVehicleId, 'peugeot-205-19-gti');
+});
+
+test('scanner de vehículo: el resumen IA es opcional y no bloquea el OCR', async () => {
+  const { status, body } = await postJSON('/api/vehicle/scan/ai', {
+    extracted: {
+      brand: { value: 'Volkswagen' },
+      model: { value: 'Golf' },
+      year: { value: 2018 },
+      vin: { value: 'WVWZZZAUZJW123456' },
+      plate: { value: '1234ABC' }
+    }
+  });
+  assert.equal(status, 200);
+  assert.equal(body.ai, null);
+});
+
+test('scanner de vehículo: el resumen IA exige datos extraídos', async () => {
+  const { status, body } = await postJSON('/api/vehicle/scan/ai', {});
+  assert.equal(status, 400);
+  assert.ok(body.error);
 });
 
 test('scanner de vehículo: rechaza formatos no admitidos', async () => {

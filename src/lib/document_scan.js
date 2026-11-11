@@ -396,7 +396,7 @@ export async function scanVehicleDocument({ dataBase64, mimeType, fileName, text
   const warnings = [
     'Los datos se han extraído automáticamente y pueden contener errores. Revísalos antes de continuar.',
     'Una fotografía exterior no identifica con exactitud la motorización, el año-modelo ni el equipamiento.',
-    'No se ha enviado el documento a ningún servicio externo: el análisis se ejecuta en el servidor local.'
+    'El archivo no se envía a ningún servicio externo: el OCR y la extracción se ejecutan en el servidor local. Solo el texto extraído y redactado puede usarse para un resumen con IA.'
   ];
   if (!vin) warnings.push('Sin VIN no es posible confirmar la versión exacta ni las campañas pendientes.');
   if (plate) warnings.push('La matrícula y el bastidor son datos personales: se guardan solo en tu garaje privado y no se publican.');

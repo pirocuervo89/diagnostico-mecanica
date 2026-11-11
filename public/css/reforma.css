@@ -1575,6 +1575,15 @@ body.modal-open { overflow: hidden; }
 .scan-field[data-confidence="baja"] { border-color: rgba(251, 191, 36, .28); }
 .scan-warnings { display: grid; gap: 4px; margin-top: 10px; padding: 10px 12px; border-left: 2px solid rgba(251, 191, 36, .55); background: rgba(251, 191, 36, .045); color: #d8d5f2; font-size: 9.5px; line-height: 1.5; }
 .scan-warnings span::before { content: "· "; color: #fbbf24; }
+.scan-ai {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid rgba(34, 211, 238, .26);
+  background: linear-gradient(145deg, rgba(34, 211, 238, .075), rgba(139, 92, 246, .045));
+}
+.scan-ai[hidden] { display: none; }
+.scan-ai p { margin: 7px 0 6px; color: #e6e1ff; font-size: 11.5px; line-height: 1.6; white-space: pre-line; }
+.scan-ai small { display: block; margin-bottom: 9px; color: var(--muted); font-size: 9px; line-height: 1.45; }
 .scan-review-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
 @media (max-width: 920px) {
   .start-head { flex-direction: column; gap: 10px; }

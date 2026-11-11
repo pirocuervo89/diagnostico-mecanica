@@ -68,6 +68,7 @@ before(async () => {
       HOST: '127.0.0.1',
       AI_PROVIDER: '', AI_API_KEY: '', GROQ_API_KEY: '', OPENROUTER_API_KEY: '',
       MISTRAL_API_KEY: '', CEREBRAS_API_KEY: '', OPENAI_API_KEY: '', GEMINI_API_KEY: '',
+      POLLINATIONS_ENABLED: '0',
       FORUM_DB_PATH: path.join(TMP, 'forum.sqlite'),
       FORUM_UPLOAD_DIR: path.join(TMP, 'forum-uploads'),
       GARAGE_UPLOAD_DIR: path.join(TMP, 'garage-uploads')

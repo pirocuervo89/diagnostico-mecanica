@@ -913,8 +913,71 @@ router.get('/vehicle/scan/status', (_req, res) => {
     formats: ['JPG', 'PNG', 'WebP', 'PDF con texto', 'PDF escaneado (OCR)'],
     ocr: true,
     maxFileMb: 12,
-    privacy: 'El archivo se procesa en memoria y no se almacena en el servidor.'
+    privacy: 'El archivo se procesa en memoria y no se almacena. Solo el texto extraído y redactado puede enviarse a la IA para un resumen.'
   });
+});
+
+// El resumen de IA nunca recibe el archivo: solo los campos de texto ya
+// extraídos. Matrícula y VIN se excluyen y, por si aparecen en otro campo, se
+// redactan antes de construir el prompt. No se guarda nada en disco.
+const SCAN_PLATE_PATTERNS = [
+  /\b\d{4}\s?[A-Z]{3}\b/g,
+  /\b[A-Z]{1,2}\s?\d{4}\s?[A-Z]{1,2}\b/g
+];
+
+function redactScanIdentifiers(text, { plate = '', vin = '' } = {}) {
+  let out = String(text || '');
+  for (const [value, label] of [[vin, '[VIN]'], [plate, '[MATRÍCULA]']]) {
+    const clean = String(value || '').trim();
+    if (clean.length >= 4) out = out.split(clean).join(label);
+  }
+  out = out.replace(/\b[A-HJ-NPR-Z0-9]{17}\b/g, '[VIN]');
+  for (const pattern of SCAN_PLATE_PATTERNS) out = out.replace(pattern, '[MATRÍCULA]');
+  return out;
+}
+
+function scanAiInput(extracted = {}) {
+  const rows = [];
+  for (const [key, item] of Object.entries(extracted)) {
+    if (key === 'plate' || key === 'vin') continue;
+    const value = item && typeof item === 'object' ? item.value : item;
+    if (value === '' || value === null || value === undefined) continue;
+    rows.push(`${key}: ${value}`);
+  }
+  const plate = extracted.plate?.value || '';
+  const vin = extracted.vin?.value || '';
+  return redactScanIdentifiers(rows.join('\n'), { plate, vin });
+}
+
+async function scanAiSummary(result) {
+  try {
+    const details = scanAiInput(result?.extracted);
+    if (!details) return null;
+    const prompt = `Eres un asesor de taller. Estos son los datos de texto extraídos de la documentación de un vehículo (no se ha enviado ningún archivo ni imagen):\n\n${details}\n\nRedacta un resumen breve en español, de 2 a 4 frases, que:\n1) identifique el coche con lo que se sabe y diga qué dato falta por confirmar;\n2) proponga 2 o 3 comprobaciones prácticas antes de comprar o reparar.\nNo inventes datos ni versiones. No menciones matrícula, bastidor ni VIN.`;
+    const ai = await callAI(prompt, { temperature: 0.3, maxOutputTokens: 320, timeoutMs: 20000 });
+    if (!ai.ok || !ai.text) return null;
+    return {
+      summary: ai.text,
+      provider: ai.provider,
+      provider_label: ai.providerLabel,
+      model: ai.model,
+      notice: 'Resumen generado solo con el texto extraído. La matrícula y el VIN se han redactado antes de enviarlo.'
+    };
+  } catch (error) {
+    console.warn('[VEHICLE SCAN] Resumen de IA no disponible:', error?.message || error);
+    return null;
+  }
+}
+
+router.post('/vehicle/scan/ai', async (req, res) => {
+  const extracted = req.body?.extracted;
+  if (!extracted || typeof extracted !== 'object' || Array.isArray(extracted)) {
+    return res.status(400).json({ error: 'Faltan los datos extraídos del vehículo.' });
+  }
+  // Se llama por separado para que el escaneo local responda al instante aunque
+  // la IA tarde o esté limitada. No se recibe ni se guarda ningún archivo.
+  const ai = await scanAiSummary({ extracted });
+  res.json({ ai });
 });
 
 router.post('/vehicle/scan', async (req, res) => {
@@ -926,7 +989,8 @@ router.post('/vehicle/scan', async (req, res) => {
       fileName: body.fileName,
       text: body.text
     });
-    res.json(result);
+    // El resumen de IA se pide aparte desde la interfaz para no bloquear el OCR.
+    res.json({ ...result, ai: null });
   } catch (error) {
     const message = String(error?.message || 'No se pudo analizar el documento.');
     const status = /supera el l[íi]mite|Formato no admitido|No se ha recibido|est[áa] vac[íi]o/i.test(message) ? 400 : 422;

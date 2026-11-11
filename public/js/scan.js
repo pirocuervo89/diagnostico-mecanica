@@ -11,10 +11,15 @@
   const warningsBox = $('#scanWarnings');
   const methodBox = $('#scanMethod');
   const confidenceTag = $('#scanConfidence');
+  const aiBox = $('#scanAi');
+  const aiText = $('#scanAiText');
+  const aiMeta = $('#scanAiMeta');
+  const askAiBtn = $('#scanAskAi');
   const continueBtn = $('#scanContinue');
   const clearBtn = $('#scanClear');
   let currentResult = null;
   let busy = false;
+  let aiRequestId = 0;
 
   if (!drop || !review) return;
 
@@ -81,6 +86,14 @@
       });
     });
     warningsBox.innerHTML = (result.warnings || []).map(warning => `<span>${String(warning).replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join('');
+    if (aiBox) {
+      const ai = result.ai || null;
+      if (ai?.summary) {
+        showAiSummary(ai);
+      } else {
+        requestAiSummary(result.extracted);
+      }
+    }
     const confidence = result.confidence || {};
     if (confidenceTag) {
       confidenceTag.textContent = `${String(confidence.overall || 'baja').toUpperCase()} · ${Number(confidence.score || 0)}%`;
@@ -97,6 +110,50 @@
       methodBox.textContent = `${methods[confidence.method] || 'Análisis local'} · Revisa y corrige cualquier dato antes de continuar.`;
     }
     review.hidden = false;
+  }
+
+  function showAiSummary(ai) {
+    if (!aiBox) return;
+    const summary = String(ai?.summary || '').trim();
+    if (!summary) {
+      aiBox.hidden = true;
+      return;
+    }
+    if (aiText) aiText.textContent = summary;
+    if (aiMeta) aiMeta.textContent = `Generado por IA${(ai.provider_label || ai.provider) ? ` (${ai.provider_label || ai.provider})` : ''}. ${ai.notice || 'Revisa los datos antes de continuar.'}`;
+    aiBox.hidden = false;
+  }
+
+  async function requestAiSummary(extracted) {
+    const requestId = ++aiRequestId;
+    if (!aiBox) return;
+    aiBox.hidden = false;
+    if (aiText) aiText.textContent = 'Analizando la ficha con IA…';
+    if (aiMeta) aiMeta.textContent = 'Se enviará solo el texto extraído, sin matrícula ni VIN.';
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 25000);
+    try {
+      const response = await fetch('/api/vehicle/scan/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ extracted }),
+        signal: controller.signal
+      });
+      const data = await response.json().catch(() => ({}));
+      if (requestId !== aiRequestId) return;
+      if (!response.ok) throw new Error(data.error || `Error HTTP ${response.status}`);
+      if (data.ai?.summary) {
+        showAiSummary(data.ai);
+      } else {
+        aiBox.hidden = true;
+      }
+    } catch (error) {
+      if (requestId !== aiRequestId) return;
+      if (aiText) aiText.textContent = 'La lectura IA no está disponible ahora mismo. Los datos extraídos siguen siendo válidos.';
+      if (aiMeta) aiMeta.textContent = 'Puedes continuar al diagnóstico o preguntar al asistente.';
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   async function analyze(payload, label = 'Analizando documento…') {
@@ -116,6 +173,8 @@
     } catch (error) {
       review.hidden = true;
       currentResult = null;
+      aiRequestId += 1;
+      if (aiBox) aiBox.hidden = true;
       setStatus(error.message || 'No se pudo analizar el documento.', 'error');
     } finally {
       setBusy(false);
@@ -209,8 +268,8 @@
     }, 'Validando datos manuales…');
   });
 
-  continueBtn?.addEventListener('click', () => {
-    if (!currentResult?.extracted) return;
+  function applyResultVehicle() {
+    if (!currentResult?.extracted) return null;
     const get = key => valueOf(currentResult.extracted[key]).toString().trim();
     const brand = get('brand');
     const model = get('model');
@@ -218,7 +277,7 @@
       setStatus('Faltan la marca o el modelo. Corrígelos antes de continuar.', 'error');
       const target = fieldsBox.querySelector(`[data-scan-field="${!brand ? 'brand' : 'model'}"]`);
       target?.focus();
-      return;
+      return null;
     }
     const engine = [
       get('engineCode'),
@@ -228,24 +287,50 @@
       get('transmission')
     ].filter(Boolean).join(' · ');
 
+    const vehicle = { id: currentResult.linkedVehicleId || '', brand, model, engine };
     const ok = typeof window.setVehicleState === 'function'
-      ? window.setVehicleState({ id: currentResult.linkedVehicleId || '', brand, model, engine }, 'scan')
+      ? window.setVehicleState(vehicle, 'scan')
       : false;
     if (!ok) {
       setStatus('No se pudo aplicar el vehículo al diagnóstico.', 'error');
-      return;
+      return null;
     }
     const yearInput = $('#fYear');
     if (yearInput && get('year')) yearInput.value = get('year');
-    setStatus(`Vehículo aplicado: ${[brand, model, engine].filter(Boolean).join(' ')}.`);
+    return { ...vehicle, year: get('year') };
+  }
+
+  continueBtn?.addEventListener('click', () => {
+    const vehicle = applyResultVehicle();
+    if (!vehicle) return;
+    setStatus(`Vehículo aplicado: ${[vehicle.brand, vehicle.model, vehicle.engine].filter(Boolean).join(' ')}.`);
     if (typeof window.showView === 'function') window.showView('diagnostico');
+  });
+
+  askAiBtn?.addEventListener('click', () => {
+    const vehicle = applyResultVehicle();
+    if (!vehicle) return;
+    const label = [vehicle.brand, vehicle.model, vehicle.engine, vehicle.year ? `(${vehicle.year})` : ''].filter(Boolean).join(' ');
+    setStatus(`Vehículo aplicado: ${label}.`);
+    if (typeof window.showView === 'function') window.showView('chat');
+    const input = $('#chatInput');
+    if (input) {
+      input.value = `He escaneado la documentación de mi ${label}. ¿Qué averías o síntomas debo vigilar y qué comprobaciones hago primero?`;
+      input.focus();
+    }
   });
 
   clearBtn?.addEventListener('click', () => {
     currentResult = null;
+    aiRequestId += 1;
     review.hidden = true;
     if (fieldsBox) fieldsBox.innerHTML = '';
     if (warningsBox) warningsBox.innerHTML = '';
+    if (aiBox) {
+      aiBox.hidden = true;
+      if (aiText) aiText.textContent = '';
+      if (aiMeta) aiMeta.textContent = '';
+    }
     setStatus('');
     manual?.reset();
     fileInput && (fileInput.value = '');
