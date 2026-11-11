@@ -2975,5 +2975,5 @@ body:has(.consent-bar:not([hidden])) .pwa-install {
     height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
     padding-top: env(safe-area-inset-top, 0px);
   }
-  body { overscroll-behavior-y: contain; }
+  body { overscroll-behavior-y: auto; }
 }
