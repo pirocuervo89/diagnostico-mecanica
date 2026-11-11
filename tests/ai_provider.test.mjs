@@ -10,6 +10,7 @@ import {
   callAI,
   callAIVision,
   resetCooldown,
+  resetFreeThrottle,
   listProviders
 } from '../src/lib/ai_provider.js';
 
@@ -67,6 +68,9 @@ after(() => new Promise(resolve => server.close(resolve)));
 beforeEach(() => {
   received = [];
   resetCooldown();
+  // El límite de Pollinations es global (1 llamada/45 s); sin reiniciarlo, una
+  // prueba dejaría a la siguiente sin turno gratuito y el fallo sería del test.
+  resetFreeThrottle();
   nextReply = () => ({ status: 200, body: {} });
 });
 

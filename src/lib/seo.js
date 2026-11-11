@@ -152,6 +152,13 @@ export function productMeta() {
     if (title.length > MAX_TITLE) title = clip(name, MAX_TITLE - 3);
     if (titles.has(title.toLowerCase())) title = clip(`${name} · ${brand || item.category || 'catálogo'}`, MAX_TITLE);
     if (titles.has(title.toLowerCase())) title = clip(`${name} · ${item.subcategory || item.asin || item.id}`, MAX_TITLE);
+    // Dos fichas de tienda pueden compartir los primeros caracteres del nombre
+    // (títulos de Amazon larguísimos). La referencia del vendedor desempata.
+    if (titles.has(title.toLowerCase())) {
+      const ref = String(item.asin || item.id).replace(/^amz-/, '').slice(-6).toUpperCase();
+      title = clip(`${clip(name, MAX_TITLE - 9)} · ${ref}`, MAX_TITLE);
+    }
+    if (titles.has(title.toLowerCase())) title = clip(`${item.id} · ${clip(name, 28)}`, MAX_TITLE);
     titles.add(title.toLowerCase());
 
     let description = fillDescription(

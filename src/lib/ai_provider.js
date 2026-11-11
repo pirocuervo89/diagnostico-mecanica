@@ -139,6 +139,8 @@ function buildProvider(preset, env) {
 export function resolveProviders(env = process.env) {
   const forced = String(env.AI_PROVIDER || '').trim().toLowerCase();
   const order = [];
+  // Un proveedor forzado solo se pone delante si tiene clave: si no, la cadena
+  // no debe quedarse esperando a un servicio que no puede responder.
   if (forced && PRESETS[forced]) order.push(forced);
   for (const id of AUTO_ORDER) {
     if (!order.includes(id)) order.push(id);
@@ -151,6 +153,18 @@ export function resolveProviders(env = process.env) {
     if (!preset) continue;
     const provider = buildProvider(preset, env);
     if (provider) providers.push(provider);
+    // Claves extra del mismo proveedor (GROQ_API_KEY_2, _3...): cada cuenta
+    // gratuita suma cuota y actúa como proveedor independiente en la cadena.
+    // Así una web sin presupuesto puede tener tres IA gratuitas en paralelo.
+    if (preset.keyEnv) {
+      for (const suffix of ['_2', '_3', '_4']) {
+        const extraKey = String(env[`${preset.keyEnv}${suffix}`] || '').trim();
+        if (!extraKey) continue;
+        const extra = buildProvider(preset, { ...env, [preset.keyEnv]: extraKey });
+        if (!extra) continue;
+        providers.push({ ...extra, id: `${preset.id}${suffix.toLowerCase()}`, label: `${preset.label} ${suffix.slice(1)}` });
+      }
+    }
   }
   return providers;
 }
@@ -294,6 +308,14 @@ async function callOpenAICompatible(provider, prompt, opts) {
     const choice = data?.choices?.[0];
     const text = (choice?.message?.content || '').trim();
     const rawFinish = choice?.finish_reason;
+
+    // Algunos servicios gratuitos devuelven un 200 con el aviso de límite en el
+    // propio texto (Pollinations: "Free limit reached..."). Eso no es una
+    // respuesta: se trata como cuota agotada para no enseñárselo al usuario.
+    if (/free limit reached|rate limit|too many requests|quota exceeded/i.test(text) && text.length < 400) {
+      setCooldown(provider, 'quota');
+      return { ok: false, reason: 'quota', message: text.slice(0, 120) };
+    }
     const finishReason = rawFinish === 'length' ? 'MAX_TOKENS' : (rawFinish ? String(rawFinish).toUpperCase() : 'STOP');
 
     if (!text) {
@@ -555,30 +577,58 @@ export async function callAIVision(prompt, imageDataUrl, opts = {}) {
  * Llama al primer proveedor que responda. Nunca lanza excepción hacia la ruta.
  * @returns {Promise<{ok: boolean, text?: string, reason?: string, model?: string, provider?: string, providerLabel?: string, finishReason?: string, errors?: Array}>}
  */
+// Pollinations gratis admite una respuesta cada 45 s por IP. Si se le llama más
+// a menudo, contesta con el aviso de límite (o tarda hasta un minuto). Se lleva
+// un control global para no gastar el turno en vano: mejor caer al motor local
+// al instante que hacer esperar al usuario.
+const FREE_MIN_INTERVAL_MS = 45 * 1000;
+let lastFreeCallAt = 0;
+
+/** Marca el hueco libre de Pollinations (útil en tests y tras un reinicio). */
+export function resetFreeThrottle() {
+  lastFreeCallAt = 0;
+}
+
 export async function callAI(prompt, opts = {}) {
   const env = opts.env || process.env;
   const providers = resolveProviders(env);
   if (!providers.length) return { ok: false, reason: 'no_key' };
 
+  const startedAt = Date.now();
+  const budgetMs = Math.max(5000, Math.min(Number(opts.deadlineMs || env.AI_DEADLINE_MS) || 35000, 90000));
   const attempts = [];
   for (const provider of providers) {
     if (isCoolingDown(provider)) {
       attempts.push({ provider: provider.id, reason: 'cooldown' });
       continue;
     }
-    // Pollinations gratuito razona antes de escribir y con 4096 tokens puede
-    // superar el tiempo de espera. Se limita la salida para que responda a tiempo.
+    if (provider.free && Date.now() - lastFreeCallAt < FREE_MIN_INTERVAL_MS) {
+      attempts.push({ provider: provider.id, reason: 'throttled' });
+      continue;
+    }
+    // Presupuesto total de la cadena: aunque queden proveedores, no se puede
+    // tener al usuario esperando. Se reparte lo que quede y, agotado, se pasa
+    // al motor experto local (que responde al instante).
+    const elapsed = Date.now() - startedAt;
+    if (elapsed >= budgetMs) {
+      attempts.push({ provider: provider.id, reason: 'deadline' });
+      break;
+    }
+    const remaining = budgetMs - elapsed;
     const requestedMax = Number(opts.maxOutputTokens) || 1200;
-    const effectiveOpts = provider.id === 'pollinations'
-      ? {
-          ...opts,
-          maxOutputTokens: Math.min(requestedMax, 3000),
-          timeoutMs: Math.max(Number(opts.timeoutMs) || 0, requestedMax > 600 ? 60000 : 20000)
-        }
-      : opts;
+    const hardCap = provider.free ? 24000 : 20000;
+    const wantedTimeout = provider.free
+      ? Math.max(Number(opts.timeoutMs) || 0, requestedMax > 600 ? 24000 : 16000)
+      : (Number(opts.timeoutMs) || 15000);
+    const effectiveOpts = {
+      ...opts,
+      ...(provider.free ? { maxOutputTokens: Math.min(requestedMax, 3000) } : {}),
+      timeoutMs: Math.max(2000, Math.min(wantedTimeout, hardCap, remaining))
+    };
     const result = provider.kind === 'gemini'
       ? await callGemini(provider, prompt, effectiveOpts)
       : await callOpenAICompatible(provider, prompt, effectiveOpts);
+    if (provider.free) lastFreeCallAt = Date.now();
     if (result.ok) return result;
     attempts.push({ provider: provider.id, reason: result.reason, status: result.status });
   }

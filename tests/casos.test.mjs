@@ -1117,12 +1117,14 @@ test('foro: suspensión de usuario y cierre de sesión', async () => {
 // ---------------------------------------------------------------
 // Evolución profesional: catálogo, vehículos, tuning e IA con contexto
 // ---------------------------------------------------------------
-test('catálogo final: 500 productos con imagen y enlace locales verificados', async () => {
+test('catálogo final: productos con imagen y enlace locales verificados', async () => {
   const { status, body } = await getJSON('/api/products');
   assert.equal(status, 200);
-  assert.equal(body.length, 500);
-  assert.equal(new Set(body.map(p => p.id)).size, 500);
-  assert.equal(new Set(body.map(p => p.name.toLowerCase())).size, 500);
+  // El catálogo crece con cada tanda de recambios; lo que se exige es que no
+  // haya fichas duplicadas y que ninguna quede sin imagen ni sin enlace.
+  assert.ok(body.length >= 500, `catálogo demasiado corto: ${body.length}`);
+  assert.equal(new Set(body.map(p => p.id)).size, body.length);
+  assert.equal(new Set(body.map(p => p.name.toLowerCase())).size, body.length);
   const cats = new Set(body.map(p => p.category));
   for (const c of ['Herramientas', 'Diagnosis', 'Líquidos y Químicos', 'Repuestos', 'Maquinaria', 'Tuning']) assert.ok(cats.has(c), `falta categoría ${c}`);
   assert.ok(body.every(p => p.imageStatus === 'verified' && p.image));
@@ -1130,7 +1132,7 @@ test('catálogo final: 500 productos con imagen y enlace locales verificados', a
   assert.ok(body.every(p => p.compatibility?.type && p.compatibility?.note));
   assert.ok(body.every(p => !/^(Profesional|Línea Económica|Genérico|Universal)$/i.test(p.manufacturer || '')));
   const tuning = await getJSON('/api/products?category=Tuning');
-  assert.equal(tuning.body.length, 40);
+  assert.ok(tuning.body.length >= 40, `tuning demasiado corto: ${tuning.body.length}`);
 });
 
 test('vehículos: fichas, guía de compra y relaciones coherentes', async () => {
