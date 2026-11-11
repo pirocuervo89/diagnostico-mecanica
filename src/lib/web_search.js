@@ -8,6 +8,7 @@
 // WEB_SEARCH_ENABLED=0 desactiva las consultas externas.
 
 const SEARCH_URL = 'https://lite.duckduckgo.com/lite/';
+const HTML_SEARCH_URL = 'https://html.duckduckgo.com/html/';
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const CACHE_MAX_ENTRIES = 50;
@@ -90,6 +91,9 @@ function resolveResultUrl(href) {
       const target = parsed.searchParams.get('uddg');
       if (!target) return '';
       const destination = new URL(target, 'https://duckduckgo.com');
+      // El parámetro `rut` es un token de la búsqueda, no de la página: si se
+      // deja, el mismo hilo entra dos veces con URLs distintas.
+      destination.searchParams.delete('rut');
       return /^https?:$/.test(destination.protocol) ? destination.toString() : '';
     }
     return /^https?:$/.test(parsed.protocol) ? parsed.toString() : '';
@@ -109,6 +113,12 @@ function domainOf(url) {
 const LINK_RE = /<a\b([^>]*\bclass\s*=\s*(?:"[^"]*\bresult-link\b[^"]*"|'[^']*\bresult-link\b[^']*')[^>]*)>([\s\S]*?)<\/a>/gi;
 const SNIPPET_RE = /<td\b[^>]*\bclass\s*=\s*(?:"[^"]*\bresult-snippet\b[^"]*"|'[^']*\bresult-snippet\b[^']*')[^>]*>([\s\S]*?)<\/td>/gi;
 
+// La versión completa (html.duckduckgo.com) usa otras clases. Desde un servidor
+// en la nube la versión "lite" a veces no devuelve nada, así que se prueban las
+// dos y se usa la que responda resultados.
+const HTML_LINK_RE = /<a\b([^>]*\bclass\s*=\s*(?:"[^"]*\bresult__a\b[^"]*"|'[^']*\bresult__a\b[^']*')[^>]*)>([\s\S]*?)<\/a>/gi;
+const HTML_SNIPPET_RE = /<a\b[^>]*\bclass\s*=\s*(?:"[^"]*\bresult__snippet\b[^"]*"|'[^']*\bresult__snippet\b[^']*')[^>]*>([\s\S]*?)<\/a>/gi;
+
 /** Parsea el HTML de lite.duckduckgo.com y devuelve resultados ya limpios. */
 export function parseWebResults(html, { limit = DEFAULT_LIMIT } = {}) {
   const links = [];
@@ -123,6 +133,10 @@ export function parseWebResults(html, { limit = DEFAULT_LIMIT } = {}) {
     snippets.push(stripTags(match[1]));
   }
 
+  return collectResults(links, snippets, limit);
+}
+
+function collectResults(links, snippets, limit) {
   const results = [];
   const seen = new Set();
   for (let i = 0; i < links.length && results.length < safeLimit(limit); i += 1) {
@@ -142,6 +156,19 @@ export function parseWebResults(html, { limit = DEFAULT_LIMIT } = {}) {
     });
   }
   return results;
+}
+
+/** Parsea html.duckduckgo.com (clases result__a / result__snippet). */
+export function parseHtmlResults(html, { limit = DEFAULT_LIMIT } = {}) {
+  const links = [];
+  const snippets = [];
+  for (const match of String(html || '').matchAll(HTML_LINK_RE)) {
+    links.push({ url: resolveResultUrl(hrefFromAttributes(match[1])), title: stripTags(match[2]) });
+  }
+  for (const match of String(html || '').matchAll(HTML_SNIPPET_RE)) {
+    snippets.push(stripTags(match[1]));
+  }
+  return collectResults(links, snippets, limit);
 }
 
 function readCache(key) {
@@ -178,31 +205,40 @@ export async function searchWebContext(query, { limit = DEFAULT_LIMIT, timeoutMs
     const cached = readCache(key);
     if (cached) return cached.slice(0, safeLimit(limit));
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), safeTimeout(timeoutMs));
-    let html = '';
-    try {
-      const response = await fetch(`${SEARCH_URL}?q=${encodeURIComponent(q)}`, {
-        method: 'GET',
-        headers: {
-          'User-Agent': USER_AGENT,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'es-ES,es;q=0.9',
-          'Cache-Control': 'no-cache'
-        },
-        signal: controller.signal
-      });
-      if (!response || !response.ok) return [];
-      html = await response.text();
-    } catch {
-      return [];
-    } finally {
-      clearTimeout(timer);
+    // Dos endpoints del mismo buscador: si el primero no devuelve resultados
+    // (habitual cuando se llama desde un centro de datos), se prueba el otro.
+    const endpoints = [
+      { url: `${SEARCH_URL}?q=${encodeURIComponent(q)}`, parse: parseWebResults },
+      { url: `${HTML_SEARCH_URL}?q=${encodeURIComponent(q)}`, parse: parseHtmlResults }
+    ];
+
+    for (const endpoint of endpoints) {
+      let html = '';
+      try {
+        const response = await fetch(endpoint.url, {
+          method: 'GET',
+          headers: {
+            'User-Agent': USER_AGENT,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'es-ES,es;q=0.9',
+            'Cache-Control': 'no-cache'
+          },
+          signal: AbortSignal.timeout(safeTimeout(timeoutMs))
+        });
+        if (!response || !response.ok) continue;
+        html = await response.text();
+      } catch {
+        continue;
+      }
+      const results = endpoint.parse(html, { limit: safeLimit(limit) });
+      if (results.length) {
+        writeCache(key, results);
+        return results;
+      }
     }
 
-    const results = parseWebResults(html, { limit: safeLimit(limit) });
-    writeCache(key, results);
-    return results;
+    writeCache(key, []);
+    return [];
   } catch {
     return [];
   }
@@ -237,28 +273,53 @@ function isForum(domain) {
  * Devuelve [] ante cualquier fallo: es un extra, nunca una dependencia.
  */
 async function searchStackExchange(query, { limit = 3, timeoutMs = 3500 } = {}) {
+  // Stack Exchange está en inglés: con la consulta en español suele devolver
+  // poco, así que se le pasa también una versión sin palabras vacías.
+  const stop = /^(de|del|la|el|los|las|un|una|y|o|con|por|para|que|en|mi|al|se|su|sin|m[aá]s|muy|no|me|da|hace|tiene)$/i;
+  const keywords = String(query || '')
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !stop.test(word))
+    .slice(0, 6)
+    .join(' ');
+
+  for (const term of [query, keywords]) {
+    if (!String(term || '').trim()) continue;
+    try {
+      const url = 'https://api.stackexchange.com/2.3/search/advanced'
+        + `?order=desc&sort=relevance&pagesize=${safeLimit(limit)}&site=mechanics&filter=default`
+        + `&q=${encodeURIComponent(String(term).slice(0, 200))}`;
+      const response = await fetch(url, {
+        headers: { 'Accept-Encoding': 'gzip', 'User-Agent': USER_AGENT },
+        signal: AbortSignal.timeout(timeoutMs)
+      });
+      if (!response.ok) continue;
+      const data = await response.json().catch(() => null);
+      const items = Array.isArray(data?.items) ? data.items : [];
+      const mapped = items
+        .filter(item => item && item.link && item.title)
+        .map(item => ({
+          title: decodeEntities(item.title),
+          url: item.link,
+          snippet: String(item.title || '').slice(0, 220),
+          domain: 'mechanics.stackexchange.com',
+          forum: true
+        }));
+      if (mapped.length) return mapped;
+    } catch {
+      // Se prueba el siguiente término; un fallo de red no puede tumbar el chat.
+    }
+  }
+  return [];
+}
+
+// El mismo hilo puede llegar por dos consultas con parámetros distintos. La
+// clave de deduplicado ignora query, hash, mayúsculas y www.
+function samePageKey(url) {
   try {
-    const url = 'https://api.stackexchange.com/2.3/search/advanced'
-      + `?order=desc&sort=relevance&pagesize=${safeLimit(limit)}&site=mechanics&filter=default`
-      + `&q=${encodeURIComponent(String(query || '').slice(0, 200))}`;
-    const response = await fetch(url, {
-      headers: { 'Accept-Encoding': 'gzip', 'User-Agent': USER_AGENT },
-      signal: AbortSignal.timeout(timeoutMs)
-    });
-    if (!response.ok) return [];
-    const data = await response.json().catch(() => null);
-    const items = Array.isArray(data?.items) ? data.items : [];
-    return items
-      .filter(item => item && item.link && item.title)
-      .map(item => ({
-        title: decodeEntities(item.title),
-        url: item.link,
-        snippet: String(item.title || '').slice(0, 220),
-        domain: 'mechanics.stackexchange.com',
-        forum: true
-      }));
+    const parsed = new URL(url);
+    return `${parsed.hostname.replace(/^www\./i, '').toLowerCase()}${parsed.pathname.replace(/\/+$/, '')}`.toLowerCase();
   } catch {
-    return [];
+    return String(url || '').toLowerCase();
   }
 }
 
@@ -267,8 +328,10 @@ function mergeResults(groups, { limit = 6 } = {}) {
   const merged = [];
   for (const group of groups) {
     for (const item of group || []) {
-      if (!item || !item.url || seen.has(item.url)) continue;
-      seen.add(item.url);
+      if (!item || !item.url) continue;
+      const pageKey = samePageKey(item.url);
+      if (seen.has(pageKey)) continue;
+      seen.add(pageKey);
       merged.push({ ...item, forum: item.forum ?? isForum(item.domain) });
     }
   }
