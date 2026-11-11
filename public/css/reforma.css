@@ -2970,10 +2970,27 @@ body:has(.consent-bar:not([hidden])) .pwa-install {
   .chip { min-height: 34px; }
 }
 
+/* El gesto vertical pertenece siempre al documento, también en TWA/WebView.
+   Sin esto, un ancestro con overscroll-behavior: contain puede quedarse con el
+   arrastre y la página solo se mueve dentro de una lista interna. */
+html,
+body {
+  overscroll-behavior-y: auto !important;
+}
+
+/* clip no crea un contenedor de scroll (hidden sí puede hacerlo en WebView). */
+@supports (overflow: clip) {
+  .hero { overflow: clip; }
+}
+
 @media (display-mode: standalone) {
   .topbar {
     height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
     padding-top: env(safe-area-inset-top, 0px);
   }
-  body { overscroll-behavior-y: auto; }
+  html,
+  body {
+    overscroll-behavior-y: auto !important;
+    touch-action: auto;
+  }
 }

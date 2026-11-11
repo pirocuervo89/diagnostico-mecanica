@@ -86,6 +86,19 @@ function severityClass(value) {
 // -------------------------------------------------------------
 // NAVEGACIÓN Y VISTAS
 // -------------------------------------------------------------
+// Un modal cerrado con el gesto "atrás" o al volver desde segundo plano podía
+// dejar overflow:hidden en el body y matar el scroll de toda la app.
+function releaseStuckPageScroll() {
+  if (document.body.classList.contains('modal-open')) return;
+  if ($('#productModal:not([hidden]), .tut-modal:not([hidden]), .app-menu:not([hidden])')) return;
+  if (document.body.style.overflow === 'hidden') document.body.style.overflow = '';
+}
+
+window.addEventListener('pageshow', releaseStuckPageScroll);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) releaseStuckPageScroll();
+});
+
 function showView(name, fromHistory = false) {
   if (!name || !document.getElementById(`view-${name}`)) name = 'home';
   closeAppMenu();
@@ -94,7 +107,7 @@ function showView(name, fromHistory = false) {
   document.body.classList.remove('modal-open');
   const stuckModal = $('#productModal');
   if (stuckModal) stuckModal.hidden = true;
-  if (document.body.style.overflow === 'hidden') document.body.style.overflow = '';
+  releaseStuckPageScroll();
   $$('.view').forEach(v => v.classList.toggle('active', v.id === `view-${name}`));
   $$('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === name));
   const nav = $('#nav');
