@@ -341,8 +341,113 @@ function mergeResults(groups, { limit = 6 } = {}) {
 }
 
 /**
+ * Wikipedia (API oficial, sin clave). No es un foro, pero desde un centro de
+ * datos responde siempre: sirve como última fuente cuando los buscadores
+ * bloquean la IP del servidor.
+ */
+async function searchWikipedia(query, { limit = 3, timeoutMs = 3500 } = {}) {
+  try {
+    const url = 'https://es.wikipedia.org/w/api.php'
+      + `?action=query&list=search&format=json&utf8=1&srlimit=${safeLimit(limit)}`
+      + `&srsearch=${encodeURIComponent(String(query || '').slice(0, 200))}`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': `${USER_AGENT} (diagnostico-mecanica)` },
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+    if (!response.ok) return [];
+    const data = await response.json().catch(() => null);
+    const items = Array.isArray(data?.query?.search) ? data.query.search : [];
+    return items.map(item => ({
+      title: decodeEntities(stripTags(item.title)),
+      url: `https://es.wikipedia.org/wiki/${encodeURIComponent(String(item.title).replace(/\s+/g, '_'))}`,
+      snippet: stripTags(item.snippet || '').slice(0, 200),
+      domain: 'es.wikipedia.org',
+      forum: false
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Cuando los buscadores bloquean la IP del servidor, se pide la misma búsqueda
+ * a un lector público (r.jina.ai), que la ejecuta desde su propia red y
+ * devuelve el HTML ya limpio. Sin clave y con el mismo parser.
+ */
+async function searchViaReader(query, { limit = 4, timeoutMs = 6000 } = {}) {
+  try {
+    const target = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(String(query || '').slice(0, 200))}`;
+    const response = await fetch(`https://r.jina.ai/${target}`, {
+      headers: { 'User-Agent': USER_AGENT, 'Accept': 'text/plain' },
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+    if (!response.ok) return [];
+    const text = await response.text();
+    // r.jina.ai devuelve markdown: se reutiliza el parser buscando enlaces.
+    const links = [];
+    const snippets = [];
+    for (const match of text.matchAll(/\[([^\]]{8,160})\]\((https?:\/\/[^\s)]+)\)/g)) {
+      const domain = domainOf(match[2]);
+      if (!domain || domain === 'duckduckgo.com' || domain === 'r.jina.ai') continue;
+      links.push({ url: match[2], title: match[1] });
+      snippets.push('');
+    }
+    return collectResults(links, snippets, limit);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Investigación completa: foros y web en paralelo, con diagnóstico por fuente.
+ * Nunca lanza excepción. El diagnóstico sirve para saber desde el propio
+ * servidor qué proveedor está bloqueado (Render bloquea unos y no otros).
+ * @param {string} query
+ * @param {{limit?: number, timeoutMs?: number, env?: NodeJS.ProcessEnv}} options
+ * @returns {Promise<{refs: Array, backends: Array<{name: string, count: number, ms: number}>}>}
+ */
+export async function researchSources(query, { limit = 6, timeoutMs = DEFAULT_TIMEOUT_MS, env = process.env } = {}) {
+  const q = String(query || '').replace(/\s+/g, ' ').trim().slice(0, 200);
+  if (!q || !enabled(env)) return { refs: [], backends: [{ name: 'disabled', count: 0, ms: 0 }] };
+
+  const run = async (name, fn) => {
+    const started = Date.now();
+    let items = [];
+    try {
+      items = (await fn()) || [];
+    } catch {
+      items = [];
+    }
+    return { name, items, ms: Date.now() - started };
+  };
+
+  const settled = await Promise.all([
+    run('ddg-foros', () => searchWebContext(`${q} ${FORUM_QUERY_HINT}`, { limit: 4, timeoutMs, env })),
+    run('ddg-general', () => searchWebContext(`${q} foro averia`, { limit: 4, timeoutMs, env })),
+    run('stackexchange', () => searchStackExchange(q, { limit: 3, timeoutMs: Math.min(timeoutMs, 3500) })),
+    run('wikipedia', () => searchWikipedia(q, { limit: 3, timeoutMs: Math.min(timeoutMs, 3500) }))
+  ]);
+
+  let refs = mergeResults(settled.map(s => s.items), { limit });
+
+  // Si nada respondió, se insiste a través del lector público: lo que aquí está
+  // bloqueado por IP, allí no lo está.
+  if (!refs.length) {
+    const viaReader = await run('reader', () => searchViaReader(`${q} foro coche`, { limit: 4 }));
+    settled.push(viaReader);
+    refs = mergeResults([viaReader.items], { limit });
+  }
+
+  return {
+    refs,
+    backends: settled.map(s => ({ name: s.name, count: s.items.length, ms: s.ms }))
+  };
+}
+
+/**
  * Contexto de foros para una consulta: DDG general + DDG restringido a foros +
- * Stack Exchange (mecánica). Nunca lanza excepción y respeta WEB_SEARCH_ENABLED.
+ * Stack Exchange (mecánica) + Wikipedia de respaldo. Nunca lanza excepción y
+ * respeta WEB_SEARCH_ENABLED.
  * @param {string} query
  * @param {{limit?: number, timeoutMs?: number, env?: NodeJS.ProcessEnv}} options
  * @returns {Promise<Array<{title: string, url: string, snippet: string, domain: string, forum: boolean}>>}
@@ -356,15 +461,9 @@ export async function searchForumContext(query, { limit = 6, timeoutMs = DEFAULT
     const cached = readCache(key);
     if (cached) return cached.slice(0, safeLimit(limit));
 
-    const [general, restricted, exchange] = await Promise.all([
-      searchWebContext(`${q} foro averia`, { limit: 4, timeoutMs, env }),
-      searchWebContext(`${q} ${FORUM_QUERY_HINT}`, { limit: 4, timeoutMs, env }),
-      searchStackExchange(q, { limit: 3, timeoutMs: Math.min(timeoutMs, 3500) })
-    ]);
-
-    const results = mergeResults([restricted, general, exchange], { limit });
-    writeCache(key, results);
-    return results;
+    const { refs } = await researchSources(q, { limit, timeoutMs, env });
+    writeCache(key, refs);
+    return refs;
   } catch {
     return [];
   }

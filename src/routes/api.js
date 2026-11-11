@@ -6,7 +6,7 @@ import { obtenerSystemPrompt, filtrarProductosRecomendados } from '../../ia_reas
 import { callAI, aiStatus } from '../lib/ai_provider.js';
 import { enrichDTC, deriveSystem, deriveSeverity, normSeverity } from '../lib/dtc_enrich.js';
 import { findKnowledgeCases } from '../lib/forum_db.js';
-import { searchWebContext, searchForumContext } from '../lib/web_search.js';
+import { searchWebContext, searchForumContext, researchSources } from '../lib/web_search.js';
 import { listTutorials } from '../lib/tutorial_db.js';
 import { scanVehicleDocument } from '../lib/document_scan.js';
 import { findEquivalents, sizeSummary, rimWidthRange, checkWheelFit } from '../lib/tyres.js';
@@ -1440,6 +1440,24 @@ router.get('/lighting-media', (_req, res) => {
       verified: families.reduce((n, f) => n + f.products.filter(p => p.imageStatus === 'verified' && p.linkStatus === 'verified').length, 0)
     }
   });
+});
+
+// Diagnóstico de fuentes: dice desde el propio servidor qué buscador responde
+// (Render bloquea unos y no otros). Útil cuando el chat no trae referencias.
+router.get('/ai/sources', async (req, res) => {
+  const q = String(req.query.q || 'tirones motor testigo encendido').slice(0, 200);
+  const started = Date.now();
+  try {
+    const { refs, backends } = await researchSources(q, { limit: 6, env: process.env });
+    res.json({
+      query: q,
+      ms: Date.now() - started,
+      backends,
+      refs: refs.map(ref => ({ title: ref.title, url: ref.url, domain: ref.domain, forum: ref.forum }))
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'No se pudo consultar las fuentes', detail: error?.message || String(error) });
+  }
 });
 
 router.get('/ai/status', (_req, res) => {
