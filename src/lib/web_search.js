@@ -174,7 +174,10 @@ export function parseHtmlResults(html, { limit = DEFAULT_LIMIT } = {}) {
 function readCache(key) {
   const entry = cache.get(key);
   if (!entry) return null;
-  if (Date.now() - entry.at > CACHE_TTL_MS) {
+  // Un resultado vacío puede ser un bloqueo puntual del buscador: se reintenta
+  // pronto en vez de arrastrar el fallo durante diez minutos.
+  const ttl = entry.results?.length ? CACHE_TTL_MS : 60 * 1000;
+  if (Date.now() - entry.at > ttl) {
     cache.delete(key);
     return null;
   }
