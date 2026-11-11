@@ -483,15 +483,15 @@ export async function researchSources(query, { limit = 6, timeoutMs = DEFAULT_TI
     run('wikipedia', () => searchWikipedia(q, { limit: 3, timeoutMs: Math.min(timeoutMs, 3500) }))
   ]);
 
-  const forumRefs = mergeResults(
-    settled.filter(s => s.name !== 'wikipedia').map(s => s.items),
-    { limit }
-  );
+  const ddgItems = settled
+    .filter(s => s.name.startsWith('ddg-'))
+    .flatMap(s => s.items || []);
   let refs = mergeResults(settled.map(s => s.items), { limit });
 
-  // Si no ha salido ni un hilo, se insiste a través del lector público: lo que
-  // está bloqueado por IP desde el servidor, allí no lo está.
-  if (!forumRefs.length) {
+  // Los buscadores bloquean la IP del servidor con frecuencia. Si no han dado
+  // ni un resultado, se insiste a través del lector público, que ejecuta la
+  // misma búsqueda desde su red y devuelve los hilos en español.
+  if (!ddgItems.length) {
     const viaReader = await run('reader', () => searchViaReader(`${q} foro coche`, { limit: 4 }));
     settled.push(viaReader);
     refs = mergeResults([viaReader.items, refs], { limit });
