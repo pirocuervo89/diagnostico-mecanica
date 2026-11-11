@@ -263,6 +263,51 @@ const FORUM_DOMAINS = [
 
 const FORUM_QUERY_HINT = '(site:forocoches.com OR site:areavag.com OR site:opinauto.es OR site:reddit.com)';
 
+// Stack Exchange está en inglés y no entiende las consultas en español. Este
+// glosario traduce los términos de taller más frecuentes para que la búsqueda
+// devuelva hilos reales en vez de cero resultados.
+const AUTO_GLOSSARY = [
+  [/tirones?|tironeo|rateo/gi, 'misfire jerking'],
+  [/testigo (de )?motor|check ?engine/gi, 'check engine light'],
+  [/ralent[ií]/gi, 'idle'],
+  [/humo (blanco|negro|azul)/gi, 'smoke'],
+  [/frenos?/gi, 'brake'],
+  [/pastillas/gi, 'brake pads'],
+  [/discos/gi, 'brake rotors'],
+  [/embrague/gi, 'clutch'],
+  [/caja de cambios|transmisi[oó]n/gi, 'transmission'],
+  [/amortiguador(es)?/gi, 'shock absorber'],
+  [/suspensi[oó]n/gi, 'suspension'],
+  [/direcci[oó]n/gi, 'steering'],
+  [/bater[ií]a/gi, 'battery'],
+  [/arranque/gi, 'starter'],
+  [/alternador/gi, 'alternator'],
+  [/radiador|refrigerante|anticongelante/gi, 'radiator coolant'],
+  [/inyectores?/gi, 'injectors'],
+  [/bomba (de )?(agua|combustible|gasolina)/gi, 'pump'],
+  [/filtro de aceite/gi, 'oil filter'],
+  [/filtro de aire/gi, 'air filter'],
+  [/filtro de combustible/gi, 'fuel filter'],
+  [/buj[ií]as?/gi, 'spark plugs'],
+  [/correa|distribuci[oó]n/gi, 'timing belt'],
+  [/turbo/gi, 'turbo'],
+  [/escape|tubo de escape/gi, 'exhaust'],
+  [/catalizador|fap|dpf/gi, 'catalytic dpf'],
+  [/v[aá]lvula egr/gi, 'egr valve'],
+  [/caudal[ií]metro/gi, 'mass air flow sensor'],
+  [/sonda lambda/gi, 'oxygen sensor'],
+  [/aceite/gi, 'oil'],
+  [/ruido/gi, 'noise'],
+  [/p[eé]rdida de potencia/gi, 'loss of power']
+];
+
+/** Traduce lo justo para que Stack Exchange encuentre el caso equivalente. */
+function englishQuery(query) {
+  let text = String(query || '');
+  for (const [pattern, replacement] of AUTO_GLOSSARY) text = text.replace(pattern, replacement);
+  return text.replace(/\s+/g, ' ').trim();
+}
+
 function isForum(domain) {
   const d = String(domain || '').toLowerCase();
   return FORUM_DOMAINS.some(f => d === f || d.endsWith(`.${f}`));
@@ -282,7 +327,11 @@ async function searchStackExchange(query, { limit = 3, timeoutMs = 3500 } = {}) 
     .slice(0, 6)
     .join(' ');
 
-  for (const term of [query, keywords]) {
+  // Stack Exchange busca por coincidencia casi exacta: con una frase larga no
+  // encuentra nada. Se prueban la frase, sus palabras clave y los dos primeros
+  // términos traducidos, que es lo que de verdad funciona ("misfire jerking").
+  const firstTwo = keywords.split(/\s+/).slice(0, 2).join(' ');
+  for (const term of [query, keywords, firstTwo]) {
     if (!String(term || '').trim()) continue;
     try {
       const url = 'https://api.stackexchange.com/2.3/search/advanced'
@@ -387,9 +436,12 @@ async function searchViaReader(query, { limit = 4, timeoutMs = 6000 } = {}) {
     const links = [];
     const snippets = [];
     for (const match of text.matchAll(/\[([^\]]{8,160})\]\((https?:\/\/[^\s)]+)\)/g)) {
-      const domain = domainOf(match[2]);
+      // El lector devuelve los enlaces de DuckDuckGo con su redirección, así que
+      // hay que resolver el destino real antes de filtrar.
+      const url = resolveResultUrl(match[2]);
+      const domain = domainOf(url);
       if (!domain || domain === 'duckduckgo.com' || domain === 'r.jina.ai') continue;
-      links.push({ url: match[2], title: match[1] });
+      links.push({ url, title: match[1] });
       snippets.push('');
     }
     return collectResults(links, snippets, limit);
@@ -424,18 +476,22 @@ export async function researchSources(query, { limit = 6, timeoutMs = DEFAULT_TI
   const settled = await Promise.all([
     run('ddg-foros', () => searchWebContext(`${q} ${FORUM_QUERY_HINT}`, { limit: 4, timeoutMs, env })),
     run('ddg-general', () => searchWebContext(`${q} foro averia`, { limit: 4, timeoutMs, env })),
-    run('stackexchange', () => searchStackExchange(q, { limit: 3, timeoutMs: Math.min(timeoutMs, 3500) })),
+    run('stackexchange', () => searchStackExchange(englishQuery(q), { limit: 3, timeoutMs: Math.min(timeoutMs, 3500) })),
     run('wikipedia', () => searchWikipedia(q, { limit: 3, timeoutMs: Math.min(timeoutMs, 3500) }))
   ]);
 
+  const forumRefs = mergeResults(
+    settled.filter(s => s.name !== 'wikipedia').map(s => s.items),
+    { limit }
+  );
   let refs = mergeResults(settled.map(s => s.items), { limit });
 
-  // Si nada respondió, se insiste a través del lector público: lo que aquí está
-  // bloqueado por IP, allí no lo está.
-  if (!refs.length) {
+  // Si no ha salido ni un hilo, se insiste a través del lector público: lo que
+  // está bloqueado por IP desde el servidor, allí no lo está.
+  if (!forumRefs.length) {
     const viaReader = await run('reader', () => searchViaReader(`${q} foro coche`, { limit: 4 }));
     settled.push(viaReader);
-    refs = mergeResults([viaReader.items], { limit });
+    refs = mergeResults([viaReader.items, refs], { limit });
   }
 
   return {
