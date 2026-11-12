@@ -67,7 +67,7 @@ const PRESETS = {
     label: 'Google Gemini',
     kind: 'gemini',
     baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
-    model: 'gemini-3.8-flash',
+    model: 'gemini-3.1-flash-lite',
     keyEnv: 'GEMINI_API_KEY'
   },
   // Preset gratuito y sin clave: último recurso cuando no hay nada configurado

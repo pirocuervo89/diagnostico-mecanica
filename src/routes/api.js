@@ -11,7 +11,7 @@ import { listTutorials } from '../lib/tutorial_db.js';
 import { scanVehicleDocument } from '../lib/document_scan.js';
 import { findEquivalents, sizeSummary, rimWidthRange, checkWheelFit } from '../lib/tyres.js';
 import { autodocUrlFor, autodocSearch, aliexpressUrlFor, temuUrlFor } from '../lib/tiendas.js';
-import { transcribeAudio } from '../lib/voice_transcribe.js';
+import { transcribeAudio, transcribeWithGemini } from '../lib/voice_transcribe.js';
 
 // Búsqueda insensible a mayúsculas y acentos.
 const fold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -1737,7 +1737,11 @@ function chatVehicle(vehicleRecord, context) {
 // Voz: el móvil graba y el servidor transcribe con Whisper de Groq (gratis).
 // Evita depender del dictado del navegador, que falla dentro de la app Android.
 router.post('/transcribe', express.raw({ type: 'audio/*', limit: '12mb' }), async (req, res) => {
-  const result = await transcribeAudio(req.body, req.headers['content-type']);
+  let result = await transcribeAudio(req.body, req.headers['content-type']);
+  if (!result.ok) {
+    const alt = await transcribeWithGemini(req.body, req.headers['content-type']);
+    if (alt.ok) result = alt;
+  }
   if (result.ok) return res.json({ text: result.text });
   const status = result.reason === 'no_key' ? 503 : result.reason === 'empty' ? 400 : 502;
   res.status(status).json({ error: result.reason, detail: result.detail || '' });
