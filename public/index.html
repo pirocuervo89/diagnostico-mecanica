@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/css/app.css?v=20261030a">
   <link rel="stylesheet" href="/css/vision.css?v=20261105c">
   <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
-  <link rel="stylesheet" href="/css/reforma.css?v=20261111e">
+  <link rel="stylesheet" href="/css/reforma.css?v=20261112b">
   <link rel="stylesheet" href="/css/legal.css?v=20261110a">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Diagnóstico y Mecánica">
@@ -1373,63 +1373,65 @@
   <section id="view-productos" class="view">
     <header class="page-head">
       <div>
-        <span class="eyebrow">EQUIPAMIENTO Y RECAMBIOS</span>
-        <h2>Catálogo de taller</h2>
-        <p>Herramientas, diagnosis, maquinaria, químicos y repuestos. Selecciona tu vehículo para ajustar el diagnóstico.</p>
+        <span class="eyebrow">CATÁLOGO DE RECAMBIOS Y TALLER</span>
+        <h2>Encuentra la pieza para tu coche</h2>
+        <p>Busca por modelo, elige la sección y compara precios. Cada ficha indica para qué coches está declarada.</p>
       </div>
       <span class="page-meta"><svg class="ic"><use href="#i-cart"></use></svg> <b data-stat="products">500</b> productos</span>
     </header>
 
-    <div class="vehicle-panel panel">
-      <div class="panel-head">
-        <div><span class="eyebrow">SELECTOR DE VEHÍCULO</span><h3>¿Qué coche estás diagnosticando?</h3></div>
-        <span class="tag"><svg class="ic"><use href="#i-car"></use></svg> Marca · Modelo · Motor</span>
-      </div>
-      <div class="form-grid vehicle-grid">
-        <label>Marca
-          <select id="catBrand">
-            <option value="">-- Selecciona marca --</option>
-            <option value="Audi">Audi</option>
-            <option value="BMW">BMW</option>
-            <option value="Citroën">Citroën</option>
-            <option value="Ford">Ford</option>
-            <option value="Mercedes-Benz">Mercedes-Benz</option>
-            <option value="Opel">Opel</option>
-            <option value="Peugeot">Peugeot</option>
-            <option value="Renault">Renault</option>
-            <option value="SEAT">SEAT</option>
-            <option value="Toyota">Toyota</option>
-            <option value="Volkswagen">Volkswagen</option>
-          </select>
+    <div class="catalog-search-panel panel">
+      <form id="catalogSearchForm" class="catalog-search-form" role="search">
+        <label class="catalog-search-field catalog-search-car">
+          <span>1 · Busca tu coche</span>
+          <div class="catalog-search-control">
+            <svg class="ic"><use href="#i-car"></use></svg>
+            <input id="catalogVehicleSearch" list="catalogVehicleList" type="search" placeholder="Ej.: Seat Ibiza, BMW 320d, Golf…" autocomplete="off" aria-label="Buscar por modelo de coche">
+            <button id="catalogVehicleClear" class="catalog-search-clear" type="button" aria-label="Quitar coche" hidden><svg class="ic"><use href="#i-close"></use></svg></button>
+          </div>
         </label>
-        <label>Modelo
-          <select id="catModel" disabled>
-            <option value="">-- Selecciona modelo --</option>
-          </select>
+        <label class="catalog-search-field catalog-search-piece">
+          <span>2 · Busca la pieza</span>
+          <div class="catalog-search-control">
+            <svg class="ic"><use href="#i-search"></use></svg>
+            <input id="catalogQuery" type="search" placeholder="Filtro de aceite, pastillas, amortiguador…" autocomplete="off" aria-label="Buscar pieza o recambio">
+          </div>
         </label>
-        <label>Motorización
-          <select id="catEngine" disabled>
-            <option value="">-- Motorización --</option>
-          </select>
-        </label>
-        <button id="btnFiltrarCoche" class="btn primary" type="button">Aplicar al diagnóstico</button>
-      </div>
-      <div id="activeVehicleBadge" class="vehicle-badge hidden"></div>
+        <button class="btn primary catalog-search-submit" type="submit">Buscar piezas</button>
+      </form>
+      <datalist id="catalogVehicleList"></datalist>
+      <div id="catalogPopularVehicles" class="catalog-popular" aria-label="Coches frecuentes"></div>
+      <div id="catalogVehicleNotice" class="catalog-vehicle-notice hidden" role="status" aria-live="polite"></div>
     </div>
 
-    <div class="cat-tabs" role="tablist" aria-label="Departamentos del catálogo">
-      <button class="cat-tab active" data-cat="Todos" type="button" role="tab" aria-selected="true" aria-controls="productGrid"><svg class="ic"><use href="#i-db"></use></svg> Todos</button>
-      <button class="cat-tab" data-cat="Herramientas" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-wrench"></use></svg> Herramientas</button>
-      <button class="cat-tab" data-cat="Diagnosis" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-cpu"></use></svg> Diagnosis</button>
-      <button class="cat-tab" data-cat="Maquinaria" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-engine"></use></svg> Maquinaria</button>
-      <button class="cat-tab" data-cat="Líquidos y Químicos" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-oil"></use></svg> Químicos y aceites</button>
-      <button class="cat-tab" data-cat="Repuestos" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-tire"></use></svg> Repuestos</button>
-      <button class="cat-tab" data-cat="Tuning" type="button" role="tab" aria-selected="false" aria-controls="productGrid"><svg class="ic"><use href="#i-zap"></use></svg> Tuning</button>
+    <div class="catalog-tabs-block">
+      <div id="catalogGroups" class="cat-tabs catalog-groups" role="tablist" aria-label="Secciones del catálogo"></div>
+      <div id="catalogSubgroups" class="catalog-subtabs" role="tablist" aria-label="Tipos de producto"></div>
     </div>
 
-    <div id="catalogStatus" class="catalog-status" role="status" aria-live="polite"></div>
-    <p class="affiliate-note">Enlaces de afiliado: si compras desde aquí podemos recibir una comisión, sin coste extra para ti. <a href="/legal/afiliacion.html">Más información</a>.</p>
+    <div class="catalog-results-head">
+      <div>
+        <b id="catalogResultCount">Cargando catálogo…</b>
+        <small id="catalogResultHint">Piezas, herramientas y consumibles con enlace a tienda.</small>
+      </div>
+      <label class="catalog-sort">Ordenar por
+        <select id="catalogSort">
+          <option value="relevance">Relevancia</option>
+          <option value="price-asc">Precio: de menor a mayor</option>
+          <option value="price-desc">Precio: de mayor a menor</option>
+          <option value="name">Nombre: A–Z</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="catalog-filter-row">
+      <label class="catalog-check"><input id="catalogIncludeUniversal" type="checkbox"> Incluir piezas universales o de varios modelos</label>
+      <span id="catalogStatus" class="catalog-status" role="status" aria-live="polite"></span>
+    </div>
+    <p class="affiliate-note">Enlaces de afiliado: si compras desde aquí podemos recibir una comisión, sin coste extra para ti. Confirma siempre la referencia y la compatibilidad exacta con tu VIN. <a href="/legal/afiliacion.html">Más información</a>.</p>
     <div id="productGrid" class="product-grid"></div>
+    <div id="catalogEmpty" class="catalog-empty" hidden></div>
+    <div class="catalog-more-wrap"><button id="catalogMore" class="btn ghost" type="button" hidden>Ver más piezas</button></div>
   </section>
 
   <!-- ===================== CHAT IA ===================== -->
@@ -1858,7 +1860,7 @@
 <script src="/js/tutorials.js?v=20261026d"></script>
 
 <script src="/js/voz.js?v=20261112a"></script>
-<script src="/js/app.js?v=20261112a"></script>
+<script src="/js/app.js?v=20261112b"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>

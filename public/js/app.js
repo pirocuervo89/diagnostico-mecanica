@@ -1219,13 +1219,623 @@ $$('.dtc-quick').forEach(b => {
 // -------------------------------------------------------------
 let productsCache = [];
 
+// Coches que aparecen en las fichas del catálogo. Las marcas y modelos se
+// comparan sin acentos ni mayúsculas. Los modelos ambiguos (A3, 208, C3…)
+// exigen que el anuncio mencione también la marca.
+const CATALOG_CARS = [
+  { label: 'BMW Serie 1', brand: 'bmw', aliases: ['serie 1', '116d', '118d', '120d', '118i', 'f20', 'f21'], requireBrand: false },
+  { label: 'BMW Serie 3', brand: 'bmw', aliases: ['serie 3', '318d', '320d', '330d', '320i', 'e90', 'e91', 'f30'], requireBrand: false },
+  { label: 'BMW Serie 5', brand: 'bmw', aliases: ['serie 5', '520d', '530d', '530i', 'e60', 'f10'], requireBrand: false },
+  { label: 'Mercedes Clase A', brand: 'mercedes', aliases: ['clase a', 'a180', 'a200', 'a220', 'w176'], requireBrand: true },
+  { label: 'Mercedes Clase C', brand: 'mercedes', aliases: ['clase c', 'c180', 'c200', 'c220', 'c250', 'w204', 'w205'], requireBrand: true },
+  { label: 'Mercedes Clase E', brand: 'mercedes', aliases: ['clase e', 'e220', 'e250', 'e350', 'w212'], requireBrand: true },
+  { label: 'Audi A2', brand: 'audi', aliases: ['a2'], requireBrand: true },
+  { label: 'Audi A3', brand: 'audi', aliases: ['a3'], requireBrand: true },
+  { label: 'Audi A4', brand: 'audi', aliases: ['a4'], requireBrand: true },
+  { label: 'Audi A6', brand: 'audi', aliases: ['a6'], requireBrand: true },
+  { label: 'VW Golf', brand: 'vw|volkswagen', aliases: ['golf'], requireBrand: false },
+  { label: 'VW Polo', brand: 'vw|volkswagen', aliases: ['polo'], requireBrand: false },
+  { label: 'VW Passat', brand: 'vw|volkswagen', aliases: ['passat'], requireBrand: false },
+  { label: 'VW Caddy', brand: 'vw|volkswagen', aliases: ['caddy'], requireBrand: true },
+  { label: 'VW Bora', brand: 'vw|volkswagen', aliases: ['bora'], requireBrand: true },
+  { label: 'Seat Ibiza', brand: 'seat', aliases: ['ibiza'], requireBrand: false },
+  { label: 'Seat León', brand: 'seat', aliases: ['seat leon', 'leon'], requireBrand: true },
+  { label: 'Seat Ateca', brand: 'seat', aliases: ['ateca'], requireBrand: false },
+  { label: 'Seat Arosa', brand: 'seat', aliases: ['arosa'], requireBrand: true },
+  { label: 'Seat Inca', brand: 'seat', aliases: ['inca'], requireBrand: true },
+  { label: 'Seat Toledo', brand: 'seat', aliases: ['toledo'], requireBrand: true },
+  { label: 'Skoda Octavia', brand: 'skoda', aliases: ['octavia'], requireBrand: false },
+  { label: 'Skoda Fabia', brand: 'skoda', aliases: ['fabia'], requireBrand: false },
+  { label: 'Skoda Superb', brand: 'skoda', aliases: ['superb'], requireBrand: false },
+  { label: 'Peugeot 206', brand: 'peugeot', aliases: ['206'], requireBrand: true },
+  { label: 'Peugeot 208', brand: 'peugeot', aliases: ['208'], requireBrand: true },
+  { label: 'Peugeot 308', brand: 'peugeot', aliases: ['308'], requireBrand: true },
+  { label: 'Peugeot 2008', brand: 'peugeot', aliases: ['2008'], requireBrand: true },
+  { label: 'Citroën C3', brand: 'citroen', aliases: ['c3'], requireBrand: true },
+  { label: 'Citroën C4', brand: 'citroen', aliases: ['c4'], requireBrand: true },
+  { label: 'Citroën Berlingo', brand: 'citroen', aliases: ['berlingo'], requireBrand: true },
+  { label: 'Opel Corsa', brand: 'opel|vauxhall', aliases: ['corsa'], requireBrand: false },
+  { label: 'Opel Astra', brand: 'opel|vauxhall', aliases: ['astra'], requireBrand: false },
+  { label: 'Opel Insignia', brand: 'opel|vauxhall', aliases: ['insignia'], requireBrand: false },
+  { label: 'Ford Focus', brand: 'ford', aliases: ['focus'], requireBrand: true },
+  { label: 'Ford Fiesta', brand: 'ford', aliases: ['fiesta'], requireBrand: false },
+  { label: 'Ford Mondeo', brand: 'ford', aliases: ['mondeo'], requireBrand: true },
+  { label: 'Renault Clio', brand: 'renault', aliases: ['clio'], requireBrand: false },
+  { label: 'Renault Mégane', brand: 'renault', aliases: ['megane'], requireBrand: false },
+  { label: 'Renault Captur', brand: 'renault', aliases: ['captur'], requireBrand: false },
+  { label: 'Renault Kangoo', brand: 'renault', aliases: ['kangoo'], requireBrand: true },
+  { label: 'Toyota Corolla', brand: 'toyota', aliases: ['corolla', 'auris'], requireBrand: false },
+  { label: 'Toyota Yaris', brand: 'toyota', aliases: ['yaris'], requireBrand: false },
+  { label: 'Toyota RAV4', brand: 'toyota', aliases: ['rav4'], requireBrand: false },
+  { label: 'Toyota Avensis', brand: 'toyota', aliases: ['avensis'], requireBrand: false },
+  { label: 'Nissan Qashqai', brand: 'nissan', aliases: ['qashqai'], requireBrand: false },
+  { label: 'Nissan Micra', brand: 'nissan', aliases: ['micra'], requireBrand: false },
+  { label: 'Fiat Punto', brand: 'fiat', aliases: ['punto'], requireBrand: true },
+  { label: 'Fiat 500', brand: 'fiat', aliases: ['500'], requireBrand: true },
+  { label: 'Dacia Duster', brand: 'dacia', aliases: ['duster'], requireBrand: false },
+  { label: 'Dacia Sandero', brand: 'dacia', aliases: ['sandero'], requireBrand: false },
+  { label: 'Kia Ceed', brand: 'kia', aliases: ['ceed'], requireBrand: false },
+  { label: 'Hyundai i30', brand: 'hyundai', aliases: ['i30'], requireBrand: false },
+  { label: 'Mini Cooper', brand: 'mini', aliases: ['cooper', 'mini one'], requireBrand: true },
+  { label: 'Volvo V50', brand: 'volvo', aliases: ['v50'], requireBrand: true },
+  { label: 'Volvo V70', brand: 'volvo', aliases: ['v70'], requireBrand: true },
+  { label: 'Mazda 3', brand: 'mazda', aliases: ['mazda 3', 'mazda3'], requireBrand: false },
+  { label: 'Honda Civic', brand: 'honda', aliases: ['civic'], requireBrand: false }
+];
+
+const CATALOG_BRAND_WORDS = new Set([
+  'audi', 'bmw', 'citroen', 'dacia', 'fiat', 'ford', 'honda', 'hyundai', 'kia',
+  'mazda', 'mercedes', 'mini', 'nissan', 'opel', 'peugeot', 'renault', 'seat',
+  'skoda', 'toyota', 'volkswagen', 'volvo', 'vw', 'vauxhall'
+]);
+
+function escapeRegExp(text) {
+  return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+for (const car of CATALOG_CARS) {
+  car.brandRe = car.brand ? new RegExp(`(^|[^a-z0-9])(?:${car.brand})([^a-z0-9]|$)`, 'i') : null;
+  car.modelRes = car.aliases.map(alias => new RegExp(`(^|[^a-z0-9])${escapeRegExp(alias)}([^a-z0-9]|$)`, 'i'));
+}
+
+const CATALOG_GROUPS = [
+  { id: 'all', label: 'Todo', icon: 'grid' },
+  { id: 'aceites', label: 'Aceites', icon: 'oil' },
+  { id: 'filtros', label: 'Filtros', icon: 'filter' },
+  { id: 'frenos', label: 'Frenos', icon: 'brake' },
+  { id: 'suspension', label: 'Suspensión', icon: 'car' },
+  { id: 'motor', label: 'Motor', icon: 'engine' },
+  { id: 'encendido', label: 'Encendido y sensores', icon: 'zap' },
+  { id: 'transmision', label: 'Transmisión', icon: 'refresh' },
+  { id: 'climatizacion', label: 'Climatización', icon: 'thermo' },
+  { id: 'carroceria', label: 'Carrocería e iluminación', icon: 'eye' },
+  { id: 'herramientas', label: 'Herramientas', icon: 'wrench' },
+  { id: 'diagnosis', label: 'Diagnosis', icon: 'cpu' },
+  { id: 'quimicos', label: 'Químicos', icon: 'oil' },
+  { id: 'neumaticos', label: 'Neumáticos', icon: 'tire' },
+  { id: 'tuning', label: 'Tuning', icon: 'spark' },
+  { id: 'maquinaria', label: 'Maquinaria', icon: 'engine' },
+  { id: 'otros', label: 'Otros', icon: 'grid' }
+];
+
+const CATALOG_SUBGROUP_ORDER = {
+  filtros: ['Filtro de aceite', 'Filtro de aire', 'Filtro de combustible', 'Filtro de gasolina', 'Filtro de habitáculo', 'Kit de filtros', 'Filtración'],
+  aceites: ['Aceite motor 0W-20', 'Aceite motor 5W-30', 'Aceite motor 5W-40', 'Aceite motor 0W-30', 'Aceite motor 10W-40', 'Aceites de Motor', 'Aceites motor', 'Valvulina 75W-90', 'Aceite caja automática ATF', 'Líquido dirección'],
+  frenos: ['Pastillas de freno', 'Discos de freno', 'Kit de frenos', 'Pinzas de freno', 'Tambores de freno', 'Latiguillos de freno', 'Frenos', 'Pastillas de freno traseras', 'Discos de freno traseros'],
+  suspension: ['Amortiguadores', 'Amortiguadores delanteros', 'Amortiguadores traseros', 'Topes y guardapolvos', 'Soportes de amortiguador', 'Brazos de suspensión', 'Rótulas', 'Bieletas', 'Silentblocks', 'Suspensión'],
+  herramientas: ['Pistolas de Impacto', 'Llaves de filtro', 'Llaves de bujías', 'Gatos hidráulicos', 'Caballetes', 'Maletines Completos', 'Útiles de Motor', 'Medición', 'Compresores de aire']
+};
+
+const CATALOG_PAGE_SIZE = 48;
+const CATALOG_POPULAR = ['BMW Serie 3', 'VW Golf', 'Seat Ibiza', 'Renault Clio', 'Ford Focus', 'Peugeot 208'];
+const catalogState = { group: 'all', subgroup: '', car: '', query: '', sort: 'relevance', includeUniversal: false, visible: CATALOG_PAGE_SIZE };
+let catalogAll = [];
+let catalogSearchTimer = 0;
+
+function catalogSearchText(p) {
+  return foldText([
+    p.name,
+    p.manufacturer,
+    p.category,
+    p.subcategory,
+    p.description,
+    p.listingTitle,
+    ...(Array.isArray(p.tags) ? p.tags : []),
+    ...((p._fitment && p._fitment.models) || [])
+  ].join(' '));
+}
+
+function catalogPriceNumber(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  const raw = String(value || '').replace(/[^\d.,]/g, '');
+  if (!raw) return null;
+  const comma = raw.lastIndexOf(',');
+  const dot = raw.lastIndexOf('.');
+  let normalized = raw;
+  if (comma > dot) normalized = raw.replace(/\./g, '').replace(',', '.');
+  else normalized = raw.replace(/,/g, '');
+  const number = Number(normalized);
+  return Number.isFinite(number) ? number : null;
+}
+
+function catalogGroupFor(p) {
+  if (p._source === 'tyre') return 'neumaticos';
+  const category = foldText(p.category);
+  const sub = foldText(p.subcategory);
+  if (category === 'herramientas') return 'herramientas';
+  if (category === 'diagnosis') return 'diagnosis';
+  if (category === 'tuning') return 'tuning';
+  if (category === 'maquinaria') return 'maquinaria';
+  if (category === 'liquidos y quimicos') {
+    if (/aceite|valvulina|atf|direccion|transmision/.test(sub)) return 'aceites';
+    if (/refrigerante|anticongelante|aire acondicionado|climatizacion/.test(sub)) return 'climatizacion';
+    return 'quimicos';
+  }
+  if (category !== 'repuestos') return 'otros';
+  if (/filtro|filtracion/.test(sub)) return 'filtros';
+  if (/freno|pastilla|disco|pinza|tambor|latiguillo/.test(sub)) return 'frenos';
+  if (/amortiguador|suspension|rotula|bieleta|brazo|silentblock|tope|soporte/.test(sub)) return 'suspension';
+  if (/bujia|bobina|encendido|alternador|arranque|bateria|sensor|caudalimetro|sonda|lambda|rele|fusible|electroventilador/.test(sub)) return 'encendido';
+  if (/embrague|transmision|homocinetica|fueye|direccion/.test(sub)) return 'transmision';
+  if (/faro|piloto|retrovisor|parrilla|bombilla|iluminacion|limpiaparabrisas|claxon|escobilla|carroceria/.test(sub)) return 'carroceria';
+  if (/aire acondicionado|calefaccion|climatizacion/.test(sub)) return 'climatizacion';
+  if (/motor|distribucion|correa|bomba de agua|termostato|radiador|junta|turbo|intercooler|egr|inyector|combustible|admision|escape|catalizador|arranque/.test(sub)) return 'motor';
+  return 'otros';
+}
+
+function catalogExtractModels(text) {
+  const folded = foldText(text);
+  const found = new Set();
+  for (const car of CATALOG_CARS) {
+    if (car.requireBrand && car.brandRe && !car.brandRe.test(folded)) continue;
+    if (car.modelRes.some(re => re.test(folded))) found.add(car.label);
+  }
+  return [...found];
+}
+
+function catalogFitmentFor(p) {
+  const declared = Array.isArray(p.compatibility?.models) ? p.compatibility.models.filter(Boolean) : [];
+  const extracted = catalogExtractModels([p.name, p.listingTitle, p.description].filter(Boolean).join(' '));
+  const seen = new Set();
+  const models = [];
+  for (const model of [...declared, ...extracted]) {
+    const canonical = CATALOG_CARS.find(car => foldText(car.label) === foldText(model));
+    const label = canonical ? canonical.label : String(model).trim();
+    const key = foldText(label);
+    if (label && !seen.has(key)) {
+      seen.add(key);
+      models.push(label);
+    }
+  }
+  let type = 'unknown';
+  if (models.length) type = 'model';
+  else if (p.compatibility?.type === 'universal') type = 'universal';
+  else if (p.compatibility?.type === 'model') type = 'unknown';
+  const short = models.length <= 4 ? models.join(' · ') : `${models.slice(0, 4).join(' · ')} +${models.length - 4}`;
+  const label = models.length ? short : type === 'universal' ? 'Universal · verifica referencia' : 'Confirma la compatibilidad con tu VIN';
+  return { type, models, label, full: models.join(' · '), search: foldText(models.join(' ')) };
+}
+
+function catalogEnrich(p) {
+  p._fitment = catalogFitmentFor(p);
+  p._group = catalogGroupFor(p);
+  p._price = catalogPriceNumber(p.price);
+  p._search = catalogSearchText(p);
+  return p;
+}
+
+function catalogSeasonLabel(value) {
+  const season = foldText(value);
+  if (season === 'verano') return 'Verano';
+  if (season === 'invierno') return 'Invierno';
+  if (season === 'allseason' || season === 'all season' || season === 'todas las estaciones') return 'Todas las estaciones';
+  return value || 'Turismo';
+}
+
+function catalogTyreToProduct(t) {
+  const size = t.size || [t.width, t.profile, t.rim].filter(Boolean).join('/');
+  const season = catalogSeasonLabel(t.season);
+  const price = catalogPriceNumber(t.price);
+  const product = {
+    id: t.id,
+    name: `${t.brand || 'Neumático'} ${t.model || ''} ${size}`.trim(),
+    manufacturer: t.brand || '',
+    category: 'Neumáticos',
+    subcategory: `${season} · ${size}`,
+    description: `Neumático ${size}${t.load ? `, índice de carga ${t.load}` : ''}${t.speed ? `, código de velocidad ${t.speed}` : ''}. Elige la medida que figura en la ficha técnica de tu coche.`,
+    tags: ['neumaticos', t.brand, size, season, t.type].filter(Boolean),
+    price: price != null ? `${price.toFixed(2).replace('.', ',')} €` : '',
+    image: t.image || '',
+    affiliateUrl: t.url || '',
+    productType: 'neumatico',
+    compatibility: { type: 'measure', note: `Se elige por medida (${size}), no por modelo de coche. Comprueba la medida homologada de tu vehículo.` },
+    imageStatus: t.imageStatus || 'verified',
+    linkStatus: t.linkStatus || 'verified',
+    seller: t.shop || 'Tienda',
+    asin: t.asin || '',
+    priceSource: t.shop || '',
+    priceCheckedAt: t.priceSeen || '',
+    _source: 'tyre',
+    _fitment: { type: 'measure', models: [], label: `Medida ${size}`, full: `${size} · ${season}`, search: foldText(`${size} ${season} ${t.brand || ''} ${t.model || ''}`) },
+    _group: 'neumaticos',
+    _price: price,
+    _search: ''
+  };
+  product._search = catalogSearchText(product);
+  return product;
+}
+
+function catalogResolveCar(value) {
+  const raw = foldText(value).trim();
+  if (!raw) return null;
+  if (CATALOG_BRAND_WORDS.has(raw)) return { label: raw, resolved: false, score: 0 };
+  let best = null;
+  for (const car of CATALOG_CARS) {
+    const label = foldText(car.label);
+    let score = 0;
+    if (raw === label) score = 120;
+    else if (raw.includes(label)) score = 110;
+    else if (raw.length >= 5 && label.includes(raw) && !CATALOG_BRAND_WORDS.has(raw)) score = 100;
+    if (car.modelRes.some(re => re.test(raw))) score += 60;
+    if (car.brandRe && car.brandRe.test(raw)) score += 10;
+    if (score > 0 && (!best || score > best.score)) best = { label: car.label, resolved: true, score };
+  }
+  return best || { label: String(value || '').trim(), resolved: false, score: 0 };
+}
+
+function catalogVehicleOptions() {
+  const labels = new Set(CATALOG_CARS.map(car => car.label));
+  for (const p of catalogAll) for (const model of p._fitment?.models || []) labels.add(model);
+  return [...labels].sort((a, b) => a.localeCompare(b, 'es'));
+}
+
+function catalogRenderVehicleOptions() {
+  const list = $('#catalogVehicleList');
+  if (!list) return;
+  list.innerHTML = catalogVehicleOptions().map(label => `<option value="${esc(label)}"></option>`).join('');
+  const popular = $('#catalogPopularVehicles');
+  if (!popular) return;
+  const available = new Set(catalogVehicleOptions());
+  const picks = CATALOG_POPULAR.filter(label => available.has(label));
+  popular.innerHTML = picks.map(label => `<button class="catalog-chip" type="button" data-catalog-car="${esc(label)}">${esc(label)}</button>`).join('');
+  popular.hidden = !picks.length;
+}
+
+function catalogResultVehicleLabel() {
+  const car = catalogResolveCar(catalogState.car);
+  return car ? car.label : '';
+}
+
+function catalogMatchesCar(p, car) {
+  if (!car) return 0;
+  if (!car.resolved) {
+    const terms = foldText(car.label).split(/\s+/).filter(Boolean);
+    if (!terms.length) return 0;
+    return terms.every(term => p._search.includes(term)) ? 55 : 0;
+  }
+  const fit = p._fitment || {};
+  if (fit.type === 'model') {
+    if (fit.models.some(model => foldText(model) === foldText(car.label))) return 120;
+    if (fit.models.some(model => foldText(model).includes(foldText(car.label)) || foldText(car.label).includes(foldText(model)))) return 100;
+    return 0;
+  }
+  if (fit.type === 'universal') return catalogState.includeUniversal ? 25 : 0;
+  if (fit.type === 'measure') return catalogState.group === 'neumaticos' && catalogState.includeUniversal ? 15 : 0;
+  return 0;
+}
+
+function catalogMatchesQuery(p, query) {
+  const raw = foldText(query).trim();
+  if (!raw) return 0;
+  const terms = raw.split(/\s+/).filter(Boolean);
+  if (!terms.every(term => p._search.includes(term))) return 0;
+  let score = 0;
+  const name = foldText(p.name);
+  const sub = foldText(p.subcategory);
+  if (name.includes(raw)) score += 40;
+  if (sub.includes(raw)) score += 35;
+  if ((p._fitment?.search || '').includes(raw)) score += 20;
+  if (foldText((p.tags || []).join(' ')).includes(raw)) score += 12;
+  terms.forEach(term => {
+    if (name.includes(term)) score += 7;
+    if (sub.includes(term)) score += 10;
+    if ((p._fitment?.search || '').includes(term)) score += 5;
+  });
+  return score;
+}
+
+function catalogFilter() {
+  const group = catalogState.group;
+  const subgroup = catalogState.subgroup;
+  const car = catalogResolveCar(catalogState.car);
+  const query = catalogState.query;
+  let items = catalogAll.filter(p => {
+    if (group !== 'all' && p._group !== group) return false;
+    if (subgroup && p.subcategory !== subgroup) return false;
+    return true;
+  });
+  if (car) {
+    items = items
+      .map(p => ({ p, score: catalogMatchesCar(p, car) }))
+      .filter(item => item.score > 0);
+  } else {
+    items = items.map(p => ({ p, score: 0 }));
+  }
+  if (query) {
+    items = items
+      .map(item => ({ ...item, score: item.score + catalogMatchesQuery(item.p, query) }))
+      .filter(item => item.score > 0);
+  }
+  const sort = catalogState.sort;
+  items.sort((a, b) => {
+    if (sort === 'price-asc' || sort === 'price-desc') {
+      const av = a.p._price == null ? Infinity : a.p._price;
+      const bv = b.p._price == null ? Infinity : b.p._price;
+      const order = av === bv ? a.p.name.localeCompare(b.p.name, 'es') : av - bv;
+      return sort === 'price-desc' ? -order : order;
+    }
+    if (sort === 'name') return a.p.name.localeCompare(b.p.name, 'es');
+    return b.score - a.score || a.p.name.localeCompare(b.p.name, 'es');
+  });
+  return items.map(item => item.p);
+}
+
+function catalogFitmentLabel(p) {
+  const fit = p._fitment || {};
+  if (fit.type === 'model') return fit.label;
+  if (fit.type === 'measure') return fit.label;
+  if (fit.type === 'universal') return 'Universal · verifica referencia';
+  return 'Compatibilidad por confirmar';
+}
+
+function catalogFitmentClass(p) {
+  const type = p._fitment?.type;
+  if (type === 'model') return 'model';
+  if (type === 'measure') return 'measure';
+  if (type === 'universal') return 'universal';
+  return 'unknown';
+}
+
+function catalogRenderGroups() {
+  const el = $('#catalogGroups');
+  if (!el) return;
+  const counts = {};
+  for (const p of catalogAll) counts[p._group] = (counts[p._group] || 0) + 1;
+  el.innerHTML = CATALOG_GROUPS
+    .filter(group => group.id === 'all' || counts[group.id])
+    .map(group => {
+      const active = catalogState.group === group.id;
+      return `<button class="cat-tab${active ? ' active' : ''}" data-catalog-group="${esc(group.id)}" type="button" role="tab" aria-selected="${active}">${icon(group.icon)} ${esc(group.label)}${group.id === 'all' ? '' : `<span class="catalog-tab-count">${fmtNum(counts[group.id])}</span>`}</button>`;
+    }).join('');
+}
+
+function catalogRenderSubgroups() {
+  const el = $('#catalogSubgroups');
+  if (!el) return;
+  if (catalogState.group === 'all') {
+    el.hidden = true;
+    el.innerHTML = '';
+    return;
+  }
+  const counts = {};
+  for (const p of catalogAll) {
+    if (p._group !== catalogState.group) continue;
+    counts[p.subcategory || 'Otros'] = (counts[p.subcategory || 'Otros'] || 0) + 1;
+  }
+  const order = CATALOG_SUBGROUP_ORDER[catalogState.group] || [];
+  const subs = Object.keys(counts).sort((a, b) => {
+    const ia = order.findIndex(label => foldText(a).includes(foldText(label)));
+    const ib = order.findIndex(label => foldText(b).includes(foldText(label)));
+    const oa = ia < 0 ? 999 : ia;
+    const ob = ib < 0 ? 999 : ib;
+    return oa - ob || counts[b] - counts[a] || a.localeCompare(b, 'es');
+  });
+  if (!subs.length) {
+    el.hidden = true;
+    el.innerHTML = '';
+    return;
+  }
+  el.hidden = false;
+  const total = Object.values(counts).reduce((n, value) => n + value, 0);
+  el.innerHTML = `<button class="catalog-subtab${catalogState.subgroup ? '' : ' active'}" data-catalog-sub="" type="button">Todos <span>${fmtNum(total)}</span></button>` +
+    subs.map(sub => `<button class="catalog-subtab${catalogState.subgroup === sub ? ' active' : ''}" data-catalog-sub="${esc(sub)}" type="button">${esc(sub)} <span>${fmtNum(counts[sub])}</span></button>`).join('');
+}
+
+function catalogRenderNotice() {
+  const notice = $('#catalogVehicleNotice');
+  if (!notice) return;
+  if (!catalogState.car) {
+    notice.hidden = true;
+    notice.innerHTML = '';
+    return;
+  }
+  const car = catalogResolveCar(catalogState.car);
+  notice.hidden = false;
+  const universalButton = !catalogState.includeUniversal
+    ? '<button class="catalog-notice-action" type="button" data-catalog-include-universal>Ampliar con universales</button>'
+    : '';
+  notice.innerHTML = `<span>${icon('car')} ${car?.resolved ? `Vehículo seleccionado: <b>${esc(car.label)}</b>` : `Filtrando por: <b>${esc(catalogState.car)}</b>`}</span><div class="catalog-notice-actions">${universalButton}<button class="catalog-notice-action" type="button" data-catalog-clear-car>Quitar coche</button></div>`;
+}
+
+function catalogProductCard(p) {
+  const link = (p.linkStatus === 'verified' && p.affiliateUrl) ? p.affiliateUrl : '';
+  const hasRealLink = /^https?:\/\//i.test(link);
+  const hasImage = p.imageStatus === 'verified' && !!p.image;
+  const media = hasImage
+    ? `<img class="product-photo" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" decoding="async">`
+    : `<span class="product-placeholder" title="Foto no disponible">${icon(productIcon(p.category))}<b>Foto pendiente</b></span>`;
+  const cta = hasRealLink
+    ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Ver oferta ${icon('external')}</a>`
+    : `<span class="btn ghost" title="Enlace de vendedor no disponible">Enlace pendiente ${icon('search')}</span>`;
+  const shop = p.seller || (hasRealLink ? 'Tienda' : 'Sin vendedor');
+  return `
+    <article class="product" data-product-card="${esc(p.id)}">
+      <div class="product-media">${media}</div>
+      <div class="product-body">
+        <div class="product-kicker">
+          <small class="product-cat">${esc(p.subcategory || p.category || 'Catálogo')}</small>
+          <span class="product-shop">${esc(shop)}</span>
+        </div>
+        <h3>${esc(p.name)}</h3>
+        <p class="product-fitment ${catalogFitmentClass(p)}">${icon('car')} <span>Para</span> <b>${esc(catalogFitmentLabel(p))}</b></p>
+        <small class="product-brand">${esc(p.manufacturer || 'Fabricante no confirmado')}</small>
+        <p class="product-desc">${esc(p.description || '')}</p>
+        <div class="product-foot">
+          <span class="product-price${/\d/.test(String(p.price || '')) ? '' : ' pending'}" title="${esc(p.priceSource || 'Precio del catálogo')}" data-price-id="${esc(p.id)}"><small>${esc(priceCaption(p))}</small><span class="price-value">${esc(p.price || 'Consultar precio')}</span></span>
+          ${cta}
+        </div>
+        <button class="product-sheet-link" type="button" data-product-id="${esc(p.id)}">Ver ficha y compatibilidad ${icon('arrow')}</button>
+      </div>
+    </article>`;
+}
+
+function catalogRenderEmpty(count) {
+  const empty = $('#catalogEmpty');
+  const grid = $('#productGrid');
+  if (!empty) return;
+  if (count) {
+    empty.hidden = true;
+    empty.innerHTML = '';
+    if (grid) grid.hidden = false;
+    return;
+  }
+  if (grid) grid.hidden = true;
+  empty.hidden = false;
+  const car = catalogState.car ? catalogResolveCar(catalogState.car) : null;
+  const message = car
+    ? `No hay piezas que coincidan con <b>${esc(car.label)}</b>${catalogState.query ? ` y “${esc(catalogState.query)}”` : ''}. Prueba otra versión, quita el filtro o busca por referencia.`
+    : `No hay piezas que coincidan con “${esc(catalogState.query || catalogState.subgroup || '')}”. Prueba con otra palabra o cambia de sección.`;
+  const universalButton = car && !catalogState.includeUniversal
+    ? '<button class="btn ghost" type="button" data-catalog-include-universal>Incluir universales</button>'
+    : '';
+  empty.innerHTML = `<div class="catalog-empty-icon">${icon('search')}</div><h3>Sin resultados</h3><p>${message}</p><div class="catalog-empty-actions"><button class="btn primary" type="button" data-catalog-reset>Ver todo el catálogo</button>${universalButton}${car ? '<button class="btn ghost" type="button" data-catalog-clear-car>Quitar coche</button>' : ''}</div>`;
+}
+
+function catalogRenderStatus(list) {
+  const status = $('#catalogStatus');
+  if (!status) return;
+  const photos = list.filter(p => p.imageStatus === 'verified' && p.image).length;
+  const links = list.filter(p => p.linkStatus === 'verified' && /^https?:\/\//i.test(p.affiliateUrl || '')).length;
+  status.innerHTML = `<span><b>${fmtNum(list.length)}</b> resultados</span><span class="ok"><i></i>${fmtNum(photos)} fotos reales</span><span class="ok"><i></i>${fmtNum(links)} enlaces verificados</span>`;
+}
+
+function catalogRenderResultHead(list) {
+  const count = $('#catalogResultCount');
+  const hint = $('#catalogResultHint');
+  if (!count) return;
+  const group = CATALOG_GROUPS.find(item => item.id === catalogState.group);
+  const car = catalogState.car ? catalogResolveCar(catalogState.car) : null;
+  const parts = [];
+  if (group && group.id !== 'all') parts.push(group.label);
+  if (catalogState.subgroup) parts.push(catalogState.subgroup);
+  if (car) parts.push(car.resolved ? car.label : `“${catalogState.car}”`);
+  if (catalogState.query) parts.push(`“${catalogState.query}”`);
+  count.textContent = `${fmtNum(list.length)} ${list.length === 1 ? 'pieza' : 'piezas'}`;
+  hint.textContent = parts.length ? parts.join(' · ') : 'Piezas, herramientas y consumibles con enlace a tienda.';
+}
+
+function catalogRenderMore(total, visible) {
+  const more = $('#catalogMore');
+  if (!more) return;
+  const remaining = total - visible;
+  more.hidden = remaining <= 0;
+  more.textContent = remaining > 0 ? `Ver más piezas (${fmtNum(remaining)} restantes)` : 'Ver más piezas';
+}
+
+function catalogRender(options = {}) {
+  const list = catalogFilter();
+  const visible = Math.min(list.length, catalogState.visible);
+  const page = list.slice(0, visible);
+  const grid = $('#productGrid');
+  if (grid) {
+    grid.hidden = !list.length;
+    grid.innerHTML = page.map(catalogProductCard).join('');
+    $$('#productGrid [data-product-id]').forEach(btn => {
+      btn.addEventListener('click', () => openProductSheet(btn.dataset.productId));
+    });
+  }
+  catalogRenderResultHead(list);
+  catalogRenderStatus(list);
+  catalogRenderMore(list.length, visible);
+  catalogRenderEmpty(list.length);
+  if (options.scroll) {
+    const section = $('#view-productos');
+    if (section) {
+      const top = section.getBoundingClientRect().top + window.scrollY - 78;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+  }
+}
+
+function catalogApplyInputs({ scroll = false } = {}) {
+  const carInput = $('#catalogVehicleSearch');
+  const queryInput = $('#catalogQuery');
+  const rawCar = carInput?.value.trim() || '';
+  const resolved = rawCar ? catalogResolveCar(rawCar) : null;
+  catalogState.car = resolved?.resolved ? resolved.label : rawCar;
+  if (carInput && resolved?.resolved && carInput.value !== resolved.label) carInput.value = resolved.label;
+  catalogState.query = queryInput?.value.trim() || '';
+  catalogState.visible = CATALOG_PAGE_SIZE;
+  catalogRenderNotice();
+  catalogRender({ scroll });
+}
+
+function catalogReset() {
+  catalogState.group = 'all';
+  catalogState.subgroup = '';
+  catalogState.car = '';
+  catalogState.query = '';
+  catalogState.sort = 'relevance';
+  catalogState.includeUniversal = false;
+  catalogState.visible = CATALOG_PAGE_SIZE;
+  const carInput = $('#catalogVehicleSearch');
+  const queryInput = $('#catalogQuery');
+  const sort = $('#catalogSort');
+  const include = $('#catalogIncludeUniversal');
+  if (carInput) carInput.value = '';
+  if (queryInput) queryInput.value = '';
+  if (sort) sort.value = 'relevance';
+  if (include) include.checked = false;
+  catalogRenderGroups();
+  catalogRenderSubgroups();
+  catalogRenderNotice();
+  catalogRender();
+}
+
+function catalogSetCar(value) {
+  const input = $('#catalogVehicleSearch');
+  if (input) input.value = value || '';
+  catalogState.car = value || '';
+  catalogState.visible = CATALOG_PAGE_SIZE;
+  const resolved = value ? catalogResolveCar(value) : null;
+  if (input && resolved?.resolved) input.value = resolved.label;
+  if (input) {
+    const clear = $('#catalogVehicleClear');
+    if (clear) clear.hidden = !input.value;
+  }
+  catalogRenderNotice();
+  catalogRender();
+}
+
 async function loadProducts() {
   const grid = $('#productGrid');
   if (!grid) return;
   try {
-    grid.innerHTML = '<div style="color:var(--muted);grid-column:1/-1;">Cargando catálogo de herramientas...</div>';
-    productsCache = await api('/api/products');
-    renderProducts('Todos');
+    grid.innerHTML = '<div class="catalog-loading">Cargando catálogo de repuestos…</div>';
+    const [productsResult, tyresResult] = await Promise.allSettled([api('/api/products'), api('/api/tyres')]);
+    const products = productsResult.status === 'fulfilled' ? productsResult.value : [];
+    const tyresPayload = tyresResult.status === 'fulfilled' ? tyresResult.value : [];
+    const tyres = Array.isArray(tyresPayload) ? tyresPayload : (tyresPayload.items || []);
+    catalogAll = [
+      ...(Array.isArray(products) ? products : []).map(catalogEnrich),
+      ...(Array.isArray(tyres) ? tyres : []).map(catalogTyreToProduct)
+    ];
+    productsCache = catalogAll;
+    catalogRenderVehicleOptions();
+    catalogRenderGroups();
+    catalogRenderSubgroups();
+    catalogRenderNotice();
+    catalogRender();
   } catch (err) {
     grid.innerHTML = `<div class="notice" style="grid-column:1/-1;">Error cargando productos: ${esc(err.message)}</div>`;
   }
@@ -1273,6 +1883,7 @@ async function refreshVisiblePrices() {
       const cached = productsCache.find(x => x.id === card.dataset.priceId);
       if (cached) {
         cached.price = next.price;
+        cached._price = catalogPriceNumber(next.price);
         cached.priceCheckedAt = next.checkedAt;
         cached.priceSource = next.source;
       }
@@ -1284,87 +1895,100 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden) refreshVisiblePrices();
 });
 
-function renderProducts(category) {
-  const grid = $('#productGrid');
-  if (!grid) return;
-
-  let list = productsCache;
-  if (category && category !== 'Todos') {
-    list = list.filter(p => String(p.category || '').toLowerCase() === category.toLowerCase());
-  }
-
-  if (!list.length) {
-    grid.innerHTML = '<div class="notice" style="grid-column:1/-1;">No hay artículos disponibles en este departamento.</div>';
-    return;
-  }
-
-  grid.innerHTML = list.map(p => {
-    const link = (p.linkStatus === 'verified' && p.affiliateUrl) ? p.affiliateUrl : '';
-    const hasRealLink = /^https?:\/\//i.test(link);
-    const hasImage = p.imageStatus === 'verified' && !!p.image;
-
-    const media = hasImage
-      ? `<img class="product-photo" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`
-      : `<span class="product-placeholder" title="Foto pendiente: no hay imagen verificada del vendedor">${icon(productIcon(p.category))}<b>Foto pendiente</b></span>`;
-
-    const cta = hasRealLink
-      ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Ver oferta ${icon('external')}</a>`
-      : `<span class="btn ghost" title="Enlace pendiente: no se localizó una ficha de vendedor verificada">Enlace pendiente ${icon('search')}</span>`;
-    // Segunda tienda con la que se puede comparar el precio del mismo recambio.
-    const autodocLink = /^https?:\/\//i.test(String(p.autodocUrl || ''))
-      ? `<a class="btn ghost" href="${esc(p.autodocUrl)}" target="_blank" rel="sponsored nofollow noopener noreferrer" title="Ver recambios en Autodoc (elige coche y pieza)">Autodoc ${icon('external')}</a>`
-      : '';
-
-    return `
-      <article class="product">
-        <div class="product-media">${media}</div>
-        <div class="product-body">
-          <div class="product-badges">
-            <span class="product-badge ${hasImage ? 'verified' : 'pending'}">${hasImage ? 'Foto verificada' : 'Foto pendiente'}</span>
-            <span class="product-badge ${hasRealLink ? 'verified' : 'pending'}">${hasRealLink ? 'Enlace verificado' : 'Enlace pendiente'}</span>
-          </div>
-          <small class="product-cat">${esc(p.category || 'Taller')}${p.subcategory ? ` · ${esc(p.subcategory)}` : ''}</small>
-          <h3>${esc(p.name)}</h3>
-          <small class="product-brand">${esc(p.manufacturer || 'Fabricante no confirmado')}${p.asin ? ` · ASIN ${esc(p.asin)}` : ''}</small>
-          <p>${esc(p.description)}</p>
-          <div class="product-foot">
-            <span class="product-price${/\d/.test(String(p.price || '')) ? '' : ' pending'}" title="${esc(p.priceSource || 'Precio del catálogo')}" data-price-id="${esc(p.id)}"><small>${esc(priceCaption(p))}</small><span class="price-value">${esc(p.price || 'Consultar precio')}</span></span>
-            ${cta}
-            ${autodocLink}
-          </div>
-          <button class="product-sheet-link" type="button" data-product-id="${esc(p.id)}">Ver ficha y compatibilidad ${icon('arrow')}</button>
-        </div>
-      </article>
-    `;
-  }).join('');
-
-  const status = $('#catalogStatus');
-  if (status) {
-    const photos = productsCache.filter(p => p.imageStatus === 'verified' && p.image).length;
-    const links = productsCache.filter(p => p.linkStatus === 'verified' && /^https?:\/\//i.test(p.affiliateUrl || '')).length;
-    const pending = productsCache.length - Math.max(photos, links);
-    status.innerHTML = `<span><b>${fmtNum(productsCache.length)}</b> artículos</span>
-      <span class="ok"><i></i><b>${fmtNum(photos)}</b> fotos verificadas</span>
-      <span class="ok"><i></i><b>${fmtNum(links)}</b> enlaces verificados</span>
-      <span class="warn"><i></i><b>${fmtNum(Math.max(0, pending))}</b> fichas pendientes de verificación</span>`;
-  }
-
-  $$('#productGrid [data-product-id]').forEach(btn => {
-    btn.addEventListener('click', () => openProductSheet(btn.dataset.productId));
-  });
+// Compatibilidad con llamadas antiguas que pasaban una categoría.
+function renderProducts() {
+  catalogRender();
 }
 
-$$('.cat-tab').forEach(b => {
-  b.addEventListener('click', () => {
-    $$('.cat-tab').forEach(x => {
-      x.classList.remove('active');
-      x.setAttribute('aria-selected', 'false');
-    });
-    b.classList.add('active');
-    b.setAttribute('aria-selected', 'true');
-    renderProducts(b.dataset.cat);
+function initCatalog() {
+  const form = $('#catalogSearchForm');
+  if (!form) return;
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    catalogApplyInputs({ scroll: true });
   });
-});
+
+  const carInput = $('#catalogVehicleSearch');
+  const queryInput = $('#catalogQuery');
+  const clear = $('#catalogVehicleClear');
+  const debounce = () => {
+    clearTimeout(catalogSearchTimer);
+    catalogSearchTimer = setTimeout(() => catalogApplyInputs(), 260);
+  };
+
+  carInput?.addEventListener('input', () => {
+    if (clear) clear.hidden = !carInput.value;
+    debounce();
+  });
+  carInput?.addEventListener('change', () => {
+    const resolved = carInput.value ? catalogResolveCar(carInput.value) : null;
+    if (resolved?.resolved) carInput.value = resolved.label;
+    catalogApplyInputs();
+  });
+  queryInput?.addEventListener('input', debounce);
+  clear?.addEventListener('click', () => catalogSetCar(''));
+
+  $('#catalogIncludeUniversal')?.addEventListener('change', event => {
+    catalogState.includeUniversal = event.target.checked;
+    catalogState.visible = CATALOG_PAGE_SIZE;
+    catalogRender();
+  });
+  $('#catalogSort')?.addEventListener('change', event => {
+    catalogState.sort = event.target.value;
+    catalogState.visible = CATALOG_PAGE_SIZE;
+    catalogRender();
+  });
+  $('#catalogMore')?.addEventListener('click', () => {
+    catalogState.visible += CATALOG_PAGE_SIZE;
+    catalogRender();
+  });
+
+  $('#catalogPopularVehicles')?.addEventListener('click', event => {
+    const button = event.target.closest('[data-catalog-car]');
+    if (button) catalogSetCar(button.dataset.catalogCar);
+  });
+
+  $('#catalogGroups')?.addEventListener('click', event => {
+    const button = event.target.closest('[data-catalog-group]');
+    if (!button) return;
+    catalogState.group = button.dataset.catalogGroup;
+    catalogState.subgroup = '';
+    catalogState.visible = CATALOG_PAGE_SIZE;
+    catalogRenderGroups();
+    catalogRenderSubgroups();
+    catalogRender({ scroll: false });
+  });
+
+  $('#catalogSubgroups')?.addEventListener('click', event => {
+    const button = event.target.closest('[data-catalog-sub]');
+    if (!button) return;
+    catalogState.subgroup = button.dataset.catalogSub;
+    catalogState.visible = CATALOG_PAGE_SIZE;
+    catalogRenderSubgroups();
+    catalogRender();
+  });
+
+  $('#catalogVehicleNotice')?.addEventListener('click', event => {
+    if (event.target.closest('[data-catalog-clear-car]')) catalogSetCar('');
+    if (event.target.closest('[data-catalog-include-universal]')) {
+      catalogState.includeUniversal = true;
+      const include = $('#catalogIncludeUniversal');
+      if (include) include.checked = true;
+      catalogRenderNotice();
+      catalogRender();
+    }
+  });
+  $('#catalogEmpty')?.addEventListener('click', event => {
+    if (event.target.closest('[data-catalog-clear-car]')) catalogSetCar('');
+    if (event.target.closest('[data-catalog-reset]')) catalogReset();
+    if (event.target.closest('[data-catalog-include-universal]')) {
+      catalogState.includeUniversal = true;
+      const include = $('#catalogIncludeUniversal');
+      if (include) include.checked = true;
+      catalogRender();
+    }
+  });
+}
 
 // -------------------------------------------------------------
 // VISTA: CHAT DE DIAGNÓSTICO IA
@@ -3530,6 +4154,8 @@ async function openProductSheet(id) {
       return;
     }
   }
+  if (!p._fitment) p = catalogEnrich(p);
+  const fit = p._fitment;
   const link = p.linkStatus === 'verified' ? p.affiliateUrl : '';
   const autodoc = p.autodocUrl || autodocSearchUrl(p);
   const features = Array.isArray(p.features) ? p.features : [];
@@ -3545,17 +4171,22 @@ async function openProductSheet(id) {
       <div class="product-sheet-copy">
         <span class="eyebrow">${esc(p.category || 'Catálogo')}${p.subcategory ? ' · ' + esc(p.subcategory) : ''}</span>
         <h2 id="productSheetTitle">${esc(p.name)}</h2>
-        <p class="product-sheet-brand">${esc(p.manufacturer || 'Fabricante no confirmado')}${p.asin ? ` · ASIN ${esc(p.asin)}` : ''}</p>
+        <p class="product-sheet-brand">${esc(p.manufacturer || 'Fabricante no confirmado')}${p.seller ? ` · ${esc(p.seller)}` : ''}</p>
         <p>${esc(p.description || 'Sin descripción verificada.')}</p>
         <div class="product-sheet-facts">
-          <div><small>Referencia</small><b>${esc(p.reference || 'No publicada en la ficha')}</b></div>
-          <div><small>Vendedor</small><b>${esc(p.seller || 'No indicado')}</b></div>
+          <div><small>Aplicación</small><b>${esc(fit.label)}</b></div>
+          <div><small>Referencia</small><b>${esc(p.reference || p.asin || 'No publicada en la ficha')}</b></div>
           <div><small>Precio</small><b>${esc(p.price || 'Consultar precio')}</b></div>
-          <div><small>Verificado</small><b>${esc(p.verifiedAt || 'No indicado')}</b></div>
+          <div><small>Vendedor</small><b>${esc(p.seller || 'No indicado')}</b></div>
         </div>
         ${/\d/.test(String(p.price || '')) ? `<p class="micro-note">Precio de ${esc((p.priceSource || 'la tienda').replace(/\s*·\s*[A-Z0-9]{10}$/i, ''))} consultado el ${esc(priceDate(p.priceCheckedAt || p.verifiedAt))}. Puede variar: confirma el importe final en la ficha del vendedor.</p>` : `<p class="micro-note">${esc(p.priceNote || 'Sin precio publicado por el vendedor: no se muestra una cifra sin verificar.')}</p>`}
         ${features.length ? `<h4>Características publicadas por el vendedor</h4><ul class="check-list">${features.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
-        <div class="compat-note"><b>${icon('alert')} Compatibilidad</b><p>${esc(p.compatibility?.note || 'No verificada para un vehículo concreto.')}</p></div>
+        <div class="compat-note"><b>${icon('car')} Para qué coche es</b>
+          ${fit.models.length
+            ? `<div class="compat-models">${fit.models.map(model => `<span>${esc(model)}</span>`).join('')}</div>`
+            : `<p>${esc(fit.type === 'measure' ? 'Se elige por medida, no por modelo de coche.' : fit.type === 'universal' ? 'Compatible con varios modelos. Confirma la referencia exacta antes de comprar.' : 'El vendedor no declara un modelo concreto. Confirma la compatibilidad con tu VIN o matrícula.')}</p>`}
+          ${p.compatibility?.note ? `<p class="micro-note">${esc(p.compatibility.note)}</p>` : ''}
+        </div>
         ${p.verificationNote ? `<p class="micro-note">${esc(p.verificationNote)}</p>` : ''}
         <div class="product-sheet-actions">
           ${link ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Abrir en la tienda ${icon('external')}</a>` : '<span class="btn ghost">Enlace no disponible</span>'}
@@ -3847,6 +4478,7 @@ document.addEventListener('viewchange', e => {
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
   initPayments();
+  initCatalog();
   initVehicleSelector();
   initHomeVehicleSelector();
   initUniversalSearch();
