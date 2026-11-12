@@ -64,6 +64,8 @@
     clone.querySelectorAll('a').forEach(a => { a.textContent = ` ${a.textContent} `; });
     let text = clone.textContent || '';
     text = text
+      .replace(/\[Vehículo:[^\]]*\]/gi, ' ')
+      .replace(/^\s*>.*$/gm, ' ')
       .replace(/https?:\/\/\S+/g, ' ')
       .replace(/[*_`#>|]/g, ' ')
       .replace(/\s*\n\s*/g, '. ')
@@ -130,7 +132,7 @@
     // Voz de hombre con seguridad: tono grave pero natural y ritmo algo vivo.
     // Un ritmo demasiado lento suena a robot y hace que la gente desconecte.
     utter.pitch = male ? 0.88 : 0.72;
-    utter.rate = 1.06;
+    utter.rate = 1.12;
     utter.volume = 1;
     speakingBubble = bubble;
     bubble.classList.add('voz-speaking');
