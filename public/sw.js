@@ -1,4 +1,4 @@
-const CACHE = 'dm-app-v16';
+const CACHE = 'dm-app-v17';
 const CORE = [
   '/',
   '/index.html',
@@ -13,6 +13,7 @@ const CORE = [
   '/fonts/fonts.css',
   '/js/app.js',
   '/js/voz.js',
+  '/js/dictado.js',
   '/js/micro-permiso.js',
   '/js/obd.js',
   '/js/tutorials.js',
