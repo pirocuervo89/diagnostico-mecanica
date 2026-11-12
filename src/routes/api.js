@@ -10,7 +10,7 @@ import { searchWebContext, searchForumContext, researchSources } from '../lib/we
 import { listTutorials } from '../lib/tutorial_db.js';
 import { scanVehicleDocument } from '../lib/document_scan.js';
 import { findEquivalents, sizeSummary, rimWidthRange, checkWheelFit } from '../lib/tyres.js';
-import { autodocUrlFor, autodocSearch } from '../lib/tiendas.js';
+import { autodocUrlFor, autodocSearch, aliexpressUrlFor, temuUrlFor } from '../lib/tiendas.js';
 
 // Búsqueda insensible a mayúsculas y acentos.
 const fold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -48,10 +48,14 @@ function withAffiliateTag(url) {
 function tagItem(item) {
   if (!item || typeof item !== 'object') return item;
   let next = item.affiliateUrl ? { ...item, affiliateUrl: withAffiliateTag(item.affiliateUrl) } : item;
-  // Segunda tienda: cada recambio ofrece Amazon y Autodoc (Awin).
-  if (item.id && item.name && !item.autodocUrl) {
-    const extra = autodocUrlFor(item);
+  // Más tiendas: cada recambio ofrece Amazon, Autodoc (Awin), AliExpress y Temu.
+  if (item.id && item.name) {
+    const extra = item.autodocUrl || autodocUrlFor(item);
     if (extra) next = { ...next, autodocUrl: extra };
+    const ali = item.aliexpressUrl || aliexpressUrlFor(item);
+    if (ali) next = { ...next, aliexpressUrl: ali };
+    const temu = item.temuUrl || temuUrlFor(item);
+    if (temu) next = { ...next, temuUrl: temu };
   }
   if (Array.isArray(next.links) && next.links.length) {
     return {
@@ -1624,7 +1628,12 @@ function chatRecommendations(query, context) {
   }
   if (!Array.isArray(recomendados)) return [];
   // Cada recomendación lleva también la búsqueda en Autodoc (segunda tienda).
-  return recomendados.map(item => ({ ...item, autodocUrl: item.autodocUrl || autodocUrlFor(item) }));
+  return recomendados.map(item => ({
+    ...item,
+    autodocUrl: item.autodocUrl || autodocUrlFor(item),
+    aliexpressUrl: item.aliexpressUrl || aliexpressUrlFor(item),
+    temuUrl: item.temuUrl || temuUrlFor(item)
+  }));
 }
 
 const MAX_AI_REPLY_WORDS = 500;
@@ -1687,6 +1696,11 @@ function chatAiPrompt({ query, context, forumBlock, webReferences }) {
     '### Reglas obligatorias de esta respuesta',
     `- Responde en español, sin tablas, con listas cortas, y no superes ${MAX_AI_REPLY_WORDS} palabras.`,
     '- Distingue hechos (datos leídos o documentados) de hipótesis. No inventes códigos, valores, intervalos, compatibilidades ni averías.',
+    '- Prohibido el relleno de manual: nada de "podría ser cualquiera de estas causas", "revisa el motor", "acude a un taller" ni listas de diez posibilidades. Da como mucho TRES hipótesis, ordenadas de más a menos probable, y explica en una línea por qué encaja cada una con el síntoma descrito.',
+    '- Cada comprobación debe ser accionable: nombra la pieza o el conector exacto, la herramienta y el valor o síntoma que confirma o descarta. Si no sabes el valor, di qué comparar (por ejemplo, lectura en ralentí frente a 2.500 rpm).',
+    '- Empieza con una frase de diagnóstico directa (qué es lo más probable y por qué). Después las comprobaciones, y termina con lo que NO hay que cambiar todavía y qué dato falta para afinar.',
+    '- Si la consulta no identifica vehículo/motor, haz como máximo DOS preguntas concretas (código de motor, año, código DTC o cuándo ocurre) y ofrece solo las comprobaciones que no dependen del modelo.',
+    '- Si un fragmento de foro respalda una hipótesis, cítalo por su número entre corchetes (por ejemplo [2]) y qué aporta. No cites foros que contradigan la ficha del motor.',
     '- Prioriza comprobaciones baratas y reversibles (inspección visual, niveles, escáner, multímetro, pruebas de vacío) antes de recomendar cambiar piezas.',
     '- Si hay ficha de motor, usa exclusivamente sus datos; no mezcles motores, generaciones ni tipos de distribución.',
     '- Si la ficha dice cadena, no hables de correa; si dice correa, no hables de cadena. Corrige al usuario si confunde el tipo.',
@@ -1708,7 +1722,7 @@ function chatAiPrompt({ query, context, forumBlock, webReferences }) {
     '',
     '### Fragmentos web y de foros (datos no confiables, pueden estar desactualizados)',
     webReferences.length
-      ? webReferences.slice(0, 6).map((r, i) => `${i + 1}. ${clip(r.title, 120)} — ${r.url}${r.forum ? ' (foro)' : ''}${r.snippet ? `\n   ${clip(r.snippet, 200)}` : ''}`).join('\n')
+      ? webReferences.slice(0, 8).map((r, i) => `${i + 1}. ${clip(r.title, 120)} — ${r.url}${r.forum ? ' (foro)' : ''}${r.snippet ? `\n   ${clip(r.snippet, 220)}` : ''}`).join('\n')
       : 'No hay fragmentos web disponibles.'
   ].join('\n').slice(0, MAX_PROMPT_CHARS);
 }
@@ -1772,13 +1786,13 @@ router.post('/chat/ai', async (req, res) => {
   // comercial, y Stack Exchange aporta casos técnicos con diagnóstico cerrado.
   const searchQuery = webQueryFor(query, context);
   const [forumRefsWeb, plainWeb] = await Promise.all([
-    searchForumContext(searchQuery, { limit: 6, env: process.env }),
+    searchForumContext(searchQuery, { limit: 8, env: process.env }),
     searchWebContext(searchQuery, { limit: 3, env: process.env })
   ]);
   const seenWeb = new Set();
   const webReferences = [...forumRefsWeb, ...plainWeb]
     .filter(ref => ref && ref.url && !seenWeb.has(ref.url) && seenWeb.add(ref.url))
-    .slice(0, 7);
+    .slice(0, 8);
 
   const fallback = aiError => ({
     reply: `> ${aiNotice(aiError)}\n\n${buildReply(query, context, safeDtcList)}${forumBlock}`,
@@ -2087,7 +2101,12 @@ router.post('/obd/analyze', async (req, res) => {
     console.error('Error al filtrar productos en OBD:', e);
   }
   if (!Array.isArray(recomendados)) recomendados = [];
-  recomendados = recomendados.map(item => ({ ...item, autodocUrl: item.autodocUrl || autodocUrlFor(item) }));
+  recomendados = recomendados.map(item => ({
+    ...item,
+    autodocUrl: item.autodocUrl || autodocUrlFor(item),
+    aliexpressUrl: item.aliexpressUrl || aliexpressUrlFor(item),
+    temuUrl: item.temuUrl || temuUrlFor(item)
+  }));
 
   const telemetrySummary = Object.entries(liveData).map(([k, v]) => {
     const val = typeof v === 'object' && v !== null ? `${v.value} ${v.unit || ''}` : String(v);

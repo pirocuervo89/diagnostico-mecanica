@@ -261,10 +261,33 @@ const FORUM_DOMAINS = [
   'clubvwgolf.com',
   'reddit.com',
   'bimmerforums.com',
-  'mechanics.stackexchange.com'
+  'mechanics.stackexchange.com',
+  'forotoyota.com',
+  'audisport-iberica.com',
+  'bmwfaq.com',
+  'mercedesclub.es',
+  'clubmeganeforum.com',
+  'meganeclub.es',
+  'planetclio.com',
+  'clubseat.net',
+  'alfistas.com',
+  'hondistas.com',
+  'clubsubaru.es',
+  'foro4x4.com',
+  'mecanicoautomotriz.net',
+  'automecanico.com',
+  'opinautos.com',
+  'todomecanica.com',
+  'foroautos.com',
+  'faqcars.com',
+  'motor.mapfre.es'
 ];
 
-const FORUM_QUERY_HINT = '(site:forocoches.com OR site:areavag.com OR site:opinauto.es OR site:reddit.com)';
+// DuckDuckGo acepta como máximo un puñado de `site:` por consulta antes de
+// devolver el HTML vacío, así que se agrupan por bloques y se lanzan en
+// paralelo: los foros españoles por un lado y los técnicos en inglés por otro.
+const FORUM_QUERY_HINT = '(site:forocoches.com OR site:areavag.com OR site:opinauto.es OR site:forotoyota.com OR site:bmwfaq.com)';
+const FORUM_QUERY_HINT_2 = '(site:reddit.com OR site:audisport-iberica.com OR site:alfistas.com OR site:hondistas.com)';
 
 // Stack Exchange está en inglés y no entiende las consultas en español. Este
 // glosario traduce los términos de taller más frecuentes para que la búsqueda
@@ -478,9 +501,13 @@ export async function researchSources(query, { limit = 6, timeoutMs = DEFAULT_TI
 
   const settled = await Promise.all([
     run('ddg-foros', () => searchWebContext(`${q} ${FORUM_QUERY_HINT}`, { limit: 4, timeoutMs, env })),
-    run('ddg-general', () => searchWebContext(`${q} foro averia`, { limit: 4, timeoutMs, env })),
-    run('stackexchange', () => searchStackExchange(englishQuery(q), { limit: 3, timeoutMs: Math.min(timeoutMs, 3500) })),
-    run('wikipedia', () => searchWikipedia(q, { limit: 3, timeoutMs: Math.min(timeoutMs, 3500) }))
+    run('ddg-foros-2', () => searchWebContext(`${q} ${FORUM_QUERY_HINT_2}`, { limit: 3, timeoutMs, env })),
+    // Segunda pasada con la palabra que usan los hilos resueltos: así aparecen
+    // casos con diagnóstico cerrado en vez de preguntas sin respuesta.
+    run('ddg-solucion', () => searchWebContext(`${q} solucionado causa ruido fallo`, { limit: 3, timeoutMs, env })),
+    run('ddg-general', () => searchWebContext(`${q} foro averia`, { limit: 3, timeoutMs, env })),
+    run('stackexchange', () => searchStackExchange(englishQuery(q), { limit: 4, timeoutMs: Math.min(timeoutMs, 3500) })),
+    run('wikipedia', () => searchWikipedia(q, { limit: 2, timeoutMs: Math.min(timeoutMs, 3500) }))
   ]);
 
   const ddgItems = settled

@@ -680,6 +680,60 @@ select option { background: #0b0a1e; }
 .web-reference small { color: var(--muted); font-size: 10.5px; line-height: 1.45; }
 .chat-form { background: #070615; }
 .chat-form input { border-color: rgba(34, 211, 238, .24); }
+
+/* ---------- Lectura cómoda del chat (2026-11-12) ----------
+   El recuadro era bajo y el texto pequeño: se veía obligado a hacer scroll
+   dentro de una franja estrecha. Ahora ocupa más alto de pantalla, el texto
+   sube a 15 px y las respuestas largas respiran con márgenes reales. */
+.chat-box {
+  height: clamp(340px, 56vh, 660px);
+  padding: 20px 18px 22px;
+  gap: 14px;
+}
+.bubble {
+  max-width: 89%;
+  padding: 14px 17px;
+  font-size: 15px;
+  line-height: 1.68;
+}
+.bubble > :first-child { margin-top: 0; }
+.bubble > :last-child { margin-bottom: 0; }
+.bubble p { margin: 0 0 10px; }
+.bubble p:last-child { margin-bottom: 0; }
+.bubble ul, .bubble ol { margin: 8px 0 10px; padding-left: 20px; }
+.bubble li { margin-bottom: 5px; }
+.bubble h3, .bubble h4 { font-size: 15.5px; margin: 13px 0 6px; line-height: 1.35; }
+.bubble .web-reference { margin-top: 8px; }
+.chat-suggestions .chip { font-size: 12.5px; padding: 8px 13px; }
+.chat-form input { font-size: 15px; padding: 13px 14px; }
+.chat-form .btn { font-size: 14px; padding: 0 20px; }
+
+@media (max-width: 720px) {
+  .chat-box { height: clamp(330px, 62vh, 640px); padding: 16px 12px 18px; gap: 12px; }
+  .bubble { max-width: 95%; font-size: 15px; padding: 13px 14px; }
+  .chat-suggestions { padding: 0 12px 12px; }
+  .chat-form { flex-wrap: wrap; padding: 12px; }
+  .chat-form input { font-size: 16px; }   /* 16px evita el zoom automático en iOS */
+  .chat-form .btn { width: 100%; padding: 13px 16px; }
+}
+
+/* ---------- Fotos de producto centradas y a mayor tamaño ---------- */
+.product-media { height: 214px; }
+.product-photo {
+  width: 94%;
+  height: 94%;
+  object-fit: contain;
+  object-position: center;
+  margin: auto;
+  padding: 8px;
+  border-radius: 8px;
+  background: #f7f8f9;
+}
+.product-sheet-media > img {
+  object-position: center;
+  background: #f7f8f9;
+  padding: 10px;
+}
 .report-preview {
   border-color: rgba(167, 139, 250, .2);
   background: linear-gradient(150deg, rgba(139, 92, 246, .1), transparent 55%), rgba(255, 255, 255, .018);
@@ -731,7 +785,24 @@ select option { background: #0b0a1e; }
 }
 
 @media (max-width: 720px) {
-  .hero { min-height: 820px; padding: 34px 20px 150px; }
+  /* En el móvil la primera pantalla es el coche y la pregunta a la IA: la foto
+     deja de ser un fondo desvaído al pie y pasa a abrir la página. */
+  .hero { min-height: 0; padding: 22px 18px 30px; display: flex; flex-direction: column; gap: 16px; }
+  .hero-visual {
+    order: -1;
+    position: relative;
+    inset: auto;
+    width: 100%;
+    right: auto;
+    bottom: auto;
+    opacity: 1;
+    margin: 0;
+  }
+  .hero-photo-frame { border-radius: 12px; }
+  .holo-caption { display: none; }
+  .holo-stage { opacity: .5; }
+  .hero-copy { order: 0; }
+  .garaje-cta { margin-top: 4px; }
   .hero-copy h1 { font-size: clamp(2.55rem, 10.6vw, 3.7rem); }
   .universal-search { padding-left: 10px; }
   .universal-search input { font-size: 12.5px; }

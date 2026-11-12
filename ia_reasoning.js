@@ -90,6 +90,7 @@ const TYPE_GROUPS = {
     maquinaria: 'herramienta',
     accesorio: 'herramienta',
     repuesto: 'repuesto',
+    recambio: 'repuesto',
     tuning: 'repuesto',
     limpieza_quimico: 'limpieza_quimico'
 };
@@ -275,6 +276,38 @@ function allowedByGlobalRules(p, rule, fullNorm) {
     return true;
 }
 
+/**
+ * Coche del contexto, en palabras sueltas y normalizadas.
+ * Devuelve null si el usuario no ha identificado vehículo.
+ */
+function buildVehicle(ctx) {
+    const label = norm(ctx.vehicleLabel || [ctx.brand, ctx.model].filter(Boolean).join(' ')).trim();
+    if (!label) return null;
+    const tokens = label.split(/[^a-z0-9]+/).filter(t => t.length > 2);
+    const brand = norm(ctx.brand || tokens[0] || '');
+    const hasModel = tokens.some(t => t !== brand && t.length > 2);
+    return { label, tokens, brand, hasModel };
+}
+
+/**
+ * ¿Sirve esta pieza para el coche del contexto?
+ *  - 'yes'     la ficha declara ese modelo
+ *  - 'no'      la ficha declara otros modelos y no incluye el nuestro
+ *  - 'unknown' no declara modelos (universal, por medida o sin datos)
+ * Sin vehículo identificado todo es 'unknown': no se descarta nada a ciegas.
+ */
+function vehicleFit(p, vehicle) {
+    if (!vehicle) return 'unknown';
+    const models = Array.isArray(p?.compatibility?.models) ? p.compatibility.models : [];
+    if (!models.length) return 'unknown';
+    const text = norm(models.join(' '));
+    const brandHit = vehicle.brand ? text.includes(vehicle.brand) : true;
+    if (!brandHit) return 'no';
+    if (!vehicle.hasModel) return 'unknown';
+    const modelHit = vehicle.tokens.some(token => token !== vehicle.brand && text.includes(token));
+    return modelHit ? 'yes' : 'no';
+}
+
 function compatibilityFor(p, rule) {
     if (p.productType === 'repuesto') {
         return 'No sustituir sin prueba directa (medición, DTC específico o desmontaje). Verifica referencia OEM, motor y año.';
@@ -295,11 +328,20 @@ function compatibilityFor(p, rule) {
     return (p.compatibility && p.compatibility.note) || 'Herramienta universal; comprueba medidas y conexiones antes de comprar.';
 }
 
-function selectRecommendations(rule, fullNorm, productos) {
+function selectRecommendations(rule, fullNorm, productos, vehicle = null) {
     const scored = [];
     for (const p of productos) {
         if (!rule.match(p)) continue;
-        if (!rule.types.includes(p.productType)) continue;
+        // Si la ficha del vendedor declara modelos y el nuestro no está, fuera:
+        // recomendar una pastilla de otro coche es peor que no recomendar nada.
+        const fit = vehicleFit(p, vehicle);
+        if (fit === 'no') continue;
+        // Las piezas solo se recomiendan si el usuario pide esa pieza concreta y
+        // la ficha declara que es para su coche. El resto de temas siguen siendo
+        // de comprobación, no de sustitución.
+        const asksPart = /pastilla|disco de freno|amortiguador|filtro|bujia|bujía|rotula|rótula|sensor abs|escobilla|bateria|batería|correa|termostato|radiador|bomba de agua/.test(fullNorm);
+        const partAllowed = groupFor(p) === 'repuesto' && asksPart && fit === 'yes';
+        if (!rule.types.includes(p.productType) && !partAllowed) continue;
         if (!allowedByGlobalRules(p, rule, fullNorm)) continue;
         if (rule.spec && !rule.spec(p)) continue;
         const qFuel = fuelKind(fullNorm);
@@ -319,7 +361,8 @@ function selectRecommendations(rule, fullNorm, productos) {
         }
         if (p.linkStatus === 'verified') score += 10;
         if (p.imageStatus === 'verified') score += 2;
-        scored.push({ p, score });
+        if (fit === 'yes') score += 9;
+        scored.push({ p, score, fit });
     }
 
     scored.sort((a, b) => b.score - a.score || String(a.p.name).localeCompare(String(b.p.name)));
@@ -330,7 +373,7 @@ function selectRecommendations(rule, fullNorm, productos) {
     const seenIds = new Set();
     const seenNames = new Set();
 
-    for (const { p } of scored) {
+    for (const { p, fit } of scored) {
         const group = groupFor(p);
         if (!limits[group] || counts[group] >= limits[group]) continue;
         const key = norm(p.name).replace(/[^a-z0-9]/g, '').slice(0, 55);
@@ -351,7 +394,10 @@ function selectRecommendations(rule, fullNorm, productos) {
             productType: p.productType,
             group,
             reason: rule.reason,
-            compatibilityNote: compatibilityFor(p, rule)
+            compatible: fit === 'yes',
+            compatibilityNote: fit === 'yes'
+                ? `La ficha declara compatibilidad con ${vehicle.label}. Confirma la referencia exacta con tu matrícula o VIN.`
+                : compatibilityFor(p, rule)
         });
         if (chosen.length >= 4) break;
     }
@@ -395,17 +441,22 @@ function filtrarProductosRecomendados(consulta, ctx = {}) {
         return [];
     }
 
+    const vehicle = buildVehicle(context);
     const topics = TOPIC_RULES.filter(rule => rule.triggers.some(t => fullNorm.includes(t)));
     if (!topics.length && /[pcbu]\d{4}/i.test(fullNorm)) {
         topics.push(TOPIC_RULES.find(r => r.id === 'diagnostico_obd_general'));
     }
 
-    for (const rule of topics) {
-        const selected = selectRecommendations(rule, fullNorm, productos);
-        if (selected.length) return selected;
-    }
-
-    return [];
+    // Se calculan todos los temas y gana el primero que tenga una pieza que la
+    // ficha del vendedor declare compatible con el coche del usuario. Antes
+    // ganaba el primer tema con resultados, que a veces era "líquido de frenos"
+    // cuando lo que hacía falta eran las pastillas de ese modelo.
+    const candidates = topics
+        .map(rule => selectRecommendations(rule, fullNorm, productos, vehicle))
+        .filter(items => items.length);
+    if (!candidates.length) return [];
+    const fitted = vehicle ? candidates.find(items => items.some(item => item.compatible)) : null;
+    return (fitted || candidates[0]);
 }
 
 export {

@@ -4142,6 +4142,18 @@ function autodocSearchUrl(product) {
   return `https://www.awin1.com/cread.php?awinmid=120163&awinaffid=${encodeURIComponent(id)}&ued=${encodeURIComponent(destination)}`;
 }
 
+// Búsqueda real en AliExpress y Temu. Si el servidor ya manda el enlace con
+// seguimiento de afiliado se usa ese; si no, se arma la búsqueda equivalente.
+function shopSearchUrl(product, store) {
+  const brand = product?.manufacturer && !/no confirmado/i.test(product.manufacturer) ? product.manufacturer : '';
+  const query = [brand, product?.subcategory || product?.category, product?.name]
+    .filter(Boolean).join(' ').replace(/\s+/g, ' ').trim().slice(0, 90);
+  if (!query) return '';
+  const encoded = encodeURIComponent(query);
+  if (store === 'aliexpress') return `https://es.aliexpress.com/w/wholesale-${encoded}.html`;
+  return `https://www.temu.com/search_result.html?search_key=${encoded}`;
+}
+
 async function openProductSheet(id) {
   const modal = $('#productModal');
   const body = $('#productSheetBody');
@@ -4191,6 +4203,8 @@ async function openProductSheet(id) {
         <div class="product-sheet-actions">
           ${link ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Abrir en la tienda ${icon('external')}</a>` : '<span class="btn ghost">Enlace no disponible</span>'}
           ${autodoc ? `<a class="btn ghost" href="${esc(autodoc)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Buscar en Autodoc ${icon('external')}</a>` : ''}
+          <a class="btn ghost" href="${esc(p.aliexpressUrl || shopSearchUrl(p, 'aliexpress'))}" target="_blank" rel="sponsored nofollow noopener noreferrer">AliExpress ${icon('external')}</a>
+          <a class="btn ghost" href="${esc(p.temuUrl || shopSearchUrl(p, 'temu'))}" target="_blank" rel="sponsored nofollow noopener noreferrer">Temu ${icon('external')}</a>
           <a class="btn ghost" href="/producto/${encodeURIComponent(p.id)}">Ver ficha completa</a>
           <button class="btn ghost" type="button" data-product-close>Cerrar</button>
         </div>
@@ -4485,6 +4499,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initOBD();
   const initial = location.hash.slice(1);
   if (initial) showView(initial);
+  // Sin hash se queda la portada (view-home, ya activa en el HTML): el coche,
+  // la pregunta a la IA y la ficha técnica están en la primera pantalla.
   Promise.all([
     loadStats(),
     loadSymptoms(),

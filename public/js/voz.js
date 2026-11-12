@@ -59,11 +59,36 @@
     return text.slice(0, 5000);
   }
 
+  // Voz de hombre, española y con empaque de mecánico veterano: grave, pausada
+  // y sin tono comercial. El orden de preferencia está por nombres reales de
+  // voces conocidas (Windows, Apple, Android, Chrome) porque las APIs no dicen
+  // el sexo; cuando solo hay voces femeninas se baja el tono para que no suene
+  // a asistente de móvil.
+  const MALE_HINTS = /\b(jorge|diego|carlos|pablo|raul|raúl|miguel|juan|enrique|andres|andrés|antonio|manuel|alvaro|álvaro|gonzalo|sebastian|sebastián|ricardo|javier|pedro|luis|arturo|gerardo|hombre|male|masculin)\b/i;
+  const FEMALE_HINTS = /\b(monica|mónica|paulina|helena|lucia|lucía|carmen|laura|isabel|maria|maría|sofia|sofía|sabina|elena|esperanza|ximena|catalina|lupe|penelope|penélope|ines|inés|triana|vera|abril|dalia|elvira|irene|larissa|teresa|lola|female|mujer|femenin)\b/i;
+
   function pickSpanishVoice() {
-    const voices = synth.getVoices() || [];
-    const exact = voices.find(v => v.lang && v.lang.toLowerCase() === lang.toLowerCase());
-    if (exact) return exact;
-    return voices.find(v => /^es/i.test(v.lang || '')) || null;
+    const voices = (synth.getVoices() || []).filter(v => /^es/i.test(v.lang || ''));
+    if (!voices.length) return { voice: null, male: false };
+
+    const score = voice => {
+      const name = `${voice.name || ''} ${voice.voiceURI || ''}`;
+      let points = 0;
+      // La variante de España es la que suena natural aquí.
+      if (/^es[-_]es/i.test(voice.lang || '')) points += 6;
+      if (MALE_HINTS.test(name)) points += 10;
+      if (FEMALE_HINTS.test(name)) points -= 8;
+      // Las voces de red (Google/Microsoft) suenan bastante mejor que las robóticas locales.
+      if (!voice.localService) points += 2;
+      if (/google|microsoft|natural|neural|premium|enhanced/i.test(name)) points += 3;
+      return points;
+    };
+
+    const ranked = voices
+      .map(voice => ({ voice, points: score(voice), male: MALE_HINTS.test(`${voice.name || ''} ${voice.voiceURI || ''}`) }))
+      .sort((a, b) => b.points - a.points);
+    const best = ranked[0];
+    return { voice: best?.voice || null, male: Boolean(best?.male) };
   }
 
   function stopSpeaking() {
@@ -86,10 +111,13 @@
     const parts = text.match(/[\s\S]{1,220}(?:[.!?]|$)/g) || [text];
     const utter = new SpeechSynthesisUtterance(parts.join(' '));
     utter.lang = lang;
-    utter.rate = 1.02;
-    utter.pitch = 1;
-    const voice = pickSpanishVoice();
-    if (voice) utter.voice = voice;
+    const { voice, male } = pickSpanishVoice();
+    utter.voice = voice || null;
+    // Registro grave y ritmo tranquilo: se entiende mejor y suena a persona
+    // que sabe de lo que habla, no a locutor acelerado.
+    utter.pitch = male ? 0.82 : 0.68;
+    utter.rate = 0.96;
+    utter.volume = 1;
     speakingBubble = bubble;
     bubble.classList.add('voz-speaking');
     const btn = bubble.querySelector('.voz-btn');

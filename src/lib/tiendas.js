@@ -133,10 +133,68 @@ export function autodocSearch(text) {
   return withAwin(path);
 }
 
-/** Estado público de las dos afiliaciones (sin exponer claves). */
+// ---------------------------------------------------------------------------
+// AliExpress y Temu
+//
+// Las dos tienen programa de afiliados, pero cada cuenta genera sus propios
+// enlaces de seguimiento: AliExpress a través del portal (Admitad) y Temu con
+// su panel de afiliados. Sin ese identificador no se puede inventar una URL de
+// comisión, así que aquí se construye la búsqueda real de la tienda y, cuando
+// exista plantilla, se envuelve para que cobre.
+//
+// Plantillas (con {q} donde va la búsqueda):
+//   ALIEXPRESS_AFF_URL=https://s.click.aliexpress.com/e/_xxxx?q={q}
+//   TEMU_AFF_URL=https://temu.to/k/xxxxx
+// Sin plantilla, el botón sigue llevando a la búsqueda del producto: sirve al
+// usuario y no rompe nada.
+// ---------------------------------------------------------------------------
+
+const ALIEXPRESS_SEARCH = 'https://es.aliexpress.com/w/wholesale-{q}.html';
+const TEMU_SEARCH = 'https://www.temu.com/search_result.html?search_key={q}';
+
+/** Palabras útiles para buscar la pieza en tiendas asiáticas. */
+function shopQuery(item) {
+  const brand = String(item?.manufacturer || '').trim();
+  const usable = brand && !/no confirmado|recambio/i.test(brand) ? brand : '';
+  const kind = String(item?.subcategory || item?.category || '').trim();
+  const name = String(item?.name || '')
+    .replace(/[|,()[\]{}"]/g, ' ')
+    .replace(NOISE, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return [usable, kind, name.split(' ').filter(w => w.length > 2).slice(0, 4).join(' ')]
+    .filter(Boolean).join(' ').slice(0, 90).trim();
+}
+
+function shopUrl(template, query) {
+  if (!query) return '';
+  const encoded = encodeURIComponent(query);
+  if (template.includes('{q}')) return template.replace(/\{q\}/g, encoded);
+  return template;
+}
+
+/** Enlace de AliExpress para una ficha (con seguimiento si está configurado). */
+export function aliexpressUrlFor(item) {
+  const query = shopQuery(item);
+  if (!query) return '';
+  const template = String(process.env.ALIEXPRESS_AFF_URL || '').trim() || ALIEXPRESS_SEARCH;
+  return shopUrl(template, query);
+}
+
+/** Enlace de Temu para una ficha (con seguimiento si está configurado). */
+export function temuUrlFor(item) {
+  const query = shopQuery(item);
+  if (!query) return '';
+  const template = String(process.env.TEMU_AFF_URL || '').trim() || TEMU_SEARCH;
+  return shopUrl(template, query);
+}
+
+/** Estado público de las tiendas afiliadas (sin exponer claves). */
 export function storeStatus() {
   return {
     amazon: { tag: amazonTag(), active: Boolean(amazonTag()) },
-    autodoc: { publisher: awinPublisherId(), active: Boolean(awinPublisherId()), merchant: AUTODOC_MID }
+    autodoc: { publisher: awinPublisherId(), active: Boolean(awinPublisherId()), merchant: AUTODOC_MID },
+    aliexpress: { active: Boolean(String(process.env.ALIEXPRESS_AFF_URL || '').trim()) },
+    temu: { active: Boolean(String(process.env.TEMU_AFF_URL || '').trim()) }
   };
 }
