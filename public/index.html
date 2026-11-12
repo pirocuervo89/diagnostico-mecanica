@@ -103,13 +103,13 @@
   </a>
 
   <nav id="nav" aria-label="Navegación principal">
-    <button data-view="garaje" class="nav-garaje" type="button"><svg class="ic"><use href="#i-wrench"></use></svg>Mi garaje</button>
-    <button data-view="testigos" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Testigos</button>
     <button data-view="home" class="active" type="button"><svg class="ic"><use href="#i-gauge"></use></svg>Inicio</button>
+    <button data-view="garaje" class="nav-garaje" type="button"><svg class="ic"><use href="#i-car"></use></svg>Mi garaje</button>
+    <button data-view="obd" type="button"><svg class="ic"><use href="#i-cpu"></use></svg>OBD-II</button>
+    <button data-view="testigos" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Testigos</button>
     <button data-view="diagnostico" type="button"><svg class="ic"><use href="#i-pulse"></use></svg>Diagnóstico</button>
     <button data-view="vehiculos" type="button"><svg class="ic"><use href="#i-car"></use></svg>Vehículos</button>
     <button data-view="dtc" type="button" title="Códigos de avería DTC"><svg class="ic"><use href="#i-search"></use></svg>DTC</button>
-    <button data-view="obd" type="button"><svg class="ic"><use href="#i-cpu"></use></svg>OBD-II</button>
     <button data-view="sala" type="button" title="Sala de máquinas"><svg class="ic"><use href="#i-gauge"></use></svg>Sala</button>
     <button data-view="tutoriales" type="button"><svg class="ic"><use href="#i-play"></use></svg>Tutoriales</button>
     <button data-view="productos" type="button"><svg class="ic"><use href="#i-cart"></use></svg>Productos</button>
@@ -137,70 +137,54 @@
 
   <!-- ===================== INICIO ===================== -->
   <section id="view-home" class="view active">
-    <div class="hero">
+    <div class="hero hero-home">
       <div class="hero-copy">
         <div class="hero-brand">
           <span class="brand-mark"><svg class="ic"><use href="#i-logo"></use></svg></span>
           <span class="brand-text"><strong>DIAGNÓSTICO</strong><small>Y MECÁNICA · PRO</small></span>
         </div>
 
-        <span class="eyebrow"><i></i> TU MECÁNICO CON IA · EMPIEZA GRATIS</span>
-        <h1>Cuéntale qué le pasa a tu coche.<br><span class="grad">Te dice qué mirar y qué comprar.</span></h1>
-        <p class="lead">Habla o escribe: un ruido, un tirón, un testigo encendido o un código DTC. La IA cruza foros y manuales, descarta lo que no encaja con tu coche y te da los pasos del taller.</p>
+        <h1>Lleva tu mecánico<br><span class="grad">siempre contigo.</span></h1>
+        <p class="lead lead-short">Te lo explico fácil: habla, haz una foto o enchufa el escáner.</p>
 
-        <div class="universal-search" role="search">
+        <div class="home-actions home-actions-duo">
+          <div class="home-action home-action-ai">
+            <span class="home-action-ico"><svg class="ic"><use href="#i-chat"></use></svg></span>
+            <b>Habla con la IA</b>
+            <p>Dile qué te pasa.</p>
+            <button class="mic-big" type="button" data-home-voice aria-label="Hablar con la IA">
+              <svg class="ic"><use href="#i-mic"></use></svg>
+              <span>Pulsa y habla</span>
+            </button>
+            <button class="home-action-link" type="button" data-home-ai>Prefiero escribirlo</button>
+          </div>
+          <div class="home-action home-action-light">
+            <span class="home-action-ico"><svg class="ic"><use href="#i-alert"></use></svg></span>
+            <b>Se encendió una luz</b>
+            <p>Hazle una foto al cuadro y te digo qué es y cuánta prisa tiene.</p>
+            <button class="btn primary home-action-btn" type="button" data-home-light>
+              <svg class="ic"><use href="#i-camera"></use></svg> Hacer foto al cuadro
+            </button>
+          </div>
+        </div>
+
+        <div class="home-shortcuts" aria-label="Accesos rápidos">
+          <button type="button" data-view="garaje"><svg class="ic"><use href="#i-car"></use></svg><span>Mi garaje</span></button>
+          <button type="button" data-view="obd"><svg class="ic"><use href="#i-cpu"></use></svg><span>Escáner OBD</span></button>
+          <button type="button" data-view="dtc"><svg class="ic"><use href="#i-search"></use></svg><span>Código de avería</span></button>
+        </div>
+
+        <div class="universal-search universal-search-compact" role="search">
           <span class="universal-search-icon"><svg class="ic"><use href="#i-spark"></use></svg></span>
-          <input id="universalSearch" type="search" autocomplete="off" aria-label="Pregunta a la IA o busca una pieza" aria-expanded="false" aria-controls="universalResults" placeholder="Pregúntale a la IA: ruido, tirón, testigo, código DTC...">
+          <input id="universalSearch" type="search" autocomplete="off" aria-label="Pregunta a la IA o busca una pieza" aria-expanded="false" aria-controls="universalResults" placeholder="O escríbelo aquí: ruido, tirón, testigo, código...">
           <button id="universalSearchBtn" class="btn primary sm" type="button">Preguntar</button>
           <div id="universalResults" class="universal-results hidden" role="listbox" aria-label="Resultados de búsqueda"></div>
         </div>
 
-        <div class="home-actions">
-          <div class="home-action home-action-ai">
-            <span class="home-action-kicker">PASO 1 · SIN REGISTRO</span>
-            <b>Habla con la IA</b>
-            <p>Escribe tu avería o pulsa el micrófono y cuéntasela en voz alta. Respuesta de mecánico en segundos.</p>
-            <div class="home-action-row">
-              <button class="btn primary" type="button" data-home-ai>
-                Escribir mi avería <svg class="ic"><use href="#i-arrow"></use></svg>
-              </button>
-              <button class="btn ghost home-action-mic" type="button" data-home-voice>
-                <svg class="ic"><use href="#i-mic"></use></svg> Hablar ahora
-              </button>
-            </div>
-          </div>
-          <div class="home-action">
-            <span class="home-action-kicker">PASO 2 · TU COCHE</span>
-            <b>Sube tu ficha técnica</b>
-            <p>Foto o PDF: la IA lee matrícula, motor y versión y crea tu primera ficha en Mi garaje.</p>
-            <label class="btn ghost home-action-btn">
-              <svg class="ic"><use href="#i-camera"></use></svg> Subir o hacer foto
-              <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" data-garage-ficha hidden>
-            </label>
-            <button class="home-action-link" type="button" data-garage-manual>O rellenarlo a mano</button>
-          </div>
-          <div class="home-action">
-            <span class="home-action-kicker">PASO 3 · MANOS A LA OBRA</span>
-            <b>Empieza el diagnóstico</b>
-            <p>Comprobaciones ordenadas con pieza, herramienta y valor esperado, antes de cambiar nada.</p>
-            <button class="btn cyan home-action-btn" type="button" data-view="diagnostico">
-              Empezar diagnóstico <svg class="ic"><use href="#i-arrow"></use></svg>
-            </button>
-          </div>
-          <div class="home-action home-action-shop">
-            <span class="home-action-kicker">LECTURA DE CÓDIGOS</span>
-            <b>Compra tu escáner DTC</b>
-            <p>Adaptadores 10/10 compatibles con esta app, ordenados de más barato a más caro.</p>
-            <button class="btn ghost home-action-btn" type="button" data-home-scanners>
-              <svg class="ic"><use href="#i-cpu"></use></svg> Ver escáneres
-            </button>
-          </div>
-        </div>
-
         <div class="hero-trust">
-          <span><svg class="ic"><use href="#i-check"></use></svg> 9.201 códigos DTC</span>
-          <span><svg class="ic"><use href="#i-check"></use></svg> 454 síntomas</span>
-          <span><svg class="ic"><use href="#i-check"></use></svg> Tu primer coche, gratis</span>
+          <span><svg class="ic"><use href="#i-check"></use></svg> 9.201 códigos</span>
+          <span><svg class="ic"><use href="#i-check"></use></svg> 454 averías</span>
+          <span><svg class="ic"><use href="#i-check"></use></svg> Gratis para empezar</span>
         </div>
       </div>
 
@@ -645,8 +629,8 @@
     <header class="page-head">
       <div>
         <span class="eyebrow">DIAGNOSIS ELECTRÓNICA</span>
-        <h2>Lectura OBD-II / ELM327</h2>
-        <p>Conecta un adaptador compatible o usa el simulador virtual para leer la ECU, códigos y parámetros en vivo.</p>
+        <h2>Escanea averías y parámetros en vivo</h2>
+        <p>Con nuestros escáneres 100 % compatibles lees los códigos del coche y ves los datos del motor mientras funciona.</p>
       </div>
       <span class="page-meta"><svg class="ic"><use href="#i-cpu"></use></svg> Web Serial · BLE</span>
     </header>
@@ -1114,8 +1098,8 @@
     <header class="page-head">
       <div>
         <span class="eyebrow">MI GARAJE · PRIVADO</span>
-        <h2>Tu coche, su ficha y todo lo que le ha pasado</h2>
-        <p>Identifica el vehículo con la foto de la ficha técnica, guarda su documentación y lleva al día mantenimientos, averías, reparaciones y gastos. Cada cuenta ve únicamente sus coches.</p>
+        <h2>Registra tu vehículo</h2>
+        <p>Así sabemos el modelo exacto y te llevamos el <b>mantenimiento, las facturas, las averías, las luces y los informes</b> de tu coche. Solo lo ves tú.</p>
       </div>
       <span class="page-meta"><svg class="ic"><use href="#i-car"></use></svg> <b id="garageCount">—</b> vehículos · <b id="garageSpent">—</b> registrados</span>
     </header>
@@ -1860,10 +1844,9 @@
 
 <nav class="tabbar" id="tabbar" aria-label="Navegación de la app">
   <button class="tabbar-btn active" data-view="home" type="button" aria-label="Inicio"><svg class="ic"><use href="#i-gauge"></use></svg><span>Inicio</span></button>
-  <button class="tabbar-btn" data-view="diagnostico" type="button" aria-label="Diagnóstico"><svg class="ic"><use href="#i-pulse"></use></svg><span>Diagnóstico</span></button>
-  <button class="tabbar-btn" data-view="dtc" type="button" aria-label="Códigos DTC"><svg class="ic"><use href="#i-search"></use></svg><span>DTC</span></button>
-  <button class="tabbar-btn" data-view="productos" type="button" aria-label="Productos"><svg class="ic"><use href="#i-cart"></use></svg><span>Productos</span></button>
-  <button class="tabbar-btn" data-view="informe" type="button" aria-label="Informe técnico"><svg class="ic"><use href="#i-file"></use></svg><span>Informe</span></button>
+  <button class="tabbar-btn" data-view="garaje" type="button" aria-label="Mi garaje"><svg class="ic"><use href="#i-car"></use></svg><span>Garaje</span></button>
+  <button class="tabbar-btn" data-view="obd" type="button" aria-label="Escáner OBD"><svg class="ic"><use href="#i-cpu"></use></svg><span>OBD</span></button>
+  <button class="tabbar-btn" data-view="chat" type="button" aria-label="Chat con la IA"><svg class="ic"><use href="#i-chat"></use></svg><span>IA</span></button>
   <button class="tabbar-btn" id="tabbarMore" type="button" aria-label="Más secciones" aria-expanded="false" aria-controls="appMenu"><svg class="ic"><use href="#i-menu"></use></svg><span>Más</span></button>
 </nav>
 

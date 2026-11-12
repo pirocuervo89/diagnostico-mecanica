@@ -241,7 +241,15 @@
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
-    try { await preparePhoto(file); } catch (error) { setStatus(error.message, 'error'); }
+    try {
+      await preparePhoto(file);
+      // Si la foto se hizo desde el botón grande de la portada, se analiza sin
+      // obligar a buscar el botón de analizar.
+      if (window.__homeLightFlow) {
+        window.__homeLightFlow = false;
+        analyze();
+      }
+    } catch (error) { setStatus(error.message, 'error'); }
   });
 
   $('#tlClearPhoto')?.addEventListener('click', () => {

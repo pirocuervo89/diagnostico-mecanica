@@ -118,7 +118,7 @@ function showView(name, fromHistory = false) {
   }
   const tabbarMore = $('#tabbarMore');
   if (tabbarMore) {
-    const mainViews = ['home', 'diagnostico', 'dtc', 'productos', 'informe'];
+    const mainViews = ['home', 'garaje', 'obd', 'chat'];
     tabbarMore.classList.toggle('active', !mainViews.includes(name));
     tabbarMore.setAttribute('aria-expanded', 'false');
   }
@@ -219,6 +219,13 @@ $$('[data-home-voice]').forEach(btn => btn.addEventListener('click', () => {
 
 $$('[data-home-scanners]').forEach(btn => btn.addEventListener('click', () => {
   document.getElementById('homeScanners')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}));
+
+$$('[data-home-light]').forEach(btn => btn.addEventListener('click', () => {
+  // Un solo toque: abre la cámara del cuadro y, al elegir la foto, analiza.
+  window.__homeLightFlow = true;
+  showView('testigos');
+  setTimeout(() => document.getElementById('tlFile')?.click(), 260);
 }));
 
 function goToTutorials(params = {}) {
@@ -3385,6 +3392,7 @@ function renderObdScanners() {
             <p class="micro-note">${esc(item.verification?.note || '')}</p>
           </details>
           <a class="btn btn-ghost scanner-buy" href="${esc(item.url)}" target="_blank" rel="noopener sponsored">Ver ficha y precio en Amazon</a>
+          <span class="scanner-aff">Enlace de afiliado · comisión sin coste para ti</span>
         </div>
       </article>`;
   }).join('');
@@ -3444,7 +3452,7 @@ async function initHomeScanners() {
           <b>${esc(item.name)}</b>
           <small>${esc(item.brand || '')} · ${esc(item.connection || '')}</small>
           <span class="home-scanner-badge">${esc(item.protocolSupport?.label || 'Compatible con la web')}</span>
-          <span class="home-scanner-price">${esc(item.priceText)}</span>
+          <span class="home-scanner-price">${esc(item.priceText)} <small>Afiliado</small></span>
           <a class="btn btn-ghost" href="${esc(item.url)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Comprar en Amazon ${icon('external')}</a>
         </div>
       </article>`).join('');

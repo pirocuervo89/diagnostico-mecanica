@@ -99,7 +99,7 @@
       stream.getTracks().forEach(track => track.stop());
       granted = true;
       hidePanel();
-      setHint('Micrófono activado. Pulsa 🎤 otra vez para dictar.', 6000);
+      setHint('Micrófono activado. Habla ahora.', 6000);
       return true;
     } catch (error) {
       granted = false;
@@ -147,7 +147,10 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     requestMic().then(ok => {
-      if (ok) button.dataset.micAllowed = '1';
+      if (!ok) return;
+      // Ya hay permiso: se dicta en el mismo toque, sin pedir un segundo clic.
+      button.dataset.micAllowed = '1';
+      button.click();
     });
   }, true);
 
