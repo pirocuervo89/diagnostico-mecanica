@@ -16,6 +16,7 @@ import pricesRouter from './src/routes/prices.js';
 import seoRouter from './src/routes/seo.js';
 import affiliatesRouter from './src/routes/affiliates.js';
 import { startPriceSync } from './src/lib/price_sync.js';
+import { installShutdownBackup, backupStatus } from './src/lib/db_persist.js';
 
 dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -55,7 +56,9 @@ app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  // microphone=(self) es obligatorio: con microphone=() el navegador bloquea
+  // getUserMedia en toda la web, aunque el usuario conceda el permiso.
+  res.setHeader('Permissions-Policy', 'geolocation=(self), microphone=(self), camera=(self)');
   next();
 });
 
@@ -131,5 +134,10 @@ app.listen(PORT, HOST, () => {
   console.log(` Local: http://localhost:${PORT}`);
   console.log(` Red:   http://<tu-ip-local>:${PORT}`);
   console.log('');
+  const backup = backupStatus();
+  console.log(backup.enabled
+    ? `[db] copia de seguridad activa en el bucket ${backup.bucket}`
+    : '[db] SIN copia en la nube (faltan SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY)');
+  installShutdownBackup();
   startPriceSync();
 });

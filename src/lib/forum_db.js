@@ -3,6 +3,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'url';
+import { restoreDatabase, startAutoBackup, startUploadsSync } from './db_persist.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..', '..');
@@ -13,7 +14,13 @@ const UPLOAD_DIR = path.resolve(process.env.FORUM_UPLOAD_DIR || path.join(DATA_D
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
+// Si el disco está vacío (primer arranque en Render tras un despliegue),
+// recuperamos cuentas y vehículos de la copia en la nube antes de abrir.
+await restoreDatabase(DB_PATH);
+
 export const db = new DatabaseSync(DB_PATH);
+startAutoBackup(db, DB_PATH);
+await startUploadsSync(UPLOAD_DIR, 'files/foro');
 
 db.exec(`
   PRAGMA journal_mode = WAL;

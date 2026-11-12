@@ -3,6 +3,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'url';
+import { restoreDatabase, startAutoBackup } from './db_persist.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..', '..');
@@ -17,7 +18,10 @@ const DB_PATH = path.resolve(process.env.TUTORIAL_DB_PATH || (
 
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
+await restoreDatabase(DB_PATH);
+
 export const tutorialsDb = new DatabaseSync(DB_PATH);
+startAutoBackup(tutorialsDb, DB_PATH);
 
 tutorialsDb.exec(`
   PRAGMA journal_mode = WAL;

@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
 import { db, cleanText } from './forum_db.js';
+import { startUploadsSync } from './db_persist.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..', '..');
@@ -11,6 +12,9 @@ const UPLOAD_DIR = path.resolve(process.env.GARAGE_UPLOAD_DIR || path.join(ROOT,
 const RELIABILITY_PATH = path.join(ROOT, 'data', 'engine-reliability.json');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+// Fotos y facturas del garaje: se recuperan y se copian a la nube.
+await startUploadsSync(UPLOAD_DIR, 'files/garaje');
 
 export const MAINTENANCE_ITEMS = [
   ['aceite', 'Aceite y filtro de aceite'],

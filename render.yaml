@@ -30,7 +30,14 @@ services:
         value: eur
       - key: REPORT_PRODUCT_NAME
         value: Informe técnico PRO
+      # Copia de seguridad de la base de datos y de los archivos subidos.
+      # En el plan Free el disco se borra en cada despliegue: esto es lo que
+      # conserva las cuentas, los coches y las facturas entre versiones.
+      - key: DB_BACKUP_BUCKET
+        value: mecanica-db
       # Secretas — añadir SOLO en el panel de Render (Environment), nunca aquí:
+      # SUPABASE_URL=https://xxxx.supabase.co
+      # SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
       # STRIPE_SECRET_KEY=sk_live_...        (clave Live, no de test, para cobrar de verdad)
       # STRIPE_WEBHOOK_SECRET=whsec_...      (webhook Live de /api/payments/webhook)
       # AWIN_PUBLISHER_ID=                    (cuando te des de alta en Awin)
