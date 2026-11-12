@@ -3533,18 +3533,6 @@ body {
   padding: 14px;
   background: #f5f7f8;
 }
-.product.has-photo .product-media::before {
-  content: "";
-  position: absolute;
-  inset: -12%;
-  z-index: 0;
-  background-image: var(--photo);
-  background-size: cover;
-  background-position: center;
-  filter: blur(26px) saturate(.85);
-  opacity: .34;
-  transform: scale(1.1);
-}
 .product-no-photo { display: none; }
 .product.photo-failed .product-no-photo {
   position: relative;

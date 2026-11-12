@@ -1693,7 +1693,7 @@ function catalogProductCard(p) {
     : `<span class="btn ghost" title="Enlace de vendedor no disponible">Enlace pendiente ${icon('search')}</span>`;
   const shop = p.seller || (hasRealLink ? 'Tienda' : 'Sin vendedor');
   return `
-    <article class="product${hasImage ? ' has-photo' : ''}" data-product-card="${esc(p.id)}"${hasImage ? ` style="--photo:url('${esc(p.image)}')"` : ''}>
+    <article class="product${hasImage ? ' has-photo' : ''}" data-product-card="${esc(p.id)}">
       <div class="product-media">${media}<span class="product-no-photo" aria-hidden="true">${icon(productIcon(p.category))}</span></div>
       <div class="product-body">
         <div class="product-kicker">
