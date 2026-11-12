@@ -671,6 +671,13 @@ select option { background: #0b0a1e; }
 }
 .bubble.assistant { background: rgba(14, 12, 40, .96); border-color: rgba(167, 139, 250, .18); border-left-color: var(--cyan); }
 .bubble.user { background: rgba(48, 27, 98, .92); border-color: rgba(167, 139, 250, .34); border-right-color: var(--violet-2); }
+.chat-meta { display: block; margin-top: 7px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.chat-ai-head { margin-bottom: 9px; color: var(--cyan); font: 700 9px var(--mono); letter-spacing: .13em; }
+.web-reference-list { display: grid; gap: 7px; }
+.web-reference { display: grid; gap: 2px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255, 255, 255, .025); color: var(--text); text-decoration: none; }
+.web-reference:hover { border-color: rgba(34, 211, 238, .4); background: rgba(34, 211, 238, .05); }
+.web-reference strong { font-size: 12.5px; line-height: 1.35; }
+.web-reference small { color: var(--muted); font-size: 10.5px; line-height: 1.45; }
 .chat-form { background: #070615; }
 .chat-form input { border-color: rgba(34, 211, 238, .24); }
 .report-preview {

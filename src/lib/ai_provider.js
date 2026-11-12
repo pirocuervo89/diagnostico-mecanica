@@ -336,6 +336,125 @@ async function callOpenAICompatible(provider, prompt, opts) {
   }
 }
 
+// Pollinations tiene tres puertas distintas al mismo modelo gratuito. Cada una
+// falla por su cuenta: el POST /openai se encola a veces durante segundos, el
+// GET de texto responde por otra ruta y, si la IP del servidor está limitada,
+// un proxy público hace la petición desde otra IP. Se prueban en ese orden
+// dentro del mismo proveedor para que una sola puerta caída no deje la web sin
+// análisis de IA.
+function compactForUrl(prompt, max = 1700) {
+  const text = String(prompt || '').replace(/\s+/g, ' ').trim();
+  if (text.length <= max) return text;
+  const head = text.slice(0, 500);
+  const tail = text.slice(-(max - 520));
+  return `${head} … ${tail}`;
+}
+
+function parsePollinationsText(raw) {
+  const text = String(raw || '').trim();
+  if (!text) return '';
+  if (text.startsWith('{') || text.startsWith('[')) {
+    try {
+      const data = JSON.parse(text);
+      return String(data?.choices?.[0]?.message?.content || data?.text || '').trim();
+    } catch { /* texto plano */ }
+  }
+  return text;
+}
+
+async function pollinationsRoute(provider, prompt, opts, route) {
+  const timeoutMs = Math.max(2000, Number(opts.timeoutMs) || 8000);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  // El preset guarda la URL completa del endpoint OpenAI; para el POST se le
+  // añade /chat/completions igual que a cualquier proveedor compatible.
+  const base = String(opts.baseUrl || provider.baseUrl || 'https://text.pollinations.ai/openai')
+    .replace(/\/+$/, '')
+    .replace(/\/chat\/completions$/, '')
+    .replace(/\/openai$/, '');
+
+  try {
+    let url;
+    let init;
+    if (route === 'post') {
+      // Pollinations expone el formato OpenAI en /openai; una URL base de
+      // pruebas tipo .../v1 usa la ruta estándar /chat/completions.
+      url = /\/v\d+$/i.test(base) ? `${base}/chat/completions` : `${base}/openai`;
+      init = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: provider.model,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: opts.temperature ?? 0.35,
+          max_tokens: Math.min(Number(opts.maxOutputTokens) || 1600, 2400),
+          stream: false
+        })
+      };
+    } else {
+      const textBase = String(opts.textBaseUrl || 'https://text.pollinations.ai').replace(/\/+$/, '');
+      const textUrl = `${textBase}/${encodeURIComponent(compactForUrl(prompt))}?model=${encodeURIComponent(provider.model)}`;
+      url = route === 'proxy'
+        ? `https://api.allorigins.win/raw?url=${encodeURIComponent(textUrl)}`
+        : textUrl;
+      init = { method: 'GET', headers: { 'Accept': 'text/plain,application/json' } };
+    }
+
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    if (!response.ok) {
+      console.warn(`[IA] Pollinations ruta ${route} respondió ${response.status}; siguiente ruta.`);
+      return { ok: false, route, status: response.status, reason: classifyError(response.status) };
+    }
+    const raw = await response.text();
+    const text = parsePollinationsText(raw);
+    if (!text) return { ok: false, route, reason: 'empty' };
+    if (/free limit reached|rate limit|too many requests|quota exceeded|payment required/i.test(text) && text.length < 400) {
+      return { ok: false, route, reason: 'quota', message: text.slice(0, 120) };
+    }
+    return { ok: true, route, text };
+  } catch (err) {
+    return { ok: false, route, reason: err.name === 'AbortError' ? 'timeout' : 'network' };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function callPollinationsFree(provider, prompt, opts) {
+  const env = opts.env || process.env;
+  const proxyOff = ['0', 'false', 'off', 'no'].includes(String(env.POLLINATIONS_PROXY ?? '').trim().toLowerCase());
+  // Las rutas GET solo tienen sentido contra el Pollinations real: con una URL
+  // de pruebas propia (servidor local) se usa únicamente el POST.
+  const realPollinations = /pollinations\.ai/i.test(String(provider.baseUrl || '')) || Boolean(opts.textBaseUrl);
+  const routes = realPollinations ? ['post', 'get', ...(proxyOff ? [] : ['proxy'])] : ['post'];
+  const started = Date.now();
+  const budget = Math.max(6000, Math.min(Number(opts.timeoutMs) || 18000, 26000));
+  const tried = [];
+
+  for (const route of routes) {
+    const left = budget - (Date.now() - started);
+    if (left < 2500) { tried.push({ route, reason: 'deadline' }); break; }
+    const share = route === 'post' ? Math.min(left, 9000) : Math.min(left, 9000);
+    const result = await pollinationsRoute(provider, prompt, { ...opts, timeoutMs: share }, route);
+    if (result.ok) {
+      clearCooldown(provider);
+      return {
+        ok: true,
+        text: result.text,
+        finishReason: 'STOP',
+        model: provider.model,
+        provider: provider.id,
+        providerLabel: route === 'post' ? provider.label : `${provider.label} · ruta ${route === 'get' ? 'texto' : 'espejo'}`
+      };
+    }
+    tried.push({ route, reason: result.reason || 'provider_error', status: result.status });
+  }
+
+  const quota = tried.every(t => t.reason === 'quota');
+  const reason = tried.some(t => t.reason === 'quota') ? 'quota' : (tried.some(t => t.reason === 'timeout') ? 'timeout' : 'provider_error');
+  setCooldown(provider, quota ? 'quota' : reason);
+  return { ok: false, reason, message: `Pollinations: ${tried.map(t => `${t.route}:${t.reason}`).join(', ')}`, errors: tried };
+}
+
 async function callGemini(provider, prompt, opts) {
   const { temperature = 0.4, maxOutputTokens = 4096, timeoutMs = 15000 } = opts;
   const url = `${provider.baseUrl.replace(/\/+$/, '')}/models/${encodeURIComponent(provider.model)}:generateContent`;
@@ -581,7 +700,7 @@ export async function callAIVision(prompt, imageDataUrl, opts = {}) {
 // a menudo, contesta con el aviso de límite (o tarda hasta un minuto). Se lleva
 // un control global para no gastar el turno en vano: mejor caer al motor local
 // al instante que hacer esperar al usuario.
-const FREE_MIN_INTERVAL_MS = 45 * 1000;
+const FREE_MIN_INTERVAL_MS = 12 * 1000;
 let lastFreeCallAt = 0;
 
 /** Marca el hueco libre de Pollinations (útil en tests y tras un reinicio). */
@@ -618,7 +737,8 @@ export async function callAI(prompt, opts = {}) {
     const requestedMax = Number(opts.maxOutputTokens) || 1200;
     // Un proveedor gratuito que no contesta en 12 s está en cola: seguir
     // esperando solo alarga la pantalla. Se corta y se cae al motor local.
-    const hardCap = provider.free ? 12000 : 20000;
+    // Las tres rutas gratuitas (POST, texto y espejo) se reparten este tope.
+    const hardCap = provider.free ? 22000 : 20000;
     const wantedTimeout = provider.free
       ? Math.max(Number(opts.timeoutMs) || 0, requestedMax > 600 ? 24000 : 16000)
       : (Number(opts.timeoutMs) || 15000);
@@ -629,7 +749,9 @@ export async function callAI(prompt, opts = {}) {
     };
     const result = provider.kind === 'gemini'
       ? await callGemini(provider, prompt, effectiveOpts)
-      : await callOpenAICompatible(provider, prompt, effectiveOpts);
+      : (provider.id === 'pollinations'
+        ? await callPollinationsFree(provider, prompt, { ...effectiveOpts, env })
+        : await callOpenAICompatible(provider, prompt, effectiveOpts));
     if (provider.free) lastFreeCallAt = Date.now();
     if (result.ok) return result;
     attempts.push({ provider: provider.id, reason: result.reason, status: result.status });

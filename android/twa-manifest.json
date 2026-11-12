@@ -20,8 +20,8 @@
     "path": "./android.keystore",
     "alias": "android"
   },
-  "appVersion": "1.2.0",
-  "appVersionCode": 3,
+  "appVersion": "1.4.0",
+  "appVersionCode": 5,
   "shortcuts": [
     {
       "name": "Mi garaje",

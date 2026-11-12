@@ -1310,6 +1310,10 @@ function renderProducts(category) {
     const cta = hasRealLink
       ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Ver oferta ${icon('external')}</a>`
       : `<span class="btn ghost" title="Enlace pendiente: no se localizó una ficha de vendedor verificada">Enlace pendiente ${icon('search')}</span>`;
+    // Segunda tienda con la que se puede comparar el precio del mismo recambio.
+    const autodocLink = /^https?:\/\//i.test(String(p.autodocUrl || ''))
+      ? `<a class="btn ghost" href="${esc(p.autodocUrl)}" target="_blank" rel="sponsored nofollow noopener noreferrer" title="Ver recambios en Autodoc (elige coche y pieza)">Autodoc ${icon('external')}</a>`
+      : '';
 
     return `
       <article class="product">
@@ -1326,6 +1330,7 @@ function renderProducts(category) {
           <div class="product-foot">
             <span class="product-price${/\d/.test(String(p.price || '')) ? '' : ' pending'}" title="${esc(p.priceSource || 'Precio del catálogo')}" data-price-id="${esc(p.id)}"><small>${esc(priceCaption(p))}</small><span class="price-value">${esc(p.price || 'Consultar precio')}</span></span>
             ${cta}
+            ${autodocLink}
           </div>
           <button class="product-sheet-link" type="button" data-product-id="${esc(p.id)}">Ver ficha y compatibilidad ${icon('arrow')}</button>
         </div>
@@ -1385,6 +1390,124 @@ function addBubble(content, type = 'assistant', isHtml = false) {
   return bubble;
 }
 
+// Lleva la vista al inicio de la respuesta, no al final del chat. En móvil el
+// foco del input y el scroll interno hacían que el usuario empezara a leer por
+// el final y tuviera que subir toda la página.
+function scrollToBubbleStart(bubble) {
+  if (!bubble) return;
+  requestAnimationFrame(() => {
+    if (chatBox && chatBox.scrollHeight > chatBox.clientHeight + 8) {
+      const boxTop = chatBox.getBoundingClientRect().top;
+      const bubbleTop = bubble.getBoundingClientRect().top;
+      chatBox.scrollTop = Math.max(0, chatBox.scrollTop + bubbleTop - boxTop - 10);
+    }
+    const top = bubble.getBoundingClientRect().top + window.scrollY - 86;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  });
+}
+
+function chatMeta(res, fallback = 'Respuesta del motor experto local.') {
+  const fromAI = res?.source === 'ai_provider' || res?.source === 'gemini_ai';
+  if (fromAI) {
+    const label = res.provider_label ? `Respuesta generada por IA (${esc(res.provider_label)}).` : 'Respuesta generada por IA.';
+    return `<small class="chat-meta">${label}</small>`;
+  }
+  if (res?.ai_pending) {
+    return '<small class="chat-meta">Respuesta rápida del motor experto. Ampliando con IA y fuentes…</small>';
+  }
+  return `<small class="chat-meta">${fallback}</small>`;
+}
+
+function renderChatExtras(res) {
+  if (!chatForumRefs) return;
+  const forum = Array.isArray(res?.forum_references) ? res.forum_references : [];
+  const web = Array.isArray(res?.web_references) ? res.web_references : [];
+  const forumPanel = forum.length ? `
+    <div class="panel recommended-panel">
+      <div class="panel-head">
+        <div><span class="eyebrow">CONOCIMIENTO DEL FORO</span><h3>Casos reales relacionados</h3></div>
+        <span class="tag">${icon('forum')} Referencias internas</span>
+      </div>
+      <div class="forum-reference-list">
+        ${forum.map(ref => `
+          <button class="forum-reference" type="button" data-forum-ref="${ref.id}">
+            <span class="forum-ref">${esc(ref.ref)} · ${esc(ref.confidence)}</span>
+            <strong>${esc(ref.title)}</strong>
+            <small>${esc(ref.vehicle || 'Vehículo no indicado')} · ${(ref.dtcs || []).map(esc).join(', ') || 'Sin DTC'}</small>
+          </button>`).join('')}
+      </div>
+      <p class="forum-note">Solo se muestran casos guardados en esta instalación. La confianza depende de la coincidencia y de si la solución está verificada.</p>
+    </div>` : '';
+  const webPanel = web.length ? `
+    <div class="panel recommended-panel web-refs-panel">
+      <div class="panel-head">
+        <div><span class="eyebrow">FUENTES CONSULTADAS</span><h3>Foros y web recientes</h3></div>
+        <span class="tag">${icon('search')} ${web.length} fuentes</span>
+      </div>
+      <div class="web-reference-list">
+        ${web.map(ref => `
+          <a class="web-reference" href="${esc(ref.url)}" target="_blank" rel="nofollow noopener noreferrer">
+            <span class="forum-ref">${esc(ref.domain || 'web')}</span>
+            <strong>${esc(ref.title || ref.url)}</strong>
+            <small>${esc(ref.snippet || 'Sin extracto disponible.')}</small>
+          </a>`).join('')}
+      </div>
+      <p class="forum-note">Resultados externos no verificados. Úsalos como pistas y confirma siempre con la ficha del motor y pruebas de taller.</p>
+    </div>` : '';
+  chatForumRefs.innerHTML = forumPanel + webPanel;
+  if (Array.isArray(res?.productos_recomendados) && res.productos_recomendados.length && chatRecomendados) {
+    const groupLabels = {
+      herramienta: 'Herramientas y equipos',
+      diagnostico: 'Diagnóstico',
+      repuesto: 'Repuestos',
+      limpieza_quimico: 'Limpieza y químicos',
+      mantenimiento: 'Mantenimiento'
+    };
+    const groups = {};
+    res.productos_recomendados.forEach(prod => {
+      const key = prod.group || prod.productType || 'herramienta';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(prod);
+    });
+    const order = ['herramienta', 'diagnostico', 'repuesto', 'limpieza_quimico', 'mantenimiento'];
+    const grouped = order.filter(k => groups[k] && groups[k].length).map(k => `
+      <div class="recommended-group">
+        <h4>${groupLabels[k] || 'Productos'}</h4>
+        ${groups[k].map(prod => {
+          const link = (prod.linkStatus === 'verified' && prod.affiliateUrl) ? prod.affiliateUrl : '';
+          const hasLink = /^https?:\/\//i.test(link);
+          const hasImage = prod.imageStatus === 'verified' && !!prod.image;
+          const media = hasImage
+            ? `<img class="recommended-photo" src="${esc(prod.image)}" alt="${esc(prod.name)}" loading="lazy">`
+            : `<span class="recommended-ico" title="Foto pendiente">${icon(productIcon(prod.category))}</span>`;
+          const note = prod.compatibilityNote || prod.reason || 'Comprueba la compatibilidad antes de comprar.';
+          const inner = `
+            ${media}
+            <span class="recommended-info">
+              <b>${esc(prod.name)}</b>
+              <small>${esc(prod.price || 'Consultar')}${hasLink ? '' : ' · Enlace pendiente'}</small>
+              <em>${esc(note)}</em>
+            </span>
+            ${hasLink ? icon('external') : icon('search')}
+          `;
+          return hasLink
+            ? `<a class="recommended-item" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer" title="${esc(note)}">${inner}</a>`
+            : `<span class="recommended-item pending" title="${esc(note)}">${inner}</span>`;
+        }).join('')}
+      </div>
+    `).join('');
+    chatRecomendados.innerHTML = `
+      <div class="panel recommended-panel">
+        <div class="panel-head">
+          <div><span class="eyebrow">PRODUCTOS RECOMENDADOS</span><h3>Según la avería y el vehículo</h3></div>
+          <span class="tag">${icon('wrench')} Del catálogo</span>
+        </div>
+        <div class="recommended-list">${grouped}</div>
+      </div>
+    `;
+  }
+}
+
 async function submitChat(text) {
   const query = String(text || '').trim();
   if (!query || chatBusy) return;
@@ -1398,9 +1521,9 @@ async function submitChat(text) {
   if (chatForumRefs) chatForumRefs.innerHTML = '';
 
   const thinkingBubble = addBubble('<i></i><i></i><i></i>', 'assistant typing', true);
+  if (chatInput) chatInput.blur();
 
   try {
-    const reqStart = Date.now();
     const payload = {
       message: query,
       context: {
@@ -1418,84 +1541,38 @@ async function submitChat(text) {
     });
 
     if (thinkingBubble) thinkingBubble.remove();
-    const fromAI = res.source === 'ai_provider' || res.source === 'gemini_ai';
-    const aiLabel = res.provider_label ? `Respuesta generada por IA (${esc(res.provider_label)}).` : 'Respuesta generada por IA.';
-    const meta = fromAI
-      ? `<small style="color:var(--muted);display:block;margin-top:6px;">${aiLabel}</small>`
-      : '<small style="color:var(--muted);display:block;margin-top:6px;">Respuesta del motor experto local.</small>';
-    addBubble(formatMarkdown(res.reply) + meta, 'assistant', true);
+    const localBubble = addBubble(formatMarkdown(res.reply || '') + chatMeta(res), 'assistant', true);
+    renderChatExtras(res);
+    scrollToBubbleStart(localBubble);
 
-    if (Array.isArray(res.forum_references) && res.forum_references.length && chatForumRefs) {
-      chatForumRefs.innerHTML = `
-        <div class="panel recommended-panel">
-          <div class="panel-head">
-            <div><span class="eyebrow">CONOCIMIENTO DEL FORO</span><h3>Casos reales relacionados</h3></div>
-            <span class="tag">${icon('forum')} Referencias internas</span>
-          </div>
-          <div class="forum-reference-list">
-            ${res.forum_references.map(ref => `
-              <button class="forum-reference" type="button" data-forum-ref="${ref.id}">
-                <span class="forum-ref">${esc(ref.ref)} · ${esc(ref.confidence)}</span>
-                <strong>${esc(ref.title)}</strong>
-                <small>${esc(ref.vehicle || 'Vehículo no indicado')} · ${(ref.dtcs || []).map(esc).join(', ') || 'Sin DTC'}</small>
-              </button>`).join('')}
-          </div>
-          <p class="forum-note">Solo se muestran casos guardados en esta instalación. La confianza depende de la coincidencia y de si la solución está verificada.</p>
-        </div>`;
-    }
-
-    if (Array.isArray(res.productos_recomendados) && res.productos_recomendados.length && chatRecomendados) {
-      const groupLabels = {
-        herramienta: 'Herramientas y equipos',
-        diagnostico: 'Diagnóstico',
-        repuesto: 'Repuestos',
-        limpieza_quimico: 'Limpieza y químicos',
-        mantenimiento: 'Mantenimiento'
-      };
-      const groups = {};
-      res.productos_recomendados.forEach(prod => {
-        const key = prod.group || prod.productType || 'herramienta';
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(prod);
-      });
-      const order = ['herramienta', 'diagnostico', 'repuesto', 'limpieza_quimico', 'mantenimiento'];
-      const grouped = order.filter(k => groups[k] && groups[k].length).map(k => `
-        <div class="recommended-group">
-          <h4>${groupLabels[k] || 'Productos'}</h4>
-          ${groups[k].map(prod => {
-            const link = (prod.linkStatus === 'verified' && prod.affiliateUrl) ? prod.affiliateUrl : '';
-            const hasLink = /^https?:\/\//i.test(link);
-            const hasImage = prod.imageStatus === 'verified' && !!prod.image;
-            const media = hasImage
-              ? `<img class="recommended-photo" src="${esc(prod.image)}" alt="${esc(prod.name)}" loading="lazy">`
-              : `<span class="recommended-ico" title="Foto pendiente">${icon(productIcon(prod.category))}</span>`;
-            const note = prod.compatibilityNote || prod.reason || 'Comprueba la compatibilidad antes de comprar.';
-            const inner = `
-              ${media}
-              <span class="recommended-info">
-                <b>${esc(prod.name)}</b>
-                <small>${esc(prod.price || 'Consultar')}${hasLink ? '' : ' · Enlace pendiente'}</small>
-                <em>${esc(note)}</em>
-              </span>
-              ${hasLink ? icon('external') : icon('search')}
-            `;
-            return hasLink
-              ? `<a class="recommended-item" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer" title="${esc(note)}">${inner}</a>`
-              : `<span class="recommended-item pending" title="${esc(note)}">${inner}</span>`;
-          }).join('')}
-        </div>
-      `).join('');
-      chatRecomendados.innerHTML = `
-        <div class="panel recommended-panel">
-          <div class="panel-head">
-            <div><span class="eyebrow">PRODUCTOS RECOMENDADOS</span><h3>Según la avería y el vehículo</h3></div>
-            <span class="tag">${icon('wrench')} Del catálogo</span>
-          </div>
-          <div class="recommended-list">
-            ${grouped}
-          </div>
-        </div>
-      `;
+    // El backend nuevo responde primero con el motor experto y deja la IA en
+    // segundo plano. Así el usuario empieza a leer al instante.
+    if (res.ai_pending) {
+      const aiThinking = addBubble('<i></i><i></i><i></i>', 'assistant typing', true);
+      try {
+        const aiRes = await api('/api/chat/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (aiThinking) aiThinking.remove();
+        if (aiRes?.source === 'ai_provider' && aiRes.reply) {
+          const aiBubble = addBubble(
+            `<div class="chat-ai-head">ANÁLISIS IA CONTRASTADO</div>${formatMarkdown(aiRes.reply)}${chatMeta(aiRes)}`,
+            'assistant',
+            true
+          );
+          renderChatExtras(aiRes);
+          scrollToBubbleStart(aiBubble);
+        } else {
+          const meta = localBubble?.querySelector('.chat-meta');
+          if (meta) meta.textContent = 'La IA no está disponible ahora. Se mantiene el diagnóstico del motor experto local.';
+        }
+      } catch (err) {
+        if (aiThinking) aiThinking.remove();
+        const meta = localBubble?.querySelector('.chat-meta');
+        if (meta) meta.textContent = 'No se pudo ampliar con IA; se mantiene la respuesta del motor experto local.';
+      }
     }
   } catch (err) {
     if (thinkingBubble) thinkingBubble.remove();

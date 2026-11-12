@@ -10,6 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { autodocUrlFor } from './tiendas.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const DATA = path.join(ROOT, 'data');
@@ -166,7 +167,13 @@ export function productMeta() {
       'Ficha con precio comprobado, fotografía y enlace al vendedor.'
     );
     if (descriptions.has(description)) description = fillDescription(`${name}${brand ? ` (${brand})` : ''}. ${description}`, 'Consulta precio y compatibilidad.');
-    if (descriptions.has(description)) description = clip(`${description} Ref. ${item.asin || item.id}.`, MAX_DESC);
+    if (descriptions.has(description)) {
+      // El sufijo debe ir dentro del límite, no después de recortar: si se
+      // recortaba al final, dos descripciones largas volvían a quedar iguales.
+      const ref = String(item.asin || item.id).replace(/^amz-/, '').slice(-6).toUpperCase();
+      const suffix = ` · Ref. ${ref}`;
+      description = `${description.slice(0, Math.max(50, MAX_DESC - suffix.length)).trim()}${suffix}`;
+    }
     descriptions.add(description);
 
     map.set(item.id, { title, description });
@@ -263,6 +270,8 @@ function layout({ title, description, canonical, image, robots, jsonLd, crumbs, 
     .seo-buy { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: #0b0b12; font-weight: 700;
       padding: 12px 18px; border-radius: 10px; text-decoration: none; margin: 4px 0 10px; }
     .seo-buy:hover { color: #0b0b12; filter: brightness(1.08); }
+    .seo-buy-alt { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .seo-buy-alt:hover { color: #0b0b12; background: var(--accent); }
     .seo-note { font-size: 12.5px; color: var(--muted-2); line-height: 1.55; margin: 10px 0 0; }
     .seo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; padding: 0; margin: 16px 0 0; list-style: none; }
     .seo-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
@@ -346,6 +355,7 @@ export function productPage(id) {
   const price = money(item.price);
   const canonical = abs(`/producto/${item.id}`);
   const buy = item.affiliateUrl ? affiliateUrl(item.affiliateUrl) : '';
+  const autodoc = autodocUrlFor(item);
   const description = (productMeta().get(item.id) || {}).description
     || clip(item.description || `${item.name} de ${item.manufacturer || 'fabricante'}.`, MAX_DESC);
   const checked = item.priceCheckedAt ? fmtDate(item.priceCheckedAt) : '';
@@ -415,6 +425,7 @@ export function productPage(id) {
         ${price ? `<p class="seo-price">${esc(price.display)}</p>` : '<p class="seo-price" style="color:var(--warn)">Precio no disponible</p>'}
         <p class="seo-meta">${item.seller ? `${esc(item.seller)}` : ''}${checked ? `${item.seller ? ' · ' : ''}Precio comprobado el ${esc(checked)}` : ''}</p>
         ${buy ? `<a class="seo-buy" href="${esc(buy)}" target="_blank" rel="sponsored nofollow noopener">Ver oferta en ${esc(item.seller || 'la tienda')} →</a>` : ''}
+        ${autodoc ? `<a class="seo-buy seo-buy-alt" href="${esc(autodoc)}" target="_blank" rel="sponsored nofollow noopener">Comparar precio en Autodoc →</a>` : ''}
         ${item.compatibility?.note ? `<p class="seo-note">${esc(item.compatibility.note)}</p>` : ''}
         <p class="seo-note">El importe puede cambiar en la tienda. La referencia válida es la del vendedor en el momento de la compra.</p>
       </div>

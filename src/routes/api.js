@@ -10,6 +10,7 @@ import { searchWebContext, searchForumContext, researchSources } from '../lib/we
 import { listTutorials } from '../lib/tutorial_db.js';
 import { scanVehicleDocument } from '../lib/document_scan.js';
 import { findEquivalents, sizeSummary, rimWidthRange, checkWheelFit } from '../lib/tyres.js';
+import { autodocUrlFor, autodocSearch } from '../lib/tiendas.js';
 
 // Búsqueda insensible a mayúsculas y acentos.
 const fold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -46,7 +47,12 @@ function withAffiliateTag(url) {
 
 function tagItem(item) {
   if (!item || typeof item !== 'object') return item;
-  const next = item.affiliateUrl ? { ...item, affiliateUrl: withAffiliateTag(item.affiliateUrl) } : item;
+  let next = item.affiliateUrl ? { ...item, affiliateUrl: withAffiliateTag(item.affiliateUrl) } : item;
+  // Segunda tienda: cada recambio ofrece Amazon y Autodoc (Awin).
+  if (item.id && item.name && !item.autodocUrl) {
+    const extra = autodocUrlFor(item);
+    if (extra) next = { ...next, autodocUrl: extra };
+  }
   if (Array.isArray(next.links) && next.links.length) {
     return {
       ...next,
@@ -1576,14 +1582,34 @@ function resolveChatContext(query, inputContext = {}) {
     context.buyingGuide = vehicleRecord.buyingGuide || null;
   }
 
-  // Sin vehículo identificado, se ofrecen los motores que encajan con lo que pide el usuario.
+  // Sin vehículo identificado, se busca el motor por marcas, familia y códigos.
+  // No se usan palabras genéricas como "correa" o "cadena": provocaban que una
+  // consulta de BMW acabara en la ficha de un Hyundai solo por mencionar "correa".
   if (!context.engineReliability) {
     const q = fold(query);
-    const candidate = readEngineReliability().engines.find(e => {
-      const tokens = fold(`${e.family} ${e.commercial} ${e.codes || ''} ${e.brand}`).split(/\s+/).filter(t => t.length > 3);
-      return tokens.some(t => q.includes(t));
-    });
-    if (candidate) context.engineReliability = reliabilityContext(candidate, query);
+    const generic = new Set([
+      'correa', 'correas', 'cadena', 'cadenas', 'distribucion', 'bomba', 'bombas',
+      'aceite', 'motor', 'motores', 'diesel', 'gasolina', 'turbo', 'inyeccion',
+      'caja', 'automatica', 'manual', 'version', 'generacion', 'confirmar', 'segun',
+      'modelo', 'anos', 'sistema', 'sistemas', 'cambio', 'cambios', 'ruido', 'ruidos',
+      'averia', 'problema', 'fallo', 'fallos', 'coche', 'vehiculo', 'taller',
+      'common', 'rail', 'inyector', 'inyectores', 'bujia', 'bujias', 'filtro',
+      'filtros', 'embrague', 'dpf', 'egr', 'fap', 'revision', 'mantenimiento'
+    ]);
+    const tokensOf = value => [...new Set(fold(value).split(/\W+/).filter(t => t.length >= 3 && !generic.has(t)))];
+    const scored = readEngineReliability().engines.map(engine => {
+      let score = 0;
+      for (const token of tokensOf(engine.brand)) if (q.includes(token)) score += 5;
+      for (const token of tokensOf(engine.family)) if (q.includes(token)) score += 4;
+      for (const token of tokensOf(engine.codes || '')) if (q.includes(token)) score += 3;
+      for (const token of tokensOf(engine.commercial)) if (q.includes(token)) score += 1;
+      return { engine, score };
+    }).sort((a, b) => b.score - a.score);
+    const best = scored[0];
+    const second = scored[1];
+    if (best && best.score >= 4 && best.score > (second?.score || 0)) {
+      context.engineReliability = reliabilityContext(best.engine, query);
+    }
   }
 
   return { context, vehicleRecord };
@@ -1596,10 +1622,12 @@ function chatRecommendations(query, context) {
   } catch (e) {
     console.error('Error al filtrar productos:', e);
   }
-  return Array.isArray(recomendados) ? recomendados : [];
+  if (!Array.isArray(recomendados)) return [];
+  // Cada recomendación lleva también la búsqueda en Autodoc (segunda tienda).
+  return recomendados.map(item => ({ ...item, autodocUrl: item.autodocUrl || autodocUrlFor(item) }));
 }
 
-const MAX_AI_REPLY_WORDS = 700;
+const MAX_AI_REPLY_WORDS = 500;
 
 /** Corta la respuesta al límite de palabras, sin partir la última frase si se puede. */
 function limitReplyWords(text, max = MAX_AI_REPLY_WORDS) {
@@ -1657,7 +1685,7 @@ function chatAiPrompt({ query, context, forumBlock, webReferences }) {
     obtenerSystemPrompt(),
     '',
     '### Reglas obligatorias de esta respuesta',
-    `- Responde en español y no superes ${MAX_AI_REPLY_WORDS} palabras.`,
+    `- Responde en español, sin tablas, con listas cortas, y no superes ${MAX_AI_REPLY_WORDS} palabras.`,
     '- Distingue hechos (datos leídos o documentados) de hipótesis. No inventes códigos, valores, intervalos, compatibilidades ni averías.',
     '- Prioriza comprobaciones baratas y reversibles (inspección visual, niveles, escáner, multímetro, pruebas de vacío) antes de recomendar cambiar piezas.',
     '- Si hay ficha de motor, usa exclusivamente sus datos; no mezcles motores, generaciones ni tipos de distribución.',
@@ -1798,6 +1826,17 @@ router.post('/chat/ai', async (req, res) => {
   });
 });
 
+function localCostText(cost) {
+  if (!cost) return '';
+  if (typeof cost === 'string') return cost;
+  const bits = [];
+  if (cost.typical) bits.push(cost.typical);
+  if (cost.parts) bits.push(`piezas: ${cost.parts}`);
+  if (cost.labour) bits.push(`mano de obra: ${cost.labour}`);
+  if (!bits.length && cost.note) bits.push(cost.note);
+  return bits.join(' · ');
+}
+
 function buildReply(msg, ctx, dtcList) {
   const m = msg.toLowerCase();
   const context = [];
@@ -1860,7 +1899,7 @@ function buildReply(msg, ctx, dtcList) {
     const issueLines = chosen.map((i, n) => {
       const symptoms = Array.isArray(i.sintomas) && i.sintomas.length ? ` Síntomas: ${i.sintomas.slice(0, 3).join('; ')}.` : '';
       const checks = Array.isArray(i.comprobaciones) && i.comprobaciones.length ? ` Comprobar: ${i.comprobaciones.slice(0, 2).join('; ')}.` : '';
-      return `${n + 1}. **${i.titulo || 'Avería documentada'}** (${i.estado || 'estado no indicado'}, gravedad ${i.gravedad || 'no indicada'}).${symptoms}${checks}${i.costeOrientativo ? ` Coste orientativo: ${i.costeOrientativo}.` : ''}`;
+      return `${n + 1}. **${i.titulo || 'Avería documentada'}** (${i.estado || 'estado no indicado'}, gravedad ${i.gravedad || 'no indicada'}).${symptoms}${checks}${i.costeOrientativo ? ` Coste orientativo: ${localCostText(i.costeOrientativo)}.` : ''}`;
     }).join('\n');
     const acoustic = /ruido|sonido|golpeteo|traqueteo|vibraci|chirrido|silbido/.test(m);
     const intro = acoustic
@@ -2048,6 +2087,7 @@ router.post('/obd/analyze', async (req, res) => {
     console.error('Error al filtrar productos en OBD:', e);
   }
   if (!Array.isArray(recomendados)) recomendados = [];
+  recomendados = recomendados.map(item => ({ ...item, autodocUrl: item.autodocUrl || autodocUrlFor(item) }));
 
   const telemetrySummary = Object.entries(liveData).map(([k, v]) => {
     const val = typeof v === 'object' && v !== null ? `${v.value} ${v.unit || ''}` : String(v);
