@@ -3405,3 +3405,164 @@ body {
 }
 .catalog-notice-action:hover { border-color: rgba(34, 211, 238, .5); color: var(--cyan-2); }
 #view-productos [hidden] { display: none !important; }
+
+/* ============================================================
+   Portada 1.6: acciones grandes, escáneres 10/10 y fotos de producto
+   ============================================================ */
+
+/* ---------- Acciones de la portada ---------- */
+.home-actions {
+  position: relative;
+  z-index: 12;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 760px;
+  margin: 4px 0 22px;
+}
+.home-action {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 17px 18px 16px;
+  border: 1px solid rgba(167, 139, 250, .26);
+  border-radius: 14px;
+  background: linear-gradient(155deg, rgba(23, 19, 52, .92), rgba(8, 7, 24, .88));
+  box-shadow: 0 16px 40px rgba(2, 2, 12, .32), inset 0 1px 0 rgba(255, 255, 255, .05);
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.home-action:hover { border-color: rgba(167, 139, 250, .5); transform: translateY(-2px); box-shadow: 0 22px 50px rgba(2, 2, 12, .42); }
+.home-action-ai {
+  grid-column: span 2;
+  border-color: rgba(139, 92, 246, .5);
+  background:
+    radial-gradient(560px 240px at 8% -30%, rgba(139, 92, 246, .42), transparent 68%),
+    linear-gradient(150deg, rgba(26, 20, 62, .96), rgba(8, 7, 24, .92));
+}
+.home-action-kicker {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .16em;
+  color: #a9a3d6;
+}
+.home-action b { font-size: 17px; line-height: 1.25; color: #f5f3ff; letter-spacing: -.01em; }
+.home-action-ai b { font-size: clamp(1.15rem, 2.2vw, 1.5rem); }
+.home-action p { margin: 0; color: #b3afd2; font-size: 12.5px; line-height: 1.5; }
+.home-action-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.home-action .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; }
+.home-action-btn { width: 100%; margin-top: auto; }
+.home-action-link {
+  align-self: flex-start;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: #a9a3d6;
+  font: inherit;
+  font-size: 11.5px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.home-action-link:hover { color: #ddd6fe; }
+.home-action-shop { border-color: rgba(34, 211, 238, .26); }
+.home-action-shop .home-action-kicker { color: #7fd8e8; }
+
+@media (max-width: 720px) {
+  .home-actions { grid-template-columns: 1fr; gap: 10px; }
+  .home-action-ai { grid-column: span 1; }
+  .home-action { padding: 15px 15px 14px; }
+  .home-action-row .btn { flex: 1 1 140px; }
+}
+
+/* ---------- Escáneres DTC en portada ---------- */
+.home-scanners { margin: 0 0 18px; scroll-margin-top: calc(var(--topbar-h) + 16px); }
+.home-scanners .panel-head p { margin: 6px 0 0; color: #9d99bd; font-size: 12.5px; line-height: 1.55; max-width: 720px; }
+.home-scanner-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.home-scanner {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(34, 211, 238, .16);
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(15, 20, 34, .95), rgba(7, 9, 18, .98));
+}
+.home-scanner.cheapest { border-color: rgba(56, 239, 164, .4); box-shadow: 0 0 0 1px rgba(56, 239, 164, .12), 0 16px 40px rgba(0, 0, 0, .3); }
+.home-scanner-media {
+  display: grid;
+  place-items: center;
+  height: 128px;
+  padding: 12px;
+  background: radial-gradient(circle at 50% 40%, rgba(34, 211, 238, .1), transparent 70%), #f5f7f8;
+}
+.home-scanner-media img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.home-scanner-body { display: flex; flex-direction: column; gap: 5px; padding: 13px 14px 14px; }
+.home-scanner-rank {
+  align-self: flex-start;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(34, 211, 238, .12);
+  color: #8fe6f5;
+  font: 700 9px/1.2 var(--mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.home-scanner.cheapest .home-scanner-rank { background: rgba(56, 239, 164, .14); color: #9af3c8; }
+.home-scanner b { font-size: 14px; color: #f1eeff; line-height: 1.3; }
+.home-scanner small { color: #8e9aa5; font-size: 10.5px; }
+.home-scanner-badge { color: #9af3c8; font: 700 9.5px/1.3 var(--mono); letter-spacing: .04em; }
+.home-scanner-price { font-size: 21px; font-weight: 800; color: #f3f1ff; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.home-scanner .btn { margin-top: 8px; width: 100%; justify-content: center; font-size: 11.5px; padding: 9px 10px; }
+.home-scanner-note { margin: 12px 0 0; color: #7f7b9e; font-size: 10.5px; line-height: 1.5; }
+
+/* ---------- Fotos de producto: fondo desenfocado + pieza centrada ---------- */
+.product-media { height: 232px; }
+.product-media .product-photo {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  padding: 14px;
+  background: #f5f7f8;
+}
+.product.has-photo .product-media::before {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  background-image: var(--photo);
+  background-size: cover;
+  background-position: center;
+  filter: blur(26px) saturate(.85);
+  opacity: .34;
+  transform: scale(1.1);
+}
+.product-no-photo { display: none; }
+.product.photo-failed .product-no-photo {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  color: var(--violet-2);
+}
+.product.photo-failed .product-no-photo .ic { width: 44px; height: 44px; }
+@media (max-width: 560px) {
+  .home-scanner-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .home-scanner-media { height: 104px; padding: 8px; }
+  .home-scanner-body { padding: 10px 10px 11px; }
+  .home-scanner b { font-size: 12.5px; }
+  .home-scanner-price { font-size: 18px; }
+  .product-media { height: 240px; }
+}
+@media (max-width: 380px) {
+  .home-scanner-list { grid-template-columns: 1fr; }
+}

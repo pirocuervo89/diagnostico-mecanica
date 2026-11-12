@@ -225,10 +225,45 @@
     if (input) input.placeholder = value ? 'Te escucho… habla con naturalidad' : 'Ej.: Seat León 2.0 TDI da tirones en baja y marca código P0299...';
   }
 
-  function startRecognition() {
+  // Pide el permiso de micrófono de verdad antes de dictar. Sin esto, en
+  // Android el aviso del sistema no aparecía y el dictado fallaba en silencio.
+  async function ensureMicPermission() {
+    if (!window.isSecureContext) {
+      hint('El micrófono necesita HTTPS. Abre la web con https:// o usa la app.', 8000);
+      return false;
+    }
+    try {
+      const status = await navigator.permissions?.query?.({ name: 'microphone' });
+      if (status && status.state === 'denied') {
+        hint('Micrófono bloqueado. Toca el candado de la barra y permite el micrófono.', 9000);
+        return false;
+      }
+    } catch { /* Safari/Firefox no soportan esta consulta */ }
+    if (!navigator.mediaDevices?.getUserMedia) return true;
+    try {
+      hint('Acepta el permiso de micrófono que acaba de aparecer en tu teléfono…', 6000);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      return true;
+    } catch (err) {
+      const denied = err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
+      hint(denied
+        ? 'Micrófono denegado. Ajustes › Aplicaciones › Diagnóstico y Mecánica › Permisos › Micrófono.'
+        : 'No se pudo abrir el micrófono. Cierra la app que lo esté usando y reinténtalo.', 9000);
+      return false;
+    }
+  }
+
+  async function startRecognition() {
     const form = document.getElementById('chatForm');
     const input = document.getElementById('chatInput');
     if (!form || !input) return;
+    if (!Recognition) {
+      hint('Este navegador no permite dictado. Escribe tu consulta y la IA te responde igual.', 8000);
+      return;
+    }
+    const allowed = await ensureMicPermission();
+    if (!allowed) return;
 
     recognition = new Recognition();
     recognition.lang = lang;
@@ -253,7 +288,7 @@
     recognition.onerror = event => {
       setListening(false);
       const map = {
-        'not-allowed': 'Permiso de micrófono denegado. Actívalo en los ajustes del navegador.',
+        'not-allowed': 'Permiso de micrófono denegado. Actívalo en los ajustes del navegador o de la app.',
         'service-not-allowed': 'El dictado no está disponible en este navegador.',
         'no-speech': 'No te he oído. Pulsa el micrófono y vuelve a hablar.',
         'audio-capture': 'No se encuentra el micrófono.',
@@ -353,6 +388,12 @@
     // Chrome carga las voces de forma asíncrona: se refresca el idioma elegido.
     if (synth) synth.onvoiceschanged = () => pickSpanishVoice();
   }
+
+  // La portada usa este botón para abrir el chat y dictar en un solo toque.
+  window.VozHablar = () => {
+    if (listening && recognition) return;
+    startRecognition();
+  };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

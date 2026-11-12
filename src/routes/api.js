@@ -2035,7 +2035,10 @@ router.get('/obd/protocols', (_req, res) => {
 
 router.get('/obd/scanners', (_req, res) => {
   const data = readJSON('diagnostic-scanners.json');
-  const items = Array.isArray(data.items) ? data.items.slice().sort((a, b) => a.rank - b.rank) : [];
+  // Los enlaces de compra también llevan la etiqueta de afiliado.
+  const items = Array.isArray(data.items)
+    ? data.items.slice().sort((a, b) => a.rank - b.rank).map(item => ({ ...item, url: withAffiliateTag(item.url) }))
+    : [];
   const priceOrder = items.slice().sort((a, b) => a.price - b.price).map(item => item.id);
   res.json({
     version: data.version || null,

@@ -597,7 +597,9 @@ test('obd/scanners: solo adaptadores web verificables, de más barato a más car
     assert.ok(item.name && item.brand && item.type, `${item.id} debe estar identificado`);
     assert.ok(item.price > 0, `${item.id} debe tener precio numérico`);
     assert.match(item.priceText, /€/);
-    assert.match(item.url, /^https:\/\/www\.amazon\.es\/dp\/[A-Z0-9]{10}$/);
+    // El enlace debe apuntar a la ficha real del producto; la etiqueta de
+    // afiliado se añade al responder y es opcional según la configuración.
+    assert.match(item.url, /^https:\/\/www\.amazon\.es\/dp\/[A-Z0-9]{10}(\?tag=[A-Za-z0-9-]+)?$/);
     assert.ok(existsSync(path.join(ROOT, 'public', item.image)), `${item.id} debe tener imagen local`);
     assert.ok(item.bestFor && item.limits.length, `${item.id} debe explicar uso y límites`);
     assert.ok(item.verification?.note, `${item.id} debe indicar cómo se verificó`);

@@ -46,6 +46,7 @@
   <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0 5 5L11 20a2.6 2.6 0 0 1-3.7-3.7l8.5-8.5a4 4 0 0 1-1.3-1.3Z"/><path d="m14.5 6.5 3-3"/></symbol>
   <symbol id="i-cart" viewBox="0 0 24 24"><path d="M4 8h16l-1.2 11H5.2L4 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12.5h5"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="10" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21M9 21h6"/></symbol>
   <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></symbol>
   <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V4h10v5"/><path d="M7 17H5V9h14v8h-2"/><path d="M7 14h10v6H7v-6Z"/></symbol>
   <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></symbol>
@@ -143,9 +144,9 @@
           <span class="brand-text"><strong>DIAGNÓSTICO</strong><small>Y MECÁNICA · PRO</small></span>
         </div>
 
-        <span class="eyebrow"><i></i> PLATAFORMA DE DIAGNÓSTICO AUTOMOTRIZ</span>
-        <h1>El diagnóstico que<br><span class="grad">piensa como un ingeniero.</span></h1>
-        <p class="lead">Síntomas, códigos DTC, lectura OBD-II en vivo y asistencia con IA. Comprobaciones de taller antes de sustituir cualquier pieza.</p>
+        <span class="eyebrow"><i></i> TU MECÁNICO CON IA · EMPIEZA GRATIS</span>
+        <h1>Cuéntale qué le pasa a tu coche.<br><span class="grad">Te dice qué mirar y qué comprar.</span></h1>
+        <p class="lead">Habla o escribe: un ruido, un tirón, un testigo encendido o un código DTC. La IA cruza foros y manuales, descarta lo que no encaja con tu coche y te da los pasos del taller.</p>
 
         <div class="universal-search" role="search">
           <span class="universal-search-icon"><svg class="ic"><use href="#i-spark"></use></svg></span>
@@ -154,35 +155,52 @@
           <div id="universalResults" class="universal-results hidden" role="listbox" aria-label="Resultados de búsqueda"></div>
         </div>
 
-        <div class="garaje-cta">
-          <div class="garaje-cta-top">
-            <span class="eyebrow"><i></i> MI GARAJE</span>
-            <span class="garaje-cta-free">Tu primer coche, gratis</span>
+        <div class="home-actions">
+          <div class="home-action home-action-ai">
+            <span class="home-action-kicker">PASO 1 · SIN REGISTRO</span>
+            <b>Habla con la IA</b>
+            <p>Escribe tu avería o pulsa el micrófono y cuéntasela en voz alta. Respuesta de mecánico en segundos.</p>
+            <div class="home-action-row">
+              <button class="btn primary" type="button" data-home-ai>
+                Escribir mi avería <svg class="ic"><use href="#i-arrow"></use></svg>
+              </button>
+              <button class="btn ghost home-action-mic" type="button" data-home-voice>
+                <svg class="ic"><use href="#i-mic"></use></svg> Hablar ahora
+              </button>
+            </div>
           </div>
-          <strong class="garaje-cta-title">Escanea, sube o echa una foto a tu ficha técnica y empieza el diagnóstico</strong>
-          <p>La IA lee matrícula, bastidor, motor, cilindrada, potencia y fecha, y desde ese momento solo te enseña recambios que encajan en tu coche.</p>
-          <div class="garaje-cta-actions">
-            <label class="btn primary garaje-cta-photo">
-              <svg class="ic"><use href="#i-camera"></use></svg> Foto de la ficha técnica
+          <div class="home-action">
+            <span class="home-action-kicker">PASO 2 · TU COCHE</span>
+            <b>Sube tu ficha técnica</b>
+            <p>Foto o PDF: la IA lee matrícula, motor y versión y crea tu primera ficha en Mi garaje.</p>
+            <label class="btn ghost home-action-btn">
+              <svg class="ic"><use href="#i-camera"></use></svg> Subir o hacer foto
               <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" data-garage-ficha hidden>
             </label>
-            <button class="btn ghost" type="button" data-garage-manual>Rellenar a mano</button>
+            <button class="home-action-link" type="button" data-garage-manual>O rellenarlo a mano</button>
           </div>
-          <small class="garaje-cta-note">Privado: tu garaje solo lo ves tú. Sin tarjeta y sin publicar nada.</small>
+          <div class="home-action">
+            <span class="home-action-kicker">PASO 3 · MANOS A LA OBRA</span>
+            <b>Empieza el diagnóstico</b>
+            <p>Comprobaciones ordenadas con pieza, herramienta y valor esperado, antes de cambiar nada.</p>
+            <button class="btn cyan home-action-btn" type="button" data-view="diagnostico">
+              Empezar diagnóstico <svg class="ic"><use href="#i-arrow"></use></svg>
+            </button>
+          </div>
+          <div class="home-action home-action-shop">
+            <span class="home-action-kicker">LECTURA DE CÓDIGOS</span>
+            <b>Compra tu escáner DTC</b>
+            <p>Adaptadores 10/10 compatibles con esta app, ordenados de más barato a más caro.</p>
+            <button class="btn ghost home-action-btn" type="button" data-home-scanners>
+              <svg class="ic"><use href="#i-cpu"></use></svg> Ver escáneres
+            </button>
+          </div>
         </div>
 
-        <div class="actions">
-          <button class="btn primary lg" data-view="diagnostico" type="button">
-            Iniciar diagnóstico <svg class="ic"><use href="#i-arrow"></use></svg>
-          </button>
-          <button class="btn cyan lg" data-view="obd" type="button">
-            <svg class="ic"><use href="#i-cpu"></use></svg> Conectar OBD-II
-          </button>
-        </div>
         <div class="hero-trust">
           <span><svg class="ic"><use href="#i-check"></use></svg> 9.201 códigos DTC</span>
           <span><svg class="ic"><use href="#i-check"></use></svg> 454 síntomas</span>
-          <span><svg class="ic"><use href="#i-check"></use></svg> Diagnóstico electrónico</span>
+          <span><svg class="ic"><use href="#i-check"></use></svg> Tu primer coche, gratis</span>
         </div>
       </div>
 
@@ -300,6 +318,21 @@
           <button id="scanClear" class="btn ghost" type="button">Descartar y empezar de nuevo</button>
         </div>
       </div>
+    </section>
+
+    <section id="homeScanners" class="panel home-scanners" aria-labelledby="homeScannersTitle">
+      <div class="panel-head">
+        <div>
+          <span class="eyebrow"><i></i> LEE LOS CÓDIGOS DE TU COCHE</span>
+          <h2 id="homeScannersTitle">Compra tu escáner DTC</h2>
+          <p>Adaptadores <b>10/10 compatibles</b> con esta app: leen los diez protocolos OBD-II y no necesitan app propietaria. De más barato a más caro.</p>
+        </div>
+        <span id="homeScannerCount" class="tag">Cargando…</span>
+      </div>
+      <div id="homeScannerList" class="home-scanner-list" aria-live="polite">
+        <div class="notice">Cargando adaptadores verificados…</div>
+      </div>
+      <p class="home-scanner-note">Si compras desde estos enlaces ganamos una comisión sin coste extra para ti. Precios y stock comprobados: <span id="homeScannerDate">—</span>.</p>
     </section>
 
     <div class="vehicle-dock" aria-label="Selector de vehículo">

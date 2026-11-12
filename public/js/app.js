@@ -197,6 +197,30 @@ if (appMenu) {
 
 $$('[data-view]').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
 
+// -------------------------------------------------------------
+// Portada: acciones directas (IA, voz, escáneres)
+// -------------------------------------------------------------
+function focusChatInput() {
+  setTimeout(() => document.getElementById('chatInput')?.focus(), 240);
+}
+
+$$('[data-home-ai]').forEach(btn => btn.addEventListener('click', () => {
+  showView('chat');
+  focusChatInput();
+}));
+
+$$('[data-home-voice]').forEach(btn => btn.addEventListener('click', () => {
+  showView('chat');
+  // Se llama dentro del propio clic: el permiso de micrófono del móvil
+  // tiene que salir con la activación del usuario todavía vigente.
+  if (typeof window.VozHablar === 'function') window.VozHablar();
+  else focusChatInput();
+}));
+
+$$('[data-home-scanners]').forEach(btn => btn.addEventListener('click', () => {
+  document.getElementById('homeScanners')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}));
+
 function goToTutorials(params = {}) {
   if (typeof window.openTutorialSearch === 'function') window.openTutorialSearch(params);
   else showView('tutoriales');
@@ -1662,15 +1686,15 @@ function catalogProductCard(p) {
   const hasRealLink = /^https?:\/\//i.test(link);
   const hasImage = p.imageStatus === 'verified' && !!p.image;
   const media = hasImage
-    ? `<img class="product-photo" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" decoding="async">`
+    ? `<img class="product-photo" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.closest('.product').classList.add('photo-failed');this.remove()">`
     : `<span class="product-placeholder" title="Foto no disponible">${icon(productIcon(p.category))}<b>Foto pendiente</b></span>`;
   const cta = hasRealLink
     ? `<a class="btn primary" href="${esc(link)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Ver oferta ${icon('external')}</a>`
     : `<span class="btn ghost" title="Enlace de vendedor no disponible">Enlace pendiente ${icon('search')}</span>`;
   const shop = p.seller || (hasRealLink ? 'Tienda' : 'Sin vendedor');
   return `
-    <article class="product" data-product-card="${esc(p.id)}">
-      <div class="product-media">${media}</div>
+    <article class="product${hasImage ? ' has-photo' : ''}" data-product-card="${esc(p.id)}"${hasImage ? ` style="--photo:url('${esc(p.image)}')"` : ''}>
+      <div class="product-media">${media}<span class="product-no-photo" aria-hidden="true">${icon(productIcon(p.category))}</span></div>
       <div class="product-body">
         <div class="product-kicker">
           <small class="product-cat">${esc(p.subcategory || p.category || 'Catálogo')}</small>
@@ -3393,6 +3417,42 @@ async function initObdScanners() {
   }
 }
 
+// Escáneres OBD en la portada: los 10/10 compatibles, de más barato a más caro.
+async function initHomeScanners() {
+  const box = $('#homeScannerList');
+  if (!box) return;
+  try {
+    const data = await api('/api/obd/scanners');
+    const items = (data.items || [])
+      .filter(item => item.forWeb && /adaptador/i.test(item.type || ''))
+      .sort((a, b) => a.price - b.price);
+    if (!items.length) {
+      box.innerHTML = '<div class="notice">No hay adaptadores compatibles ahora mismo.</div>';
+      return;
+    }
+    const count = $('#homeScannerCount');
+    if (count) count.textContent = `${items.length} compatibles · desde ${items[0].priceText}`;
+    const date = $('#homeScannerDate');
+    if (date) date.textContent = data.priceCheckedAt || '—';
+    box.innerHTML = items.map((item, index) => `
+      <article class="home-scanner${index === 0 ? ' cheapest' : ''}">
+        <div class="home-scanner-media">
+          <img src="${esc(item.image)}" alt="${esc(item.imageAlt || item.name)}" loading="lazy" decoding="async">
+        </div>
+        <div class="home-scanner-body">
+          <span class="home-scanner-rank">${index === 0 ? 'Más barato' : `Opción ${index + 1}`}</span>
+          <b>${esc(item.name)}</b>
+          <small>${esc(item.brand || '')} · ${esc(item.connection || '')}</small>
+          <span class="home-scanner-badge">${esc(item.protocolSupport?.label || 'Compatible con la web')}</span>
+          <span class="home-scanner-price">${esc(item.priceText)}</span>
+          <a class="btn btn-ghost" href="${esc(item.url)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Comprar en Amazon ${icon('external')}</a>
+        </div>
+      </article>`).join('');
+  } catch (err) {
+    box.innerHTML = `<div class="notice">No se pudieron cargar los escáneres: ${esc(err.message)}.</div>`;
+  }
+}
+
 function initOBD() {
   if (!window.ELM327Manager) {
     const sup = $('#obdBrowserSupport');
@@ -4497,6 +4557,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initHomeVehicleSelector();
   initUniversalSearch();
   initOBD();
+  initHomeScanners();
   const initial = location.hash.slice(1);
   if (initial) showView(initial);
   // Sin hash se queda la portada (view-home, ya activa en el HTML): el coche,
