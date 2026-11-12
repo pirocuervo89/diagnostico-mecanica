@@ -447,6 +447,9 @@ async function callPollinationsFree(provider, prompt, opts) {
       };
     }
     tried.push({ route, reason: result.reason || 'provider_error', status: result.status });
+    // Si la cuota está agotada, las otras rutas dan el mismo error: se corta
+    // aquí para no hacer esperar al usuario 20 segundos por nada.
+    if (result.reason === 'quota') break;
   }
 
   const quota = tried.every(t => t.reason === 'quota');

@@ -22,6 +22,19 @@
 
   const canRead = Boolean(synth && typeof SpeechSynthesisUtterance === 'function');
   const canHear = Boolean(Recognition);
+
+  // La portada llama a esta función. Tiene que existir SIEMPRE: si el navegador
+  // no soporta dictado, debe explicarlo en pantalla en vez de no hacer nada.
+  window.VozHablar = function () {
+    const el = document.getElementById('vozHint');
+    if (el) {
+      el.textContent = 'Este navegador no permite dictado. Usa el micrófono del teclado o escribe tu consulta.';
+      el.hidden = false;
+    }
+    const input = document.getElementById('chatInput');
+    if (input) { input.placeholder = 'Escribe aquí tu avería…'; input.focus(); }
+  };
+
   if (!canRead && !canHear) return;
 
   const store = {
@@ -38,6 +51,7 @@
   let speakingBubble = null;
   let recognition = null;
   let listening = false;
+  let permissionGranted = false;
 
   // ---------------------------------------------------------------- utilidades
 
@@ -113,10 +127,10 @@
     utter.lang = lang;
     const { voice, male } = pickSpanishVoice();
     utter.voice = voice || null;
-    // Registro grave y ritmo tranquilo: se entiende mejor y suena a persona
-    // que sabe de lo que habla, no a locutor acelerado.
-    utter.pitch = male ? 0.82 : 0.68;
-    utter.rate = 0.96;
+    // Voz de hombre con seguridad: tono grave pero natural y ritmo algo vivo.
+    // Un ritmo demasiado lento suena a robot y hace que la gente desconecte.
+    utter.pitch = male ? 0.88 : 0.72;
+    utter.rate = 1.06;
     utter.volume = 1;
     speakingBubble = bubble;
     bubble.classList.add('voz-speaking');
@@ -228,6 +242,7 @@
   // Pide el permiso de micrófono de verdad antes de dictar. Sin esto, en
   // Android el aviso del sistema no aparecía y el dictado fallaba en silencio.
   async function ensureMicPermission() {
+    if (permissionGranted) return true;
     if (!window.isSecureContext) {
       hint('El micrófono necesita HTTPS. Abre la web con https:// o usa la app.', 8000);
       return false;
@@ -244,6 +259,7 @@
       hint('Acepta el permiso de micrófono que acaba de aparecer en tu teléfono…', 6000);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach(track => track.stop());
+      permissionGranted = true;
       return true;
     } catch (err) {
       const denied = err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
@@ -259,11 +275,15 @@
     const input = document.getElementById('chatInput');
     if (!form || !input) return;
     if (!Recognition) {
-      hint('Este navegador no permite dictado. Escribe tu consulta y la IA te responde igual.', 8000);
+      hint('Este navegador no permite dictado. Usa el micrófono del teclado o escribe la consulta.', 9000);
+      input.focus();
       return;
     }
+    hint('Pidiendo permiso de micrófono…', 3000);
+    input.placeholder = 'Pidiendo permiso de micrófono…';
     const allowed = await ensureMicPermission();
-    if (!allowed) return;
+    if (!allowed) { input.placeholder = 'Escribe tu avería o pulsa el micrófono'; return; }
+    hint('Te escucho. Habla ahora.', 5000);
 
     recognition = new Recognition();
     recognition.lang = lang;
@@ -391,7 +411,10 @@
 
   // La portada usa este botón para abrir el chat y dictar en un solo toque.
   window.VozHablar = () => {
-    if (listening && recognition) return;
+    if (listening && recognition) {
+      try { recognition.stop(); } catch { /* ya parado */ }
+      return;
+    }
     startRecognition();
   };
 

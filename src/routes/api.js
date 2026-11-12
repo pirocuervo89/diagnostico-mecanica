@@ -1699,6 +1699,8 @@ function chatAiPrompt({ query, context, forumBlock, webReferences }) {
     '- Prohibido el relleno de manual: nada de "podría ser cualquiera de estas causas", "revisa el motor", "acude a un taller" ni listas de diez posibilidades. Da como mucho TRES hipótesis, ordenadas de más a menos probable, y explica en una línea por qué encaja cada una con el síntoma descrito.',
     '- Cada comprobación debe ser accionable: nombra la pieza o el conector exacto, la herramienta y el valor o síntoma que confirma o descarta. Si no sabes el valor, di qué comparar (por ejemplo, lectura en ralentí frente a 2.500 rpm).',
     '- Empieza con una frase de diagnóstico directa (qué es lo más probable y por qué). Después las comprobaciones, y termina con lo que NO hay que cambiar todavía y qué dato falta para afinar.',
+    '- Prohibido contestar solo "no se puede saber sin código". Da siempre las tres hipótesis más probables con su comprobación concreta y pide el DTC al final, no como excusa.',
+    '- No atribuyas un código de motor (EA189, EA288, etc.) si no aparece en el contexto del vehículo: si falta, dilo como dato desconocido en lugar de suponerlo.',
     '- Si la consulta no identifica vehículo/motor, haz como máximo DOS preguntas concretas (código de motor, año, código DTC o cuándo ocurre) y ofrece solo las comprobaciones que no dependen del modelo.',
     '- Si un fragmento de foro respalda una hipótesis, cítalo por su número entre corchetes (por ejemplo [2]) y qué aporta. No cites foros que contradigan la ficha del motor.',
     '- Prioriza comprobaciones baratas y reversibles (inspección visual, niveles, escáner, multímetro, pruebas de vacío) antes de recomendar cambiar piezas.',
@@ -1851,6 +1853,100 @@ function localCostText(cost) {
   return bits.join(' · ');
 }
 
+// Diagnóstico cuando el usuario nombra un testigo del cuadro. El motor local no
+// puede inventarse un código, pero sí decir qué significa la luz, qué se
+// comprueba primero y qué NO se debe cambiar sin datos.
+function warningLightReply(msg, ctx) {
+  const m = fold(msg);
+  const mentionsLight = /testigo|luz|se enciende|encendid|parpade|cuadro|aviso/.test(m);
+  if (!mentionsLight) return '';
+  const engineText = fold([ctx.engine, ctx.engineReliability?.motor, ctx.vehicleLabel].filter(Boolean).join(' '));
+  const diesel = /diesel|tdi|hdi|dci|cdi|crdi|jtd|d-4d|blue ?hdi/.test(`${engineText} ${m}`);
+  const car = ctx.vehicleLabel || [ctx.brand, ctx.model, ctx.year].filter(Boolean).join(' ') || 'tu coche';
+  const blinking = /parpade|intermiten/.test(m);
+
+  if (/calentador|precalent|glow/.test(m)) {
+    const glow = diesel
+      ? 'En un diésel, ese testigo hace dos trabajos: encenderse un instante al arrancar en frío y avisar de una avería en la gestión del motor. Si se queda encendido o parpadea con el motor en marcha, la centralita ha detectado un fallo y ha guardado un código.'
+      : 'Ese testigo es del precalentamiento (diésel). Si aparece en un coche de gasolina, comprueba que no lo estés confundiendo con el testigo de motor.';
+    return `### Testigo de calentadores${diesel ? ' en diésel' : ''}\n\n` +
+      `${glow}\n\n` +
+      `**Qué hago ahora:** ${blinking ? 'si parpadea, no aceleres fuerte ni hagas un viaje largo: la centralita está protegiendo el motor y el filtro de partículas. Ve al taller sin forzar.' : 'si queda fijo, puedes circular con suavidad y sin exigir potencia hasta leer el código.'}\n\n` +
+      `**Comprobaciones, de la más barata a la más cara (${car}):**\n` +
+      `1. **Leer el DTC con un escáner OBD-II** y apuntar el código exacto. Sin el código, cambiar piezas es adivinar.\n` +
+      `2. **EGR**: comprobar por datos en vivo si se queda abierta o atascada. Es la causa más común de tirones en baja y de este testigo.\n` +
+      `3. **Inyectores**: prueba de retorno comparando los cuatro; el que devuelve mucho más combustible está mal.\n` +
+      `4. **Caudalímetro (MAF)**: comparar el aire medido con el esperado a ralentí y a 2.500 rpm.\n` +
+      `5. **Turbo y geometría variable**: comparar presión real con la pedida y revisar el actuador.\n` +
+      `6. **Calentadores**: medir resistencia y consumo; uno fundido no suele dar tirones, pero sí arranque irregular en frío.\n` +
+      `7. **Filtro de combustible** y posibles tomas de aire en la admisión.\n\n` +
+      `**No cambies todavía** los cuatro inyectores ni la EGR a ciegas. Primero el código y la prueba de retorno.\n\n` +
+      `**Me falta un dato para afinarlo:** el código DTC exacto (por ejemplo P0401, P2002, P0301) y si el testigo parpadea o queda fijo.`;
+  }
+
+  if (/check engine|testigo.*motor|luz.*motor|gestion.*motor|averia.*motor/.test(m)) {
+    return `### Testigo de motor (Check Engine)\n\n` +
+      `La centralita ha registrado una anomalía. **El testigo dice que hay un fallo, no cuál**: eso lo dice el código.\n\n` +
+      `**Qué hago ahora:** ${blinking ? 'si parpadea, reduce y para cuanto antes: puede haber fallos de combustión que dañen el catalizador o el filtro de partículas.' : 'si queda fijo y el coche va normal, puedes llegar al taller sin forzar.'}\n\n` +
+      `**Pasos:**\n` +
+      `1. Leer códigos y anotarlos (incluidos los pendientes).\n` +
+      `2. Si hay fallo de combustión, identificar el cilindro afectado.\n` +
+      `3. Revisar las causas del código concreto antes de tocar piezas.\n\n` +
+      `**Dato que falta:** el código exacto.`;
+  }
+
+  if (/dpf|fap|particulas/.test(m)) {
+    return `### Testigo de filtro de partículas (DPF/FAP)\n\n` +
+      `El filtro está cargado y el coche no ha podido regenerarlo, normalmente por trayectos cortos.\n\n` +
+      `**Qué hago ahora:** sal a carretera y circula 20–30 minutos a 2.000–2.500 rpm con el motor caliente, sin parar. Si el testigo no se apaga, no lo fuerces más.\n\n` +
+      `**Comprobaciones:**\n` +
+      `1. Leer la carga de hollín y la presión diferencial del DPF.\n` +
+      `2. Comprobar sensores de presión del filtro y temperatura de escape.\n` +
+      `3. Revisar EGR y fugas de admisión: si el motor genera más hollín, el filtro vuelve a cargarse.\n\n` +
+      `**No cambies el DPF** sin comprobar la presión diferencial y la causa que lo satura.`;
+  }
+
+  if (/presion.*aceite|aceite.*rojo|temperatura|refrigerante|calienta/.test(m)) {
+    return `### Testigo rojo de aceite o temperatura\n\n` +
+      `**Para el motor en un sitio seguro cuanto antes.** Un testigo rojo de presión de aceite o de temperatura no es un aviso para seguir hasta casa: puede gripar el motor o deformar la culata.\n\n` +
+      `**Después, en frío:**\n` +
+      `1. Comprobar nivel y estado del aceite.\n` +
+      `2. Comprobar nivel de refrigerante y fugas.\n` +
+      `3. Revisar el sensor de presión y el termostato.\n\n` +
+      `**No vuelvas a arrancar** si el nivel es bajo o el motor hace ruido.`;
+  }
+
+  if (/bateria|luz.*bateria|alternador/.test(m)) {
+    return `### Testigo de batería\n\n` +
+      `El alternador no está cargando o la batería no mantiene la tensión.\n\n` +
+      `**Comprobaciones:**\n` +
+      `1. Tensión en reposo: 12,4–12,8 V.\n` +
+      `2. Con motor en marcha: 13,8–14,5 V. Si no llega, revisar alternador y correa.\n` +
+      `3. Bornes, masas y consumo parásito.\n\n` +
+      `**No cambies la batería** sin medir la carga del alternador.`;
+  }
+
+  if (/abs|esp/.test(m)) {
+    return `### Testigo ABS/ESP\n\n` +
+      `Los frenos siguen funcionando, pero sin ABS ni control de estabilidad. Conducir con lluvia o en curvas es más peligroso.\n\n` +
+      `1. Leer códigos del módulo de frenos.\n` +
+      `2. Revisar sensores de rueda y coronas magnéticas (golpes, suciedad, cable roto).\n` +
+      `3. Comprobar tensión de batería: una batería baja también enciende este testigo.\n\n` +
+      `**No sustituyas el módulo ABS** sin leer antes el código y comprobar los sensores.`;
+  }
+
+  if (/airbag/.test(m)) {
+    return `### Testigo de airbag\n\n` +
+      `El sistema puede no desplegarse en un accidente. No es una avería de motor.\n\n` +
+      `1. Leer el código del módulo de airbag.\n` +
+      `2. Revisar el conector bajo el asiento del conductor (es la causa más habitual).\n` +
+      `3. Comprobar el anillo del volante si el claxon o los mandos fallan.\n\n` +
+      `**No manipules el airbag** sin desconectar la batería y esperar el tiempo indicado por el fabricante.`;
+  }
+
+  return '';
+}
+
 function buildReply(msg, ctx, dtcList) {
   const m = msg.toLowerCase();
   const context = [];
@@ -1861,6 +1957,11 @@ function buildReply(msg, ctx, dtcList) {
   if (ctx.symptoms) context.push(`síntomas: ${ctx.symptoms}`);
 
   const header = context.length ? `[Vehículo: ${context.join(', ')}]\n\n` : '';
+
+  // Si nombra un testigo del cuadro, la respuesta concreta de esa luz manda
+  // sobre la plantilla genérica del síntoma.
+  const lightReply = warningLightReply(msg, ctx);
+  if (lightReply) return header + lightReply;
 
   const codeMatch = msg.match(/\b[PBCU]\d{4}\b/i);
   if (codeMatch) {

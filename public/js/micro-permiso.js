@@ -136,23 +136,8 @@
     } catch { /* Permission API no disponible: se pedirá al pulsar. */ }
   }
 
-  document.addEventListener('click', event => {
-    const button = event.target instanceof Element ? event.target.closest('#vozMic') : null;
-    if (!button) return;
-    if (button.dataset.micAllowed === '1') {
-      delete button.dataset.micAllowed;
-      return;
-    }
-    if (granted) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    requestMic().then(ok => {
-      if (!ok) return;
-      // Ya hay permiso: se dicta en el mismo toque, sin pedir un segundo clic.
-      button.dataset.micAllowed = '1';
-      button.click();
-    });
-  }, true);
+  // El dictado (voz.js) pide el permiso y arranca en el mismo toque. Aquí solo
+  // se muestra el panel de ayuda cuando el navegador lo tiene bloqueado.
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
