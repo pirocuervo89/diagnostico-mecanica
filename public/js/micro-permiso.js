@@ -132,7 +132,8 @@
     try {
       const status = await navigator.permissions?.query?.({ name: 'microphone' });
       if (status?.state === 'granted') granted = true;
-      if (status?.state === 'denied') showPanel('denied');
+      // No se avisa antes de pulsar: el panel sale solo si el permiso falla al
+      // intentar grabar, para no asustar con un "bloqueado" prematuro.
     } catch { /* Permission API no disponible: se pedirá al pulsar. */ }
   }
 

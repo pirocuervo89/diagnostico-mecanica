@@ -71,11 +71,30 @@
   }
   window.VozHablar = toggle;
   window.DictadoDisponible = true;
-  document.addEventListener('click', event => {
+  let holdStart = 0, held = false;
+  document.addEventListener('pointerdown', event => {
     const el = event.target instanceof Element ? event.target.closest('#vozMic') : null;
     if (!el) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    toggle();
+    if (busy && rec && rec.state === 'recording') { rec.stop(); return; }
+    held = true; holdStart = Date.now(); start();
   }, true);
+  document.addEventListener('pointerup', () => {
+    if (!held) return;
+    held = false;
+    // Pulsación larga = estilo WhatsApp: al soltar, envía.
+    if (Date.now() - holdStart > 600 && rec && rec.state === 'recording') rec.stop();
+  }, true);
+  document.addEventListener('pointercancel', () => { held = false; if (busy && rec && rec.state === 'recording') rec.stop(); }, true);
+  // Si pulsa Enviar mientras graba, se corta y se manda lo hablado.
+  document.getElementById('chatForm')?.addEventListener('submit', event => {
+    if (busy && rec && rec.state === 'recording') {
+      event.preventDefault(); event.stopImmediatePropagation(); rec.stop();
+    }
+  }, true);
+  setTimeout(() => {
+    const b = $('vozMic');
+    if (b) b.title = 'Mantén pulsado para hablar (o toca y vuelve a tocar para parar)';
+  }, 800);
 })();
