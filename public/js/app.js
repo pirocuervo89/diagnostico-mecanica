@@ -211,6 +211,13 @@ $$('[data-home-ai]').forEach(btn => btn.addEventListener('click', () => {
 
 $$('[data-home-voice]').forEach(btn => btn.addEventListener('click', () => {
   showView('chat');
+  // DuckDuckGo y otros navegadores Android no pueden grabar en una web:
+  // antes de quedarse con un botón mudo, se explica y se ofrece Chrome.
+  if (!navigator.mediaDevices?.getUserMedia) {
+    if (typeof window.AvisoMicro === 'function') return window.AvisoMicro();
+    focusChatInput();
+    return;
+  }
   // Se llama dentro del propio clic: el permiso de micrófono del móvil
   // tiene que salir con la activación del usuario todavía vigente.
   if (typeof window.VozHablar === 'function') window.VozHablar();
