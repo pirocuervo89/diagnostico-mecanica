@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/css/app.css?v=20261030a">
   <link rel="stylesheet" href="/css/vision.css?v=20261105c">
   <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
-  <link rel="stylesheet" href="/css/reforma.css?v=20261112c">
+  <link rel="stylesheet" href="/css/reforma.css?v=20261112e">
   <link rel="stylesheet" href="/css/legal.css?v=20261110a">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Diagnóstico y Mecánica">
@@ -1459,7 +1459,7 @@
         <h2>Chat de diagnóstico IA</h2>
         <p>Describe el fallo y recibe una explicación técnica clara, con plan de comprobación y herramientas recomendadas.</p>
       </div>
-      <span class="page-meta"><svg class="ic"><use href="#i-shield"></use></svg> Motor experto + IA</span>
+      <span class="page-meta"><svg class="ic"><use href="#i-spark"></use></svg> IA en vivo + base técnica</span>
     </header>
 
     <div id="chatVehicleInfo" class="notice" style="display:none;"></div>
@@ -1474,19 +1474,23 @@
       </div>
 
       <div id="chatBox" class="chat-box" role="log" aria-live="polite" aria-label="Conversación con el asistente técnico">
-        <div class="bubble assistant">¡Hola! Soy tu Asistente Técnico Mecánico. Cuéntame qué síntoma o fallo presenta el vehículo. Si dispones de un código DTC, marca, modelo, año y motor, indícalo para ajustar las comprobaciones paso a paso.</div>
+        <div class="bubble assistant">¡Hola! ¿Qué le pasa a tu coche? Háblame por el micrófono, escríbelo o hazle una foto a la luz del cuadro. Te pregunto lo que falte y vamos al grano.</div>
       </div>
 
-      <div class="chat-suggestions">
-        <button class="chip" data-prompt="El coche da tirones en baja y se enciende la luz de avería. ¿Qué compruebo primero?" type="button">Tirones en baja</button>
-        <button class="chip" data-prompt="Noto olor a freno quemado y el pedal está esponjoso. ¿Cuál es el diagnóstico?" type="button">Problema de frenos</button>
-        <button class="chip" data-prompt="La batería se descarga si el coche está parado dos días. ¿Cómo localizo la fuga de corriente?" type="button">Batería se descarga</button>
-        <button class="chip" data-prompt="Tengo el código P0299 y falta de potencia en un 2.0 TDI. Explícame las causas." type="button">Analizar P0299</button>
+      <div class="chat-suggestions" aria-label="Preguntas rápidas">
+        <button class="chip" data-prompt="Se me ha encendido una luz en el cuadro" type="button">Se encendió una luz</button>
+        <button class="chip" data-prompt="Hace un ruido raro y no sé de dónde viene" type="button">Hace un ruido</button>
+        <button class="chip" data-prompt="El coche da tirones y pierde fuerza" type="button">Da tirones</button>
+        <button class="chip" data-prompt="El coche no arranca" type="button">No arranca</button>
+        <button class="chip" data-prompt="El coche echa humo" type="button">Echa humo</button>
       </div>
 
       <form id="chatForm" class="chat-form">
-        <input id="chatInput" placeholder="Ej.: Seat León 2.0 TDI da tirones en baja y marca código P0299..." maxlength="4000" autocomplete="off" required aria-label="Mensaje para el asistente">
-        <button type="submit" class="btn primary" aria-label="Enviar consulta"><svg class="ic"><use href="#i-send"></use></svg> Consultar</button>
+        <button type="button" class="btn ghost chat-photo" id="chatCameraBtn" aria-label="Hacer una foto al cuadro de instrumentos" title="Foto al cuadro">
+          <svg class="ic"><use href="#i-camera"></use></svg><span>Foto</span>
+        </button>
+        <input id="chatInput" placeholder="Escribe o pulsa el micrófono…" maxlength="4000" autocomplete="off" required aria-label="Mensaje para el asistente">
+        <button type="submit" class="btn primary" aria-label="Enviar consulta"><svg class="ic"><use href="#i-send"></use></svg> Enviar</button>
       </form>
     </div>
     <div id="chatForumRefs"></div>
@@ -1875,9 +1879,9 @@
 <script src="/js/obd.js?v=20261105c"></script>
 <script src="/js/tutorials.js?v=20261026d"></script>
 
-<script src="/js/voz.js?v=20261112d"></script>
+<script src="/js/voz.js?v=20261112e"></script>
 <script src="/js/micro-permiso.js?v=20261112c"></script>
-<script src="/js/app.js?v=20261112c"></script>
+<script src="/js/app.js?v=20261112d"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>

@@ -188,7 +188,7 @@
     bar.id = 'vozBar';
     bar.className = 'voz-bar';
     bar.innerHTML = `
-      ${canRead ? `<button type="button" class="voz-chip" id="vozAuto" aria-pressed="${autoRead ? 'true' : 'false'}" title="Leer automáticamente cada respuesta">🔊 Leer respuestas: <b>${autoRead ? 'sí' : 'no'}</b></button>` : ''}
+      ${canRead ? `<button type="button" class="voz-chip" id="vozAuto" aria-pressed="${autoRead ? 'true' : 'false'}" title="Leer automáticamente cada respuesta">🔊 Que me lo lea: <b>${autoRead ? 'sí' : 'no'}</b></button>` : ''}
       ${canRead ? `<button type="button" class="voz-chip" id="vozStop" hidden>⏹ Parar</button>` : ''}
       <span class="voz-hint" id="vozHint" hidden></span>
     `;
@@ -201,7 +201,7 @@
       autoRead = !autoRead;
       store.set(STORE_READ, autoRead ? '1' : '0');
       autoBtn.setAttribute('aria-pressed', String(autoRead));
-      autoBtn.innerHTML = `🔊 Leer respuestas: <b>${autoRead ? 'sí' : 'no'}</b>`;
+      autoBtn.innerHTML = `🔊 Que me lo lea: <b>${autoRead ? 'sí' : 'no'}</b>`;
       if (!autoRead) stopSpeaking();
       else {
         const bubbles = document.querySelectorAll('#chatBox .bubble.assistant');

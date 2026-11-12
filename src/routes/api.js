@@ -1853,6 +1853,47 @@ function localCostText(cost) {
   return bits.join(' · ');
 }
 
+// Conversación de primera acogida: si la pregunta es vaga, no se suelta un
+// formulario ni una plantilla; se pide UN dato concreto y se ofrece la foto.
+function conversationalReply(msg, ctx) {
+  const m = fold(msg);
+  const words = m.split(/\s+/).filter(Boolean).length;
+  const car = ctx.vehicleLabel || [ctx.brand, ctx.model, ctx.year].filter(Boolean).join(' ');
+  const carLine = car ? `He anotado tu **${car}**.\n\n` : '';
+  const hasLight = /luz|testigo|encendid|parpade|aviso/.test(m);
+  const knownLight = /calentador|check engine|testigo.*motor|luz.*motor|aceite|bateria|abs|esp|airbag|dpf|fap|particulas|temperatura|refrigerante|freno|direccion|presion/;
+
+  if (hasLight && !knownLight.test(m)) {
+    return `### Vamos a ver esa luz\n\n${carLine}` +
+      `Para decirte qué es y si puedes seguir conduciendo necesito saber **cuál se ha encendido**.\n\n` +
+      `**Lo más rápido:** hazle una foto al cuadro con el botón 📷 y te digo el significado, la gravedad y qué comprobar.\n\n` +
+      `Si prefieres escribirlo, dime el **color** (rojo, ámbar o verde) y el **dibujo** (motor, batería, gota de aceite, freno, volante…).`;
+  }
+
+  if (/ruido|sonido|golpeteo|traqueteo|chirrido|silbido|vibraci/.test(m) &&
+      !/freno|motor|direccion|suspension|amortiguador|turbo|correa|cadena|escape|rodamiento|bomba/.test(m)) {
+    return `### Vamos a localizar ese ruido\n\n${carLine}` +
+      `Dime tres cosas y te doy las causas probables, de la más barata a la más cara:\n` +
+      `1. **Dónde suena**: motor, rueda, freno, suspensión o dentro del coche.\n` +
+      `2. **Cuándo**: al arrancar, en baches, al girar, al frenar o solo en frío.\n` +
+      `3. **Cómo es**: golpe seco, chirrido, silbido o traqueteo.\n\n` +
+      `También puedes dictármelo con el micrófono, hablando normal.`;
+  }
+
+  if (/(no va bien|falla|problema|raro|extrano|extraño|no se que|no se qué)/.test(m) && words <= 9) {
+    return `### Cuéntame un poco más\n\n${carLine}` +
+      `¿Qué notas exactamente? Elige una y seguimos:\n\n` +
+      `- **Se enciende una luz** en el cuadro\n` +
+      `- **Da tirones** o pierde fuerza\n` +
+      `- **Hace un ruido**\n` +
+      `- **No arranca**\n` +
+      `- **Echa humo**\n\n` +
+      `Con eso te digo por dónde empezar sin cambiar piezas a ciegas.`;
+  }
+
+  return '';
+}
+
 // Diagnóstico cuando el usuario nombra un testigo del cuadro. El motor local no
 // puede inventarse un código, pero sí decir qué significa la luz, qué se
 // comprueba primero y qué NO se debe cambiar sin datos.
@@ -1958,8 +1999,10 @@ function buildReply(msg, ctx, dtcList) {
 
   const header = context.length ? `[Vehículo: ${context.join(', ')}]\n\n` : '';
 
-  // Si nombra un testigo del cuadro, la respuesta concreta de esa luz manda
-  // sobre la plantilla genérica del síntoma.
+  // Primero se responde a la conversación (pregunta vaga o luz sin identificar);
+  // después, al testigo concreto y al síntoma.
+  const conv = conversationalReply(msg, ctx);
+  if (conv) return header + conv;
   const lightReply = warningLightReply(msg, ctx);
   if (lightReply) return header + lightReply;
 
@@ -2111,14 +2154,10 @@ function buildReply(msg, ctx, dtcList) {
       `5. Revisar fugas en el cárter, junta del tapón y filtro.`;
   }
 
-  return header + `### Asistente de Diagnóstico Automotriz\n\n` +
-    `Para ofrecerte un diagnóstico preciso y pasos de comprobación específicos, por favor facilita:\n` +
-    `- **Marca y modelo exacto** (ej.: Volkswagen Golf VII)\n` +
-    `- **Año de fabricación y kilometraje**\n` +
-    `- **Motorización** (cilindrada, combustible y letras de motor si las sabes)\n` +
-    `- **Síntoma concreto:** cómo se manifiesta, si ocurre en frío/caliente, a ralentí o en aceleración\n` +
-    `- **Código de avería OBD/DTC** si le has conectado una máquina de diagnosis\n\n` +
-    `*Recuerda que esta orientación técnica debe confirmarse siempre mediante pruebas físicas en el vehículo.*`;
+  return header + `### Cuéntame qué pasa\n\n` +
+    `Dime **qué notas** (una luz encendida, un ruido, tirones, humo, que no arranca) y **cuándo ocurre**.\n\n` +
+    `Si es una luz del cuadro, hazle una foto con el botón 📷: te digo qué es y la gravedad.\n\n` +
+    `Si tienes el **código DTC** (por ejemplo P0299), pásamelo y te doy las comprobaciones exactas.`;
 }
 
 router.get('/obd/protocols', (_req, res) => {

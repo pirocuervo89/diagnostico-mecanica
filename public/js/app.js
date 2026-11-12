@@ -2245,6 +2245,13 @@ if (chatForm) {
   });
 }
 
+// La cámara del chat lleva directa al análisis de la luz del cuadro.
+document.getElementById('chatCameraBtn')?.addEventListener('click', () => {
+  window.__homeLightFlow = true;
+  showView('testigos');
+  setTimeout(() => document.getElementById('tlFile')?.click(), 260);
+});
+
 $$('.chat-suggestions .chip[data-prompt]').forEach(btn => {
   btn.addEventListener('click', () => submitChat(btn.dataset.prompt));
 });

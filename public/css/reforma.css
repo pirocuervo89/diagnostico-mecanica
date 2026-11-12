@@ -3690,3 +3690,48 @@ body {
   font-size: 9.5px;
   line-height: 1.4;
 }
+
+/* ---------- Chat más fácil: foto, micrófono y enviar a mano ---------- */
+.chat-form {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+}
+.chat-form input { width: 100%; min-width: 0; }
+.chat-form .btn { min-height: 46px; }
+.chat-photo { display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; }
+.chat-photo .ic { width: 19px; height: 19px; }
+.chat-form .voz-mic {
+  width: 48px;
+  min-height: 46px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+}
+.chat-suggestions .chip { font-weight: 600; }
+
+@media (max-width: 720px) {
+  .chat-form { padding: 10px; gap: 6px; }
+  .chat-form .chat-photo span { display: none; }
+  .chat-form .chat-photo { width: 44px; min-height: 44px; padding: 0; justify-content: center; }
+  .chat-form .voz-mic { width: 44px; min-height: 44px; }
+  .chat-form button[type="submit"] {
+    width: 46px;
+    min-height: 46px;
+    padding: 0;
+    font-size: 0;
+    justify-content: center;
+  }
+  .chat-form button[type="submit"] .ic { width: 20px; height: 20px; }
+  .chat-form input { font-size: 16px; padding: 12px; }
+  .chat-suggestions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 10px;
+  }
+  .chat-suggestions::-webkit-scrollbar { display: none; }
+  .chat-suggestions .chip { flex: 0 0 auto; white-space: nowrap; }
+}

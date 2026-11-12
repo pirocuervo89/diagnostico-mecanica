@@ -433,7 +433,9 @@ async function callPollinationsFree(provider, prompt, opts) {
   for (const route of routes) {
     const left = budget - (Date.now() - started);
     if (left < 2500) { tried.push({ route, reason: 'deadline' }); break; }
-    const share = route === 'post' ? Math.min(left, 9000) : Math.min(left, 9000);
+    // Ruta corta: si una puerta está cerrada, se prueba la siguiente sin
+    // dejar al usuario esperando veinte segundos.
+    const share = Math.min(left, 6000);
     const result = await pollinationsRoute(provider, prompt, { ...opts, timeoutMs: share }, route);
     if (result.ok) {
       clearCooldown(provider);
@@ -447,9 +449,6 @@ async function callPollinationsFree(provider, prompt, opts) {
       };
     }
     tried.push({ route, reason: result.reason || 'provider_error', status: result.status });
-    // Si la cuota está agotada, las otras rutas dan el mismo error: se corta
-    // aquí para no hacer esperar al usuario 20 segundos por nada.
-    if (result.reason === 'quota') break;
   }
 
   const quota = tried.every(t => t.reason === 'quota');
