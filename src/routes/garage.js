@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { userFromSession, isBanned } from '../lib/forum_db.js';
+import { planState } from '../lib/plans.js';
 import {
   listVehicles, garageStats, createVehicle, updateVehicle, deleteVehicle, getVehicle,
   saveVehiclePhoto, deleteVehiclePhoto, getVehiclePhoto,
@@ -83,11 +84,33 @@ router.get('/status', route((req, res) => {
 
 router.get('/vehicles', route((req, res) => {
   const userId = Number(req.user.id);
-  res.json({ vehicles: listVehicles(userId), stats: garageStats(userId) });
+  const plan = planState(req.user);
+  res.json({
+    vehicles: listVehicles(userId),
+    stats: garageStats(userId),
+    plan: { id: plan.id, name: plan.name, vehicles: plan.vehicles, trialActive: plan.trialActive, trialDaysLeft: plan.trialDaysLeft }
+  });
 }));
 
+// Cada plan lleva un número máximo de coches: 1 en la prueba gratuita, 2 en
+// Pro y 10 en Full. Se comprueba en el servidor para que el límite sea real,
+// no solo un texto en la pantalla de precios.
 router.post('/vehicles', writeLimit, route((req, res) => {
-  const vehicle = createVehicle(Number(req.user.id), req.body || {});
+  const userId = Number(req.user.id);
+  const plan = planState(req.user);
+  const actuales = listVehicles(userId).length;
+  if (actuales >= plan.vehicles) {
+    return res.status(402).json({
+      error: plan.id === 'full'
+        ? `Has llegado al máximo de tu plan ${plan.name} (${plan.vehicles} coches). Borra uno que ya no uses para añadir otro.`
+        : `Tu plan ${plan.name} permite ${plan.vehicles} coche${plan.vehicles === 1 ? '' : 's'} y ya lo tienes${plan.vehicles === 1 ? '' : 's'}. Con el plan Full (9,99 €/mes) llevas hasta 10 coches, cada uno con su mantenimiento y sus facturas.`,
+      limit: plan.vehicles,
+      used: actuales,
+      upgrade: plan.id === 'full' ? null : 'full',
+      plansUrl: '/#planes'
+    });
+  }
+  const vehicle = createVehicle(userId, req.body || {});
   res.status(201).json({ vehicle, saved: true });
 }));
 

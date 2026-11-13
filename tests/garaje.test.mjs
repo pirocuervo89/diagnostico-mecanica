@@ -300,6 +300,38 @@ test('garaje: eliminar exige confirmación explícita', async () => {
   assert.equal(after.status, 404);
 });
 
+test('plan Gratis: un solo coche y el segundo empuja al plan Full', async () => {
+  // Se entra con una cuenta ya creada por los tests anteriores (el alta tiene
+  // su propio límite por IP) y se le pone el plan Gratis, que es el de una
+  // cuenta nueva.
+  const login = await call('/api/forum/auth/login', {
+    method: 'POST',
+    body: { username: 'garaje_borra', password: 'clave-segura-123' }
+  });
+  assert.equal(login.status, 200);
+  const cookie = login.cookie;
+  const db = new DatabaseSync(path.join(TMP, 'forum.sqlite'));
+  db.prepare("UPDATE users SET plan = 'free', plan_expires_at = NULL WHERE username = ?").run('garaje_borra');
+  db.close();
+
+  const primero = await call('/api/garage/vehicles', {
+    method: 'POST',
+    cookie,
+    body: { brand: 'SEAT', model: 'Ibiza', version: '1.2 TSI', year: 2015 }
+  });
+  assert.equal(primero.status, 201);
+
+  const segundo = await call('/api/garage/vehicles', {
+    method: 'POST',
+    cookie,
+    body: { brand: 'SEAT', model: 'León', version: '1.6 TDI', year: 2012 }
+  });
+  assert.equal(segundo.status, 402);
+  assert.equal(segundo.body.limit, 1);
+  assert.equal(segundo.body.upgrade, 'full');
+  assert.match(segundo.body.error, /Full/);
+});
+
 test('scanner: extrae matrícula, matriculación, plazas y masa de una ficha', async () => {
   const scan = await call('/api/vehicle/scan', {
     method: 'POST',
