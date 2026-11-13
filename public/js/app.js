@@ -910,7 +910,8 @@ async function loadSymptoms() {
   if (!grid) return;
   try {
     grid.innerHTML = '<div style="color:var(--muted);grid-column:1/-1;">Cargando catálogo de síntomas...</div>';
-    symptomsCache = await api('/api/symptoms');
+    // Lista ligera: el detalle completo se pide al abrir cada síntoma.
+    symptomsCache = await api('/api/symptoms?lite=1');
     renderSymptomFilters();
     applySymptomFilters();
   } catch (err) {
@@ -979,9 +980,18 @@ function renderSymptomsGrid(list) {
   `).join('');
 
   $$('.symptom').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const item = symptomsCache.find(x => x.id === btn.dataset.id);
-      if (item) renderSymptomDetail(item);
+      if (!item) return;
+      if (!Array.isArray(item.causeDetails)) {
+        btn.classList.add('loading');
+        try {
+          const full = await api(`/api/symptoms/${encodeURIComponent(item.id)}`);
+          Object.assign(item, full || {});
+        } catch { /* si falla, se muestra lo que ya hay */ }
+        btn.classList.remove('loading');
+      }
+      renderSymptomDetail(item);
     });
   });
 }
@@ -3459,7 +3469,7 @@ async function initHomeScanners() {
     box.innerHTML = items.map((item, index) => `
       <article class="home-scanner${index === 0 ? ' cheapest' : ''}">
         <div class="home-scanner-media">
-          <img src="${esc(item.image)}" alt="${esc(item.imageAlt || item.name)}" loading="lazy" decoding="async">
+          <img src="${esc(item.image)}" alt="${esc(item.imageAlt || item.name)}" width="240" height="168" loading="lazy" decoding="async">
         </div>
         <div class="home-scanner-body">
           <span class="home-scanner-rank">${index === 0 ? 'Más barato' : `Opción ${index + 1}`}</span>

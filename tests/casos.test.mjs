@@ -10,6 +10,9 @@ import vm from 'node:vm';
 import { filtrarProductosRecomendados } from '../ia_reasoning.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// El total sale del propio catálogo: así, cuando se importan síntomas nuevos,
+// el test comprueba que todos se sirven en vez de exigir un número fijo.
+const SYMPTOM_TOTAL = JSON.parse(readFileSync(path.join(__dirname, '../data/symptoms.json'), 'utf8')).length;
 const ROOT = path.join(__dirname, '..');
 const PORT = 4123;
 const BASE = `http://127.0.0.1:${PORT}`;
@@ -109,7 +112,7 @@ test('stats carga los datos JSON', async () => {
   const { status, body } = await getJSON('/api/stats');
   assert.equal(status, 200);
   assert.ok(body.dtc > 9000, 'debe haber más de 9000 DTC');
-  assert.equal(body.symptoms, 454);
+  assert.equal(body.symptoms, SYMPTOM_TOTAL);
   assert.ok(body.products >= 200);
   assert.equal(body.vehicles, 15);
   assert.equal(body.tuning, 3);
@@ -263,7 +266,7 @@ test('estado de IA no expone la clave y usa el motor local sin configurar', asyn
 test('listado de síntomas con icono, nombre y categoría', async () => {
   const { status, body } = await getJSON('/api/symptoms');
   assert.equal(status, 200);
-  assert.equal(body.length, 454);
+  assert.equal(body.length, SYMPTOM_TOTAL);
   assert.ok(body.every(s => s.id && s.name && s.icon && s.categoryId && s.category));
   assert.equal(new Set(body.map(s => s.id)).size, body.length, 'no debe haber IDs duplicados');
   assert.equal(new Set(body.map(s => s.name.toLowerCase())).size, body.length, 'no debe haber nombres duplicados');
@@ -283,9 +286,9 @@ test('250 síntomas nuevos con ficha técnica completa y trazabilidad genérica'
 test('categorías de síntomas y filtros de API', async () => {
   const meta = await getJSON('/api/symptoms/meta');
   assert.equal(meta.status, 200);
-  assert.equal(meta.body.total, 454);
+  assert.equal(meta.body.total, SYMPTOM_TOTAL);
   assert.equal(meta.body.curated, 250);
-  assert.equal(meta.body.categories.reduce((n, c) => n + c.count, 0), 454);
+  assert.equal(meta.body.categories.reduce((n, c) => n + c.count, 0), SYMPTOM_TOTAL);
   assert.ok(meta.body.categories.every(c => c.id && c.label && c.count >= 0));
   const filtered = await getJSON('/api/symptoms?category=frenos-chasis');
   assert.equal(filtered.status, 200);

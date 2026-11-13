@@ -2064,12 +2064,12 @@ body.modal-open { overflow: hidden; }
 .obd-web-adapters > .obd-adapters-coverage { color: var(--muted); }
 .obd-adapters-coverage:empty { display: none; }
 .obd-adapters { display: grid; gap: 10px; margin-top: 12px; }
-.obd-scanner { position: relative; display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.025); }
+.obd-scanner { position: relative; display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.025); }
 .obd-scanner.for-web { border-color: rgba(34,211,238,.35); }
 .obd-scanner.cheapest { border-color: rgba(52,211,153,.55); background: linear-gradient(120deg, rgba(52,211,153,.07), rgba(255,255,255,.02)); }
 .scanner-media { position: relative; align-self: start; }
 .scanner-cheapest { position: absolute; top: 4px; left: 0; font-size: 9px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #041018; background: #34d399; border-radius: 4px; padding: 2px 5px; }
-.scanner-img { width: 120px; height: 120px; max-width: 100%; object-fit: contain; border-radius: 8px; background: #fff; padding: 4px; }
+.scanner-img { width: 132px; height: 132px; max-width: 100%; object-fit: contain; border-radius: 8px; background: #fff; padding: 2px; transform: scale(1.06); }
 .scanner-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 7px; align-content: start; min-width: 0; overflow-wrap: anywhere; }
 .scanner-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; min-width: 0; }
 .scanner-head b { font-size: 14px; line-height: 1.3; }
@@ -3495,11 +3495,23 @@ body {
 .home-scanner-media {
   display: grid;
   place-items: center;
-  height: 128px;
-  padding: 12px;
+  height: 168px;
+  padding: 6px;
+  overflow: hidden;
   background: radial-gradient(circle at 50% 40%, rgba(34, 211, 238, .1), transparent 70%), #f5f7f8;
 }
-.home-scanner-media img { max-width: 100%; max-height: 100%; object-fit: contain; }
+/* Las fotos de Amazon traen mucho margen blanco: con contain el aparato se veía
+   diminuto. Se ajusta al alto del marco y se amplía un poco para recortar ese
+   margen sin cortar el producto. */
+.home-scanner-media img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  transform: scale(1.14);
+  transform-origin: center;
+}
 .home-scanner-body { display: flex; flex-direction: column; gap: 5px; padding: 13px 14px 14px; }
 .home-scanner-rank {
   align-self: flex-start;
@@ -3545,7 +3557,7 @@ body {
 .product.photo-failed .product-no-photo .ic { width: 44px; height: 44px; }
 @media (max-width: 560px) {
   .home-scanner-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
-  .home-scanner-media { height: 104px; padding: 8px; }
+  .home-scanner-media { height: 124px; padding: 4px; }
   .home-scanner-body { padding: 10px 10px 11px; }
   .home-scanner b { font-size: 12.5px; }
   .home-scanner-price { font-size: 18px; }

@@ -606,6 +606,25 @@ router.get('/symptoms', (req, res) => {
   if (category) list = list.filter(s => s.categoryId === category || s.category === category);
   if (system) list = list.filter(s => fold(s.system).includes(system));
   if (q) list = list.filter(s => fold(`${s.name} ${s.description} ${s.category} ${s.system}`).includes(q));
+
+  // `lite=1`: la lista viaja con lo justo para pintar las tarjetas y el resto
+  // se pide al abrir el síntoma. Con 741 fichas el JSON completo pasaba de
+  // 1,3 MB y en el móvil tardaba en arrancar la pestaña.
+  if (String(req.query.lite || '') === '1') {
+    return res.json(list.map(s => ({
+      id: s.id,
+      name: s.name,
+      icon: s.icon,
+      category: s.category,
+      categoryId: s.categoryId,
+      group: s.group,
+      system: s.system,
+      area: s.area,
+      description: s.description,
+      urgency: s.urgency
+    })));
+  }
+
   res.json(list);
 });
 
@@ -1672,7 +1691,61 @@ function clip(value, max) {
   return text.length > max ? `${text.slice(0, max)}…` : text;
 }
 
-function chatAiPrompt({ query, context, forumBlock, webReferences }) {
+// Síntomas de la base interna que encajan con lo que pregunta el usuario y con
+// sus datos (DTC, síntomas declarados). Van al prompt para que la IA razone con
+// causas y pruebas ya verificadas en vez de improvisar una lista genérica.
+const SYMPTOM_STOPWORDS = new Set([
+  'para', 'como', 'cuando', 'porque', 'desde', 'hasta', 'sobre', 'entre', 'tiene', 'tengo',
+  'hace', 'esta', 'este', 'esto', 'mucho', 'poco', 'pero', 'aunque', 'solo', 'todo', 'nada',
+  'coche', 'coches', 'vehiculo', 'motor', 'problema', 'fallo', 'pasa', 'ayer', 'ahora'
+]);
+
+function symptomSearchTokens(text) {
+  return fold(String(text || ''))
+    .split(/[^a-z0-9]+/)
+    .filter(t => t.length >= 4 && !SYMPTOM_STOPWORDS.has(t));
+}
+
+function sintomasInternos(query, context = {}, limit = 3) {
+  const pregunta = symptomSearchTokens(`${query} ${context.symptoms || ''} ${context.dtc || ''}`);
+  if (!pregunta.length) return [];
+  const dtcList = readJSON('dtc.json');
+  const lista = getNormalizedSymptoms(Array.isArray(dtcList) ? dtcList : []);
+  const quiereDtc = String(context.dtc || '').toUpperCase();
+
+  return lista
+    .map(s => {
+      const texto = fold(`${s.name} ${(s.w || []).join(' ')} ${s.area || ''} ${(s.relatedDtc || []).join(' ')}`);
+      let score = 0;
+      for (const token of pregunta) if (texto.includes(token)) score += 1;
+      if (quiereDtc && (s.relatedDtc || []).some(code => String(code).toUpperCase() === quiereDtc)) score += 4;
+      return { s, score };
+    })
+    .filter(x => x.score >= 2)
+    .sort((a, b) => b.score - a.score || (b.s.urgency === 'Alta') - (a.s.urgency === 'Alta'))
+    .slice(0, limit)
+    .map(x => x.s);
+}
+
+function sintomasInternosBlock(query, context) {
+  const encontrados = sintomasInternos(query, context);
+  if (!encontrados.length) {
+    return '### Síntomas de la base interna que encajan\nNinguno coincide con suficiente precisión. No inventes causas: pide el dato que falta (DTC, cuándo ocurre, ruido o testigo) antes de concretar.';
+  }
+  const filas = encontrados.map((s, i) => {
+    const causas = (s.causeDetails || []).slice(0, 4).map(c => c.text).filter(Boolean).join('; ');
+    const pruebas = (s.quickChecks || []).slice(0, 4).join('; ');
+    const dtcs = (s.relatedDtc || []).slice(0, 5).join(', ');
+    return `${i + 1}. ${clip(s.name, 140)}\n   Sistema: ${s.area || s.system || 'general'} · Urgencia: ${s.urgency || 'media'}${dtcs ? ` · DTC: ${dtcs}` : ''}\n   Causas de la base: ${clip(causas || 'sin causas documentadas', 400)}\n   Pruebas de la base: ${clip(pruebas || 'sin pruebas documentadas', 320)}`;
+  });
+  return [
+    '### Síntomas de la base interna que encajan (úsalos como punto de partida)',
+    ...filas,
+    'Contrasta estas causas con lo que cuenta el usuario y con los fragmentos de foro. Si la base contradice los datos, gana el dato del coche. No cambies una prueba concreta por una recomendación genérica.'
+  ].join('\n');
+}
+
+function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock = '' }) {
   const engine = context.engineReliability;
   const knownIssues = Array.isArray(context.knownIssues) ? context.knownIssues : [];
 
@@ -1716,6 +1789,8 @@ function chatAiPrompt({ query, context, forumBlock, webReferences }) {
     engineBlock,
     '',
     soundsBlock,
+    '',
+    symptomBlock || '### Síntomas de la base interna que encajan\nSin coincidencias fiables.',
     '',
     '### Contexto del vehículo (JSON)',
     clip(JSON.stringify(context), 1800),
@@ -1824,7 +1899,13 @@ router.post('/chat/ai', async (req, res) => {
     vehicle
   });
 
-  const prompt = chatAiPrompt({ query, context, forumBlock, webReferences });
+  const prompt = chatAiPrompt({
+    query,
+    context,
+    forumBlock,
+    webReferences,
+    symptomBlock: sintomasInternosBlock(query, context)
+  });
   let ai;
   try {
     // Presupuesto acotado: si ninguna IA responde a tiempo, se devuelve el
