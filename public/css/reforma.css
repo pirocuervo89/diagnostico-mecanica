@@ -3882,3 +3882,47 @@ body {
   .shop-toolbar { gap: 6px; }
   .shop-count { font-size: 11.5px; }
 }
+
+/* Ficha de producto (ventana) */
+.shop-card-media { border: 0; cursor: pointer; width: 100%; font: inherit; }
+.shop-card-title {
+  border: 0; background: none; padding: 0; margin: 0; text-align: left; cursor: pointer;
+  color: inherit; font: inherit; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.shop-card-title:hover { color: #ffd58a; }
+.home-action-note { display: block; margin-top: 7px; font-size: 11px; color: #8e88ad; }
+
+.shop-modal { position: fixed; inset: 0; z-index: 9500; display: grid; place-items: center; padding: 16px; }
+.shop-modal[hidden] { display: none; }
+.shop-modal-bg { position: absolute; inset: 0; background: rgba(4, 6, 12, .74); backdrop-filter: blur(3px); }
+.shop-modal-card {
+  position: relative; width: min(860px, 100%); max-height: min(88vh, 720px); overflow: auto;
+  display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 0;
+  border-radius: 18px; border: 1px solid rgba(255, 255, 255, .12);
+  background: linear-gradient(170deg, #171b2a, #0a0c15); box-shadow: 0 30px 80px rgba(0, 0, 0, .55);
+}
+.shop-modal-close {
+  position: absolute; right: 10px; top: 10px; z-index: 2; width: 38px; height: 38px;
+  border-radius: 50%; border: 1px solid rgba(255, 255, 255, .16); background: rgba(8, 9, 14, .8);
+  color: #fff; font-size: 16px; cursor: pointer;
+}
+.shop-modal-media { display: grid; place-items: center; padding: 18px; background: #f7f8fa; border-radius: 18px 0 0 18px; }
+.shop-modal-img img { max-width: 100%; max-height: 320px; object-fit: contain; }
+.shop-modal-body { padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 8px; }
+.shop-modal-brand { font: 700 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: #9fe8f5; }
+.shop-modal-title { margin: 0; font-size: 19px; line-height: 1.3; color: #f6f3ff; }
+.shop-modal-cat { font-size: 11.5px; color: #8e88ad; }
+.shop-modal-desc { margin: 4px 0 0; font-size: 13px; line-height: 1.6; color: #c9c4de; }
+.shop-modal-note { margin: 0; font-size: 11.5px; line-height: 1.5; color: #8e88ad; }
+.shop-modal-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 12px; }
+.shop-modal-price { font-size: 26px; font-weight: 800; color: #ffd58a; font-variant-numeric: tabular-nums; }
+.shop-modal-card.cargando { opacity: .8; }
+body.shop-modal-open { overflow: hidden; }
+@media (max-width: 640px) {
+  .shop-modal-card { grid-template-columns: 1fr; max-height: 92vh; }
+  .shop-modal-media { border-radius: 18px 18px 0 0; padding: 14px; }
+  .shop-modal-img img { max-height: 220px; }
+  .shop-modal-body { padding: 16px; }
+  .shop-modal-title { font-size: 16.5px; }
+  .shop-modal-price { font-size: 22px; }
+}

@@ -185,13 +185,13 @@
     const precioTxt = /€/.test(p.price || '') ? p.price : (p.price ? `${p.price} €` : 'Ver precio');
     const enlace = p.affiliateUrl || '#';
     return `
-      <article class="shop-card">
-        <a class="shop-card-media" href="${esc(enlace)}" target="_blank" rel="sponsored nofollow noopener noreferrer" aria-label="${esc(p.name)}">
+      <article class="shop-card" data-id="${esc(p.id)}">
+        <button class="shop-card-media" type="button" data-ficha="${esc(p.id)}" aria-label="Ver ficha de ${esc(p.name)}">
           ${imagen}
           <span class="shop-card-brand">${esc(p.manufacturer || p.seller || 'Recambio')}</span>
-        </a>
+        </button>
         <div class="shop-card-body">
-          <h3>${esc(p.name)}</h3>
+          <h3><button class="shop-card-title" type="button" data-ficha="${esc(p.id)}">${esc(p.name)}</button></h3>
           <span class="shop-card-cat">${esc(p.subcategory || p.category || '')}</span>
           <div class="shop-card-foot">
             <b class="shop-card-price">${esc(precioTxt)}</b>
@@ -220,6 +220,91 @@
       count.textContent = `${list.length.toLocaleString('es-ES')} producto${list.length === 1 ? '' : 's'} en ${secLabel}${state.query ? ` · «${state.query}»` : ''}`;
     }
     if (more) more.hidden = list.length <= state.shown;
+  }
+
+  // ------------------------------------------------------------- ficha (modal)
+  let modal = null;
+  let focoPrevio = null;
+
+  function cerrarFicha() {
+    if (!modal) return;
+    modal.hidden = true;
+    document.body.classList.remove('shop-modal-open');
+    focoPrevio?.focus?.();
+    focoPrevio = null;
+  }
+
+  function crearModal() {
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.className = 'shop-modal';
+    modal.hidden = true;
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.innerHTML = `
+      <div class="shop-modal-bg" data-cerrar></div>
+      <div class="shop-modal-card" role="document">
+        <button class="shop-modal-close" type="button" data-cerrar aria-label="Cerrar ficha">✕</button>
+        <div class="shop-modal-media"><div class="shop-modal-img"></div></div>
+        <div class="shop-modal-body">
+          <span class="shop-modal-brand"></span>
+          <h3 class="shop-modal-title"></h3>
+          <span class="shop-modal-cat"></span>
+          <p class="shop-modal-desc"></p>
+          <p class="shop-modal-note"></p>
+          <div class="shop-modal-foot">
+            <b class="shop-modal-price"></b>
+            <a class="shop-card-buy" target="_blank" rel="sponsored nofollow noopener noreferrer">Ver oferta</a>
+          </div>
+        </div>
+      </div>`;
+    modal.addEventListener('click', event => {
+      if (event.target.closest('[data-cerrar]')) cerrarFicha();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && modal && !modal.hidden) cerrarFicha();
+    });
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  async function abrirFicha(id) {
+    if (!id) return;
+    focoPrevio = document.activeElement;
+    crearModal();
+    const card = modal.querySelector('.shop-modal-card');
+    card.classList.add('cargando');
+    modal.hidden = false;
+    document.body.classList.add('shop-modal-open');
+    modal.querySelector('.shop-modal-close')?.focus();
+
+    const base = state.all.find(p => String(p.id) === String(id)) || {};
+    pintarFicha(base);
+    try {
+      const full = await api(`/api/products/${encodeURIComponent(id)}`);
+      pintarFicha({ ...base, ...full });
+    } catch { /* se queda con lo que ya había */ }
+    card.classList.remove('cargando');
+  }
+
+  function pintarFicha(p) {
+    if (!modal) return;
+    const imgBox = modal.querySelector('.shop-modal-img');
+    if (p.image) {
+      imgBox.innerHTML = `<img src="${esc(p.image)}" alt="${esc(p.name || '')}" onerror="this.remove()">`;
+    } else {
+      imgBox.textContent = '📦';
+    }
+    modal.querySelector('.shop-modal-brand').textContent = p.manufacturer || p.seller || 'Recambio';
+    modal.querySelector('.shop-modal-title').textContent = p.name || '';
+    modal.querySelector('.shop-modal-cat').textContent = [p.category, p.subcategory].filter(Boolean).join(' · ');
+    modal.querySelector('.shop-modal-desc').textContent = p.description || '';
+    const nota = p.compatibility?.note || (p.compatibility?.type === 'universal' ? 'Compatible de forma genérica: comprueba referencia, medidas y motor antes de comprar.' : '');
+    modal.querySelector('.shop-modal-note').textContent = nota;
+    modal.querySelector('.shop-modal-price').textContent = p.price || '';
+    const buy = modal.querySelector('.shop-modal-foot a');
+    if (p.affiliateUrl) { buy.href = p.affiliateUrl; buy.hidden = false; }
+    else { buy.hidden = true; }
   }
 
   function buscar(term) {
@@ -260,6 +345,10 @@
     $('shopMore')?.addEventListener('click', () => {
       state.shown += PAGE;
       pintarGrid();
+    });
+    $('shopGrid')?.addEventListener('click', event => {
+      const btn = event.target.closest('[data-ficha]');
+      if (btn) abrirFicha(btn.dataset.ficha);
     });
   }
 
