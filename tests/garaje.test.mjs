@@ -5,6 +5,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -56,6 +57,15 @@ async function registerUser(name) {
     body: { username: name, displayName: name, password: 'clave-segura-123' }
   });
   assert.equal(response.status, 201);
+  // Toda cuenta nueva nace en plan Gratis (1 coche). Estos tests crean varios
+  // vehículos por usuario, así que se sube la cuenta a Full en la base del
+  // servidor de pruebas; el límite por plan se comprueba aparte.
+  try {
+    const db = new DatabaseSync(path.join(TMP, 'forum.sqlite'));
+    db.prepare("UPDATE users SET plan = 'full', plan_expires_at = ? WHERE username = ?")
+      .run(new Date(Date.now() + 30 * 86400000).toISOString(), name);
+    db.close();
+  } catch { /* si no se puede, el test fallará con el límite y se verá */ }
   return response.cookie;
 }
 

@@ -4,6 +4,27 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import Stripe from 'stripe';
+import { PLANS, PLAN_ORDER, planState, planById } from '../lib/plans.js';
+import { db, userFromSession } from '../lib/forum_db.js';
+
+const SESSION_COOKIE = 'dym_forum_session';
+
+function cookieValue(req, name) {
+  const raw = String(req.headers.cookie || '');
+  for (const part of raw.split(';')) {
+    const [key, ...rest] = part.trim().split('=');
+    if (key === name) return decodeURIComponent(rest.join('=') || '');
+  }
+  return '';
+}
+
+function currentUser(req) {
+  try { return userFromSession(cookieValue(req, SESSION_COOKIE)); } catch { return null; }
+}
+
+function savePlan(userId, plan, untilISO) {
+  db.prepare('UPDATE users SET plan = ?, plan_expires_at = ? WHERE id = ?').run(plan, untilISO, userId);
+}
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -219,6 +240,7 @@ function reportHtml(order) {
 }
 
 router.get('/status', (req, res) => {
+  // (planes: ver /api/payments/plans)
   const stripe = stripeClient();
   const key = String(process.env.STRIPE_SECRET_KEY || '');
   const config = reportConfig();
@@ -401,10 +423,39 @@ router.post('/webhook', (req, res) => {
 
   if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
     const session = event.data.object;
-    if (session.payment_status === 'paid') {
+    if (session.mode === 'subscription') {
+      // Alta de plan: se guarda un mes (Stripe renueva y avisa cada mes).
+      const userId = Number(session.metadata?.userId || String(session.client_reference_id || '').replace('user:', ''));
+      const plan = planById(session.metadata?.plan);
+      if (Number.isInteger(userId) && userId > 0 && plan.id !== 'free') {
+        const until = new Date(Date.now() + 31 * 86400000).toISOString();
+        try { savePlan(userId, plan.id, until); } catch { /* la base manda */ }
+      }
+    } else if (session.payment_status === 'paid') {
       markOrderPaid(session.client_reference_id, session.id);
     }
   }
+
+  if (event.type === 'invoice.paid') {
+    const invoice = event.data.object;
+    const userId = Number(invoice.subscription_details?.metadata?.userId || 0);
+    if (Number.isInteger(userId) && userId > 0) {
+      try {
+        const row = db.prepare('SELECT plan FROM users WHERE id = ?').get(userId);
+        if (row?.plan && row.plan !== 'free') {
+          savePlan(userId, row.plan, new Date(Date.now() + 31 * 86400000).toISOString());
+        }
+      } catch { /* sin base no se puede renovar */ }
+    }
+  }
+
+  if (event.type === 'customer.subscription.deleted') {
+    const userId = Number(event.data.object?.metadata?.userId || 0);
+    if (Number.isInteger(userId) && userId > 0) {
+      try { savePlan(userId, 'free', null); } catch { /* la base manda */ }
+    }
+  }
+
   res.json({ received: true });
 });
 
@@ -438,5 +489,66 @@ function sendReport(res, order) {
   res.setHeader('Content-Disposition', `inline; filename="informe-${order.id}.html"`);
   res.send(reportHtml(order));
 }
+
+// --------------------------------------------------------------- planes
+
+router.get('/plans', (req, res) => {
+  const user = currentUser(req);
+  const state = planState(user);
+  res.json({
+    current: state.id,
+    currentLabel: state.name,
+    trialActive: state.trialActive,
+    trialDaysLeft: state.trialDaysLeft,
+    blocked: state.blocked,
+    loggedIn: Boolean(user),
+    plans: PLAN_ORDER.map(id => ({ ...PLANS[id], current: state.id === id }))
+  });
+});
+
+// Alta o cambio de plan con Stripe Checkout en modo suscripción mensual.
+router.post('/subscribe', async (req, res, next) => {
+  try {
+    const user = currentUser(req);
+    if (!user) return res.status(401).json({ error: 'Entra en tu cuenta para contratar un plan.' });
+    const planId = String(req.body?.plan || '').toLowerCase();
+    const plan = PLANS[planId];
+    if (!plan || plan.id === 'free') return res.status(400).json({ error: 'Plan no válido.' });
+
+    const stripe = stripeClient();
+    if (!stripe) {
+      return res.status(503).json({
+        error: 'Los cobros todavía no están activados.',
+        detail: 'Añade STRIPE_SECRET_KEY en Render para poder contratar planes.'
+      });
+    }
+
+    const base = String(process.env.PUBLIC_BASE_URL || 'https://diagnostico-mecanica.onrender.com').replace(/\/$/, '');
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      customer_email: undefined,
+      client_reference_id: `user:${user.id}`,
+      metadata: { userId: String(user.id), plan: plan.id },
+      subscription_data: { metadata: { userId: String(user.id), plan: plan.id } },
+      line_items: [{
+        quantity: 1,
+        price_data: {
+          currency: 'eur',
+          unit_amount: plan.priceCents,
+          recurring: { interval: 'month' },
+          product_data: {
+            name: `Diagnóstico y Mecánica · Plan ${plan.name}`,
+            description: plan.features.slice(0, 2).join(' · ')
+          }
+        }
+      }],
+      success_url: `${base}/?plan=${plan.id}&pago=ok#planes`,
+      cancel_url: `${base}/?pago=cancelado#planes`
+    });
+    res.json({ url: session.url, id: session.id });
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;

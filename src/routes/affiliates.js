@@ -72,6 +72,10 @@ router.get('/', (req, res) => {
     tagActive: Boolean(tag),
     tagSource: isTag(fromEnv) ? 'AFFILIATE_TAG_AMAZON' : (isTag(stored) ? 'data/legal.json' : ''),
     awinPublisher: String(process.env.AWIN_PUBLISHER_ID || '').trim() || '',
+    // AliExpress y Temu: no tienen un identificador con formato fijo, así que
+    // se informa de si existe la plantilla de seguimiento en el entorno.
+    aliexpress: { active: Boolean(String(process.env.ALIEXPRESS_AFF_URL || '').trim()) },
+    temu: { active: Boolean(String(process.env.TEMU_AFF_URL || '').trim()) },
     catalogue: catalogues,
     linkedItems: catalogues.reduce((total, entry) => total + entry.withLink, 0),
     siteUrl: legal.siteUrl || '',

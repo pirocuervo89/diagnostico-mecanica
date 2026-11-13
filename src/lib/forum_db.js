@@ -22,6 +22,7 @@ export const db = new DatabaseSync(DB_PATH);
 startAutoBackup(db, DB_PATH);
 await startUploadsSync(UPLOAD_DIR, 'files/foro');
 
+
 db.exec(`
   PRAGMA journal_mode = WAL;
   PRAGMA foreign_keys = ON;
@@ -189,6 +190,22 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_dm_messages_thread ON dm_messages(thread_id);
 `);
 
+// Planes: columnas nuevas sobre las bases que ya existen (migración suave, sin
+// perder cuentas ni coches).
+for (const [column, definition] of [
+  ['plan', "TEXT NOT NULL DEFAULT 'free'"],
+  ['plan_expires_at', 'TEXT'],
+  ['trial_ends_at', 'TEXT']
+]) {
+  try { db.exec(`ALTER TABLE users ADD COLUMN ${column} ${definition}`); } catch { /* ya existe */ }
+}
+// A quien ya tenía cuenta se le dan los 30 días de prueba desde hoy.
+try {
+  db.prepare("UPDATE users SET trial_ends_at = ? WHERE trial_ends_at IS NULL").run(
+    new Date(Date.now() + 30 * 86400000).toISOString()
+  );
+} catch { /* sin permiso de escritura: se sigue igual */ }
+
 const CATEGORIES = [
   ['motor', 'Motor', 'Bloque, culata, lubricación y averías mecánicas internas.', 'engine'],
   ['turbo', 'Turbo y sobrealimentación', 'Turbocompresor, geometría variable, intercooler y presión de soplado.', 'wind'],
@@ -281,7 +298,10 @@ export function publicUser(user) {
     reputation: Number(user.reputation || 0),
     bannedUntil: user.banned_until || null,
     createdAt: user.created_at,
-    lastSeen: user.last_seen
+    lastSeen: user.last_seen,
+    plan: user.plan || 'free',
+    planExpiresAt: user.plan_expires_at || null,
+    trialEndsAt: user.trial_ends_at || null
   };
 }
 
@@ -321,10 +341,12 @@ export function registerUser({ username, displayName, password }, meta = {}) {
   const colors = ['#f39c12', '#22d3ee', '#7c9cff', '#4ade80', '#f472b6', '#facc15'];
   const color = colors[Math.floor(Math.random() * colors.length)];
   const created = nowISO();
+  // 30 días de prueba desde el alta, como en el plan Gratis.
+  const trialEnds = new Date(Date.now() + 30 * 86400000).toISOString();
   const info = db.prepare(`
-    INSERT INTO users (username, display_name, password_salt, password_hash, role, avatar_color, created_at, last_seen)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(cleanUsername, name, salt, hash, role, color, created, created);
+    INSERT INTO users (username, display_name, password_salt, password_hash, role, avatar_color, created_at, last_seen, plan, trial_ends_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'free', ?)
+  `).run(cleanUsername, name, salt, hash, role, color, created, created, trialEnds);
   return publicUser(userById(Number(info.lastInsertRowid)));
 }
 

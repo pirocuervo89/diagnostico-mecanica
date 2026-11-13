@@ -21,7 +21,9 @@
     { id: 'aceites', label: 'Aceites y líquidos', ico: '🛢️', match: p => s(p.category) === 'liquidos y quimicos' },
     { id: 'frenos', label: 'Frenos y ABS', ico: '🛑', match: p => /freno|pastilla|disco|abs|pinza/.test(s(p.subcategory)) },
     { id: 'suspension', label: 'Suspensión y dirección', ico: '🔧', match: p => /amortiguador|rotula|suspension|direccion|silentblock|brazo|muelle|barra/.test(s(p.subcategory)) },
-    { id: 'iluminacion', label: 'Iluminación', ico: '💡', match: p => /bombilla|luz|led|xenon|faro|matricula/.test(s(p.subcategory)) },
+    { id: 'iluminacion', label: 'Iluminación', ico: '💡', match: p => /bombilla|kit led|led|luz|matricula|intermitente/.test(s(p.subcategory)) },
+    { id: 'carroceria', label: 'Carrocería y estilo', ico: '🚗', match: p => /parrilla|rejilla|faro|piloto|retrovisor|espejo|separador|pomo|volante|paragolpes|aleron|alero|moldura|embellecedor|talonera|carrocer|difusor|toma de aire/.test(s(p.subcategory)) },
+    { id: 'audio', label: 'Car audio y multimedia', ico: '🎵', match: p => /audio|altavoz|subwoofer|woofer|amplificador|radio|pantalla|multimedia|tweeter|coaxial/.test(s(p.subcategory)) },
     { id: 'motor', label: 'Motor y distribución', ico: '⚙️', match: p => /bujia|distribucion|correa|bomba|turbo|inyector|culata|junta|termostato|radiador|embrague|valvula|sensor de cigue|manguito/.test(s(p.subcategory)) },
     { id: 'electricidad', label: 'Baterías y electricidad', ico: '🔋', match: p => /bateria|alternador|arranque|sensor|fusible|bobina/.test(s(p.subcategory)) },
     { id: 'limpieza', label: 'Limpieza y cuidado', ico: '🧴', match: p => /limpieza|limpia|escobilla|aditivo|sellador/.test(s(p.subcategory)) },
@@ -189,6 +191,7 @@
         <button class="shop-card-media" type="button" data-ficha="${esc(p.id)}" aria-label="Ver ficha de ${esc(p.name)}">
           ${imagen}
           <span class="shop-card-brand">${esc(p.manufacturer || p.seller || 'Recambio')}</span>
+          <span class="shop-card-aff">Afiliado</span>
         </button>
         <div class="shop-card-body">
           <h3><button class="shop-card-title" type="button" data-ficha="${esc(p.id)}">${esc(p.name)}</button></h3>
@@ -256,6 +259,11 @@
             <b class="shop-modal-price"></b>
             <a class="shop-card-buy" target="_blank" rel="sponsored nofollow noopener noreferrer">Ver oferta</a>
           </div>
+          <div class="shop-modal-shops" hidden>
+            <span class="shop-modal-shops-label">Comprar en otras tiendas</span>
+            <div class="shop-modal-shops-row"></div>
+            <small>Enlaces de afiliado: si compras, ganamos una comisión sin coste extra para ti.</small>
+          </div>
         </div>
       </div>`;
     modal.addEventListener('click', event => {
@@ -305,6 +313,23 @@
     const buy = modal.querySelector('.shop-modal-foot a');
     if (p.affiliateUrl) { buy.href = p.affiliateUrl; buy.hidden = false; }
     else { buy.hidden = true; }
+
+    // Segunda, tercera y cuarta tienda: Autodoc, AliExpress y Temu. Solo se
+    // pintan si el servidor devuelve el enlace (con seguimiento cuando el
+    // titular ha configurado su identificador de afiliado).
+    const shops = modal.querySelector('.shop-modal-shops');
+    const row = modal.querySelector('.shop-modal-shops-row');
+    if (shops && row) {
+      const otras = [
+        ['Autodoc', p.autodocUrl],
+        ['AliExpress', p.aliexpressUrl],
+        ['Temu', p.temuUrl]
+      ].filter(([, url]) => url && /^https?:\/\//i.test(url));
+      row.innerHTML = otras.map(([nombre, url]) =>
+        `<a class="shop-shop-btn" href="${esc(url)}" target="_blank" rel="sponsored nofollow noopener noreferrer">${esc(nombre)}</a>`
+      ).join('');
+      shops.hidden = !otras.length;
+    }
   }
 
   function buscar(term) {

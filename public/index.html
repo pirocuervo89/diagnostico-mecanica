@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/css/app.css?v=20261030a">
   <link rel="stylesheet" href="/css/vision.css?v=20261105c">
   <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
-  <link rel="stylesheet" href="/css/reforma.css?v=20261113c">
+  <link rel="stylesheet" href="/css/reforma.css?v=20261113d">
   <link rel="stylesheet" href="/css/legal.css?v=20261110a">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Diagnóstico y Mecánica">
@@ -113,6 +113,7 @@
     <button data-view="sala" type="button" title="Sala de máquinas"><svg class="ic"><use href="#i-gauge"></use></svg>Sala</button>
     <button data-view="tutoriales" type="button"><svg class="ic"><use href="#i-play"></use></svg>Tutoriales</button>
     <button data-view="tienda" type="button" title="Tienda: recambios, aceites, neumáticos y tuning"><svg class="ic"><use href="#i-cart"></use></svg>Tienda</button>
+    <button data-view="planes" type="button" title="Planes y precios"><svg class="ic"><use href="#i-file"></use></svg>Planes</button>
     <button data-view="fiabilidad" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Fiabilidad</button>
     <button data-view="chat" type="button"><svg class="ic"><use href="#i-chat"></use></svg>Chat IA</button>
     <button data-view="informe" type="button"><svg class="ic"><use href="#i-file"></use></svg>Informe</button>
@@ -1383,6 +1384,20 @@
     </section>
   </section>
 
+  <!-- ===================== PLANES ===================== -->
+  <section id="view-planes" class="view planes-view">
+    <header class="plans-head">
+      <span class="eyebrow"><i></i> PLANES</span>
+      <h2>Elige cuánto quieres saber</h2>
+      <p>Todos los planes incluyen la tienda, los 741 síntomas y los 9.201 códigos de avería. Lo que cambia es el número de coches en el garaje y el detalle del asistente.</p>
+      <p id="plansState" class="plans-state" aria-live="polite"></p>
+    </header>
+    <div id="plansGrid" class="plans-grid">
+      <div class="notice">Cargando planes…</div>
+    </div>
+    <p class="plans-legal">Pago seguro con Stripe. Puedes cancelar cuando quieras desde el recibo de Stripe; el plan sigue activo hasta el final del mes pagado. El plan Gratis dura 30 días desde el alta.</p>
+  </section>
+
   <!-- ===================== TIENDA ===================== -->
   <section id="view-tienda" class="view shop-view">
     <header class="shop-hero">
@@ -1950,7 +1965,8 @@
 
 <script src="/js/voz.js?v=20261113j"></script>
 
-<script src="/js/tienda.js?v=20261113b"></script>
+<script src="/js/tienda.js?v=20261113c"></script>
+<script src="/js/planes.js?v=20261113a"></script>
 <script src="/js/app.js?v=20261113a"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 
 import { db, cleanText } from './forum_db.js';
 import { startUploadsSync } from './db_persist.js';
+import { planState } from './plans.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..', '..');
@@ -393,7 +394,12 @@ export function garageStats(userId) {
 export function createVehicle(userId, data) {
   const payload = cleanVehiclePayload(data);
   const existing = db.prepare('SELECT COUNT(*) AS n FROM garage_vehicles WHERE user_id = ?').get(userId).n;
-  if (Number(existing) >= 25) throw fail('Has alcanzado el máximo de 25 vehículos por cuenta.', 409);
+  // El máximo de coches lo marca el plan: 1 en Gratis, 2 en Pro y 10 en Full.
+  const cuenta = db.prepare('SELECT plan, plan_expires_at, trial_ends_at FROM users WHERE id = ?').get(userId);
+  const limite = planState(cuenta).vehicles;
+  if (Number(existing) >= limite) {
+    throw fail(`Tu plan permite ${limite} coche${limite === 1 ? '' : 's'} en el garaje. Pasa a Pro (2 coches) o Full (10 coches) para añadir más.`, 402);
+  }
   const created = nowISO();
   const info = db.prepare(`
     INSERT INTO garage_vehicles (user_id, brand, model, version, year, plate, vin, engine_code,

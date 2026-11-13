@@ -5,7 +5,8 @@ import { fileURLToPath } from 'url';
 import { obtenerSystemPrompt, filtrarProductosRecomendados } from '../../ia_reasoning.js';
 import { callAI, aiStatus } from '../lib/ai_provider.js';
 import { enrichDTC, deriveSystem, deriveSeverity, normSeverity } from '../lib/dtc_enrich.js';
-import { findKnowledgeCases } from '../lib/forum_db.js';
+import { findKnowledgeCases, userFromSession } from '../lib/forum_db.js';
+import { planState } from '../lib/plans.js';
 import { searchWebContext, searchForumContext, researchSources } from '../lib/web_search.js';
 import { listTutorials } from '../lib/tutorial_db.js';
 import { scanVehicleDocument } from '../lib/document_scan.js';
@@ -1774,7 +1775,23 @@ function sintomasInternosBlock(query, context) {
   ].join('\n');
 }
 
-function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock = '' }) {
+// Plan de quien pregunta: decide cuánto detalle se le da. Sin sesión se aplica
+// el plan gratuito, que es el que empuja a contratar.
+function planDePeticion(req) {
+  try {
+    const raw = String(req.headers.cookie || '');
+    let token = '';
+    for (const part of raw.split(';')) {
+      const [key, ...rest] = part.trim().split('=');
+      if (key === 'dym_forum_session') { token = decodeURIComponent(rest.join('=') || ''); break; }
+    }
+    return planState(token ? userFromSession(token) : null);
+  } catch {
+    return planState(null);
+  }
+}
+
+function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock = '', maxWords = MAX_AI_REPLY_WORDS, pushFull = true }) {
   const engine = context.engineReliability;
   const knownIssues = Array.isArray(context.knownIssues) ? context.knownIssues : [];
 
@@ -1797,7 +1814,10 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     obtenerSystemPrompt(),
     '',
     '### Reglas obligatorias de esta respuesta',
-    `- Responde en español, sin tablas, con listas cortas, y no superes ${MAX_AI_REPLY_WORDS} palabras.`,
+    `- Responde en español, sin tablas, con listas cortas, y no superes ${maxWords} palabras.`,
+    pushFull
+      ? '- Da la respuesta correcta y útil, pero sin el paso a paso milimétrico: para el desglose completo (valores, conectores y orden exacto de comprobaciones) remite al plan Full en una sola línea al final, sin insistir más.'
+      : '- Da el paso a paso completo: valores de referencia, conectores y orden exacto de las comprobaciones.',
     '- Distingue hechos (datos leídos o documentados) de hipótesis. No inventes códigos, valores, intervalos, compatibilidades ni averías.',
     '- Prohibido el relleno de manual: nada de "podría ser cualquiera de estas causas", "revisa el motor", "acude a un taller" ni listas de diez posibilidades. Da como mucho TRES hipótesis, ordenadas de más a menos probable, y explica en una línea por qué encaja cada una con el síntoma descrito.',
     '- Cada comprobación debe ser accionable: nombra la pieza o el conector exacto, la herramienta y el valor o síntoma que confirma o descarta. Si no sabes el valor, di qué comparar (por ejemplo, lectura en ralentí frente a 2.500 rpm).',
@@ -1928,12 +1948,15 @@ router.post('/chat/ai', async (req, res) => {
     vehicle
   });
 
+  const plan = planDePeticion(req);
   const prompt = chatAiPrompt({
     query,
     context,
     forumBlock,
     webReferences,
-    symptomBlock: sintomasInternosBlock(query, context)
+    symptomBlock: sintomasInternosBlock(query, context),
+    maxWords: plan.aiWords || MAX_AI_REPLY_WORDS,
+    pushFull: plan.id !== 'full'
   });
   let ai;
   try {
@@ -1955,7 +1978,7 @@ router.post('/chat/ai', async (req, res) => {
   }
 
   return res.json({
-    reply: limitReplyWords(reply),
+    reply: limitReplyWords(reply, plan.aiWords || MAX_AI_REPLY_WORDS),
     productos_recomendados: recomendados.slice(0, 4),
     forum_references: forumReferences,
     web_references: webReferences,

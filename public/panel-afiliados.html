@@ -51,6 +51,8 @@
     <div class="card"><div class="k">Enlaces con comisión</div><div class="v" id="linked">—</div><div class="s" id="linkedDetail"></div></div>
     <div class="card"><div class="k">Awin (Autodoc)</div><div class="v warn" id="awin">Comprobando…</div><div class="s">Identificador de editor</div></div>
     <div class="card"><div class="k">Stripe (informe PRO)</div><div class="v warn" id="stripe">Comprobando…</div><div class="s" id="stripeDetail">Pasarela de cobro</div></div>
+    <div class="card"><div class="k">AliExpress</div><div class="v warn" id="ali">Comprobando…</div><div class="s">Enlaces de búsqueda con comisión</div></div>
+    <div class="card"><div class="k">Temu</div><div class="v warn" id="temu">Comprobando…</div><div class="s">Enlaces de búsqueda con comisión</div></div>
   </section>
 
   <h2>Dónde se ve lo que has ganado</h2>
@@ -59,6 +61,8 @@
     <li><a href="https://ui.awin.com/" target="_blank" rel="noopener">Awin → Autodoc y otras tiendas</a><span>Editor: aquí salen los clics y las comisiones de Autodoc (merchant 120163).</span></li>
     <li><a href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console</a><span>Si las páginas se están indexando. Es lo que trae el tráfico que luego compra.</span></li>
     <li><a href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Stripe</a><span>Cobros del informe PRO. Los ingresos llegan al banco que configures dentro de Stripe.</span></li>
+    <li><a href="https://portals.aliexpress.com/" target="_blank" rel="noopener">AliExpress Portals → comisiones</a><span>Programa de afiliados: al darte de alta te dan una plantilla de enlace de seguimiento.</span></li>
+    <li><a href="https://partner.temu.com/" target="_blank" rel="noopener">Temu Affiliate → comisiones</a><span>Alta de afiliado: genera tu enlace corto (temu.to) y se pega en Render.</span></li>
     <li><a href="https://dashboard.render.com/" target="_blank" rel="noopener">Render</a><span>Servidor, variables de entorno y despliegues.</span></li>
     <li><a href="/" target="_blank" rel="noopener">Ver la web publicada</a><span>Comprueba que las fichas y los botones de compra se ven bien.</span></li>
   </ul>
@@ -80,6 +84,8 @@
     <li><a href="https://dashboard.stripe.com/" target="_blank" rel="noopener">2 · Stripe: pasar a Live y añadir IBAN</a><span>Settings → Payouts (IBAN + identidad) y Developers → API keys en modo <strong>Live</strong>. Copia la <code>sk_live_…</code> y el webhook <code>whsec_…</code> a Render → Environment. Mientras sea <code>sk_test_…</code> no entra dinero real.</span></li>
     <li><a href="https://search.google.com/search-console" target="_blank" rel="noopener">3 · Search Console: enviar el sitemap</a><span><code>https://diagnostico-mecanica.onrender.com/sitemap.xml</code> — es lo que hace que Google rastree las páginas y llegue el tráfico.</span></li>
     <li><a href="https://ui.awin.com/" target="_blank" rel="noopener">4 · Awin: Publisher ID + IBAN (opcional)</a><span>Activa el botón «Buscar en Autodoc». Pon el Publisher ID en Render como <code>AWIN_PUBLISHER_ID</code> y el IBAN en Awin → Payment Settings.</span></li>
+    <li><a href="https://portals.aliexpress.com/" target="_blank" rel="noopener">5 · AliExpress: enlace de seguimiento</a><span>Da de alta la cuenta, copia la plantilla de enlace y pégala en Render como <code>ALIEXPRESS_AFF_URL</code> con <code>{q}</code> donde va la búsqueda, por ejemplo <code>https://s.click.aliexpress.com/e/_xxxx?q={q}</code>. Entonces la tarjeta de cada producto pasa a mostrar el botón AliExpress con comisión.</span></li>
+    <li><a href="https://partner.temu.com/" target="_blank" rel="noopener">6 · Temu: enlace corto</a><span>Da de alta la cuenta de afiliado, copia tu enlace <code>https://temu.to/k/xxxxx</code> y pégalo en Render como <code>TEMU_AFF_URL</code>.</span></li>
   </ul>
   <p class="lead">Guía completa y comprobación automática: <code>node scripts/check-monetizacion.mjs</code> y el archivo <code>MONETIZACION.md</code>.</p>
 
@@ -109,6 +115,8 @@
       .join(' · ');
 
     set('awin', data.awinPublisher ? 'Configurado' : 'Sin configurar', data.awinPublisher ? 'ok' : 'warn');
+    set('ali', data.aliexpress?.active ? 'Activa' : 'Sin activar', data.aliexpress?.active ? 'ok' : 'warn');
+    set('temu', data.temu?.active ? 'Activa' : 'Sin activar', data.temu?.active ? 'ok' : 'warn');
 
     try {
       const pay = await (await fetch('/api/payments/status', { headers: { accept: 'application/json' } })).json();

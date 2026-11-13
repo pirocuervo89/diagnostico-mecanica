@@ -215,7 +215,30 @@ const QUERIES = [
   { q: 'cargador bateria coche mantenedor', category: 'Herramientas', subcategory: 'Cargadores de batería', req: /cargador|mantenedor/i, ban: /funda|m[oó]vil|usb.*tel[eé]fono|port[aá]til|linterna/i, tags: ['herramienta', 'bateria'] },
   { q: 'compresor aire neumaticos coche', category: 'Herramientas', subcategory: 'Compresores de aire', req: /compresor|inflador/i, ban: /funda|aer[oó]grafo|pintura|aire acondicionado/i, tags: ['herramienta', 'neumaticos'] },
   { q: 'llave dinamometrica coche taller', category: 'Herramientas', subcategory: 'Llaves dinamométricas', req: /dinamom[eé]trica|torque/i, ban: /funda|ambientador/i, tags: ['herramienta', 'taller'] },
-  { q: 'juego llaves vaso carraca coche', category: 'Herramientas', subcategory: 'Juegos de vasos', req: /vaso|carraca|juego/i, ban: /funda|ambientador|cocina/i, tags: ['herramienta', 'taller'] }
+  { q: 'juego llaves vaso carraca coche', category: 'Herramientas', subcategory: 'Juegos de vasos', req: /vaso|carraca|juego/i, ban: /funda|ambientador|cocina/i, tags: ['herramienta', 'taller'] },
+
+  // ---- CAR AUDIO Y MULTIMEDIA ----
+  { q: 'subwoofer coche 12 pulgadas', category: 'Tuning', subcategory: 'Subwoofers', req: /subwoofer|sub\s?woofer|altavoz.*graves/i, ban: /funda|ambientador|soporte.*m[oó]vil|cable|conector|rejilla/i, tags: ['audio', 'subwoofer', 'graves'] },
+  { q: 'subwoofer coche activo amplificado', category: 'Tuning', subcategory: 'Subwoofers amplificados', req: /subwoofer|sub\s?woofer/i, ban: /funda|ambientador|soporte.*m[oó]vil|cable|conector|rejilla/i, tags: ['audio', 'subwoofer', 'activo'] },
+  { q: 'altavoces coche 6.5 pulgadas vias separadas', category: 'Tuning', subcategory: 'Altavoces', req: /altavoz|altavoces|speaker/i, ban: /funda|ambientador|subwoofer|soporte.*m[oó]vil|rejilla.*altavoz/i, tags: ['audio', 'altavoces'] },
+  { q: 'altavoces coche coaxiales 6x9', category: 'Tuning', subcategory: 'Altavoces coaxiales', req: /altavoz|altavoces|coaxial/i, ban: /funda|ambientador|subwoofer|soporte.*m[oó]vil/i, tags: ['audio', 'altavoces', 'coaxial'] },
+  { q: 'kit altavoces coche componentes tweeter', category: 'Tuning', subcategory: 'Kits de altavoces', req: /kit|juego|componentes|tweeter/i, ban: /funda|ambientador|cable.*solo|soporte.*m[oó]vil/i, tags: ['audio', 'kit', 'tweeter'] },
+  { q: 'amplificador coche 4 canales', category: 'Tuning', subcategory: 'Amplificadores', req: /amplificador|amplifier|etapa/i, ban: /funda|ambientador|soporte.*m[oó]vil|cable.*solo|fusible/i, tags: ['audio', 'amplificador'] },
+  { q: 'radio coche bluetooth usb', category: 'Tuning', subcategory: 'Radios y pantallas', req: /radio|autorradio|pantalla|multimedia/i, ban: /funda|ambientador|soporte.*m[oó]vil|antena|mando.*volante|marco.*solo/i, tags: ['audio', 'radio', 'bluetooth'] },
+  { q: 'pantalla android coche 2 din', category: 'Tuning', subcategory: 'Radios y pantallas', req: /pantalla|android|2\s?din|multimedia/i, ban: /funda|ambientador|soporte.*m[oó]vil|protector|cristal.*templado/i, tags: ['audio', 'pantalla', 'android'] },
+  { q: 'kit cableado audio coche amplificador', category: 'Tuning', subcategory: 'Cableado de audio', req: /cable|kit|instalaci[oó]n/i, ban: /funda|ambientador|soporte.*m[oó]vil|cargador|usb.*tel[eé]fono/i, tags: ['audio', 'cableado'] },
+  { q: 'caja subwoofer coche sellada', category: 'Tuning', subcategory: 'Cajas para subwoofer', req: /caja|recinto|bafle|subwoofer/i, ban: /funda|ambientador|cable|conector/i, tags: ['audio', 'caja', 'subwoofer'] },
+  { q: 'tweeter coche agudos', category: 'Tuning', subcategory: 'Tweeters', req: /tweeter|agudo/i, ban: /funda|ambientador|soporte.*m[oó]vil|cable.*solo/i, tags: ['audio', 'tweeter'] },
+
+  // ---- CARROCERÍA, BODY KITS Y REJILLAS ----
+  { q: 'kit carroceria coche body kit', category: 'Tuning', subcategory: 'Kits de carrocería', req: /body\s?kit|kit.*carrocer|carrocer.*kit|faldo|talonera/i, ban: /funda|ambientador|pegatina|adhesivo|pintura|limpiador/i, tags: ['carroceria', 'body kit'] },
+  { q: 'taloneras laterales coche', category: 'Tuning', subcategory: 'Taloneras', req: /talonera|fald[oó]n|faldilla/i, ban: /funda|ambientador|pegatina|pintura|limpiador/i, tags: ['carroceria', 'taloneras'] },
+  { q: 'aleron coche universal', category: 'Tuning', subcategory: 'Alerones y spoilers', req: /aler[oó]n|spoiler|spoile/i, ban: /funda|ambientador|pegatina|pintura|limpiador/i, tags: ['carroceria', 'aleron'] },
+  { q: 'rejilla parrilla deportiva coche', category: 'Tuning', subcategory: 'Rejillas deportivas', req: /rejilla|parrilla|grill/i, ban: /funda|ambientador|barbacoa|pintura|limpiador|aire acondicionado/i, tags: ['carroceria', 'rejilla'] },
+  { q: 'paragolpes delantero coche recambio', category: 'Repuestos', subcategory: 'Paragolpes', req: /paragolpes|parachoques|defensa/i, ban: /funda|ambientador|pegatina|pintura|limpiador|protector.*paragolpes/i, tags: ['carroceria', 'paragolpes'] },
+  { q: 'embellecedor cromado coche rejilla', category: 'Tuning', subcategory: 'Embellecedores', req: /embellecedor|cromado|moldura/i, ban: /funda|ambientador|pegatina|pintura|limpiador|espuma/i, tags: ['carroceria', 'embellecedor'] },
+  { q: 'difeusor trasero coche deportivo', category: 'Tuning', subcategory: 'Difusores traseros', req: /difusor|difeusor/i, ban: /funda|ambientador|pegatina|pintura/i, tags: ['carroceria', 'difusor'] },
+  { q: 'entrada aire capo coche', category: 'Tuning', subcategory: 'Tomas de aire', req: /toma.*aire|entrada.*aire|cap[oó]|hood/i, ban: /funda|ambientador|filtro de aire|admisi[oó]n directa|pegatina/i, tags: ['carroceria', 'toma de aire'] }
 ];
 
 // ---- POR MODELO DE COCHE ----
@@ -276,6 +299,43 @@ for (const car of CARS) {
     QUERIES.push({
       q: `${part.q} ${car.name}`,
       category: 'Repuestos',
+      subcategory: part.subcategory,
+      req: part.req,
+      must: car.re,
+      ban: part.ban,
+      tags: [...part.tags, slugify(car.name), 'compatible'],
+      fits: car.name
+    });
+  }
+}
+
+// ---- BODY KITS, TALONERAS Y REJILLAS POR MODELO ----
+// Solo los coches con más mercado de accesorios en España. El título tiene que
+// nombrar el modelo: si no, es una pieza universal colada en una ficha
+// "compatible" y eso hace perder la confianza del cliente.
+const BODY_CARS = [
+  { name: 'Seat Ibiza', re: /ibiza/i },
+  { name: 'Seat León', re: /le[oó]n/i },
+  { name: 'VW Golf', re: /golf/i },
+  { name: 'Renault Clio', re: /clio/i },
+  { name: 'Peugeot 206', re: /206/i },
+  { name: 'Opel Corsa', re: /corsa/i },
+  { name: 'Ford Focus', re: /focus/i },
+  { name: 'Audi A3', re: /a3\b|8p|8v|8l/i }
+];
+
+const BODY_PARTS = [
+  { q: 'rejilla parrilla frontal deportiva', subcategory: 'Rejillas deportivas', req: /rejilla|parrilla|grill/i, ban: /funda|ambientador|barbacoa|pintura|limpiador|aire acondicionado|filtro/i, tags: ['carroceria', 'rejilla'] },
+  { q: 'taloneras laterales', subcategory: 'Taloneras', req: /talonera|fald[oó]n|faldilla/i, ban: /funda|ambientador|pegatina|pintura|limpiador/i, tags: ['carroceria', 'taloneras'] },
+  { q: 'kit carroceria body kit', subcategory: 'Kits de carrocería', req: /body\s?kit|kit.*carrocer|carrocer.*kit|talonera/i, ban: /funda|ambientador|pegatina|pintura|limpiador|filtro/i, tags: ['carroceria', 'body kit'] },
+  { q: 'aleron trasero', subcategory: 'Alerones y spoilers', req: /aler[oó]n|spoiler/i, ban: /funda|ambientador|pegatina|pintura|limpiador/i, tags: ['carroceria', 'aleron'] }
+];
+
+for (const car of BODY_CARS) {
+  for (const part of BODY_PARTS) {
+    QUERIES.push({
+      q: `${part.q} ${car.name}`,
+      category: 'Tuning',
       subcategory: part.subcategory,
       req: part.req,
       must: car.re,
@@ -433,7 +493,16 @@ async function main() {
   }
   console.log(`Catálogo actual: ${catalog.length} fichas · ${used.size} ASIN ya usados`);
 
-  const queries = DRY ? QUERIES.slice(0, DRY_COUNT) : QUERIES;
+    // --only=audio,carroceria... lanza solo las consultas de esas secciones, útil
+  // para completar una familia sin repasar todo el catálogo.
+  const ONLY = (process.env.ONLY_GROUPS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  const selected = ONLY.length
+    ? QUERIES.filter(query => ONLY.some(token =>
+        String(query.category).toLowerCase().includes(token)
+        || String(query.subcategory).toLowerCase().includes(token)
+        || (query.tags || []).some(tag => String(tag).toLowerCase().includes(token))))
+    : QUERIES;
+  const queries = DRY ? selected.slice(0, DRY_COUNT) : selected;
   const added = [];
   const report = [];
   let backupDone = false;
