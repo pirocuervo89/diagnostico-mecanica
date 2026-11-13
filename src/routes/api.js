@@ -1306,6 +1306,23 @@ router.get('/products', (req, res) => {
       .sort((a, b) => b.score - a.score)
       .map(x => x.p);
   }
+  // `lite=1`: solo lo que pinta la tarjeta de la tienda. El catálogo entero
+  // con descripciones y compatibilidades pesa 424 KB comprimidos; así baja a
+  // una cuarta parte y la pestaña abre al instante.
+  if (String(req.query.lite || '') === '1') {
+    return res.json(list.map(p => ({
+      id: p.id,
+      name: p.name,
+      manufacturer: p.manufacturer || '',
+      category: p.category || '',
+      subcategory: p.subcategory || '',
+      price: p.price || '',
+      image: p.image || '',
+      affiliateUrl: p.affiliateUrl || '',
+      seller: p.seller || ''
+    })));
+  }
+
   res.json(list.map(tagItem));
 });
 

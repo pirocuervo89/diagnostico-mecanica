@@ -3747,3 +3747,138 @@ body {
   .chat-suggestions::-webkit-scrollbar { display: none; }
   .chat-suggestions .chip { flex: 0 0 auto; white-space: nowrap; }
 }
+
+/* =====================================================================
+   TIENDA ÚNICA (recambios, aceites, filtros, frenos, luces, tuning)
+   ===================================================================== */
+.shop-view { padding-bottom: 40px; }
+.shop-hero {
+  display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-end; justify-content: space-between;
+  padding: 22px 22px 20px; margin: 0 0 16px; border-radius: 16px;
+  border: 1px solid rgba(245, 165, 36, .28);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(245, 165, 36, .18), transparent 55%),
+    radial-gradient(circle at 92% 100%, rgba(34, 211, 238, .16), transparent 60%),
+    linear-gradient(150deg, #161a27, #0a0c16);
+}
+.shop-hero-copy { max-width: 640px; }
+.shop-hero-copy h2 { margin: 6px 0 8px; font-size: clamp(22px, 3.4vw, 30px); line-height: 1.15; color: #f6f3ff; }
+.shop-hero-copy p { margin: 0; color: #a9a4c4; font-size: 13.5px; line-height: 1.6; }
+.shop-hero-copy b { color: #ffd58a; }
+.shop-hero-stats { display: flex; gap: 10px; }
+.shop-hero-stats > div {
+  min-width: 84px; padding: 10px 14px; border-radius: 12px; text-align: center;
+  border: 1px solid rgba(255, 255, 255, .08); background: rgba(255, 255, 255, .04);
+}
+.shop-hero-stats b { display: block; font-size: 20px; color: #f6f3ff; font-variant-numeric: tabular-nums; }
+.shop-hero-stats span { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: #8e88ad; }
+
+.shop-search { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; margin: 0 0 14px; }
+.shop-search-field { display: flex; align-items: center; gap: 9px; flex: 1 1 280px; min-width: 0; }
+.shop-search-field .ic { width: 18px; height: 18px; color: #8e88ad; flex: 0 0 auto; }
+.shop-search-field input {
+  width: 100%; min-height: 44px; padding: 8px 4px; border: 0; background: transparent;
+  color: #f1eeff; font: inherit; font-size: 15px; outline: none;
+}
+.shop-search-field input::placeholder { color: #7f7b9e; }
+.shop-search-hint { font-size: 11.5px; color: #7f7b9e; }
+
+.shop-cats { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; scrollbar-width: none; }
+.shop-cats::-webkit-scrollbar { display: none; }
+.shop-cat {
+  display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto;
+  padding: 9px 13px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(255, 255, 255, .04); color: #cfcae6; font: inherit; font-size: 13px; cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+.shop-cat:hover { border-color: rgba(245, 165, 36, .45); color: #fff; }
+.shop-cat.active { border-color: #f5a524; background: rgba(245, 165, 36, .16); color: #ffd58a; font-weight: 700; }
+.shop-cat-ico { font-size: 15px; line-height: 1; }
+.shop-cat-count {
+  font: 700 10.5px/1 var(--mono); padding: 3px 5px; border-radius: 6px;
+  background: rgba(0, 0, 0, .35); color: #9d99bd;
+}
+.shop-cat.active .shop-cat-count { color: #ffd58a; background: rgba(0, 0, 0, .3); }
+
+.shop-subs { display: flex; gap: 7px; overflow-x: auto; padding: 0 2px 12px; scrollbar-width: none; }
+.shop-subs::-webkit-scrollbar { display: none; }
+.shop-sub {
+  flex: 0 0 auto; padding: 6px 11px; border-radius: 8px; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .08); background: transparent;
+  color: #a9a4c4; font: inherit; font-size: 12px;
+}
+.shop-sub b { color: #7f7b9e; font-weight: 700; font-size: 10.5px; }
+.shop-sub.active { border-color: rgba(34, 211, 238, .55); color: #9fe8f5; background: rgba(34, 211, 238, .1); }
+
+.shop-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 0 0 12px; }
+.shop-count { font-size: 12.5px; color: #9d99bd; }
+.shop-sort { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #8e88ad; }
+.shop-sort select {
+  padding: 7px 9px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, .12);
+  background: #12141f; color: #e9e6f7; font: inherit; font-size: 12px;
+}
+
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 14px; }
+.shop-card {
+  display: flex; flex-direction: column; overflow: hidden; border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, .09); background: linear-gradient(170deg, #141827, #0b0d17);
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.shop-card:hover { transform: translateY(-2px); border-color: rgba(245, 165, 36, .4); box-shadow: 0 16px 32px rgba(0, 0, 0, .35); }
+.shop-card-media {
+  position: relative; display: grid; place-items: center; height: 168px;
+  padding: 10px; background: #f7f8fa; overflow: hidden;
+}
+.shop-card-media img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .2s ease; }
+.shop-card:hover .shop-card-media img { transform: scale(1.05); }
+.shop-card-media img.rota { display: none; }
+.shop-card-brand {
+  position: absolute; left: 8px; top: 8px; max-width: calc(100% - 16px);
+  padding: 3px 7px; border-radius: 6px; background: rgba(8, 9, 14, .82);
+  color: #fff; font: 700 9.5px/1.3 var(--mono); letter-spacing: .03em;
+  text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.shop-card-body { display: flex; flex-direction: column; gap: 5px; padding: 11px 12px 12px; flex: 1; }
+.shop-card-body h3 {
+  margin: 0; font-size: 13.5px; line-height: 1.35; color: #f1eeff; font-weight: 600;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.shop-card-cat { font-size: 10.5px; color: #8e88ad; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shop-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 6px; }
+.shop-card-price { font-size: 18px; font-weight: 800; color: #ffd58a; font-variant-numeric: tabular-nums; }
+.shop-card-buy {
+  padding: 8px 11px; border-radius: 9px; text-decoration: none; white-space: nowrap;
+  background: linear-gradient(135deg, #f5a524, #e08b0c); color: #1b1200;
+  font-size: 11.5px; font-weight: 800;
+}
+.shop-card-buy:hover { filter: brightness(1.08); }
+
+.shop-more-wrap { display: flex; justify-content: center; margin: 18px 0 4px; }
+.shop-special { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 26px 0 0; }
+.shop-special-card {
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start; text-align: left;
+  padding: 15px 16px; border-radius: 14px; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .09); background: rgba(255, 255, 255, .03);
+  color: #e9e6f7; font: inherit; transition: border-color .16s ease, background .16s ease;
+}
+.shop-special-card:hover { border-color: rgba(34, 211, 238, .45); background: rgba(34, 211, 238, .07); }
+.shop-special-ico { font-size: 20px; line-height: 1; color: #9fe8f5; }
+.shop-special-card b { font-size: 14px; color: #f6f3ff; }
+.shop-special-card small { font-size: 11.5px; color: #9d99bd; line-height: 1.45; }
+.shop-legal { margin: 18px 0 0; font-size: 11px; line-height: 1.6; color: #7f7b9e; }
+
+@media (max-width: 560px) {
+  .shop-hero { padding: 16px; gap: 12px; }
+  .shop-hero-stats { width: 100%; }
+  .shop-hero-stats > div { flex: 1; min-width: 0; padding: 8px 6px; }
+  .shop-hero-stats b { font-size: 16px; }
+  .shop-search-hint { display: none; }
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .shop-card-media { height: 132px; padding: 7px; }
+  .shop-card-body { padding: 9px 9px 10px; gap: 4px; }
+  .shop-card-body h3 { font-size: 12.5px; }
+  .shop-card-price { font-size: 16px; }
+  .shop-card-buy { padding: 7px 9px; font-size: 10.5px; }
+  .shop-toolbar { gap: 6px; }
+  .shop-count { font-size: 11.5px; }
+}

@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/css/app.css?v=20261030a">
   <link rel="stylesheet" href="/css/vision.css?v=20261105c">
   <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
-  <link rel="stylesheet" href="/css/reforma.css?v=20261113a">
+  <link rel="stylesheet" href="/css/reforma.css?v=20261113b">
   <link rel="stylesheet" href="/css/legal.css?v=20261110a">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Diagnóstico y Mecánica">
@@ -112,10 +112,7 @@
     <button data-view="dtc" type="button" title="Códigos de avería DTC"><svg class="ic"><use href="#i-search"></use></svg>DTC</button>
     <button data-view="sala" type="button" title="Sala de máquinas"><svg class="ic"><use href="#i-gauge"></use></svg>Sala</button>
     <button data-view="tutoriales" type="button"><svg class="ic"><use href="#i-play"></use></svg>Tutoriales</button>
-    <button data-view="productos" type="button"><svg class="ic"><use href="#i-cart"></use></svg>Productos</button>
-    <button data-view="luz" type="button" title="Luz y multimedia"><svg class="ic"><use href="#i-zap"></use></svg>Luz</button>
-    <button data-view="neumaticos" type="button"><svg class="ic"><use href="#i-tire"></use></svg>Neumáticos</button>
-    <button data-view="tuning" type="button"><svg class="ic"><use href="#i-zap"></use></svg>Tuning</button>
+    <button data-view="tienda" type="button" title="Tienda: recambios, aceites, neumáticos y tuning"><svg class="ic"><use href="#i-cart"></use></svg>Tienda</button>
     <button data-view="fiabilidad" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Fiabilidad</button>
     <button data-view="chat" type="button"><svg class="ic"><use href="#i-chat"></use></svg>Chat IA</button>
     <button data-view="informe" type="button"><svg class="ic"><use href="#i-file"></use></svg>Informe</button>
@@ -1387,6 +1384,79 @@
     </section>
   </section>
 
+  <!-- ===================== TIENDA ===================== -->
+  <section id="view-tienda" class="view shop-view">
+    <header class="shop-hero">
+      <div class="shop-hero-copy">
+        <span class="eyebrow"><i></i> TIENDA DEL MECÁNICO</span>
+        <h2>Todo para tu coche, en un solo sitio</h2>
+        <p>Recambios, aceites, filtros, frenos, neumáticos, luces y tuning con <b>precio y foto real</b>. Elegimos lo que se vende de verdad y lo enlazamos a la tienda donde está más barato.</p>
+      </div>
+      <div class="shop-hero-stats" id="shopStats" aria-live="polite">
+        <div><b data-shop-total>—</b><span>productos</span></div>
+        <div><b data-shop-sections>—</b><span>secciones</span></div>
+        <div><b data-shop-brands>—</b><span>marcas</span></div>
+      </div>
+    </header>
+
+    <div class="shop-search panel">
+      <label class="shop-search-field">
+        <svg class="ic"><use href="#i-search"></use></svg>
+        <input id="shopQuery" type="search" placeholder="Busca: pastillas de freno, filtro de aceite, amortiguador…" autocomplete="off" aria-label="Buscar en la tienda">
+      </label>
+      <button class="btn ghost sm" id="shopClearQuery" type="button" hidden>Limpiar</button>
+      <span class="shop-search-hint">2.700 productos verificados</span>
+    </div>
+
+    <nav id="shopCats" class="shop-cats" aria-label="Secciones de la tienda"></nav>
+    <div id="shopSubs" class="shop-subs" aria-label="Subcategorías"></div>
+
+    <div class="shop-toolbar">
+      <span id="shopCount" class="shop-count">Cargando catálogo…</span>
+      <div class="shop-sort">
+        <label for="shopSort">Ordenar</label>
+        <select id="shopSort">
+          <option value="relevant">Recomendado</option>
+          <option value="price-asc">Precio: de menor a mayor</option>
+          <option value="price-desc">Precio: de mayor a menor</option>
+          <option value="name">Nombre (A-Z)</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="shopGrid" class="shop-grid" aria-live="polite">
+      <div class="notice">Cargando productos…</div>
+    </div>
+    <div class="shop-more-wrap">
+      <button id="shopMore" class="btn ghost" type="button" hidden>Ver más productos</button>
+    </div>
+
+    <div class="shop-special">
+      <button class="shop-special-card" type="button" data-view="productos">
+        <span class="shop-special-ico"><svg class="ic"><use href="#i-car"></use></svg></span>
+        <b>Buscar por mi coche</b>
+        <small>Filtra el recambio exacto por marca, modelo y año.</small>
+      </button>
+      <button class="shop-special-card" type="button" data-view="neumaticos">
+        <span class="shop-special-ico"><svg class="ic"><use href="#i-tire"></use></svg></span>
+        <b>Asistente de neumáticos</b>
+        <small>Elige medida, uso y presupuesto.</small>
+      </button>
+      <button class="shop-special-card" type="button" data-view="luz">
+        <span class="shop-special-ico"><svg class="ic"><use href="#i-zap"></use></svg></span>
+        <b>Luces y multimedia</b>
+        <small>Bombillas, LED homologados y pantallas.</small>
+      </button>
+      <button class="shop-special-card" type="button" data-view="tuning">
+        <span class="shop-special-ico"><svg class="ic"><use href="#i-gauge"></use></svg></span>
+        <b>Tuning y potenciación</b>
+        <small>Kits por etapas y accesorios.</small>
+      </button>
+    </div>
+
+    <p class="shop-legal">Los enlaces llevan a la tienda del vendedor y son de afiliado: si compras, la web recibe una comisión sin coste extra para ti. Precios comprobados en la fecha de cada ficha; pueden cambiar en la tienda.</p>
+  </section>
+
   <section id="view-productos" class="view">
     <header class="page-head">
       <div>
@@ -1882,6 +1952,7 @@
 <script src="/js/voz.js?v=20261113i"></script>
 <script src="/js/dictado.js?v=20261113e"></script>
 <script src="/js/micro-permiso.js?v=20261113d"></script>
+<script src="/js/tienda.js?v=20261113a"></script>
 <script src="/js/app.js?v=20261113a"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
