@@ -41,3 +41,5 @@ services:
       # STRIPE_SECRET_KEY=sk_live_...        (clave Live, no de test, para cobrar de verdad)
       # STRIPE_WEBHOOK_SECRET=whsec_...      (webhook Live de /api/payments/webhook)
       # AWIN_PUBLISHER_ID=                    (cuando te des de alta en Awin)
+      # ALIEXPRESS_AFF_URL=                   (plantilla del portal de AliExpress, con {q} donde va la búsqueda)
+      # TEMU_AFF_URL=                         (enlace o plantilla de afiliado de Temu, con {q} opcional)

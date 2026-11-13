@@ -57,3 +57,6 @@ android/app-release*.apk
 android/app-release*.aab
 android/*.idsig
 android/build/
+
+# Copias temporales del ampliador de catalogo (se regeneran solas)
+data/*.bak-expand

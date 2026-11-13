@@ -238,7 +238,33 @@ const QUERIES = [
   { q: 'paragolpes delantero coche recambio', category: 'Repuestos', subcategory: 'Paragolpes', req: /paragolpes|parachoques|defensa/i, ban: /funda|ambientador|pegatina|pintura|limpiador|protector.*paragolpes/i, tags: ['carroceria', 'paragolpes'] },
   { q: 'embellecedor cromado coche rejilla', category: 'Tuning', subcategory: 'Embellecedores', req: /embellecedor|cromado|moldura/i, ban: /funda|ambientador|pegatina|pintura|limpiador|espuma/i, tags: ['carroceria', 'embellecedor'] },
   { q: 'difeusor trasero coche deportivo', category: 'Tuning', subcategory: 'Difusores traseros', req: /difusor|difeusor/i, ban: /funda|ambientador|pegatina|pintura/i, tags: ['carroceria', 'difusor'] },
-  { q: 'entrada aire capo coche', category: 'Tuning', subcategory: 'Tomas de aire', req: /toma.*aire|entrada.*aire|cap[oó]|hood/i, ban: /funda|ambientador|filtro de aire|admisi[oó]n directa|pegatina/i, tags: ['carroceria', 'toma de aire'] }
+  { q: 'entrada aire capo coche', category: 'Tuning', subcategory: 'Tomas de aire', req: /toma.*aire|entrada.*aire|cap[oó]|hood/i, ban: /funda|ambientador|filtro de aire|admisi[oó]n directa|pegatina/i, tags: ['carroceria', 'toma de aire'] },
+
+  // ---- SEGUNDA TANDA DE AUDIO (medidas y potencias que faltaban) ----
+  // Se marcan con la etiqueta 'tanda2' para poder relanzar solo estas con
+  // ONLY_TAGS=tanda2 sin repasar las 200 consultas anteriores.
+  { q: 'subwoofer coche 10 pulgadas', category: 'Tuning', subcategory: 'Subwoofers', req: /subwoofer|sub\s?woofer/i, ban: /funda|ambientador|soporte.*m[oó]vil|cable|conector|rejilla/i, tags: ['audio', 'subwoofer', 'tanda2'] },
+  { q: 'subwoofer coche 8 pulgadas', category: 'Tuning', subcategory: 'Subwoofers', req: /subwoofer|sub\s?woofer/i, ban: /funda|ambientador|soporte.*m[oó]vil|cable|conector|rejilla/i, tags: ['audio', 'subwoofer', 'tanda2'] },
+  { q: 'altavoces coche 5.25 pulgadas', category: 'Tuning', subcategory: 'Altavoces', req: /altavoz|altavoces|speaker/i, ban: /funda|ambientador|subwoofer|soporte.*m[oó]vil|rejilla.*altavoz/i, tags: ['audio', 'altavoces', 'tanda2'] },
+  { q: 'altavoces coche 4 pulgadas', category: 'Tuning', subcategory: 'Altavoces', req: /altavoz|altavoces|speaker/i, ban: /funda|ambientador|subwoofer|soporte.*m[oó]vil|rejilla.*altavoz/i, tags: ['audio', 'altavoces', 'tanda2'] },
+  { q: 'kit altavoces coche 6x9 vias separadas', category: 'Tuning', subcategory: 'Kits de altavoces', req: /kit|juego|componentes|6\s?x\s?9/i, ban: /funda|ambientador|cable.*solo|soporte.*m[oó]vil/i, tags: ['audio', 'kit', 'tanda2'] },
+  { q: 'etapa potencia coche monoblock', category: 'Tuning', subcategory: 'Amplificadores', req: /amplificador|etapa|monoblock|mono/i, ban: /funda|ambientador|soporte.*m[oó]vil|cable.*solo|fusible/i, tags: ['audio', 'amplificador', 'tanda2'] },
+  { q: 'amplificador coche 2 canales', category: 'Tuning', subcategory: 'Amplificadores', req: /amplificador|etapa/i, ban: /funda|ambientador|soporte.*m[oó]vil|cable.*solo|fusible/i, tags: ['audio', 'amplificador', 'tanda2'] },
+  { q: 'radio coche 1 din bluetooth', category: 'Tuning', subcategory: 'Radios y pantallas', req: /radio|autorradio|1\s?din/i, ban: /funda|ambientador|soporte.*m[oó]vil|antena|mando.*volante|marco.*solo/i, tags: ['audio', 'radio', 'tanda2'] },
+  { q: 'pantalla android coche 7 pulgadas', category: 'Tuning', subcategory: 'Radios y pantallas', req: /pantalla|android|multimedia/i, ban: /funda|ambientador|soporte.*m[oó]vil|protector|cristal.*templado/i, tags: ['audio', 'pantalla', 'tanda2'] },
+  { q: 'caja subwoofer coche ventilada', category: 'Tuning', subcategory: 'Cajas para subwoofer', req: /caja|recinto|bafle|subwoofer/i, ban: /funda|ambientador|cable|conector/i, tags: ['audio', 'caja', 'tanda2'] },
+  { q: 'kit cableado subwoofer coche', category: 'Tuning', subcategory: 'Cableado de audio', req: /cable|kit|instalaci[oó]n/i, ban: /funda|ambientador|soporte.*m[oó]vil|cargador|usb.*tel[eé]fono/i, tags: ['audio', 'cableado', 'tanda2'] },
+
+  // ---- SEGUNDA TANDA DE CARROCERÍA POR MODELO ----
+  { q: 'rejilla parrilla frontal Audi A3', category: 'Tuning', subcategory: 'Rejillas deportivas', req: /rejilla|parrilla|grill/i, must: /a3\b|audi/i, ban: /funda|ambientador|barbacoa|pintura|limpiador|filtro/i, tags: ['carroceria', 'rejilla', 'tanda2'], fits: 'Audi A3' },
+  { q: 'rejilla parrilla frontal BMW E90', category: 'Tuning', subcategory: 'Rejillas deportivas', req: /rejilla|parrilla|grill/i, must: /e90|bmw/i, ban: /funda|ambientador|barbacoa|pintura|limpiador|filtro/i, tags: ['carroceria', 'rejilla', 'tanda2'], fits: 'BMW Serie 3' },
+  { q: 'rejilla parrilla frontal Golf 7', category: 'Tuning', subcategory: 'Rejillas deportivas', req: /rejilla|parrilla|grill/i, must: /golf/i, ban: /funda|ambientador|barbacoa|pintura|limpiador|filtro/i, tags: ['carroceria', 'rejilla', 'tanda2'], fits: 'VW Golf' },
+  { q: 'aleron trasero BMW E90', category: 'Tuning', subcategory: 'Alerones y spoilers', req: /aler[oó]n|spoiler/i, must: /e90|bmw/i, ban: /funda|ambientador|pegatina|pintura|limpiador/i, tags: ['carroceria', 'aleron', 'tanda2'], fits: 'BMW Serie 3' },
+  { q: 'aleron trasero Seat Leon', category: 'Tuning', subcategory: 'Alerones y spoilers', req: /aler[oó]n|spoiler/i, must: /le[oó]n/i, ban: /funda|ambientador|pegatina|pintura|limpiador/i, tags: ['carroceria', 'aleron', 'tanda2'], fits: 'Seat León' },
+  { q: 'taloneras laterales Golf 7', category: 'Tuning', subcategory: 'Taloneras', req: /talonera|fald[oó]n|faldilla/i, must: /golf/i, ban: /funda|ambientador|pegatina|pintura|limpiador/i, tags: ['carroceria', 'taloneras', 'tanda2'], fits: 'VW Golf' },
+  { q: 'difusor trasero Golf GTI', category: 'Tuning', subcategory: 'Difusores traseros', req: /difusor|difeusor/i, must: /golf/i, ban: /funda|ambientador|pegatina|pintura/i, tags: ['carroceria', 'difusor', 'tanda2'], fits: 'VW Golf' },
+  { q: 'body kit carroceria BMW E90', category: 'Tuning', subcategory: 'Kits de carrocería', req: /body\s?kit|kit.*carrocer|carrocer.*kit/i, must: /e90|bmw/i, ban: /funda|ambientador|pegatina|pintura|limpiador|filtro/i, tags: ['carroceria', 'body kit', 'tanda2'], fits: 'BMW Serie 3' },
+  { q: 'paragolpes delantero Golf 7', category: 'Repuestos', subcategory: 'Paragolpes', req: /paragolpes|parachoques/i, must: /golf/i, ban: /funda|ambientador|pegatina|pintura|limpiador|protector.*paragolpes/i, tags: ['carroceria', 'paragolpes', 'tanda2'], fits: 'VW Golf' }
 ];
 
 // ---- POR MODELO DE COCHE ----
@@ -496,12 +522,17 @@ async function main() {
     // --only=audio,carroceria... lanza solo las consultas de esas secciones, útil
   // para completar una familia sin repasar todo el catálogo.
   const ONLY = (process.env.ONLY_GROUPS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  // ONLY_TAGS=tanda2 lanza solo las consultas marcadas con esa etiqueta: sirve
+  // para completar una remesa concreta sin repetir las doscientas anteriores.
+  const ONLY_TAGS = (process.env.ONLY_TAGS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
   const selected = ONLY.length
     ? QUERIES.filter(query => ONLY.some(token =>
         String(query.category).toLowerCase().includes(token)
         || String(query.subcategory).toLowerCase().includes(token)
         || (query.tags || []).some(tag => String(tag).toLowerCase().includes(token))))
-    : QUERIES;
+    : (ONLY_TAGS.length
+        ? QUERIES.filter(query => (query.tags || []).some(tag => ONLY_TAGS.includes(String(tag).toLowerCase())))
+        : QUERIES);
   const queries = DRY ? selected.slice(0, DRY_COUNT) : selected;
   const added = [];
   const report = [];
