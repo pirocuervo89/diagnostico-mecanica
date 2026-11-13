@@ -51,7 +51,7 @@
   // Modo conversación: al terminar de leer, el micrófono se abre solo para
   // responder, como en una llamada. Se apaga con el botón del chat.
   const STORE_CONV = 'dm_voz_conversacion';
-  let conversacion = store.get(STORE_CONV, '1') === '1';
+  let conversacion = store.get(STORE_CONV, '0') === '1';
   let lang = store.get(STORE_LANG, 'es-ES');
   let speakingBubble = null;
   let recognition = null;
@@ -85,7 +85,7 @@
   // voces conocidas (Windows, Apple, Android, Chrome) porque las APIs no dicen
   // el sexo; cuando solo hay voces femeninas se baja el tono para que no suene
   // a asistente de móvil.
-  const MALE_HINTS = /\b(jorge|diego|carlos|pablo|raul|raúl|miguel|juan|enrique|andres|andrés|antonio|manuel|alvaro|álvaro|gonzalo|sebastian|sebastián|ricardo|javier|pedro|luis|arturo|gerardo|hombre|male|masculin)\b/i;
+  const MALE_HINTS = /\b(jorge|diego|carlos|pablo|raul|raúl|miguel|juan|enrique|andres|andrés|antonio|manuel|alvaro|álvaro|gonzalo|sebastian|sebastián|ricardo|javier|pedro|luis|arturo|gerardo|hombre|male|masculin|ernesto|esteban|hugo|ivan|iván|mateo|nicolas|nicolás|tomas|tomás|dario|darío|jaime|sergio|ramiro|felipe|emilio|julio|alonso|bruno|gabriel|agustin|agustín|joaquin|joaquín|rodrigo|german|germán|mauricio|cristian|benjamin|benjamín|alberto|alfonso|ramon|ramón|marcos|victor|víctor|norberto|nestor|néstor|wenceslao|standard-b)\b/i;
   const FEMALE_HINTS = /\b(monica|mónica|paulina|helena|lucia|lucía|carmen|laura|isabel|maria|maría|sofia|sofía|sabina|elena|esperanza|ximena|catalina|lupe|penelope|penélope|ines|inés|triana|vera|abril|dalia|elvira|irene|larissa|teresa|lola|female|mujer|femenin)\b/i;
 
   function pickSpanishVoice() {
@@ -112,6 +112,29 @@
     return { voice: best?.voice || null, male: Boolean(best?.male) };
   }
 
+  // Lo que se lee en alto tiene que ser corto: si se lee todo el informe, el
+  // usuario se pasa medio minuto sin poder hablar. Se queda con la explicación
+  // sencilla y, como mucho, tres frases.
+  function resumenHablado(texto) {
+    let texto2 = String(texto || '').trim();
+    if (!texto2) return '';
+    const facil = texto2.match(/en f[aá]cil[:,]?\s*([\s\S]+)/i);
+    if (facil && facil[1].trim()) texto2 = facil[1].trim();
+    const frases = texto2.match(/[^.!?]+[.!?]*/g) || [texto2];
+    let salida = '';
+    for (const frase of frases) {
+      const limpia = frase.trim();
+      if (!limpia) continue;
+      if (/^[-•*·]|^\d+[).]\s/.test(limpia)) continue; // listas y numeraciones
+      const siguiente = salida ? `${salida} ${limpia}` : limpia;
+      if (salida && siguiente.length > 300) break;
+      salida = siguiente;
+      if (salida.length >= 180) break;
+    }
+    if (!salida) salida = texto2.slice(0, 280);
+    return salida.length > 320 ? `${salida.slice(0, 317).trim()}…` : salida;
+  }
+
   function stopSpeaking() {
     if (synth) synth.cancel();
     if (speakingBubble) {
@@ -126,7 +149,7 @@
     if (!canRead || !bubble) return;
     if (speakingBubble === bubble && synth.speaking) { stopSpeaking(); return; }
     stopSpeaking();
-    const text = plainText(bubble);
+    const text = resumenHablado(plainText(bubble));
     if (!text) return;
     // Nunca se lee y se escucha a la vez: el altavoz taparía al usuario.
     if (typeof window.DictadoParar === 'function') window.DictadoParar();
@@ -136,10 +159,10 @@
     utter.lang = lang;
     const { voice, male } = pickSpanishVoice();
     utter.voice = voice || null;
-    // Voz de hombre con seguridad: tono grave pero natural y ritmo algo vivo.
-    // Un ritmo demasiado lento suena a robot y hace que la gente desconecte.
-    utter.pitch = male ? 0.88 : 0.72;
-    utter.rate = 1.12;
+    // Voz de hombre, grave y de confianza. Si el móvil no trae ninguna voz
+    // masculina en español, se baja el tono para que suene a hombre igual.
+    utter.pitch = male ? 0.85 : 0.58;
+    utter.rate = 1.08;
     utter.volume = 1;
     speakingBubble = bubble;
     bubble.classList.add('voz-speaking');
@@ -168,7 +191,7 @@
 
   // ---------------------------------------------------------------- botón leer
 
-  function addReadButton(bubble) {
+  function addReadButton(bubble, autoSpeak = false) {
     if (!canRead || bubble.dataset.vozReady === '1') return;
     if (!bubble.classList.contains('assistant')) return;
     if (bubble.classList.contains('typing')) return;
@@ -190,14 +213,23 @@
     });
     bubble.appendChild(btn);
 
-    if (autoRead) {
-      const isHero = bubble.classList.contains('voz-no-auto');
-      if (!isHero) setTimeout(() => speak(bubble), 250);
+    // Solo se lee sola la respuesta que acaba de llegar. Las que ya estaban en
+    // el chat (al abrirlo o cambiar de vista) nunca se leen: si no, el móvil se
+    // pone a hablar solo con todo el historial.
+    if (autoSpeak && autoRead && !bubble.classList.contains('voz-no-auto')) {
+      clearTimeout(addReadButton.timer);
+      addReadButton.timer = setTimeout(() => {
+        const todas = document.querySelectorAll('#chatBox .bubble.assistant:not(.typing)');
+        const ultima = todas[todas.length - 1];
+        if (ultima === bubble) speak(bubble);
+      }, 300);
     }
   }
 
   function scanBubbles() {
-    document.querySelectorAll('#chatBox .bubble.assistant').forEach(addReadButton);
+    // Ojo: forEach pasa el índice como segundo argumento, y ese valor acababa
+    // en `autoSpeak`: por eso el historial se leía solo al abrir el chat.
+    document.querySelectorAll('#chatBox .bubble.assistant').forEach(bubble => addReadButton(bubble, false));
   }
 
   // --------------------------------------------------------------- barra de voz
@@ -378,10 +410,10 @@
     wrap.innerHTML = `
       <button type="button" id="vozMic" class="push-talk" aria-pressed="false" aria-label="Mantén pulsado para hablar">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12h-2Z"/></svg>
-        <span class="push-talk-text">Mantén pulsado para hablar</span>
+        <span class="push-talk-text">Hablar</span>
         <span class="push-talk-time" hidden>0:00</span>
       </button>
-      <p class="push-talk-help">Suelta para enviar. Si lo tocas un instante sigue grabando; vuelve a tocarlo para enviar.</p>
+      <p class="push-talk-help">Mantén pulsado y suelta al terminar.</p>
     `;
     form.parentNode.insertBefore(wrap, form.nextSibling);
     wrap.querySelector('#vozMic').addEventListener('click', () => {
@@ -430,10 +462,10 @@
         mutations.forEach(m => m.addedNodes.forEach(node => {
           if (node.nodeType === 1 && node.classList?.contains('bubble')) {
             added = true;
-            addReadButton(node);
+            addReadButton(node, true);
           }
         }));
-        if (added) scanBubbles();
+        // Sin volver a recorrer el historial: cada respuesta se lee una vez.
       }).observe(box, { childList: true, subtree: true });
     }
     // Chrome carga las voces de forma asíncrona: se refresca el idioma elegido.

@@ -26,32 +26,44 @@
     const style = document.createElement('style');
     style.id = 'pushTalkStyles';
     style.textContent = `
-      .push-talk-wrap { margin: 10px 0 0; }
+      .push-talk-wrap { display: flex; flex-direction: column; align-items: center; margin: 14px 0 2px; }
+      /* Botón redondo que palpita, como el de una llamada. */
       .push-talk {
-        display: flex; align-items: center; justify-content: center; gap: 10px;
-        width: 100%; min-height: 58px; padding: 12px 16px; border-radius: 16px;
-        border: 1px solid rgba(245, 165, 36, .55);
-        background: linear-gradient(135deg, rgba(245, 165, 36, .20), rgba(245, 165, 36, .06));
-        color: #ffd58a; font: inherit; font-size: 16px; font-weight: 600;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+        width: 96px; height: 96px; padding: 8px; border-radius: 50%;
+        border: 2px solid rgba(245, 165, 36, .75);
+        background: radial-gradient(circle at 50% 35%, rgba(245, 165, 36, .30), rgba(245, 165, 36, .10));
+        color: #ffd58a; font: inherit; font-size: 13px; font-weight: 700; letter-spacing: .2px;
         cursor: pointer; user-select: none; -webkit-user-select: none;
         touch-action: none; -webkit-tap-highlight-color: transparent;
-        transition: transform .08s ease, background .15s ease, border-color .15s ease;
+        transition: transform .1s ease, background .2s ease, border-color .2s ease, color .2s ease;
+        animation: pushTalkPulse 2.4s ease-in-out infinite;
       }
-      .push-talk:active, .push-talk.grabando { transform: scale(.99); }
+      .push-talk:active { transform: scale(.96); }
       .push-talk.grabando {
-        background: linear-gradient(135deg, #c0392b, #8e2418);
-        border-color: #e74c3c; color: #fff;
-        box-shadow: 0 0 0 4px rgba(231, 76, 60, .18);
+        background: radial-gradient(circle at 50% 35%, #e74c3c, #a92a1c);
+        border-color: #ff6b5a; color: #fff;
+        animation: pushTalkPulseFast .8s ease-in-out infinite;
       }
-      .push-talk.grabando .push-talk-text::after { content: ''; }
-      .push-talk svg { flex: 0 0 auto; }
-      .push-talk-time { font-variant-numeric: tabular-nums; font-weight: 700; }
-      .push-talk-help { margin: 6px 2px 0; font-size: 12px; line-height: 1.45; color: #94a3b8; text-align: center; }
+      .push-talk svg { width: 30px; height: 30px; }
+      .push-talk-time { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 11px; }
+      .push-talk-help { margin: 8px 2px 0; font-size: 12px; line-height: 1.4; color: #94a3b8; text-align: center; }
+      @keyframes pushTalkPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(245, 165, 36, .45); }
+        55% { box-shadow: 0 0 0 14px rgba(245, 165, 36, 0); }
+      }
+      @keyframes pushTalkPulseFast {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, .65); }
+        55% { box-shadow: 0 0 0 18px rgba(231, 76, 60, 0); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .push-talk, .push-talk.grabando { animation: none; }
+      }
       [data-home-voice], .mic-big {
         user-select: none; -webkit-user-select: none;
         -webkit-touch-callout: none; touch-action: none;
       }
-      @media (max-width: 420px) { .push-talk { font-size: 15px; min-height: 54px; } }
+      @media (max-width: 420px) { .push-talk { width: 88px; height: 88px; } }
 
       .push-talk-bar {
         position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
@@ -103,7 +115,7 @@
       b.classList.toggle('grabando', activo);
       b.setAttribute('aria-pressed', activo ? 'true' : 'false');
       const t = b.querySelector('.push-talk-text');
-      if (t) t.textContent = activo ? (bloqueado ? 'Toca para enviar' : 'Suelta para enviar') : 'Mantén pulsado para hablar';
+      if (t) t.textContent = activo ? 'Escuchando' : 'Hablar';
       const time = b.querySelector('.push-talk-time');
       if (time) time.hidden = !activo;
     }
