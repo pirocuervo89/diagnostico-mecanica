@@ -3495,8 +3495,8 @@ body {
 .home-scanner-media {
   display: grid;
   place-items: center;
-  height: 104px;
-  padding: 6px;
+  height: 92px;
+  padding: 5px;
   overflow: hidden;
   background: radial-gradient(circle at 50% 40%, rgba(34, 211, 238, .08), transparent 70%);
 }
@@ -3506,15 +3506,24 @@ body {
    proporción, se limita a 104 px de alto y lleva su propio fondo blanco, así
    que el producto queda centrado y pequeño, alineado con todas las tarjetas. */
 .home-scanner-media img {
-  width: auto;
+  width: 100%;
   height: 100%;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   background: #fff;
   border-radius: 8px;
-  padding: 4px;
+  padding: 3px;
   box-sizing: border-box;
+}
+
+/* Móvil: una sola columna pero con la foto igual de pequeña y centrada, para
+   que el listado no se convierta en cinco fotos gigantes seguidas. */
+@media (max-width: 560px) {
+  .home-scanner { flex-direction: row; align-items: stretch; }
+  .home-scanner-media { width: 112px; min-width: 112px; height: auto; min-height: 92px; border-right: 1px solid rgba(34, 211, 238, .12); }
+  .home-scanner-body { flex: 1; padding: 11px 12px; }
+  .home-scanner-price { font-size: 18px; }
 }
 .home-scanner-body { display: flex; flex-direction: column; gap: 5px; padding: 13px 14px 14px; }
 .home-scanner-rank {
