@@ -1,49 +1,242 @@
+/**
+ * Botón único de voz, estilo WhatsApp.
+ *
+ *   · Mantienes pulsado → graba (se ve el tiempo y un aviso flotante).
+ *   · Sueltas → deja de grabar, transcribe y envía la consulta sola.
+ *   · Un toque rápido → se queda grabando; otro toque → envía.
+ *
+ * El audio se manda a /api/transcribe y el texto rellena el chat. No se guarda
+ * nada en el móvil. Si el navegador no puede grabar (DuckDuckGo Android, por
+ * ejemplo) se avisa con un panel que ofrece abrir la página en Chrome.
+ */
 (function () {
   'use strict';
-  // Sin grabadora o sin micrófono se deja el dictado normal de voz.js.
-  if (!navigator.mediaDevices?.getUserMedia || typeof window.MediaRecorder !== 'function') return;
+
+  const soportado = Boolean(
+    navigator.mediaDevices
+    && typeof navigator.mediaDevices.getUserMedia === 'function'
+    && typeof window.MediaRecorder === 'function'
+  );
+
   const $ = id => document.getElementById(id);
-  let rec = null, chunks = [], stream = null, busy = false;
-  function hint(msg) {
+
+  // --------------------------------------------------------------- estilos
+  function injectStyles() {
+    if (document.getElementById('pushTalkStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'pushTalkStyles';
+    style.textContent = `
+      .push-talk-wrap { margin: 10px 0 0; }
+      .push-talk {
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        width: 100%; min-height: 58px; padding: 12px 16px; border-radius: 16px;
+        border: 1px solid rgba(245, 165, 36, .55);
+        background: linear-gradient(135deg, rgba(245, 165, 36, .20), rgba(245, 165, 36, .06));
+        color: #ffd58a; font: inherit; font-size: 16px; font-weight: 600;
+        cursor: pointer; user-select: none; -webkit-user-select: none;
+        touch-action: none; -webkit-tap-highlight-color: transparent;
+        transition: transform .08s ease, background .15s ease, border-color .15s ease;
+      }
+      .push-talk:active, .push-talk.grabando { transform: scale(.99); }
+      .push-talk.grabando {
+        background: linear-gradient(135deg, #c0392b, #8e2418);
+        border-color: #e74c3c; color: #fff;
+        box-shadow: 0 0 0 4px rgba(231, 76, 60, .18);
+      }
+      .push-talk.grabando .push-talk-text::after { content: ''; }
+      .push-talk svg { flex: 0 0 auto; }
+      .push-talk-time { font-variant-numeric: tabular-nums; font-weight: 700; }
+      .push-talk-help { margin: 6px 2px 0; font-size: 12px; line-height: 1.45; color: #94a3b8; text-align: center; }
+      [data-home-voice], .mic-big {
+        user-select: none; -webkit-user-select: none;
+        -webkit-touch-callout: none; touch-action: none;
+      }
+      @media (max-width: 420px) { .push-talk { font-size: 15px; min-height: 54px; } }
+
+      .push-talk-bar {
+        position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+        z-index: 9000; display: flex; align-items: center; gap: 10px;
+        max-width: calc(100vw - 24px); padding: 12px 16px; border-radius: 999px;
+        background: #1b1d22; color: #fff; border: 1px solid rgba(231, 76, 60, .6);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .45); font-size: 14px; font-weight: 600;
+      }
+      .push-talk-bar[hidden] { display: none; }
+      .push-talk-dot {
+        width: 11px; height: 11px; border-radius: 50%; background: #e74c3c; flex: 0 0 auto;
+        animation: pushTalkPulse 1s ease-in-out infinite;
+      }
+      @keyframes pushTalkPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // ------------------------------------------------------------------ avisos
+  function hint(msg, ms = 8000) {
     const el = $('vozHint');
-    if (!el) return;
-    el.textContent = msg; el.hidden = false;
-    clearTimeout(hint.t); hint.t = setTimeout(() => { el.hidden = true; }, 8000);
+    if (el) { el.textContent = msg; el.hidden = false; }
+    clearTimeout(hint.t);
+    hint.t = setTimeout(() => { if (el) el.hidden = true; }, ms);
   }
-  function setUi(on) {
-    const b = $('vozMic'); if (b) { b.classList.toggle('listening', on); b.textContent = on ? '⏹' : '🎤'; }
-    const m = document.querySelector('.mic-big');
-    if (m) { m.classList.toggle('listening', on); m.querySelector('span').textContent = on ? 'Pulsa para parar' : 'Pulsa y habla'; }
-    const i = $('chatInput'); if (i) i.placeholder = on ? 'Te escucho… habla y vuelve a pulsar' : 'Escribe o pulsa el micrófono…';
+
+  function pedirAyuda() {
+    if (typeof window.AvisoMicro === 'function') window.AvisoMicro();
+    else hint('Este navegador no puede grabar. Abre la página en Chrome.', 12000);
   }
-  async function start() {
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (err) {
-      const denied = err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
-      hint(denied ? 'Permiso de micrófono denegado. Actívalo en Ajustes › Aplicaciones › Permisos › Micrófono.' : 'No se pudo abrir el micrófono.');
+
+  // ---------------------------------------------------------------- grabación
+  let stream = null;
+  let streamAt = 0;
+  let rec = null;
+  let chunks = [];
+  let estado = 'idle'; // idle | pidiendo | grabando | enviando
+  let bloqueado = false; // grabando con un toque (sin mantener pulsado)
+  let inicio = 0;
+  let ultimoGesto = 0;
+  let timer = null;
+  let barra = null;
+
+  function boton() { return $('vozMic'); }
+
+  function pintar(activo) {
+    const b = boton();
+    if (b) {
+      b.classList.toggle('grabando', activo);
+      b.setAttribute('aria-pressed', activo ? 'true' : 'false');
+      const t = b.querySelector('.push-talk-text');
+      if (t) t.textContent = activo ? (bloqueado ? 'Toca para enviar' : 'Suelta para enviar') : 'Mantén pulsado para hablar';
+      const time = b.querySelector('.push-talk-time');
+      if (time) time.hidden = !activo;
+    }
+    const big = document.querySelector('[data-home-voice]');
+    if (big) {
+      big.classList.toggle('listening', activo);
+      const span = big.querySelector('span');
+      if (span) span.textContent = activo ? 'Grabando… suelta para enviar' : 'Mantén pulsado';
+    }
+    pintarBarra(activo);
+  }
+
+  function pintarBarra(activo) {
+    if (!activo) {
+      if (barra) { barra.hidden = true; }
+      clearInterval(timer);
+      timer = null;
       return;
     }
-    chunks = [];
-    const type = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : '';
-    rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
-    rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-    rec.onstop = () => {
-      stream.getTracks().forEach(t => t.stop());
-      stream = null;
-      setUi(false);
-      const blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
-      if (blob.size < 1200) { hint('No te he oído. Pulsa el micrófono y habla más cerca.'); return; }
-      subir(blob);
+    if (!barra) {
+      barra = document.createElement('div');
+      barra.className = 'push-talk-bar';
+      barra.setAttribute('role', 'status');
+      barra.setAttribute('aria-live', 'polite');
+      barra.innerHTML = '<span class="push-talk-dot"></span><span data-txt>Grabando</span><span data-time>0:00</span>';
+      document.body.appendChild(barra);
+    }
+    barra.hidden = false;
+    const txt = barra.querySelector('[data-txt]');
+    const time = barra.querySelector('[data-time]');
+    const tick = () => {
+      const s = Math.floor((Date.now() - inicio) / 1000);
+      if (time) time.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+      if (txt) txt.textContent = bloqueado ? 'Grabando · toca el botón para enviar' : 'Grabando · suelta para enviar';
     };
-    rec.start();
-    busy = true;
-    setUi(true);
-    hint('Grabando… habla normal y pulsa ⏹ al terminar.');
+    tick();
+    clearInterval(timer);
+    timer = setInterval(tick, 250);
   }
+
+  async function conseguirMicro() {
+    // Reutiliza el micro unos segundos: así el segundo mensaje empieza al
+    // instante y no vuelve a pedir permiso ni a encender el micrófono.
+    if (stream && stream.getAudioTracks().some(t => t.readyState === 'live') && Date.now() - streamAt < 45000) {
+      return stream;
+    }
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        channelCount: 1
+      }
+    });
+    streamAt = Date.now();
+    return stream;
+  }
+
+  function tipoAudio() {
+    const candidatos = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+    for (const tipo of candidatos) {
+      try { if (MediaRecorder.isTypeSupported(tipo)) return tipo; } catch { /* probar siguiente */ }
+    }
+    return '';
+  }
+
+  async function empezar() {
+    if (estado === 'grabando' || estado === 'pidiendo' || estado === 'enviando') return;
+    estado = 'pidiendo';
+    try {
+      const media = await conseguirMicro();
+      chunks = [];
+      const tipo = tipoAudio();
+      rec = new MediaRecorder(media, tipo ? { mimeType: tipo, audioBitsPerSecond: 64000 } : { audioBitsPerSecond: 64000 });
+      rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+      rec.onstop = terminar;
+      rec.start(200);
+      inicio = Date.now();
+      estado = 'grabando';
+      // Se pide a Android que confirme con una vibración corta (si lo permite).
+      try { navigator.vibrate?.(18); } catch { /* sin vibración */ }
+      pintar(true);
+    } catch (error) {
+      estado = 'idle';
+      pintar(false);
+      const nombre = error && error.name;
+      if (nombre === 'NotAllowedError' || nombre === 'SecurityError') {
+        bloqueado = false;
+        pedirAyuda();
+        hint('Micrófono bloqueado. Toca «Activar micrófono» y acepta el aviso.', 12000);
+      } else if (nombre === 'NotFoundError' || nombre === 'DevicesNotFoundError') {
+        hint('El teléfono no encuentra ningún micrófono.', 10000);
+      } else if (nombre === 'NotReadableError' || nombre === 'TrackStartError') {
+        hint('Otra aplicación está usando el micrófono. Ciérrala y prueba otra vez.', 10000);
+      } else {
+        hint('No se pudo abrir el micrófono. Prueba otra vez.', 10000);
+      }
+    }
+  }
+
+  function parar(enviar = true) {
+    if (estado !== 'grabando' || !rec) return;
+    estado = 'enviando';
+    rec._enviar = enviar;
+    try { rec.stop(); } catch { terminar(); }
+  }
+
+  function terminar() {
+    const enviar = rec?._enviar !== false;
+    const tipo = rec?.mimeType || 'audio/webm';
+    rec = null;
+    pintar(false);
+    // El micro se queda encendido unos segundos por si sigue la conversación.
+    setTimeout(() => {
+      if (estado !== 'grabando' && stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
+    }, 20000);
+    if (!enviar) { estado = 'idle'; return; }
+    const blob = new Blob(chunks, { type: tipo });
+    if (blob.size < 1200) {
+      estado = 'idle';
+      hint('No te he oído. Mantén pulsado y habla cerca del micrófono.', 8000);
+      return;
+    }
+    subir(blob);
+  }
+
   async function subir(blob) {
     const input = $('chatInput');
-    hint('Entendiendo lo que has dicho…');
+    hint('Entendiendo lo que has dicho…', 15000);
+    let texto = '';
     try {
       const r = await fetch('/api/transcribe', {
         method: 'POST',
@@ -52,49 +245,117 @@
       });
       const data = await r.json().catch(() => ({}));
       if (!r.ok || !data.text) {
-        hint(r.status === 503 ? 'El dictado no está activado en el servidor. Escribe la consulta.' : 'No se pudo entender el audio. Prueba otra vez.');
+        estado = 'idle';
+        hint(r.status === 503
+          ? 'El dictado no está activado en el servidor. Escribe la consulta.'
+          : 'No se pudo entender el audio. Mantén pulsado y habla más claro.', 9000);
         return;
       }
-      input.value = data.text;
-      hint('Te he entendido. Enviando…');
-      document.getElementById('chatForm')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      texto = String(data.text).trim();
     } catch {
-      hint('Sin conexión para transcribir. Escribe la consulta.');
-    } finally {
-      busy = false;
+      estado = 'idle';
+      hint('Sin conexión para transcribir. Escribe la consulta.', 9000);
+      return;
     }
+    estado = 'idle';
+    // Marca de "esto viene del micrófono": el modo conversación la usa para
+    // volver a abrir el micro cuando la IA termine de contestar.
+    window.__dictadoEnviado = Date.now();
+    if (input) {
+      input.value = texto;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    hint(`Te he entendido: «${texto}»`);
+    // Abre el chat si el botón se pulsó desde la portada y envía solo.
+    const form = $('chatForm');
+    if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
   }
-  function toggle() {
-    if (busy && rec && rec.state === 'recording') { rec.stop(); return; }
-    if (busy) return;
-    start();
+
+  function alternar() {
+    if (estado === 'grabando') { parar(true); return; }
+    if (estado === 'pidiendo' || estado === 'enviando') return;
+    bloqueado = true;
+    empezar();
   }
-  window.VozHablar = toggle;
-  window.DictadoDisponible = true;
-  let holdStart = 0, held = false;
+
+  // ------------------------------------------------------------ interacción
+  // Un solo gesto: bajar = empezar, soltar = enviar salvo que haya sido un
+  // toque muy corto, que deja la grabación fija (estilo WhatsApp).
+  function esBotonDeVoz(target) {
+    if (!(target instanceof Element)) return false;
+    return Boolean(target.closest('#vozMic, [data-home-voice], .mic-big'));
+  }
+
+  function esBotonDePortada(target) {
+    return target instanceof Element && Boolean(target.closest('[data-home-voice], .mic-big'));
+  }
+
   document.addEventListener('pointerdown', event => {
-    const el = event.target instanceof Element ? event.target.closest('#vozMic') : null;
-    if (!el) return;
+    if (!esBotonDeVoz(event.target)) return;
+    if (event.button !== undefined && event.button > 0) return;
+    // En la portada NO se cancela el gesto: su clic cambia a la vista del chat.
+    if (!esBotonDePortada(event.target)) event.preventDefault();
+    event.stopImmediatePropagation();
+    ultimoGesto = Date.now();
+    if (!soportado) { pedirAyuda(); return; }
+    if (estado === 'grabando') { parar(true); return; }
+    if (estado === 'pidiendo' || estado === 'enviando') return;
+    bloqueado = false;
+    empezar();
+  }, true);
+
+  document.addEventListener('pointerup', () => {
+    if (estado !== 'grabando') return;
+    const duracion = Date.now() - inicio;
+    if (bloqueado) return;
+    if (duracion < 450) { bloqueado = true; pintar(true); return; }
+    parar(true);
+  }, true);
+
+  document.addEventListener('pointercancel', () => {
+    if (estado === 'grabando' && !bloqueado) parar(true);
+  }, true);
+
+  // El teclado (Enter/espacio) y los clics que no vienen de un dedo. En la
+  // portada se deja pasar el clic para que la app abra la vista del chat.
+  document.addEventListener('click', event => {
+    if (!(event.target instanceof Element) || !event.target.closest('#vozMic')) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    if (busy && rec && rec.state === 'recording') { rec.stop(); return; }
-    held = true; holdStart = Date.now(); start();
+    if (Date.now() - ultimoGesto < 800) return; // ya lo gestionó el puntero
+    alternar();
   }, true);
-  document.addEventListener('pointerup', () => {
-    if (!held) return;
-    held = false;
-    // Pulsación larga = estilo WhatsApp: al soltar, envía.
-    if (Date.now() - holdStart > 600 && rec && rec.state === 'recording') rec.stop();
-  }, true);
-  document.addEventListener('pointercancel', () => { held = false; if (busy && rec && rec.state === 'recording') rec.stop(); }, true);
+
   // Si pulsa Enviar mientras graba, se corta y se manda lo hablado.
-  document.getElementById('chatForm')?.addEventListener('submit', event => {
-    if (busy && rec && rec.state === 'recording') {
-      event.preventDefault(); event.stopImmediatePropagation(); rec.stop();
+  $('chatForm')?.addEventListener('submit', event => {
+    if (estado === 'grabando') {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      parar(true);
     }
   }, true);
-  setTimeout(() => {
-    const b = $('vozMic');
-    if (b) b.title = 'Mantén pulsado para hablar (o toca y vuelve a tocar para parar)';
-  }, 800);
+
+  // La portada y quien llame por código acaban aquí.
+  window.DictadoHablar = alternar;
+  // Para el modo conversación: abrir el micro sin pasar por el puntero.
+  window.DictadoEscuchar = () => { ultimoGesto = 0; alternar(); };
+  window.DictadoParar = () => { if (estado === 'grabando') parar(false); };
+  window.VozHablar = () => {
+    if (Date.now() - ultimoGesto < 800) return; // ya lo gestionó el puntero
+    alternar();
+  };
+
+  if (soportado) {
+    window.DictadoDisponible = true;
+    injectStyles();
+    // Mantiene al día el texto del botón si el DOM se redibuja.
+    setTimeout(() => { if (estado === 'idle') pintar(false); }, 600);
+  } else {
+    // Sin grabadora: se avisa al pulsar en vez de no hacer nada.
+    window.DictadoHablar = pedirAyuda;
+    window.VozHablar = pedirAyuda;
+    window.DictadoEscuchar = pedirAyuda;
+    window.DictadoParar = () => {};
+    injectStyles();
+  }
 })();

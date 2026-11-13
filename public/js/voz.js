@@ -46,7 +46,12 @@
     }
   };
 
-  let autoRead = store.get(STORE_READ, '0') === '1';
+  // Por defecto la IA contesta en voz alta: así se puede hablar sin mirar.
+  let autoRead = store.get(STORE_READ, '1') === '1';
+  // Modo conversación: al terminar de leer, el micrófono se abre solo para
+  // responder, como en una llamada. Se apaga con el botón del chat.
+  const STORE_CONV = 'dm_voz_conversacion';
+  let conversacion = store.get(STORE_CONV, '1') === '1';
   let lang = store.get(STORE_LANG, 'es-ES');
   let speakingBubble = null;
   let recognition = null;
@@ -123,6 +128,8 @@
     stopSpeaking();
     const text = plainText(bubble);
     if (!text) return;
+    // Nunca se lee y se escucha a la vez: el altavoz taparía al usuario.
+    if (typeof window.DictadoParar === 'function') window.DictadoParar();
 
     const parts = text.match(/[\s\S]{1,220}(?:[.!?]|$)/g) || [text];
     const utter = new SpeechSynthesisUtterance(parts.join(' '));
@@ -142,8 +149,21 @@
       bubble.classList.remove('voz-speaking');
       if (btn) btn.setAttribute('aria-pressed', 'false');
       if (speakingBubble === bubble) speakingBubble = null;
+      setTimeout(seguirConversacion, 450);
     };
     synth.speak(utter);
+  }
+
+  // Tras leer la respuesta, si esta charla empezó con el micrófono, se vuelve a
+  // abrir para contestar sin tocar nada. Nunca se abre si el usuario salió del
+  // chat, si ha pasado mucho tiempo o si el modo conversación está apagado.
+  function seguirConversacion() {
+    if (!conversacion) return;
+    if (document.hidden) return;
+    if (typeof window.DictadoEscuchar !== 'function' || !window.DictadoDisponible) return;
+    if (!document.getElementById('view-chat')?.classList.contains('active')) return;
+    if (Date.now() - (window.__dictadoEnviado || 0) > 180000) return;
+    window.DictadoEscuchar();
   }
 
   // ---------------------------------------------------------------- botón leer
@@ -191,6 +211,7 @@
     bar.className = 'voz-bar';
     bar.innerHTML = `
       ${canRead ? `<button type="button" class="voz-chip" id="vozAuto" aria-pressed="${autoRead ? 'true' : 'false'}" title="Leer automáticamente cada respuesta">🔊 Que me lo lea: <b>${autoRead ? 'sí' : 'no'}</b></button>` : ''}
+      ${canRead ? `<button type="button" class="voz-chip" id="vozConv" aria-pressed="${conversacion ? 'true' : 'false'}" title="Después de contestar, abre el micrófono solo">🗣 Conversación: <b>${conversacion ? 'sí' : 'no'}</b></button>` : ''}
       ${canRead ? `<button type="button" class="voz-chip" id="vozStop" hidden>⏹ Parar</button>` : ''}
       <span class="voz-hint" id="vozHint" hidden></span>
     `;
@@ -210,6 +231,15 @@
         const last = bubbles[bubbles.length - 1];
         if (last) speak(last);
       }
+    });
+
+    const convBtn = bar.querySelector('#vozConv');
+    convBtn?.addEventListener('click', () => {
+      conversacion = !conversacion;
+      store.set(STORE_CONV, conversacion ? '1' : '0');
+      convBtn.setAttribute('aria-pressed', String(conversacion));
+      convBtn.innerHTML = `🗣 Conversación: <b>${conversacion ? 'sí' : 'no'}</b>`;
+      if (conversacion) hint('Modo conversación: cuando la IA termine de hablar, el micrófono se abre solo.', 6000);
     });
 
     bar.querySelector('#vozStop')?.addEventListener('click', stopSpeaking);
@@ -337,29 +367,28 @@
     }
   }
 
+  // Un solo botón de voz, grande y debajo del cuadro de texto: se mantiene
+  // pulsado y al soltar se envía. El gesto lo lleva dictado.js; aquí solo se
+  // crea el botón y se deja un respaldo para navegadores sin grabadora.
   function addMicButton() {
     const form = document.getElementById('chatForm');
-    const input = document.getElementById('chatInput');
-    if (!form || !input || document.getElementById('vozMic')) return;
-    const submit = form.querySelector('button[type="submit"]');
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.id = 'vozMic';
-    btn.className = 'btn ghost voz-mic';
-    btn.setAttribute('aria-pressed', 'false');
-    btn.setAttribute('aria-label', 'Hablar en vez de escribir');
-    btn.title = 'Hablar en vez de escribir';
-    btn.textContent = '🎤';
-    btn.addEventListener('click', () => {
-      if (listening && recognition) {
-        try { recognition.stop(); } catch { /* ya parado */ }
-        return;
-      }
+    if (!form || document.getElementById('vozMic')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'push-talk-wrap';
+    wrap.innerHTML = `
+      <button type="button" id="vozMic" class="push-talk" aria-pressed="false" aria-label="Mantén pulsado para hablar">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12h-2Z"/></svg>
+        <span class="push-talk-text">Mantén pulsado para hablar</span>
+        <span class="push-talk-time" hidden>0:00</span>
+      </button>
+      <p class="push-talk-help">Suelta para enviar. Si lo tocas un instante sigue grabando; vuelve a tocarlo para enviar.</p>
+    `;
+    form.parentNode.insertBefore(wrap, form.nextSibling);
+    wrap.querySelector('#vozMic').addEventListener('click', () => {
+      if (typeof window.DictadoHablar === 'function') { window.DictadoHablar(); return; }
+      if (typeof window.AvisoMicro === 'function') { window.AvisoMicro(); return; }
       startRecognition();
     });
-    if (submit) form.insertBefore(btn, submit);
-    else form.appendChild(btn);
   }
 
   // ------------------------------------------------------------------- arranque
