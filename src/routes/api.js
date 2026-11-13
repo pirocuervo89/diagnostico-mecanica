@@ -1656,7 +1656,9 @@ function chatRecommendations(query, context) {
   }));
 }
 
-const MAX_AI_REPLY_WORDS = 500;
+// 350 palabras: cabe el diagnóstico, las tres comprobaciones y lo que no hay
+// que cambiar, y se genera (y se lee en alto) bastante más rápido que con 500.
+const MAX_AI_REPLY_WORDS = 350;
 
 /** Corta la respuesta al límite de palabras, sin partir la última frase si se puede. */
 function limitReplyWords(text, max = MAX_AI_REPLY_WORDS) {
