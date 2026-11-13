@@ -1326,6 +1326,16 @@ router.get('/products', (req, res) => {
   res.json(list.map(tagItem));
 });
 
+// Ficha completa de un producto para la ventana de detalle de la tienda.
+router.get('/products/:id', (req, res) => {
+  const data = readJSON('products.json');
+  const list = Array.isArray(data) ? data : (data.productos || []);
+  const id = String(req.params.id || '').trim();
+  const item = list.find(p => String(p.id) === id);
+  if (!item) return res.status(404).json({ error: 'Producto no encontrado' });
+  res.json(tagItem(item));
+});
+
 // ---------------------------------------------------------------------
 // NEUMÁTICOS Y LLANTAS
 // ---------------------------------------------------------------------
