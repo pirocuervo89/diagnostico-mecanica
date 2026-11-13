@@ -1319,7 +1319,10 @@ router.get('/products', (req, res) => {
       subcategory: p.subcategory || '',
       price: p.price || '',
       image: p.image || '',
-      affiliateUrl: p.affiliateUrl || '',
+      // La etiqueta de afiliado tiene que viajar también en la lista ligera:
+      // el botón "Ver oferta" de cada tarjeta compra desde aquí, y sin el tag
+      // esa venta se perdía.
+      affiliateUrl: withAffiliateTag(p.affiliateUrl || ''),
       seller: p.seller || ''
     })));
   }
