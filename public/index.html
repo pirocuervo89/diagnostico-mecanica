@@ -67,10 +67,9 @@
     boot.classList.add('nx-boot-out');
     setTimeout(function () { if (boot.parentNode) boot.parentNode.removeChild(boot); }, 420);
   }
-  // La secuencia empieza en el primer frame visible, no mientras carga.
-  var animar = function () { boot.classList.add('nx-boot-anim'); };
-  if (window.requestAnimationFrame) requestAnimationFrame(animar);
-  else setTimeout(animar, 30);
+  // La clase va ya, en el mismo instante en que se lee este bloque: así nunca
+  // se llega a pintar la pantalla quieta y luego reiniciar la secuencia.
+  boot.classList.add('nx-boot-anim');
 
   boot.addEventListener('click', cerrar);
   boot.addEventListener('touchstart', cerrar, { passive: true });
