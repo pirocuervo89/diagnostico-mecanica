@@ -60,3 +60,17 @@ android/build/
 
 # Copias temporales del ampliador de catalogo (se regeneran solas)
 data/*.bak-expand
+
+# Generador de video instalado localmente (no versionar)
+video-generator/
+
+# Videos diarios generados (se regeneran cada dia)
+video-diario/
+# Estado de publicacion y rotacion (runtime, no versionar)
+data/publicaciones.json
+data/videos-diarios.json
+# Historial de aider (local)
+.aider.chat.history.md
+.aider.input.history
+# Assets de tienda Android (binarios grandes)
+android/play-store/

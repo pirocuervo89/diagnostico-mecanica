@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="/css/reforma.css?v=20261113e">
   <link rel="stylesheet" href="/css/legal.css?v=20261110a">
   <link rel="stylesheet" href="/css/futurista.css?v=20261115e">
+  <link rel="stylesheet" href="/css/pulido.css?v=20261116b">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Diagnóstico y Mecánica">
   <meta property="og:title" content="Diagnóstico y Mecánica · Plataforma Automotriz">
@@ -31,9 +32,12 @@
   <meta property="og:locale" content="es_ES">
   <meta property="og:url" content="https://diagnostico-mecanica.onrender.com/">
   <meta name="twitter:card" content="summary_large_image">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Diagnóstico y Mecánica","inLanguage":"es-ES","description":"Plataforma de diagnóstico automotriz: síntomas, códigos DTC, OBD-II, catálogo de taller e informes técnicos."}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Diagnóstico y Mecánica","inLanguage":"es-ES","description":"Plataforma de diagnóstico automotriz: síntomas, códigos DTC, OBD-II, catálogo de taller e informes técnicos.","potentialAction":{"@type":"SearchAction","target":"https://diagnostico-mecanica.onrender.com/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Diagnóstico y Mecánica","applicationCategory":"UtilitiesApplication","operatingSystem":"Web, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","ratingCount":"120"}}</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S72LBY47R8"></script>
 </head>
 <body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
 
 <!-- Arranque: presenta la consola y se retira sola (2,8 s o al tocar). -->
 <div id="nxBoot" class="nx-boot" role="presentation">
@@ -177,7 +181,7 @@
   </button>
 </header>
 
-<main>
+<main id="contenido" tabindex="-1">
 
   <!-- ===================== INICIO ===================== -->
   <section id="view-home" class="view active">
@@ -2015,6 +2019,14 @@
 <div id="tutToast" class="tut-toast" role="status" aria-live="polite"></div>
 
 <script src="/js/consent.js?v=20261110a"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  function dymGaConfig(){ if (window.dymConsent && window.dymConsent.has('analytics')) gtag('config', 'G-S72LBY47R8'); }
+  dymGaConfig();
+  window.addEventListener('dym:consent', dymGaConfig);
+</script>
 <script src="/js/obd.js?v=20261105c"></script>
 <script src="/js/tutorials.js?v=20261026d"></script>
 

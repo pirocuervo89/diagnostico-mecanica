@@ -95,6 +95,19 @@ app.get('/sw.js', (_req, res, next) => {
   next();
 });
 
+// Descarga directa: Android reconoce el tipo MIME y abre el instalador en vez
+// de dejar el archivo suelto en la carpeta de Descargas.
+app.get('/descargar', (_req, res) => {
+  const apk = path.join(__dirname, 'public', 'download', 'Diagnostico-Mecanica.apk');
+  if (!fs.existsSync(apk)) {
+    return res.status(404).send('La app todavía no está disponible. Vuelve a intentarlo en unos minutos.');
+  }
+  res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+  res.setHeader('Content-Disposition', 'attachment; filename="Diagnostico-Mecanica.apk"');
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(apk);
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
   extensions: ['html']
