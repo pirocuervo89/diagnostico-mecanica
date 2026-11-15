@@ -61,16 +61,15 @@
   display: flex; align-items: center; justify-content: space-between; gap: 14px;
   margin-bottom: 20px;
 }
-.nx-brand { display: flex; align-items: center; gap: 11px; }
-.nx-brand .brand-mark {
-  width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center;
-  background: linear-gradient(150deg, rgba(167, 139, 250, .3), rgba(34, 211, 238, .22));
-  border: 1px solid rgba(167, 139, 250, .4);
-  box-shadow: 0 0 28px rgba(167, 139, 250, .28);
+.nx-brand { display: flex; align-items: center; gap: 10px; }
+.nx-brand-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: linear-gradient(140deg, #c4b5fd, #22d3ee);
+  box-shadow: 0 0 14px rgba(167, 139, 250, .8);
+  flex: none;
 }
-.nx-brand .brand-mark .ic { width: 23px; height: 23px; color: #e8e6ff; }
-.nx-brand b { display: block; font-size: 15px; letter-spacing: .2em; color: #f2f1ff; }
-.nx-brand small { display: block; font-size: 9px; letter-spacing: .3em; color: #8f8cba; }
+.nx-brand-text { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .26em; color: #dcd9ff; }
+.nx-brand-text small { display: block; margin-top: 3px; font-size: 8.5px; font-weight: 600; letter-spacing: .2em; color: #7f7ca6; }
 .nx-live {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 7px 13px; border-radius: 999px;
@@ -274,7 +273,8 @@
 @media (max-width: 620px) {
   .nx-home { padding: 18px 13px 22px; border-radius: 20px; }
   .nx-top { margin-bottom: 14px; }
-  .nx-brand b { font-size: 12.5px; }
+  .nx-brand-text { font-size: 9px; letter-spacing: .18em; }
+  .nx-brand-text small { font-size: 7.5px; }
   .nx-live { font-size: 9px; padding: 6px 10px; }
   .nx-trust { gap: 7px 13px; font-size: 10.5px; }
   .nx-search { padding: 6px 6px 6px 12px; }
@@ -291,7 +291,126 @@
 @media (max-width: 380px) {
   .nx-tiles { grid-template-columns: 1fr; }
 }
+/* ================================================================ animaciones
+   Entrada escalonada, brillo recorriendo las tarjetas y micro-movimiento
+   constante para que la portada se sienta viva sin marear a nadie.
+   ========================================================================== */
+
+@keyframes nxRise {
+  from { opacity: 0; transform: translate3d(0, 20px, 0) scale(.985); filter: blur(3px); }
+  60%  { filter: blur(0); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes nxShimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes nxFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -7px, 0); }
+}
+@keyframes nxCarScan {
+  0%   { transform: translateY(-30%); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(220%); opacity: 0; }
+}
+@keyframes nxIcoBreath {
+  0%, 100% { box-shadow: inset 0 0 18px rgba(34, 211, 238, .16), 0 0 0 0 rgba(34, 211, 238, .18); }
+  50%      { box-shadow: inset 0 0 22px rgba(34, 211, 238, .3), 0 0 0 7px rgba(34, 211, 238, 0); }
+}
+@keyframes nxSweep {
+  from { transform: translateX(-120%); }
+  to   { transform: translateX(120%); }
+}
+@keyframes nxRing {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 211, 238, .34), 0 18px 46px rgba(0, 0, 0, .5); }
+  70%  { box-shadow: 0 0 0 9px rgba(34, 211, 238, 0), 0 18px 46px rgba(0, 0, 0, .5); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0), 0 18px 46px rgba(0, 0, 0, .5); }
+}
+
+/* --- entrada --- */
+.nx-top,
+.nx-car,
+.nx-section-head,
+.nx-hero-copy > *,
+.nx-tile { animation: nxRise .72s cubic-bezier(.21, .72, .3, 1) backwards; }
+
+.nx-hero-copy > h1 { animation-delay: .06s; }
+.nx-hero-copy > .nx-lead { animation-delay: .13s; }
+.nx-hero-copy > .nx-search { animation-delay: .2s; }
+.nx-hero-copy > .nx-trust { animation-delay: .27s; }
+.nx-car { animation-delay: .18s; }
+.nx-section-head { animation-delay: .3s; }
+
+.nx-tile:nth-child(1) { animation-delay: .34s; }
+.nx-tile:nth-child(2) { animation-delay: .39s; }
+.nx-tile:nth-child(3) { animation-delay: .44s; }
+.nx-tile:nth-child(4) { animation-delay: .49s; }
+.nx-tile:nth-child(5) { animation-delay: .54s; }
+.nx-tile:nth-child(6) { animation-delay: .59s; }
+.nx-tile:nth-child(7) { animation-delay: .64s; }
+.nx-tile:nth-child(8) { animation-delay: .69s; }
+.nx-tile:nth-child(9) { animation-delay: .74s; }
+.nx-tile:nth-child(10) { animation-delay: .79s; }
+.nx-tile:nth-child(11) { animation-delay: .84s; }
+.nx-tile:nth-child(12) { animation-delay: .89s; }
+
+/* --- título con brillo que recorre el degradado --- */
+.nx-grad {
+  background: linear-gradient(96deg, #c4b5fd 4%, #22d3ee 34%, #7ff3c0 56%, #22d3ee 74%, #c4b5fd 96%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: nxShimmer 9s ease-in-out infinite;
+}
+
+/* --- coche: flota y se le pasa un escáner --- */
+.nx-car { animation: nxRise .72s cubic-bezier(.21, .72, .3, 1) .18s backwards, nxFloat 7.5s ease-in-out 1.2s infinite; }
+.nx-car::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 22%; z-index: 2;
+  background: linear-gradient(180deg, transparent, rgba(34, 211, 238, .22) 60%, transparent);
+  animation: nxCarScan 6s linear 1.4s infinite;
+  pointer-events: none;
+}
+
+/* --- iconos que respiran --- */
+.nx-tile-ico { animation: nxIcoBreath 4.2s ease-in-out infinite; }
+.nx-tile:nth-child(2n) .nx-tile-ico { animation-delay: .6s; }
+.nx-tile:nth-child(3n) .nx-tile-ico { animation-delay: 1.2s; }
+.nx-tile:nth-child(5n) .nx-tile-ico { animation-delay: 1.8s; }
+.nx-tile:hover .nx-tile-ico { animation-play-state: paused; transform: scale(1.06) rotate(-3deg); }
+.nx-tile-ico { transition: transform .24s cubic-bezier(.2, .8, .3, 1); }
+
+/* --- barrido de luz en la tarjeta al pasar el dedo o el ratón --- */
+.nx-tile::before {
+  transition: opacity .25s ease;
+  background: linear-gradient(115deg, transparent 30%, rgba(34, 211, 238, .22) 46%, rgba(167, 139, 250, .26) 54%, transparent 70%);
+  transform: translateX(-120%);
+}
+.nx-tile:hover::before,
+.nx-tile:focus-within::before { opacity: 1; animation: nxSweep 1.05s cubic-bezier(.4, 0, .2, 1); }
+.nx-tile:active { transform: translateY(-1px) scale(.994); }
+
+/* --- botón: destello que cruza al pasar por encima --- */
+.nx-tile-btn { position: relative; overflow: hidden; }
+.nx-tile-btn::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 46%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .34), transparent);
+  transform: translateX(-160%); pointer-events: none;
+}
+.nx-tile:hover .nx-tile-btn::after { animation: nxSweep 1s cubic-bezier(.4, 0, .2, 1) .05s; }
+
+/* --- buscador: anillo al enfocar --- */
+.nx-search:focus-within { animation: nxRing 2.2s ease-out infinite; }
+
+/* --- el punto de "IA en línea" late también de tamaño --- */
+.nx-live { animation: nxRise .6s ease backwards; }
+
 @media (prefers-reduced-motion: reduce) {
-  .nx-glow, .nx-scan, .nx-live i { animation: none; }
+  .nx-glow, .nx-scan, .nx-live i, .nx-grad, .nx-car, .nx-car::before, .nx-tile-ico,
+  .nx-top, .nx-car, .nx-section-head, .nx-hero-copy > *, .nx-tile, .nx-live { animation: none !important; }
   .nx-tile:hover { transform: none; }
+  .nx-tile:hover .nx-tile-ico { transform: none; }
+  .nx-search:focus-within { animation: none; }
 }
