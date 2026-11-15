@@ -198,6 +198,24 @@ if (appMenu) {
 $$('[data-view]').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
 
 // -------------------------------------------------------------
+// Portada: accesos directos a las páginas públicas que traen tráfico
+// (el HTML de la portada no se toca: se insertan aquí)
+// -------------------------------------------------------------
+function addHomeShortcuts() {
+  const hero = document.querySelector('.nx-home .nx-hero-copy');
+  if (!hero || hero.querySelector('.nx-shortcuts')) return;
+  const box = document.createElement('div');
+  box.className = 'nx-shortcuts';
+  box.innerHTML = `
+    <a class="nx-shortcut" href="/diagnostico-gratis">${icon('zap')} Diagnóstico gratis en 30 s</a>
+    <a class="nx-shortcut" href="/proteccion">${icon('shield')} Protector: presupuesto y conducir</a>`;
+  const trust = hero.querySelector('.nx-trust');
+  if (trust) hero.insertBefore(box, trust);
+  else hero.appendChild(box);
+}
+addHomeShortcuts();
+
+// -------------------------------------------------------------
 // Portada: acciones directas (IA, voz, escáneres)
 // -------------------------------------------------------------
 function focusChatInput() {
@@ -1017,6 +1035,32 @@ function likelihoodBadge(l) {
   return `<span class="badge-likelihood ${cls}">${esc(v)}</span>`;
 }
 
+// -------------------------------------------------------------
+// COMPARTIR: enlace público sin registro (/diagnostico-gratis)
+// Cada diagnóstico compartido es una visita nueva que puede acabar en cuenta.
+// -------------------------------------------------------------
+function freeDiagnosisUrl(kind, id) {
+  const base = `${location.origin}/diagnostico-gratis`;
+  if (!id) return base;
+  const params = new URLSearchParams();
+  if (kind === 'dtc') params.set('dtc', String(id).toUpperCase());
+  else params.set('s', String(id));
+  return `${base}?${params.toString()}`;
+}
+
+function whatsappShareUrl(kind, id, text) {
+  const link = freeDiagnosisUrl(kind, id);
+  const message = `${text || 'Diagnóstico del coche'}: averigua en 30 segundos qué puede ser, gratis y sin registro:`;
+  return `https://wa.me/?text=${encodeURIComponent(`${message} ${link}`)}`;
+}
+
+function shareDiagnosisLink(kind, id, text) {
+  if (!id) return '';
+  return `<a class="btn ghost btn-share-diagnosis" href="${esc(whatsappShareUrl(kind, id, text))}" target="_blank" rel="noopener noreferrer" title="Compartir este diagnóstico por WhatsApp">
+    ${icon('send')} Compartir diagnóstico
+  </a>`;
+}
+
 function renderSymptomDetail(s) {
   const detail = $('#symptomDetail');
   if (!detail) return;
@@ -1105,6 +1149,7 @@ function renderSymptomDetail(s) {
       <button class="btn ghost btn-informe-sintoma" type="button">
         ${icon('file')} Traspasar a Informe
       </button>
+      ${shareDiagnosisLink('symptom', s.id, s.name)}
     </div>
   `;
 
@@ -1215,6 +1260,7 @@ async function searchDtc(overrideQ = null, overridePrefix = null) {
           <button class="btn ghost btn-dtc-to-report" data-code="${esc(d.code)}" type="button">
             ${icon('file')} Agregar a Informe
           </button>
+          ${shareDiagnosisLink('dtc', d.code, `${d.code}: ${d.title}`)}
         </div>
       </article>
     `).join('');
