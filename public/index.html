@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/css/reforma.css?v=20261113e">
   <link rel="stylesheet" href="/css/legal.css?v=20261110a">
   <link rel="stylesheet" href="/css/futurista.css?v=20261115e">
-  <link rel="stylesheet" href="/css/pulido.css?v=20261116b">
+  <link rel="stylesheet" href="/css/pulido.css?v=20261116c">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Diagnóstico y Mecánica">
   <meta property="og:title" content="Diagnóstico y Mecánica · Plataforma Automotriz">
@@ -340,6 +340,17 @@
         <p class="nx-how"><b>Cómo se usa:</b> pega el presupuesto del taller, consulta la salud de tu coche o marca lo que notes para saber si es seguro seguir conduciendo.</p>
       </article>
     </div>
+
+    <section class="nx-quickguide panel" aria-labelledby="nxQuickGuideTitle">
+      <h3 id="nxQuickGuideTitle">Guía rápida de uso</h3>
+      <ol>
+        <li><b>Empieza por el síntoma:</b> escribe en la búsqueda qué notas o pulsa «Contar mi avería».</li>
+        <li><b>Revisa el testigo:</b> si se encendió una luz, haz una foto al cuadro y sigue la recomendación.</li>
+        <li><b>Conecta el OBD-II:</b> enchufa el adaptador y pulsa «Leer mi coche» para ver códigos reales.</li>
+        <li><b>Compara piezas:</b> en Tienda filtra por sección, abre la ficha y compara precio y compatibilidad.</li>
+        <li><b>Guarda el informe:</b> genera un PDF con el diagnóstico y el plan de acción para el taller.</li>
+      </ol>
+    </section>
 
     <aside id="componentPanel" class="component-panel hidden" aria-live="polite" aria-label="Información del sistema seleccionado">
       <div class="component-panel-head">
@@ -1478,6 +1489,14 @@
       <button class="btn ghost sm" id="shopClearQuery" type="button" hidden>Limpiar</button>
       <span class="shop-search-hint">2.700 productos verificados</span>
     </div>
+    <div class="shop-how" role="note" aria-label="Cómo usar la tienda">
+      <b>Cómo usar la tienda:</b>
+      <span>1) Elige una sección o subcategoría.</span>
+      <span>2) Busca por nombre o marca.</span>
+      <span>3) Pulsa la foto para ver la ficha y compatibilidad.</span>
+      <span>4) Compara el precio y abre la oferta en la tienda.</span>
+      <span>5) Usa «Ver más productos» para cargar más resultados.</span>
+    </div>
 
     <nav id="shopCats" class="shop-cats" aria-label="Secciones de la tienda"></nav>
     <div id="shopSubs" class="shop-subs" aria-label="Subcategorías"></div>
@@ -2033,7 +2052,7 @@
 <script src="/js/voz.js?v=20261113j"></script>
 <script src="/js/micro-permiso.js?v=20261112a"></script>
 
-<script src="/js/tienda.js?v=20261113c"></script>
+<script src="/js/tienda.js?v=20261116a"></script>
 <script src="/js/planes.js?v=20261113a"></script>
 <script src="/js/app.js?v=20261113a"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
@@ -2044,5 +2063,25 @@
 <script src="/js/garage.js?v=20261110a"></script>
 <script src="/js/testigos.js?v=20261105a"></script>
 <script src="/js/forum.js?v=20261026d"></script>
+<script>
+(function () {
+  // Glow interactivo: sigue el cursor en tarjetas y paneles.
+  function track(e) {
+    const t = e.target.closest('.nx-tile, .shop-card, .panel, .shop-hero');
+    if (!t) return;
+    const r = t.getBoundingClientRect();
+    t.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+    t.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+  }
+  document.addEventListener('pointermove', track, { passive: true });
+
+  // Re-trigger de animaciones al cambiar de vista.
+  document.addEventListener('viewchange', function () {
+    document.querySelectorAll('.view.active .nx-tile, .view.active .shop-card').forEach((el, i) => {
+      el.style.animationDelay = (i % 12) * 35 + 'ms';
+    });
+  });
+})();
+</script>
 </body>
 </html>
