@@ -10,7 +10,7 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
-  const PAGE = 288;
+  const PAGE = 1000;
   const fold = text => String(text || '').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
@@ -180,7 +180,7 @@
     });
   }
 
-  function tarjeta(p) {
+  function tarjeta(p, i) {
     const imagen = p.image
       ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.classList.add('rota')">`
       : '';
@@ -189,7 +189,7 @@
     // Badge "Más vendido": determinista por id, sin tocar datos.
     const vendido = (String(p.id).charCodeAt(0) + (String(p.id).length * 7)) % 5 === 0;
     return `
-      <article class="shop-card" data-id="${esc(p.id)}">
+      <article class="shop-card" data-id="${esc(p.id)}" style="--i:${Number.isFinite(i) ? i : 0}">
         <button class="shop-card-media" type="button" data-ficha="${esc(p.id)}" aria-label="Ver ficha de ${esc(p.name)}">
           ${imagen}
           <span class="shop-card-brand">${esc(p.manufacturer || p.seller || 'Recambio')}</span>
@@ -225,7 +225,7 @@
       return;
     }
     const visible = list.slice(0, state.shown);
-    grid.innerHTML = visible.map(tarjeta).join('');
+    grid.innerHTML = visible.map((p, idx) => tarjeta(p, idx)).join('');
     if (count) {
       const secLabel = state.section === 'todo' ? 'todos' : (SECCIONES.find(x => x.id === state.section)?.label || 'más recambios');
       count.textContent = `${list.length.toLocaleString('es-ES')} producto${list.length === 1 ? '' : 's'} en ${secLabel}${state.query ? ` · «${state.query}»` : ''}`;
