@@ -407,10 +407,229 @@
 /* --- el punto de "IA en línea" late también de tamaño --- */
 .nx-live { animation: nxRise .6s ease backwards; }
 
+/* ==========================================================================
+   ARRANQUE · presentación de la consola al abrir la app
+   Se retira sola por CSS (aunque falle el JS) y el JS la borra del DOM.
+   ========================================================================== */
+.nx-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 26px;
+  background:
+    radial-gradient(760px 420px at 50% 44%, rgba(34, 211, 238, .17), transparent 68%),
+    radial-gradient(900px 520px at 50% -10%, rgba(167, 139, 250, .22), transparent 70%),
+    #05060a;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+}
+.nx-boot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(70% 60% at 50% 50%, #000 10%, transparent 78%);
+  opacity: .7;
+}
+.nx-boot::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 30%;
+  z-index: 0;
+  background: linear-gradient(180deg, transparent, rgba(34, 211, 238, .14) 55%, transparent);
+  animation: nxScan 3.4s linear .1s infinite;
+  pointer-events: none;
+}
+/* La secuencia arranca cuando el navegador ya puede pintar: una clase que
+   pone el JS en el primer frame. Sin esa clase todo se ve quieto y completo. */
+.nx-boot-anim { animation: nxBootOut .55s cubic-bezier(.4, 0, .2, 1) 2.25s forwards; }
+.nx-boot-out { animation: nxBootOut .34s cubic-bezier(.4, 0, .2, 1) forwards; }
+
+.nx-boot-inner {
+  position: relative;
+  z-index: 1;
+  width: min(400px, 92vw);
+  text-align: center;
+}
+.nx-boot-anim .nx-boot-inner { animation: nxBootIn .6s cubic-bezier(.21, .72, .3, 1) both; }
+
+/* --- marca: hexágono con anillos que salen --- */
+.nx-boot-mark {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+}
+.nx-boot-mark::before {
+  content: "";
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34, 211, 238, .38), rgba(167, 139, 250, .16) 55%, transparent 72%);
+  filter: blur(10px);
+  animation: nxBootCore 1.9s ease-in-out infinite;
+}
+.nx-boot-ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(34, 211, 238, .55);
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  animation: nxBootRing 1.9s cubic-bezier(.2, .6, .3, 1) infinite;
+}
+.nx-boot-ring.r2 { border-color: rgba(167, 139, 250, .5); animation-delay: .95s; }
+.nx-boot-hex {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: linear-gradient(150deg, #c4b5fd, #22d3ee 62%, #38efa4);
+  animation: nxBootCore 1.9s ease-in-out infinite;
+}
+.nx-boot-hex i {
+  width: 44px;
+  height: 44px;
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: #07080e;
+}
+
+/* --- textos --- */
+.nx-boot-name {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .3em;
+  color: #eae7ff;
+  text-indent: .3em;
+}
+.nx-boot-anim .nx-boot-name { animation: nxBootName .8s cubic-bezier(.2, .7, .3, 1) .08s both; }
+.nx-boot-tag {
+  margin: 7px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: .04em;
+  color: #8d89b5;
+}
+.nx-boot-anim .nx-boot-tag { animation: nxBootFade .5s ease .3s backwards; }
+.nx-boot-list {
+  margin: 20px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  list-style: none;
+  min-height: 78px;
+  align-content: start;
+}
+.nx-boot-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #a8e9d6;
+}
+.nx-boot-anim .nx-boot-list li {
+  opacity: 0;
+  animation: nxBootLine .36s ease forwards;
+}
+.nx-boot-list li::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #38efa4;
+  box-shadow: 0 0 8px rgba(56, 239, 164, .9);
+}
+.nx-boot-anim .nx-boot-list li:nth-child(1) { animation-delay: .5s; }
+.nx-boot-anim .nx-boot-list li:nth-child(2) { animation-delay: .68s; }
+.nx-boot-anim .nx-boot-list li:nth-child(3) { animation-delay: .86s; }
+.nx-boot-anim .nx-boot-list li:nth-child(4) { animation-delay: 1.04s; }
+
+/* --- barra de carga --- */
+.nx-boot-bar {
+  position: relative;
+  height: 3px;
+  width: min(230px, 64%);
+  margin: 20px auto 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .09);
+  overflow: hidden;
+}
+.nx-boot-bar span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a78bfa, #22d3ee 55%, #38efa4);
+  box-shadow: 0 0 14px rgba(34, 211, 238, .8);
+}
+.nx-boot-anim .nx-boot-bar span { animation: nxBootFill 1.85s cubic-bezier(.3, .1, .2, 1) .22s backwards; }
+.nx-boot-skip {
+  margin: 15px 0 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #6c6990;
+}
+.nx-boot-anim .nx-boot-skip { animation: nxBootFade .4s ease 1.15s backwards; }
+
+@keyframes nxBootIn {
+  from { opacity: 0; transform: translateY(12px) scale(.96); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+@keyframes nxBootOut {
+  from { opacity: 1; }
+  to   { opacity: 0; visibility: hidden; transform: scale(1.05); pointer-events: none; }
+}
+@keyframes nxBootName {
+  from { opacity: 0; letter-spacing: .62em; filter: blur(4px); }
+  to   { opacity: 1; letter-spacing: .3em; filter: none; }
+}
+@keyframes nxBootFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes nxBootLine {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes nxBootRing {
+  0%   { transform: scale(.62); opacity: .85; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+@keyframes nxBootCore {
+  0%, 100% { box-shadow: 0 0 26px rgba(34, 211, 238, .45); }
+  50%      { box-shadow: 0 0 40px rgba(167, 139, 250, .68); }
+}
+@keyframes nxBootFill {
+  0%   { width: 0; }
+  70%  { width: 82%; }
+  100% { width: 100%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .nx-glow, .nx-scan, .nx-live i, .nx-grad, .nx-car, .nx-car::before, .nx-tile-ico,
   .nx-top, .nx-car, .nx-section-head, .nx-hero-copy > *, .nx-tile, .nx-live { animation: none !important; }
   .nx-tile:hover { transform: none; }
   .nx-tile:hover .nx-tile-ico { transform: none; }
   .nx-search:focus-within { animation: none; }
+  .nx-boot { display: none !important; }
 }

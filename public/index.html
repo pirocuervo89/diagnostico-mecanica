@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
   <link rel="stylesheet" href="/css/reforma.css?v=20261113e">
   <link rel="stylesheet" href="/css/legal.css?v=20261110a">
-  <link rel="stylesheet" href="/css/futurista.css?v=20261115b">
+  <link rel="stylesheet" href="/css/futurista.css?v=20261115e">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Diagnóstico y Mecánica">
   <meta property="og:title" content="Diagnóstico y Mecánica · Plataforma Automotriz">
@@ -34,6 +34,52 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Diagnóstico y Mecánica","inLanguage":"es-ES","description":"Plataforma de diagnóstico automotriz: síntomas, códigos DTC, OBD-II, catálogo de taller e informes técnicos."}</script>
 </head>
 <body>
+
+<!-- Arranque: presenta la consola y se retira sola (2,8 s o al tocar). -->
+<div id="nxBoot" class="nx-boot" role="presentation">
+  <div class="nx-boot-inner">
+    <div class="nx-boot-mark" aria-hidden="true">
+      <span class="nx-boot-ring"></span>
+      <span class="nx-boot-ring r2"></span>
+      <span class="nx-boot-hex"><i></i></span>
+    </div>
+    <p class="nx-boot-name">CENTRO DE MANDO</p>
+    <p class="nx-boot-tag">Lleva tu mecánico siempre contigo</p>
+    <ul class="nx-boot-list">
+      <li>Núcleo local listo</li>
+      <li>9.201 códigos cargados</li>
+      <li>454 averías a mano</li>
+      <li>IA en línea</li>
+    </ul>
+    <div class="nx-boot-bar" aria-hidden="true"><span></span></div>
+    <p class="nx-boot-skip">Toca para entrar</p>
+  </div>
+</div>
+<noscript><style>.nx-boot { display: none !important; }</style></noscript>
+<script>
+(function () {
+  var boot = document.getElementById('nxBoot');
+  if (!boot) return;
+  var fuera = false;
+  function cerrar() {
+    if (fuera) return;
+    fuera = true;
+    boot.classList.add('nx-boot-out');
+    setTimeout(function () { if (boot.parentNode) boot.parentNode.removeChild(boot); }, 420);
+  }
+  // La secuencia empieza en el primer frame visible, no mientras carga.
+  var animar = function () { boot.classList.add('nx-boot-anim'); };
+  if (window.requestAnimationFrame) requestAnimationFrame(animar);
+  else setTimeout(animar, 30);
+
+  boot.addEventListener('click', cerrar);
+  boot.addEventListener('touchstart', cerrar, { passive: true });
+  boot.addEventListener('animationend', function (e) {
+    if (e.animationName === 'nxBootOut') cerrar();
+  });
+  setTimeout(cerrar, 3600);
+})();
+</script>
 
 <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
   <symbol id="i-logo" viewBox="0 0 24 24"><path d="M12 2.5 20 7v10l-8 4.5L4 17V7l8-4.5Z"/><path d="m13 7-4 6h3l-1 4 4-6h-3l1-4Z"/></symbol>
