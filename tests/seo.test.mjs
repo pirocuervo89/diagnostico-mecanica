@@ -31,7 +31,9 @@ test('el sitemap incluye todo el contenido y es XML válido', () => {
   assert.ok(xml.startsWith('<?xml'));
   assert.ok(xml.trim().endsWith('</urlset>'));
   const locs = xml.match(/<loc>/g) || [];
-  assert.equal(locs.length, 6 + products().length + engines().length + vehicles().length + tyres().length + 6);
+  assert.equal(locs.length, 8 + products().length + engines().length + vehicles().length + tyres().length + 6);
+  assert.ok(xml.includes('/diagnostico-gratis</loc>'));
+  assert.ok(xml.includes('/proteccion</loc>'));
   assert.ok(xml.includes('/productos</loc>'));
   assert.ok(xml.includes(`/producto/${firstProduct.id}</loc>`));
   assert.ok(xml.includes(`/motor/${firstEngine.id}</loc>`));
@@ -115,6 +117,30 @@ test('la portada declara el mismo dominio que el resto del sitio', () => {
   assert.equal(canonical, `${baseUrl()}/`, 'el canonical de la portada debe salir de data/legal.json');
   assert.ok(html.includes(`property="og:url" content="${baseUrl()}/"`), 'og:url debe coincidir');
   assert.ok(html.includes('name="robots" content="index,follow'), 'la portada debe ser indexable');
+});
+
+test('la landing de diagnóstico gratis es indexable y carga solo recursos propios', () => {
+  const html = fs.readFileSync(new URL('../public/diagnostico-gratis.html', import.meta.url), 'utf8');
+  assert.match(html, /<title>[^<]{20,}<\/title>/);
+  assert.match(html, new RegExp(`rel="canonical" href="${baseUrl()}/diagnostico-gratis"`));
+  assert.match(html, /"@type":\s*"FAQPage"/);
+  assert.match(html, /src="\/js\/diagnostico-gratis\.js/);
+  const remoteScripts = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match => match[1]).filter(src => /^https?:/i.test(src));
+  assert.deepEqual(remoteScripts, [], 'la landing no debe depender de scripts de terceros');
+  assert.ok(fs.existsSync(new URL('../public/css/diagnostico-gratis.css', import.meta.url)));
+  assert.ok(fs.existsSync(new URL('../public/js/diagnostico-gratis.js', import.meta.url)));
+  assert.ok(fs.existsSync(new URL('../public/img/og-diagnostico-gratis.png', import.meta.url)));
+});
+
+test('el protector del conductor es indexable y carga solo recursos propios', () => {
+  const html = fs.readFileSync(new URL('../public/proteccion.html', import.meta.url), 'utf8');
+  assert.match(html, /<title>[^<]{20,}<\/title>/);
+  assert.match(html, new RegExp(`rel="canonical" href="${baseUrl()}/proteccion"`));
+  assert.match(html, /src="\/js\/proteccion\.js/);
+  const remoteScripts = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match => match[1]).filter(src => /^https?:/i.test(src));
+  assert.deepEqual(remoteScripts, [], 'el protector no debe depender de scripts de terceros');
+  assert.ok(fs.existsSync(new URL('../public/css/proteccion.css', import.meta.url)));
+  assert.ok(fs.existsSync(new URL('../public/js/proteccion.js', import.meta.url)));
 });
 
 test('las fichas de coche llevan datos técnicos, inspección y fuentes', () => {

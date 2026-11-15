@@ -1134,6 +1134,8 @@ export function sitemapXml() {
   const today = new Date().toISOString().slice(0, 10);
   const entries = [
     { loc: '/', priority: '1.0', changefreq: 'daily' },
+    { loc: '/diagnostico-gratis', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/proteccion', priority: '0.9', changefreq: 'weekly' },
     { loc: '/productos', priority: '0.9', changefreq: 'daily' },
     { loc: '/motores', priority: '0.9', changefreq: 'weekly' },
     { loc: '/coches', priority: '0.8', changefreq: 'weekly' },
@@ -1153,5 +1155,5 @@ export function sitemapXml() {
 }
 
 export function urlCount() {
-  return 6 + products().length + engines().length + vehicles().length + tyres().length + 6;
+  return 8 + products().length + engines().length + vehicles().length + tyres().length + 6;
 }

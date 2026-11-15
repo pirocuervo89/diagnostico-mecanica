@@ -324,7 +324,7 @@ function field(value, confidence, explicit, note = '') {
   };
 }
 
-export async function scanVehicleDocument({ dataBase64, mimeType, fileName, text } = {}) {
+export async function extractDocumentText({ dataBase64, mimeType, text } = {}) {
   let sourceText = compact(text || '');
   let method = sourceText ? 'texto_manual' : 'sin_texto';
   let ocr = false;
@@ -332,7 +332,7 @@ export async function scanVehicleDocument({ dataBase64, mimeType, fileName, text
   let fileType = null;
 
   if (!sourceText) {
-    if (!dataBase64) throw new Error('Adjunta una ficha en PDF o una imagen, o escribe los datos manualmente.');
+    if (!dataBase64) throw new Error('Adjunta un archivo o escribe el texto del documento.');
     const buffer = decodeBase64File(dataBase64);
     fileType = detectFileType(buffer, mimeType);
     if (!MIME_EXTENSIONS[fileType.mime]) throw new Error('Formato no admitido.');
@@ -350,8 +350,25 @@ export async function scanVehicleDocument({ dataBase64, mimeType, fileName, text
   }
 
   if (!sourceText || sourceText.replace(/\s+/g, '').length < 8) {
-    throw new Error('No se ha podido leer texto suficiente. Prueba con una imagen más nítida, recorta la zona de datos o introduce los datos manualmente.');
+    throw new Error('No se ha podido leer texto suficiente. Prueba con una imagen más nítida, recorta la zona del presupuesto o escribe las líneas a mano.');
   }
+
+  return {
+    text: sourceText,
+    method,
+    ocr,
+    pages,
+    fileType: fileType?.mime || (sourceText ? 'texto' : '')
+  };
+}
+
+export async function scanVehicleDocument({ dataBase64, mimeType, fileName, text } = {}) {
+  const extractedText = await extractDocumentText({ dataBase64, mimeType, text });
+  const sourceText = extractedText.text;
+  const method = extractedText.method;
+  const ocr = extractedText.ocr;
+  const pages = extractedText.pages;
+  const fileType = { mime: extractedText.fileType };
 
   const vehicles = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'vehicles.json'), 'utf8'));
   const brand = parseBrand(sourceText, vehicles);

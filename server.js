@@ -15,6 +15,7 @@ import paymentsRouter from './src/routes/payments.js';
 import pricesRouter from './src/routes/prices.js';
 import seoRouter from './src/routes/seo.js';
 import affiliatesRouter from './src/routes/affiliates.js';
+import proteccionRouter from './src/routes/proteccion.js';
 import { startPriceSync } from './src/lib/price_sync.js';
 import { installShutdownBackup, backupStatus } from './src/lib/db_persist.js';
 
@@ -69,6 +70,7 @@ app.use('/api/tutorials', tutorialsRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/prices', pricesRouter);
 app.use('/api/afiliados', affiliatesRouter);
+app.use('/api/proteccion', proteccionRouter);
 app.use('/api', apiRouter);
 app.use('/api/sintomas', sintomasRouter);
 // Páginas con URL propia para buscadores. Va antes del estático porque también

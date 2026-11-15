@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Protector del conductor · Presupuesto, salud y ¿puedo conducir? | Diagnóstico y Mecánica</title>
+  <meta name="description" content="Revisa si un presupuesto de taller es justo, consulta la salud de tu coche y decide si puedes conducir tras un síntoma o un código de avería. Sin registro para el análisis rápido.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://diagnostico-mecanica.onrender.com/proteccion">
+  <meta property="og:title" content="Protector del conductor · Diagnóstico y Mecánica">
+  <meta property="og:description" content="Diagnostica, comprueba el presupuesto del taller y sabe si puedes conducir. Tres herramientas en una.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://diagnostico-mecanica.onrender.com/proteccion">
+  <meta property="og:image" content="https://diagnostico-mecanica.onrender.com/img/og-diagnostico-gratis.png">
+  <meta name="theme-color" content="#080a0d">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/img/app/apple-touch-icon.png">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/css/app.css?v=20261030a">
+  <link rel="stylesheet" href="/css/proteccion.css?v=20261115a">
+</head>
+<body class="pr-body">
+  <div class="pr-bg" aria-hidden="true"><span></span><span></span><i></i></div>
+
+  <header class="pr-top">
+    <a class="pr-brand" href="/" aria-label="Volver a Diagnóstico y Mecánica">
+      <span class="pr-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2.5 20 7v10l-8 4.5L4 17V7l8-4.5Z"/><path d="m13 7-4 6h3l-1 4 4-6h-3l1-4Z"/></svg>
+      </span>
+      <span><strong>DIAGNÓSTICO</strong><small>Y MECÁNICA · PROTECTOR</small></span>
+    </a>
+    <nav class="pr-top-nav" aria-label="Enlaces rápidos">
+      <a href="/diagnostico-gratis">Diagnóstico 30 s</a>
+      <a href="/#garaje">Mi garaje</a>
+      <a href="/">Inicio</a>
+    </nav>
+  </header>
+
+  <main class="pr-wrap">
+    <section class="pr-hero">
+      <div>
+        <span class="pr-kicker"><i></i> PROTECTOR DEL CONDUCTOR</span>
+        <h1>Que no te vendan<br><em>lo que no necesitas.</em></h1>
+        <p>Revisa un presupuesto con precios de referencia, mira la salud real de tu coche y decide en 10 segundos si puedes seguir conduciendo. Sin registro para empezar.</p>
+        <div class="pr-hero-tags">
+          <span>Presupuesto con IVA y horas</span>
+          <span>Historial de tu garaje</span>
+          <span>Semáforo de urgencia</span>
+          <span>Compartir por WhatsApp</span>
+        </div>
+      </div>
+      <aside class="pr-hero-card" aria-label="Resumen del protector">
+        <div class="pr-hero-card-top"><span>3 HERRAMIENTAS</span><b>1 sola pantalla</b></div>
+        <ol>
+          <li><b>01</b><span><strong>Segunda opinión</strong><small>¿Es justo el presupuesto?</small></span></li>
+          <li><b>02</b><span><strong>Salud del coche</strong><small>Qué toca y qué falta</small></span></li>
+          <li><b>03</b><span><strong>¿Puedo conducir?</strong><small>Semáforo de seguridad</small></span></li>
+        </ol>
+        <p>No es una peritación. Es la información que te falta antes de decir «sí» en el taller.</p>
+      </aside>
+    </section>
+
+    <nav class="pr-tabs" role="tablist" aria-label="Herramientas del protector">
+      <button class="pr-tab active" id="tabQuoteBtn" type="button" role="tab" aria-selected="true" aria-controls="tabQuote" data-pr-tab="quote">
+        <span>01</span> Segunda opinión
+      </button>
+      <button class="pr-tab" id="tabHealthBtn" type="button" role="tab" aria-selected="false" aria-controls="tabHealth" data-pr-tab="health">
+        <span>02</span> Salud del coche
+      </button>
+      <button class="pr-tab" id="tabTriageBtn" type="button" role="tab" aria-selected="false" aria-controls="tabTriage" data-pr-tab="triage">
+        <span>03</span> ¿Puedo conducir?
+      </button>
+    </nav>
+
+    <section class="pr-panel active" id="tabQuote" role="tabpanel" aria-labelledby="tabQuoteBtn">
+      <div class="pr-split">
+        <div class="pr-card">
+          <div class="pr-card-head">
+            <div><span class="pr-kicker">PRESUPUESTO DEL TALLER</span><h2>Pega el presupuesto o sube una foto</h2></div>
+            <span class="pr-badge">Sin guardar el archivo</span>
+          </div>
+          <form id="quoteForm" class="pr-form" autocomplete="off">
+            <label class="pr-field">
+              <span>Tu coche (opcional)</span>
+              <select id="quoteVehicle"><option value="">Sin coche seleccionado</option></select>
+            </label>
+            <label class="pr-field">
+              <span>Texto del presupuesto</span>
+              <textarea id="quoteText" rows="8" maxlength="30000" placeholder="Ejemplo:&#10;Cambio de aceite y filtro 95 €&#10;Pastillas delanteras 140 €&#10;Mano de obra 2 h x 55 €/h&#10;IVA 21%&#10;Total 320 €"></textarea>
+            </label>
+            <div class="pr-upload">
+              <label class="pr-file" for="quoteFile">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v4h16v-4"/></svg>
+                <span><b>Subir foto o PDF</b><small>JPG, PNG, WebP o PDF · máx. 8 MB</small></span>
+                <input id="quoteFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" hidden>
+              </label>
+              <span id="quoteFileState" class="pr-file-state">También puedes escribir solo las líneas que te interesan.</span>
+            </div>
+            <div class="pr-actions">
+              <button class="pr-btn primary" id="quoteSubmit" type="submit">Revisar presupuesto</button>
+              <button class="pr-btn ghost" id="quoteClear" type="button">Limpiar</button>
+            </div>
+            <p class="pr-note">El OCR puede equivocarse con fotos borrosas. Revisa el texto detectado antes de sacar conclusiones.</p>
+          </form>
+          <div id="quoteStatus" class="pr-status" role="status" aria-live="polite" hidden></div>
+        </div>
+
+        <aside class="pr-side">
+          <h3>Qué mira la segunda opinión</h3>
+          <ul class="pr-checks">
+            <li>Si el total entra en un rango de mercado para las operaciones detectadas.</li>
+            <li>Si la mano de obra está desglosada y a qué precio por hora.</li>
+            <li>Si el IVA aparece y si base + IVA cuadran.</li>
+            <li>Líneas duplicadas, piezas sin referencia y presupuestos poco detallados.</li>
+            <li>Preguntas concretas para hacer antes de firmar.</li>
+          </ul>
+          <p class="pr-note">Rangos orientativos de mercado español. No sustituyen una peritación ni un presupuesto cerrado.</p>
+        </aside>
+      </div>
+      <div id="quoteResult" class="pr-result" aria-live="polite" hidden></div>
+    </section>
+
+    <section class="pr-panel" id="tabHealth" role="tabpanel" aria-labelledby="tabHealthBtn" hidden>
+      <div id="healthLoading" class="pr-status">Comprobando tu sesión…</div>
+
+      <div id="healthAuth" class="pr-auth" hidden>
+        <div class="pr-card">
+          <div class="pr-card-head"><div><span class="pr-kicker">ACCESO PRIVADO</span><h2>Entra para ver la salud de tu garaje</h2></div></div>
+          <p class="pr-note">Usa la misma cuenta del foro y de Mi garaje. Tus vehículos, facturas y documentos no se publican.</p>
+          <div class="pr-auth-grid">
+            <form id="healthLoginForm" class="pr-form">
+              <label class="pr-field"><span>Usuario</span><input id="healthLoginUser" autocomplete="username" required maxlength="24"></label>
+              <label class="pr-field"><span>Contraseña</span><input id="healthLoginPass" type="password" autocomplete="current-password" required></label>
+              <button class="pr-btn primary" type="submit">Entrar</button>
+            </form>
+            <form id="healthRegisterForm" class="pr-form">
+              <label class="pr-field"><span>Nuevo usuario</span><input id="healthRegUser" autocomplete="username" required minlength="3" maxlength="24" pattern="[a-zA-Z0-9._-]{3,24}"></label>
+              <label class="pr-field"><span>Nombre visible</span><input id="healthRegName" maxlength="60"></label>
+              <label class="pr-field"><span>Contraseña (mín. 8)</span><input id="healthRegPass" type="password" autocomplete="new-password" required minlength="8"></label>
+              <button class="pr-btn cyan" type="submit">Crear cuenta</button>
+            </form>
+          </div>
+          <p id="healthAuthMsg" class="pr-msg" role="status" hidden></p>
+        </div>
+      </div>
+
+      <div id="healthApp" hidden>
+        <div class="pr-toolbar">
+          <label class="pr-field pr-field-inline"><span>Vehículo</span><select id="healthVehicle"></select></label>
+          <button class="pr-btn primary" id="healthRefresh" type="button">Actualizar salud</button>
+          <a class="pr-btn ghost" href="/#garaje">Abrir Mi garaje</a>
+        </div>
+        <div id="healthEmpty" class="pr-empty" hidden>
+          <h3>Tu garaje está vacío</h3>
+          <p>Añade un coche en Mi garaje para calcular su salud, mantenimiento y documentación.</p>
+          <a class="pr-btn primary" href="/#garaje">Añadir mi coche</a>
+        </div>
+        <div id="healthResult" class="pr-result" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="pr-panel" id="tabTriage" role="tabpanel" aria-labelledby="tabTriageBtn" hidden>
+      <div class="pr-split">
+        <div class="pr-card">
+          <div class="pr-card-head">
+            <div><span class="pr-kicker">TRIAJE DE CARRETERA</span><h2>¿Puedo seguir conduciendo?</h2></div>
+            <span class="pr-badge">Orientación conservadora</span>
+          </div>
+          <form id="triageForm" class="pr-form" autocomplete="off">
+            <label class="pr-field">
+              <span>¿Qué notas?</span>
+              <textarea id="triageText" rows="5" maxlength="4000" placeholder="Ejemplo: se ha encendido el testigo de motor y el coche da tirones al acelerar. No hace ruido raro."></textarea>
+            </label>
+            <label class="pr-field">
+              <span>Código DTC (opcional)</span>
+              <input id="triageDtc" maxlength="200" placeholder="Ej.: P0300, P0299, U0100">
+            </label>
+            <fieldset class="pr-flags">
+              <legend>Marca solo lo que esté pasando ahora</legend>
+              <label><input type="checkbox" value="frenos"> Los frenos no responden o el pedal se va al fondo</label>
+              <label><input type="checkbox" value="temperatura"> Temperatura alta o testigo de refrigerante</label>
+              <label><input type="checkbox" value="aceite"> Presión o nivel de aceite bajo</label>
+              <label><input type="checkbox" value="fuego"> Humo o olor a quemado en el habitáculo</label>
+              <label><input type="checkbox" value="combustible"> Olor fuerte a combustible o fuga</label>
+              <label><input type="checkbox" value="direccion"> Dirección dura, bloqueada o con fuga</label>
+              <label><input type="checkbox" value="rueda"> Rueda suelta, bloqueada o vibración muy fuerte</label>
+              <label><input type="checkbox" value="encendido"> Testigo de motor parpadeando</label>
+              <label><input type="checkbox" value="no_arranca"> El coche no arranca</label>
+              <label><input type="checkbox" value="humo"> Humo negro, azul o blanco</label>
+              <label><input type="checkbox" value="ruido"> Ruido metálico, golpeteo o traqueteo</label>
+              <label><input type="checkbox" value="testigo_rojo"> Un testigo rojo encendido</label>
+            </fieldset>
+            <div class="pr-actions">
+              <button class="pr-btn primary" id="triageSubmit" type="submit">Comprobar si puedo conducir</button>
+              <a class="pr-btn danger" href="tel:112">Llamar al 112</a>
+            </div>
+          </form>
+          <div id="triageStatus" class="pr-status" role="status" aria-live="polite" hidden></div>
+        </div>
+        <aside class="pr-side">
+          <h3>Qué hace el semáforo</h3>
+          <div class="pr-light-row"><i class="pr-light red"></i><span><b>Rojo:</b> detente y pide asistencia.</span></div>
+          <div class="pr-light-row"><i class="pr-light amber"></i><span><b>Ámbar:</b> puedes ir despacio al taller, sin viajes largos.</span></div>
+          <div class="pr-light-row"><i class="pr-light green"></i><span><b>Verde:</b> no hay señal de emergencia, pero conviene revisarlo.</span></div>
+          <p class="pr-note">Si hay humo, fuego, olor a combustible o los frenos fallan, no uses esta herramienta: detente y llama al 112.</p>
+        </aside>
+      </div>
+      <div id="triageResult" class="pr-result" aria-live="polite" hidden></div>
+    </section>
+  </main>
+
+  <footer class="pr-footer">
+    <span>Diagnóstico y Mecánica · Herramienta informativa</span>
+    <span>No sustituye una inspección, una ITV ni los servicios de emergencia.</span>
+    <a href="/">Volver al inicio</a>
+  </footer>
+
+  <div id="prToast" class="pr-toast" role="status" aria-live="polite"></div>
+  <script src="/js/proteccion.js?v=20261115a"></script>
+</body>
+</html>
