@@ -280,8 +280,18 @@ function driveRiskForUrgency(urgency) {
   return 'Riesgo moderado: realice comprobaciones técnicas antes de circular.';
 }
 
+// Sirve también para saber qué versión está publicada: Render expone el
+// commit desplegado en RENDER_GIT_COMMIT y aquí se puede comprobar.
+const ARRANQUE = new Date().toISOString();
+
 router.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'diagnostico-mecanica', time: new Date().toISOString() });
+  res.json({
+    ok: true,
+    service: 'diagnostico-mecanica',
+    time: new Date().toISOString(),
+    startedAt: ARRANQUE,
+    commit: String(process.env.RENDER_GIT_COMMIT || '').slice(0, 7)
+  });
 });
 
 router.get('/components', (_req, res) => {
