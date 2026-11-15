@@ -1427,7 +1427,7 @@ const CATALOG_SUBGROUP_ORDER = {
   herramientas: ['Pistolas de Impacto', 'Llaves de filtro', 'Llaves de bujías', 'Gatos hidráulicos', 'Caballetes', 'Maletines Completos', 'Útiles de Motor', 'Medición', 'Compresores de aire']
 };
 
-const CATALOG_PAGE_SIZE = 48;
+const CATALOG_PAGE_SIZE = 72;
 const CATALOG_POPULAR = ['BMW Serie 3', 'VW Golf', 'Seat Ibiza', 'Renault Clio', 'Ford Focus', 'Peugeot 208'];
 const catalogState = { group: 'all', subgroup: '', car: '', query: '', sort: 'relevance', includeUniversal: false, visible: CATALOG_PAGE_SIZE };
 let catalogAll = [];

@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/css/reforma.css?v=20261113e">
   <link rel="stylesheet" href="/css/legal.css?v=20261110a">
   <link rel="stylesheet" href="/css/futurista.css?v=20261115e">
-  <link rel="stylesheet" href="/css/pulido.css?v=20261116c">
+  <link rel="stylesheet" href="/css/pulido.css?v=20261116e">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Diagnóstico y Mecánica">
   <meta property="og:title" content="Diagnóstico y Mecánica · Plataforma Automotriz">
@@ -350,6 +350,15 @@
         <li><b>Compara piezas:</b> en Tienda filtra por sección, abre la ficha y compara precio y compatibilidad.</li>
         <li><b>Guarda el informe:</b> genera un PDF con el diagnóstico y el plan de acción para el taller.</li>
       </ol>
+    </section>
+
+    <section class="nx-promo panel" aria-labelledby="nxPromoTitle">
+      <div class="nx-promo-copy">
+        <span class="nx-kicker">OFERTAS Y PIEZAS</span>
+        <h3 id="nxPromoTitle">¿Necesitas una pieza? Encuéntrala al mejor precio</h3>
+        <p>Más de 3.000 recambios, aceites, filtros, frenos, luces y tuning con foto y precio real. Compara en varias tiendas y compra donde esté más barato. Cada compra nos ayuda a seguir mejorando la app.</p>
+      </div>
+      <button class="nx-tile-btn" type="button" data-view="tienda">Ir a la tienda <svg class="ic"><use href="#i-cart"></use></svg></button>
     </section>
 
     <aside id="componentPanel" class="component-panel hidden" aria-live="polite" aria-label="Información del sistema seleccionado">
@@ -1300,6 +1309,14 @@
           <span class="tp-results" id="tpResults">—</span>
         </div>
 
+        <div class="shop-how" role="note" aria-label="Cómo usar los accesorios de tuning">
+          <b>Cómo usar los accesorios:</b>
+          <span>1) Selecciona tu coche para ver compatibles.</span>
+          <span>2) Filtra por categoría (pantallas, luces, audio…).</span>
+          <span>3) Busca por nombre o marca.</span>
+          <span>4) Abre la ficha y comprueba medidas.</span>
+          <span>5) Compara precio y abre la oferta en la tienda.</span>
+        </div>
         <div id="tpTabs" class="tp-tabs" role="tablist" aria-label="Categorías de accesorios"></div>
         <div id="tpGrid" class="tp-grid"><div class="notice">Cargando accesorios…</div></div>
         <p class="affiliate-note">Enlaces de afiliado: si compras desde aquí podemos recibir una comisión, sin coste extra para ti. <a href="/legal/afiliacion.html">Más información</a>.</p>
@@ -1350,6 +1367,13 @@
       <span class="page-meta"><svg class="ic"><use href="#i-zap"></use></svg> <b id="lmProductCount">—</b> fichas verificadas</span>
     </header>
 
+    <div class="shop-how" role="note" aria-label="Cómo usar luz y multimedia">
+      <b>Cómo usar esta sección:</b>
+      <span>1) Elige la familia (bombillas, LED, pantallas…).</span>
+      <span>2) Comprueba la referencia y el tipo de casquillo.</span>
+      <span>3) Abre la ficha y verifica compatibilidad.</span>
+      <span>4) Compara precio y abre la oferta en la tienda.</span>
+    </div>
     <div id="lmNav" class="lm-nav" role="group" aria-label="Familias de producto"></div>
     <div class="notice" id="lmNotice">Cargando familias verificadas…</div>
     <div id="lmFamilies" class="lm-families"></div>
@@ -1398,6 +1422,14 @@
       <p class="tyre-meta" id="tyreUpdated"></p>
     </div>
 
+    <div class="shop-how" role="note" aria-label="Cómo usar el buscador de neumáticos">
+      <b>Cómo usar el buscador:</b>
+      <span>1) Introduce anchura, perfil y llanta.</span>
+      <span>2) Elige temporada si quieres filtrar.</span>
+      <span>3) Pulsa «Buscar neumáticos».</span>
+      <span>4) Compara precio y etiqueta europea.</span>
+      <span>5) Usa «Calcular equivalencias» para medidas alternativas.</span>
+    </div>
     <div class="tyre-results-head" id="tyreResultsHead"></div>
     <div class="product-grid tyre-grid" id="tyreResults"><div class="notice">Cargando catálogo de neumáticos…</div></div>
     <p class="affiliate-note">Enlaces de afiliado: si compras desde aquí podemos recibir una comisión, sin coste extra para ti. <a href="/legal/afiliacion.html">Más información</a>.</p>
@@ -1497,6 +1529,13 @@
       <span>4) Compara el precio y abre la oferta en la tienda.</span>
       <span>5) Usa «Ver más productos» para cargar más resultados.</span>
     </div>
+    <ul class="shop-trust-strip" aria-label="Ventajas de comprar aquí">
+      <li><svg class="ic"><use href="#i-check"></use></svg> Precios comparados en varias tiendas</li>
+      <li><svg class="ic"><use href="#i-check"></use></svg> Fotos reales del producto</li>
+      <li><svg class="ic"><use href="#i-check"></use></svg> Compra 100% segura</li>
+      <li><svg class="ic"><use href="#i-check"></use></svg> Sin coste extra para ti</li>
+      <li><svg class="ic"><use href="#i-check"></use></svg> Envío a toda España</li>
+    </ul>
 
     <nav id="shopCats" class="shop-cats" aria-label="Secciones de la tienda"></nav>
     <div id="shopSubs" class="shop-subs" aria-label="Subcategorías"></div>
@@ -1518,7 +1557,7 @@
       <div class="notice">Cargando productos…</div>
     </div>
     <div class="shop-more-wrap">
-      <button id="shopMore" class="btn ghost" type="button" hidden>Ver más productos</button>
+      <button id="shopMore" class="btn ghost" type="button" hidden>Ver más productos <svg class="ic"><use href="#i-arrow"></use></svg></button>
     </div>
 
     <div class="shop-special">
@@ -1604,6 +1643,15 @@
     <div class="catalog-filter-row">
       <label class="catalog-check"><input id="catalogIncludeUniversal" type="checkbox"> Incluir piezas universales o de varios modelos</label>
       <span id="catalogStatus" class="catalog-status" role="status" aria-live="polite"></span>
+    </div>
+    <div class="shop-how" role="note" aria-label="Cómo usar el catálogo de recambios">
+      <b>Cómo usar el catálogo:</b>
+      <span>1) Busca tu coche por marca o modelo.</span>
+      <span>2) Escribe la pieza (filtro, pastillas, amortiguador…).</span>
+      <span>3) Elige la sección y el tipo de producto.</span>
+      <span>4) Abre la ficha para ver compatibilidad y foto.</span>
+      <span>5) Compara precio y abre la oferta en la tienda.</span>
+      <span>6) Pulsa «Ver más piezas» para cargar más resultados.</span>
     </div>
     <p class="affiliate-note">Enlaces de afiliado: si compras desde aquí podemos recibir una comisión, sin coste extra para ti. Confirma siempre la referencia y la compatibilidad exacta con tu VIN. <a href="/legal/afiliacion.html">Más información</a>.</p>
     <div id="productGrid" class="product-grid"></div>
@@ -2052,9 +2100,9 @@
 <script src="/js/voz.js?v=20261113j"></script>
 <script src="/js/micro-permiso.js?v=20261112a"></script>
 
-<script src="/js/tienda.js?v=20261116a"></script>
+<script src="/js/tienda.js?v=20261116c"></script>
 <script src="/js/planes.js?v=20261113a"></script>
-<script src="/js/app.js?v=20261113a"></script>
+<script src="/js/app.js?v=20261116a"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>

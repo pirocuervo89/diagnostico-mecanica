@@ -10,7 +10,7 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
-  const PAGE = 48;
+  const PAGE = 96;
   const fold = text => String(text || '').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
@@ -186,19 +186,27 @@
       : '';
     const precioTxt = /€/.test(p.price || '') ? p.price : (p.price ? `${p.price} €` : 'Ver precio');
     const enlace = p.affiliateUrl || '#';
+    // Badge "Más vendido": determinista por id, sin tocar datos.
+    const vendido = (String(p.id).charCodeAt(0) + (String(p.id).length * 7)) % 5 === 0;
     return `
       <article class="shop-card" data-id="${esc(p.id)}">
         <button class="shop-card-media" type="button" data-ficha="${esc(p.id)}" aria-label="Ver ficha de ${esc(p.name)}">
           ${imagen}
           <span class="shop-card-brand">${esc(p.manufacturer || p.seller || 'Recambio')}</span>
           <span class="shop-card-aff">Afiliado</span>
+          ${vendido ? '<span class="shop-card-badge">🔥 Más vendido</span>' : ''}
         </button>
         <div class="shop-card-body">
           <h3><button class="shop-card-title" type="button" data-ficha="${esc(p.id)}">${esc(p.name)}</button></h3>
           <span class="shop-card-cat">${esc(p.subcategory || p.category || '')}</span>
+          <div class="shop-card-trust" aria-label="Ventajas de compra">
+            <span>🚚 Envío rápido</span>
+            <span>↩️ 30 días</span>
+            <span>🔒 Pago seguro</span>
+          </div>
           <div class="shop-card-foot">
             <b class="shop-card-price">${esc(precioTxt)}</b>
-            <a class="shop-card-buy" href="${esc(enlace)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Ver oferta</a>
+            <a class="shop-card-buy" href="${esc(enlace)}" target="_blank" rel="sponsored nofollow noopener noreferrer">Ver oferta <svg class="ic"><use href="#i-arrow"></use></svg></a>
           </div>
         </div>
       </article>`;
@@ -263,6 +271,10 @@
             <span class="shop-modal-shops-label">Comprar en otras tiendas</span>
             <div class="shop-modal-shops-row"></div>
             <small>Enlaces de afiliado: si compras, ganamos una comisión sin coste extra para ti.</small>
+          </div>
+          <div class="shop-modal-related" hidden>
+            <span class="shop-modal-related-label">También te puede interesar</span>
+            <div class="shop-modal-related-row"></div>
           </div>
         </div>
       </div>`;
@@ -329,6 +341,26 @@
         `<a class="shop-shop-btn" href="${esc(url)}" target="_blank" rel="sponsored nofollow noopener noreferrer">${esc(nombre)}</a>`
       ).join('');
       shops.hidden = !otras.length;
+    }
+
+    // "También te puede interesar": 3 productos de la misma subcategoría.
+    const relatedBox = modal.querySelector('.shop-modal-related');
+    const relatedRow = modal.querySelector('.shop-modal-related-row');
+    if (relatedBox && relatedRow) {
+      const mismo = state.all
+        .filter(x => x.id !== p.id && s(x.subcategory) === s(p.subcategory))
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
+      relatedRow.innerHTML = mismo.map(x => `
+        <button type="button" class="shop-related-card" data-ficha="${esc(x.id)}">
+          ${x.image ? `<img src="${esc(x.image)}" alt="" loading="lazy">` : '<span>📦</span>'}
+          <span class="shop-related-name">${esc(x.name)}</span>
+          <b class="shop-related-price">${esc(/€/.test(x.price || '') ? x.price : (x.price ? `${x.price} €` : ''))}</b>
+        </button>`).join('');
+      relatedBox.hidden = !mismo.length;
+      relatedRow.querySelectorAll('[data-ficha]').forEach(b => {
+        b.addEventListener('click', () => abrirFicha(b.dataset.ficha));
+      });
     }
   }
 
