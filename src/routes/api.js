@@ -1746,16 +1746,46 @@ function sintomasInternos(query, context = {}, limit = 3) {
   const lista = getNormalizedSymptoms(Array.isArray(dtcList) ? dtcList : []);
   const quiereDtc = String(context.dtc || '').toUpperCase();
 
-  return lista
-    .map(s => {
-      const texto = fold(`${s.name} ${(s.w || []).join(' ')} ${s.area || ''} ${(s.relatedDtc || []).join(' ')}`);
+  // «Silbido», «clac» o «humo» describen casi solos el problema; «testigo» o
+  // «acelerar» aparecen en cientos de fichas. Se pesa cada palabra por lo rara
+  // que es en la base (frecuencia inversa) y el nombre del síntoma vale triple.
+  const docs = lista.map(s => ({
+    s,
+    nombre: fold(s.name || ''),
+    cuerpo: fold(`${(s.w || []).join(' ')} ${s.area || ''} ${(s.relatedDtc || []).join(' ')}`)
+  }));
+  const frecuencia = new Map();
+  for (const token of pregunta) {
+    let apariciones = 0;
+    for (const doc of docs) {
+      if (doc.nombre.includes(token) || doc.cuerpo.includes(token)) apariciones += 1;
+    }
+    frecuencia.set(token, apariciones);
+  }
+  const peso = token => {
+    const v = Math.log10(1 + docs.length / Math.max(1, frecuencia.get(token) || 1));
+    return v * v;
+  };
+
+  return docs
+    .map(({ s, nombre, cuerpo }) => {
       let score = 0;
-      for (const token of pregunta) if (texto.includes(token)) score += 1;
+      let aciertosNombre = 0;
+      for (const token of pregunta) {
+        if (nombre.includes(token)) {
+          score += 3 * peso(token);
+          aciertosNombre += 1;
+        } else if (cuerpo.includes(token)) {
+          score += peso(token);
+        }
+      }
       if (quiereDtc && (s.relatedDtc || []).some(code => String(code).toUpperCase() === quiereDtc)) score += 4;
-      return { s, score };
+      return { s, score, aciertosNombre };
     })
-    .filter(x => x.score >= 2)
-    .sort((a, b) => b.score - a.score || (b.s.urgency === 'Alta') - (a.s.urgency === 'Alta'))
+    // Sin ninguna coincidencia en el nombre hace falta mucha coincidencia de
+    // apoyo: así no se cuela un síntoma que solo comparte «motor» o «testigo».
+    .filter(x => x.aciertosNombre > 0 || x.score >= 5)
+    .sort((a, b) => b.score - a.score || b.aciertosNombre - a.aciertosNombre || (b.s.urgency === 'Alta') - (a.s.urgency === 'Alta'))
     .slice(0, limit)
     .map(x => x.s);
 }
@@ -1774,7 +1804,8 @@ function sintomasInternosBlock(query, context) {
   return [
     '### Síntomas de la base interna que encajan (úsalos como punto de partida)',
     ...filas,
-    'Contrasta estas causas con lo que cuenta el usuario y con los fragmentos de foro. Si la base contradice los datos, gana el dato del coche. No cambies una prueba concreta por una recomendación genérica.'
+    'Contrasta estas causas con lo que cuenta el usuario y con los fragmentos de foro. Si la base contradice los datos, gana el dato del coche. No cambies una prueba concreta por una recomendación genérica.',
+    'Si el síntoma principal del usuario (un ruido, un humo, un testigo, una pérdida de potencia) no aparece en el nombre de estos síntomas, no los presentes como causa más probable: menciónalos como máximo como hipótesis secundaria y razona primero con lo que describe el usuario.'
   ].join('\n');
 }
 
