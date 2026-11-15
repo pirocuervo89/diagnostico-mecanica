@@ -228,6 +228,13 @@ $$('[data-home-scanners]').forEach(btn => btn.addEventListener('click', () => {
   document.getElementById('homeScanners')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }));
 
+// Portada: subir la ficha técnica. Lleva al bloque de identificación y abre
+// el selector de archivo en el mismo toque, para que sea un solo gesto.
+$$('[data-home-ficha]').forEach(btn => btn.addEventListener('click', () => {
+  document.getElementById('diagnosisStart')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(() => document.getElementById('scanBrowse')?.click(), 320);
+}));
+
 $$('[data-home-light]').forEach(btn => btn.addEventListener('click', () => {
   // Un solo toque: abre la cámara del cuadro y, al elegir la foto, analiza.
   window.__homeLightFlow = true;

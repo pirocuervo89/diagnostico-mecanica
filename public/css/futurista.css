@@ -1,0 +1,297 @@
+/* ==========================================================================
+   PORTADA NEXUS · HUD futurista
+   Todo va bajo .nx-home para no tocar el resto de la app.
+   ========================================================================== */
+
+.nx-home {
+  --nx-cyan: #22d3ee;
+  --nx-violet: #a78bfa;
+  --nx-lime: #38efa4;
+  --nx-ink: #06070a;
+  position: relative;
+  margin: 0 0 22px;
+  padding: 26px clamp(14px, 2.4vw, 34px) 30px;
+  border: 1px solid rgba(167, 139, 250, .16);
+  border-radius: 26px;
+  background:
+    radial-gradient(1100px 520px at 82% -10%, rgba(34, 211, 238, .16), transparent 62%),
+    radial-gradient(820px 460px at 6% 0%, rgba(167, 139, 250, .18), transparent 66%),
+    linear-gradient(165deg, #0b0d14 0%, #07080c 46%, #0a0b12 100%);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .05);
+  overflow: clip;
+  isolation: isolate;
+}
+
+.nx-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.nx-bg::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .045) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(120% 90% at 50% 0%, #000 20%, transparent 78%);
+  opacity: .55;
+}
+.nx-glow {
+  position: absolute; border-radius: 50%; filter: blur(70px); opacity: .5;
+  animation: nxDrift 16s ease-in-out infinite alternate;
+}
+.nx-glow.g1 { width: 340px; height: 340px; left: -80px; top: -110px; background: rgba(167, 139, 250, .55); }
+.nx-glow.g2 { width: 400px; height: 400px; right: -120px; bottom: -160px; background: rgba(34, 211, 238, .38); animation-delay: -6s; }
+@keyframes nxDrift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(26px, 22px, 0) scale(1.12); }
+}
+.nx-scan {
+  position: absolute; left: 0; right: 0; height: 26%;
+  background: linear-gradient(180deg, transparent, rgba(34, 211, 238, .09) 55%, transparent);
+  animation: nxScan 9s linear infinite;
+}
+@keyframes nxScan {
+  0% { transform: translateY(-40%); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(420%); opacity: 0; }
+}
+
+/* ------------------------------------------------------------------ cabecera */
+.nx-top {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  margin-bottom: 20px;
+}
+.nx-brand { display: flex; align-items: center; gap: 11px; }
+.nx-brand .brand-mark {
+  width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center;
+  background: linear-gradient(150deg, rgba(167, 139, 250, .3), rgba(34, 211, 238, .22));
+  border: 1px solid rgba(167, 139, 250, .4);
+  box-shadow: 0 0 28px rgba(167, 139, 250, .28);
+}
+.nx-brand .brand-mark .ic { width: 23px; height: 23px; color: #e8e6ff; }
+.nx-brand b { display: block; font-size: 15px; letter-spacing: .2em; color: #f2f1ff; }
+.nx-brand small { display: block; font-size: 9px; letter-spacing: .3em; color: #8f8cba; }
+.nx-live {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 13px; border-radius: 999px;
+  font-size: 10px; letter-spacing: .16em; font-weight: 700; color: #7ff3c0;
+  background: rgba(56, 239, 164, .08);
+  border: 1px solid rgba(56, 239, 164, .3);
+  white-space: nowrap;
+}
+.nx-live i {
+  width: 7px; height: 7px; border-radius: 50%; background: #38efa4;
+  box-shadow: 0 0 0 0 rgba(56, 239, 164, .7);
+  animation: nxPulse 2.1s infinite;
+}
+@keyframes nxPulse {
+  0% { box-shadow: 0 0 0 0 rgba(56, 239, 164, .65); }
+  70% { box-shadow: 0 0 0 9px rgba(56, 239, 164, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(56, 239, 164, 0); }
+}
+
+/* ------------------------------------------------------------------- hero */
+.nx-hero {
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  gap: clamp(16px, 3vw, 40px); align-items: center;
+}
+.nx-hero-copy h1 {
+  margin: 0 0 12px;
+  font-size: clamp(2.05rem, 4.6vw, 3.5rem);
+  line-height: 1.02; letter-spacing: -.03em; color: #f7f6ff;
+  text-wrap: balance;
+}
+.nx-grad {
+  background: linear-gradient(96deg, #c4b5fd 4%, #22d3ee 52%, #7ff3c0 96%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.nx-hero-copy .nx-lead {
+  margin: 0 0 18px; max-width: 44ch;
+  font-size: clamp(13.5px, 1.5vw, 15.5px); line-height: 1.6; color: #b9b6d8;
+}
+
+.nx-search {
+  position: relative; display: flex; align-items: center; gap: 10px;
+  padding: 7px 7px 7px 15px; border-radius: 16px;
+  background: rgba(9, 11, 18, .82);
+  border: 1px solid rgba(167, 139, 250, .28);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .05);
+  transition: border-color .22s ease, box-shadow .22s ease;
+}
+.nx-search:focus-within {
+  border-color: rgba(34, 211, 238, .62);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, .12), 0 18px 46px rgba(0, 0, 0, .5);
+}
+.nx-search .ic { width: 18px; height: 18px; color: var(--nx-cyan); flex: none; }
+.nx-search input {
+  flex: 1 1 auto; min-width: 0;
+  background: none; border: 0; outline: 0;
+  color: #eae8ff; font-size: 14px; padding: 9px 0;
+}
+.nx-search input::placeholder { color: #7d7aa3; }
+.nx-search .nx-btn-ask {
+  flex: none; border: 0; cursor: pointer;
+  padding: 11px 18px; border-radius: 11px;
+  font-weight: 800; font-size: 13px; color: #06121a;
+  background: linear-gradient(120deg, #67e8f9, #a78bfa);
+  box-shadow: 0 8px 24px rgba(34, 211, 238, .28);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.nx-search .nx-btn-ask:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(34, 211, 238, .38); }
+.nx-search .universal-results { position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 30; }
+
+.nx-trust {
+  display: flex; flex-wrap: wrap; gap: 8px 18px;
+  margin: 16px 0 0; padding: 0; list-style: none;
+  font-size: 11.5px; letter-spacing: .04em; color: #9d99c4;
+}
+.nx-trust li { display: inline-flex; align-items: center; gap: 6px; }
+.nx-trust .ic { width: 14px; height: 14px; color: var(--nx-cyan); }
+
+/* coche */
+.nx-car {
+  position: relative; border-radius: 20px; overflow: hidden;
+  border: 1px solid rgba(34, 211, 238, .24);
+  background: radial-gradient(90% 80% at 50% 12%, rgba(34, 211, 238, .16), rgba(6, 8, 13, .9));
+  box-shadow: 0 26px 60px rgba(0, 0, 0, .55), inset 0 0 42px rgba(34, 211, 238, .08);
+  aspect-ratio: 16 / 11;
+}
+.nx-car img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .96; }
+.nx-car::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, transparent 52%, rgba(4, 6, 11, .82));
+}
+.nx-car-tag {
+  position: absolute; left: 12px; bottom: 12px; z-index: 2;
+  padding: 5px 10px; border-radius: 8px;
+  font-size: 9.5px; letter-spacing: .18em; font-weight: 700; color: #c9f7ff;
+  background: rgba(6, 12, 20, .74); border: 1px solid rgba(34, 211, 238, .4);
+}
+.nx-car-ring {
+  position: absolute; inset: auto 0 0 0; height: 42%;
+  background: radial-gradient(60% 100% at 50% 100%, rgba(167, 139, 250, .35), transparent 70%);
+  pointer-events: none;
+}
+.nx-car-label {
+  position: absolute; top: 12px; left: 12px; z-index: 2;
+  font-size: 9px; letter-spacing: .2em; color: #a9a6cf;
+}
+
+/* -------------------------------------------------------- título de botonera */
+.nx-section-head {
+  position: relative; z-index: 2;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  margin: 30px 0 14px; padding-top: 22px;
+  border-top: 1px solid rgba(167, 139, 250, .16);
+}
+.nx-section-head h2 {
+  margin: 0; font-size: clamp(1.15rem, 2vw, 1.5rem); letter-spacing: -.01em; color: #f4f2ff;
+}
+.nx-section-head h2 .nx-kicker {
+  display: block; margin-bottom: 6px;
+  font-size: 9.5px; letter-spacing: .28em; font-weight: 800; color: var(--nx-cyan);
+}
+.nx-section-head p { margin: 0; font-size: 12.5px; color: #9d99c4; }
+
+/* ---------------------------------------------------------------- botonera */
+.nx-tiles {
+  position: relative; z-index: 2;
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(228px, 1fr));
+}
+.nx-tile {
+  position: relative; display: flex; flex-direction: column; gap: 10px;
+  padding: 16px 15px 15px;
+  border-radius: 18px;
+  background: linear-gradient(158deg, rgba(20, 24, 36, .92), rgba(9, 11, 18, .94));
+  border: 1px solid rgba(255, 255, 255, .07);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .38);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  overflow: hidden;
+}
+.nx-tile::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(140deg, rgba(34, 211, 238, .16), transparent 42%, rgba(167, 139, 250, .16));
+  opacity: 0; transition: opacity .2s ease; pointer-events: none;
+}
+.nx-tile:hover, .nx-tile:focus-within {
+  transform: translateY(-3px);
+  border-color: rgba(34, 211, 238, .4);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, .5), 0 0 0 1px rgba(34, 211, 238, .14);
+}
+.nx-tile:hover::before, .nx-tile:focus-within::before { opacity: 1; }
+.nx-tile-num {
+  position: absolute; top: 12px; right: 13px;
+  font-size: 10px; font-weight: 800; letter-spacing: .14em; color: rgba(255, 255, 255, .22);
+}
+.nx-tile-ico {
+  width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center;
+  background: rgba(34, 211, 238, .1);
+  border: 1px solid rgba(34, 211, 238, .3);
+  box-shadow: inset 0 0 18px rgba(34, 211, 238, .16);
+}
+.nx-tile-ico .ic { width: 22px; height: 22px; color: #7fe9fb; }
+.nx-tile.violet .nx-tile-ico { background: rgba(167, 139, 250, .12); border-color: rgba(167, 139, 250, .34); }
+.nx-tile.violet .nx-tile-ico .ic { color: #c4b5fd; }
+.nx-tile.lime .nx-tile-ico { background: rgba(56, 239, 164, .1); border-color: rgba(56, 239, 164, .32); }
+.nx-tile.lime .nx-tile-ico .ic { color: #7ff3c0; }
+
+.nx-tile h3 {
+  margin: 0; font-size: 14.5px; line-height: 1.28; color: #f6f5ff; letter-spacing: -.005em;
+}
+.nx-tile-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 11px 12px;
+  border: 1px solid rgba(34, 211, 238, .42); border-radius: 11px;
+  background: linear-gradient(120deg, rgba(34, 211, 238, .16), rgba(167, 139, 250, .16));
+  color: #e9feff; font: inherit; font-size: 12.5px; font-weight: 800; letter-spacing: .02em;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .12s ease;
+}
+.nx-tile-btn .ic { width: 15px; height: 15px; }
+.nx-tile-btn:hover { background: linear-gradient(120deg, rgba(34, 211, 238, .3), rgba(167, 139, 250, .28)); border-color: rgba(34, 211, 238, .7); }
+.nx-tile-btn:active { transform: scale(.985); }
+.nx-tile.violet .nx-tile-btn { border-color: rgba(167, 139, 250, .48); }
+.nx-tile.lime .nx-tile-btn { border-color: rgba(56, 239, 164, .42); }
+
+.nx-how {
+  position: relative; margin: 0; padding-left: 13px;
+  font-size: 11.8px; line-height: 1.55; color: #a5a2c8;
+}
+.nx-how::before {
+  content: ""; position: absolute; left: 0; top: 5px; bottom: 4px; width: 2px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--nx-cyan), rgba(167, 139, 250, .1));
+  opacity: .8;
+}
+.nx-how b { color: #dcd9ff; font-weight: 800; }
+
+/* ------------------------------------------------------------------ móvil */
+@media (max-width: 900px) {
+  .nx-hero { grid-template-columns: 1fr; }
+  .nx-car { order: -1; aspect-ratio: 16 / 9; }
+}
+@media (max-width: 620px) {
+  .nx-home { padding: 18px 13px 22px; border-radius: 20px; }
+  .nx-top { margin-bottom: 14px; }
+  .nx-brand b { font-size: 12.5px; }
+  .nx-live { font-size: 9px; padding: 6px 10px; }
+  .nx-trust { gap: 7px 13px; font-size: 10.5px; }
+  .nx-search { padding: 6px 6px 6px 12px; }
+  .nx-search .nx-btn-ask { padding: 10px 14px; font-size: 12px; }
+  .nx-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .nx-tile { padding: 13px 11px 12px; gap: 8px; border-radius: 15px; }
+  .nx-tile-ico { width: 38px; height: 38px; border-radius: 11px; }
+  .nx-tile-ico .ic { width: 19px; height: 19px; }
+  .nx-tile h3 { font-size: 12.6px; }
+  .nx-tile-btn { padding: 9px 8px; font-size: 11.2px; }
+  .nx-how { font-size: 10.8px; line-height: 1.5; }
+  .nx-section-head { margin-top: 22px; padding-top: 16px; }
+}
+@media (max-width: 380px) {
+  .nx-tiles { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nx-glow, .nx-scan, .nx-live i { animation: none; }
+  .nx-tile:hover { transform: none; }
+}

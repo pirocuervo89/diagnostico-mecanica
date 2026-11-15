@@ -22,7 +22,8 @@
   <link rel="stylesheet" href="/css/vision.css?v=20261105c">
   <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
   <link rel="stylesheet" href="/css/reforma.css?v=20261113e">
-  <link rel="stylesheet" href="/css/legal.css?v=20261110a">
+  <link rel="stylesheet" href="/css/legal.css?v=20261110a
+  <link rel="stylesheet" href="/css/futurista.css?v=20261115a">">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Diagnóstico y Mecánica">
   <meta property="og:title" content="Diagnóstico y Mecánica · Plataforma Automotriz">
@@ -135,102 +136,179 @@
 
   <!-- ===================== INICIO ===================== -->
   <section id="view-home" class="view active">
-    <div class="hero hero-home">
-      <div class="hero-copy">
-        <div class="hero-brand">
-          <span class="brand-mark"><svg class="ic"><use href="#i-logo"></use></svg></span>
-          <span class="brand-text"><strong>DIAGNÓSTICO</strong><small>Y MECÁNICA · PRO</small></span>
-        </div>
+    <div class="nx-home">
+    <div class="nx-bg" aria-hidden="true">
+      <span class="nx-glow g1"></span>
+      <span class="nx-glow g2"></span>
+      <span class="nx-scan"></span>
+    </div>
 
-        <h1>Lleva tu mecánico<br><span class="grad">siempre contigo.</span></h1>
-        <p class="lead lead-short">Te lo explico fácil: habla, haz una foto o enchufa el escáner.</p>
+    <div class="nx-top">
+      <div class="nx-brand">
+        <span class="brand-mark"><svg class="ic"><use href="#i-logo"></use></svg></span>
+        <span class="brand-text"><b>DIAGNÓSTICO</b><small>Y MECÁNICA · PRO</small></span>
+      </div>
+      <span class="nx-live"><i></i> IA EN LÍNEA</span>
+    </div>
 
-        <div class="home-actions home-actions-duo">
-          <div class="home-action home-action-ai">
-            <span class="home-action-ico"><svg class="ic"><use href="#i-chat"></use></svg></span>
-            <b>Pregúntale a la IA</b>
-            <p>Dile qué te pasa y te lo explica y te lo lee en alto.</p>
-            <button class="btn primary home-action-btn" type="button" data-home-ai>
-              <svg class="ic"><use href="#i-chat"></use></svg> Contar mi avería
-            </button>
-            <small class="home-action-note">Escribe o usa el micrófono del teclado del móvil.</small>
-          </div>
-          <div class="home-action home-action-light">
-            <span class="home-action-ico"><svg class="ic"><use href="#i-alert"></use></svg></span>
-            <b>Se encendió una luz</b>
-            <p>Hazle una foto al cuadro y te digo qué es y cuánta prisa tiene.</p>
-            <button class="btn primary home-action-btn" type="button" data-home-light>
-              <svg class="ic"><use href="#i-camera"></use></svg> Hacer foto al cuadro
-            </button>
-          </div>
-        </div>
+    <div class="nx-hero">
+      <div class="nx-hero-copy">
+        <h1>Lleva tu mecánico<br><span class="nx-grad">siempre contigo.</span></h1>
+        <p class="nx-lead">Habla, haz una foto o enchufa el escáner. La IA te dice qué le pasa a tu coche con palabras de persona, no de taller.</p>
 
-        <div class="home-shortcuts" aria-label="Accesos rápidos">
-          <button type="button" data-view="garaje"><svg class="ic"><use href="#i-car"></use></svg><span>Mi garaje</span></button>
-          <button type="button" data-view="obd"><svg class="ic"><use href="#i-cpu"></use></svg><span>Escáner OBD</span></button>
-          <button type="button" data-view="dtc"><svg class="ic"><use href="#i-search"></use></svg><span>Código de avería</span></button>
-        </div>
-
-        <div class="universal-search universal-search-compact" role="search">
-          <span class="universal-search-icon"><svg class="ic"><use href="#i-spark"></use></svg></span>
-          <input id="universalSearch" type="search" autocomplete="off" aria-label="Pregunta a la IA o busca una pieza" aria-expanded="false" aria-controls="universalResults" placeholder="O escríbelo aquí: ruido, tirón, testigo, código...">
-          <button id="universalSearchBtn" class="btn primary sm" type="button">Preguntar</button>
+        <div class="nx-search universal-search" role="search">
+          <svg class="ic"><use href="#i-spark"></use></svg>
+          <input id="universalSearch" type="search" autocomplete="off" aria-label="Pregunta a la IA o busca una pieza" aria-expanded="false" aria-controls="universalResults" placeholder="Escribe aquí: ruido, tirón, testigo, código...">
+          <button id="universalSearchBtn" class="nx-btn-ask" type="button">Preguntar</button>
           <div id="universalResults" class="universal-results hidden" role="listbox" aria-label="Resultados de búsqueda"></div>
         </div>
 
-        <div class="hero-trust">
-          <span><svg class="ic"><use href="#i-check"></use></svg> 9.201 códigos</span>
-          <span><svg class="ic"><use href="#i-check"></use></svg> 454 averías</span>
-          <span><svg class="ic"><use href="#i-check"></use></svg> Gratis para empezar</span>
-        </div>
+        <ul class="nx-trust">
+          <li><svg class="ic"><use href="#i-check"></use></svg> 9.201 códigos</li>
+          <li><svg class="ic"><use href="#i-check"></use></svg> 454 averías</li>
+          <li><svg class="ic"><use href="#i-check"></use></svg> Gratis para empezar</li>
+        </ul>
       </div>
 
-      <div class="hero-visual" aria-label="Coche de carreras azul en estudio">
-        <div class="holo-stage" aria-hidden="true">
-          <span class="holo-orbit orbit-a"></span>
-          <span class="holo-orbit orbit-b"></span>
-          <span class="holo-scan"></span>
-          <span class="holo-grid"></span>
-        </div>
-        <div class="golf-photo-frame golf3d-frame hero-photo-frame">
-          <picture>
-            <source type="image/webp" srcset="/img/hero/golf-hero.webp">
-            <img class="hero-car-photo" src="/img/hero/golf-hero.jpg" width="1920" height="1080"
-                 alt="Coche de carreras azul en un estudio, de tres cuartos delantero, mirando a la izquierda"
-                 decoding="async" fetchpriority="high">
-          </picture>
-          <span class="golf-spec" aria-hidden="true">GT4 · PISTA</span>
-        </div>
-        <div class="holo-caption">
-          <span><i></i> ESTUDIO AZUL · GT4</span>
-          <span>Foto: <a href="https://www.pexels.com/photo/37360567/" target="_blank" rel="noopener noreferrer">Ericxon / Pexels</a> · licencia libre</span>
-        </div>
+      <div class="nx-car">
+        <span class="nx-car-label">UNIDAD DE DIAGNÓSTICO</span>
+        <picture>
+          <source type="image/webp" srcset="/img/hero/golf-hero.webp">
+          <img src="/img/hero/golf-hero.jpg" width="1920" height="1080" alt="Coche deportivo azul de tres cuartos delantero" decoding="async" fetchpriority="high">
+        </picture>
+        <span class="nx-car-ring" aria-hidden="true"></span>
+        <span class="nx-car-tag">GT4 · PISTA</span>
       </div>
-
-      <aside id="componentPanel" class="component-panel hidden" aria-live="polite" aria-label="Información del sistema seleccionado">
-        <div class="component-panel-head">
-          <span class="eyebrow">EXPLORADOR DE SISTEMAS</span>
-          <button id="componentClose" class="icon-btn" type="button" aria-label="Cerrar información del sistema">
-            <svg class="ic"><use href="#i-close"></use></svg>
-          </button>
-        </div>
-        <h3 id="componentName">Sistema</h3>
-        <p id="componentFunction" class="component-function"></p>
-        <div class="component-meta">
-          <span class="tag" id="componentSystem">—</span>
-          <span class="tag component-disclaimer">Información genérica del sistema</span>
-        </div>
-        <div class="component-lists">
-          <section><h4>Síntomas relacionados</h4><ul id="componentSymptoms"></ul></section>
-          <section><h4>Comprobaciones iniciales</h4><ul id="componentChecks"></ul></section>
-        </div>
-        <div class="component-actions">
-          <button id="componentSymptomBtn" class="btn primary sm" type="button">Ver síntomas</button>
-          <button id="componentTutorialBtn" class="btn ghost sm" type="button">Tutoriales</button>
-          <button id="componentIaBtn" class="btn ghost sm" type="button">Consultar IA</button>
-        </div>
-      </aside>
     </div>
+
+    <div class="nx-section-head">
+      <h2><span class="nx-kicker">TODO LO QUE PUEDES HACER</span>¿Qué necesitas ahora?</h2>
+      <p>Pulsa un botón. Justo debajo te explicamos cómo se usa.</p>
+    </div>
+
+    <div class="nx-tiles">
+      <article class="nx-tile">
+        <span class="nx-tile-num">01</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-chat"></use></svg></span>
+        <h3>Habla con la IA</h3>
+        <button class="nx-tile-btn" type="button" data-home-ai>Contar mi avería <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> pulsa el botón y escribe qué notas. Si no sabes explicarlo, escribe «hace un ruido raro». La IA pregunta lo que falta y te contesta.</p>
+      </article>
+
+      <article class="nx-tile violet">
+        <span class="nx-tile-num">02</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-camera"></use></svg></span>
+        <h3>Se encendió una luz</h3>
+        <button class="nx-tile-btn" type="button" data-home-light>Hacer foto al cuadro <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> con el coche encendido, haz una foto clara al cuadro. Te digo qué testigo es, qué significa y si puedes seguir circulando.</p>
+      </article>
+
+      <article class="nx-tile">
+        <span class="nx-tile-num">03</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-upload"></use></svg></span>
+        <h3>Sube tu ficha técnica</h3>
+        <button class="nx-tile-btn" type="button" data-home-ficha>Subir o fotografiar <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> fotografía el papel del coche y lo leemos solo. Así sabemos tu marca, modelo y motor exactos y no te vendemos piezas que no sirven.</p>
+      </article>
+
+      <article class="nx-tile lime">
+        <span class="nx-tile-num">04</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-car"></use></svg></span>
+        <h3>Mi garaje</h3>
+        <button class="nx-tile-btn" type="button" data-view="garaje">Registrar mi coche <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> das de alta tu coche una sola vez y ya queda guardado: mantenimiento, averías, facturas e informes siempre a mano.</p>
+      </article>
+
+      <article class="nx-tile">
+        <span class="nx-tile-num">05</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-cpu"></use></svg></span>
+        <h3>Escáner OBD-II</h3>
+        <button class="nx-tile-btn" type="button" data-view="obd">Leer mi coche <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> enchufas un escáner en la toma de debajo del volante y pulsas conectar. Si no tienes, abajo te vendemos los que funcionan seguro.</p>
+      </article>
+
+      <article class="nx-tile violet">
+        <span class="nx-tile-num">06</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-search"></use></svg></span>
+        <h3>Código de avería</h3>
+        <button class="nx-tile-btn" type="button" data-view="dtc">Buscar un código <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> escribe el código que te dio el taller o el escáner (por ejemplo P0299) y verás qué significa y cómo se comprueba.</p>
+      </article>
+
+      <article class="nx-tile lime">
+        <span class="nx-tile-num">07</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-cart"></use></svg></span>
+        <h3>Tienda de recambios</h3>
+        <button class="nx-tile-btn" type="button" data-view="tienda">Ver precios <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> entra en la sección que necesites (aceites, frenos, filtros, luces, tuning...) y compara. Compres donde compres, el precio es el mismo.</p>
+      </article>
+
+      <article class="nx-tile">
+        <span class="nx-tile-num">08</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-play"></use></svg></span>
+        <h3>Tutoriales</h3>
+        <button class="nx-tile-btn" type="button" data-view="tutoriales">Aprender a hacerlo <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> busca la pieza o la operación y elige el vídeo. Están ordenados por dificultad: los primeros los puede hacer cualquiera en casa.</p>
+      </article>
+
+      <article class="nx-tile violet">
+        <span class="nx-tile-num">09</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-file"></use></svg></span>
+        <h3>Informe del coche</h3>
+        <button class="nx-tile-btn" type="button" data-view="informe">Generar informe <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> cuando ya has diagnosticado, pulsas y sale un documento ordenado para imprimir o enseñar al taller.</p>
+      </article>
+
+      <article class="nx-tile">
+        <span class="nx-tile-num">10</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-gauge"></use></svg></span>
+        <h3>Sala de máquinas</h3>
+        <button class="nx-tile-btn" type="button" data-view="sala">Ver datos en vivo <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> con el escáner conectado ves revoluciones, temperatura y señales mientras el coche está en marcha. Ideal para pillar fallos que solo salen andando.</p>
+      </article>
+
+      <article class="nx-tile lime">
+        <span class="nx-tile-num">11</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-forum"></use></svg></span>
+        <h3>Foro de mecánicos</h3>
+        <button class="nx-tile-btn" type="button" data-view="foro">Preguntar al foro <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> si la IA no lo tiene claro, cuenta tu caso y otros conductores y mecánicos te dicen qué les pasó a ellos.</p>
+      </article>
+
+      <article class="nx-tile">
+        <span class="nx-tile-num">12</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-star"></use></svg></span>
+        <h3>Planes y precios</h3>
+        <button class="nx-tile-btn" type="button" data-view="planes">Ver mi plan <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> empiezas gratis 30 días sin tarjeta. Si te sirve, el plan Pro o Full quita los límites y deja más coches en el garaje.</p>
+      </article>
+    </div>
+
+    <aside id="componentPanel" class="component-panel hidden" aria-live="polite" aria-label="Información del sistema seleccionado">
+      <div class="component-panel-head">
+        <span class="eyebrow">EXPLORADOR DE SISTEMAS</span>
+        <button id="componentClose" class="icon-btn" type="button" aria-label="Cerrar información del sistema">
+          <svg class="ic"><use href="#i-close"></use></svg>
+        </button>
+      </div>
+      <h3 id="componentName">Sistema</h3>
+      <p id="componentFunction" class="component-function"></p>
+      <div class="component-meta">
+        <span class="tag" id="componentSystem">—</span>
+        <span class="tag component-disclaimer">Información genérica del sistema</span>
+      </div>
+      <div class="component-lists">
+        <section><h4>Síntomas relacionados</h4><ul id="componentSymptoms"></ul></section>
+        <section><h4>Comprobaciones iniciales</h4><ul id="componentChecks"></ul></section>
+      </div>
+      <div class="component-actions">
+        <button id="componentSymptomBtn" class="btn primary sm" type="button">Ver síntomas</button>
+        <button id="componentTutorialBtn" class="btn ghost sm" type="button">Tutoriales</button>
+        <button id="componentIaBtn" class="btn ghost sm" type="button">Consultar IA</button>
+      </div>
+    </aside>
+  </div>
+
 
     <section id="homeScanners" class="panel home-scanners" aria-labelledby="homeScannersTitle">
       <div class="panel-head">
@@ -362,84 +440,6 @@
         <div><strong>ELM327</strong><span>Lectura OBD-II</span></div>
         <em>USB · Bluetooth · Simulador</em>
       </article>
-    </div>
-
-    <div class="home-grid solo">
-      <section class="panel capabilities">
-        <div class="panel-head">
-          <div><span class="eyebrow">MÓDULOS DE MANDO</span><h2>Diez sistemas. Una sola consola.</h2></div>
-          <span class="tag">10 módulos activos</span>
-        </div>
-        <div class="cap-grid">
-          <button class="cap-card" data-view="diagnostico" type="button">
-            <span class="cap-ico"><svg class="ic"><use href="#i-pulse"></use></svg></span>
-            <h3>Diagnóstico por síntomas</h3>
-            <p>Selecciona lo que notas y obtén causas probables, comprobaciones y soluciones.</p>
-            <span class="cap-link">Explorar <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-          <button class="cap-card" data-view="vehiculos" type="button">
-            <span class="cap-ico cyan"><svg class="ic"><use href="#i-car"></use></svg></span>
-            <h3>Fichas de vehículo</h3>
-            <p>Motor, transmisión, sistemas y puntos de inspección con fuentes y nivel de confianza.</p>
-            <span class="cap-link">Abrir fichas <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-          <button class="cap-card" data-view="compra" type="button">
-            <span class="cap-ico"><svg class="ic"><use href="#i-shield"></use></svg></span>
-            <h3>¿Qué coche comprar?</h3>
-            <p>Problemas conocidos por motor, comprobaciones precompra y veredicto editorial transparente.</p>
-            <span class="cap-link">Evaluar compra <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-          <button class="cap-card" data-view="dtc" type="button">
-            <span class="cap-ico cyan"><svg class="ic"><use href="#i-search"></use></svg></span>
-            <h3>Buscador DTC</h3>
-            <p>9.201 códigos con gravedad, sistema afectado y procedimiento de taller.</p>
-            <span class="cap-link">Buscar <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-          <button class="cap-card" data-view="obd" type="button">
-            <span class="cap-ico"><svg class="ic"><use href="#i-cpu"></use></svg></span>
-            <h3>Lectura OBD-II</h3>
-            <p>Conecta un ELM327 compatible o usa el simulador para leer la ECU sin hardware.</p>
-            <span class="cap-link">Conectar <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-          <button class="cap-card" data-view="tutoriales" type="button">
-            <span class="cap-ico cyan"><svg class="ic"><use href="#i-play"></use></svg></span>
-            <h3>Biblioteca de tutoriales</h3>
-            <p>Vídeos técnicos verificados por operación, sistema, DTC, motor y nivel de dificultad.</p>
-            <span class="cap-link">Aprender <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-          <button class="cap-card" data-view="productos" type="button">
-            <span class="cap-ico"><svg class="ic"><use href="#i-wrench"></use></svg></span>
-            <h3>Catálogo de taller</h3>
-            <p>Herramientas, diagnosis, maquinaria, químicos y repuestos filtrados por vehículo.</p>
-            <span class="cap-link">Ver catálogo <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-          <button class="cap-card" data-view="tuning" type="button">
-            <span class="cap-ico"><svg class="ic"><use href="#i-zap"></use></svg></span>
-            <h3>Tuning y preparación</h3>
-            <p>Etapas, hardware de soporte, frenos, legalidad y productos relacionados sin promesas falsas.</p>
-            <span class="cap-link">Ver guías <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-          <button class="cap-card" data-view="chat" type="button">
-            <span class="cap-ico cyan"><svg class="ic"><use href="#i-chat"></use></svg></span>
-            <h3>Asistente IA</h3>
-            <p>Explica la avería en lenguaje claro y propone un plan de comprobación paso a paso.</p>
-            <span class="cap-link">Consultar <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-          <button class="cap-card" data-view="informe" type="button">
-            <span class="cap-ico"><svg class="ic"><use href="#i-file"></use></svg></span>
-            <h3>Informes técnicos</h3>
-            <p>Documento profesional listo para imprimir o guardar en PDF y entregar al cliente.</p>
-            <span class="cap-link">Generar <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-          <button class="cap-card" data-view="foro" type="button">
-            <span class="cap-ico"><svg class="ic"><use href="#i-forum"></use></svg></span>
-            <h3>Foro de mecánicos</h3>
-            <p>Casos reales, mediciones y soluciones verificadas por la comunidad y la moderación.</p>
-            <span class="cap-link">Entrar al foro <svg class="ic"><use href="#i-arrow"></use></svg></span>
-          </button>
-        </div>
-      </section>
-
     </div>
 
     <div class="notice">

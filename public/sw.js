@@ -1,4 +1,4 @@
-const CACHE = 'dm-app-v26';
+const CACHE = 'dm-app-v27';
 const CORE = [
   '/',
   '/index.html',
@@ -9,6 +9,7 @@ const CORE = [
   '/css/vision.css',
   '/css/tutorials.css',
   '/css/reforma.css',
+  '/css/futurista.css',
   '/css/legal.css',
   '/fonts/fonts.css',
   '/js/app.js',
