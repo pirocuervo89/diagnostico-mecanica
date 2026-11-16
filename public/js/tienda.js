@@ -10,7 +10,7 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
-  const PAGE = 1000;
+  const PAGE = 2000;
   const fold = text => String(text || '').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
