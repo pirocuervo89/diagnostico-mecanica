@@ -350,7 +350,7 @@
       const mismo = state.all
         .filter(x => x.id !== p.id && s(x.subcategory) === s(p.subcategory))
         .sort(() => Math.random() - 0.5)
-        .slice(0, 3);
+        .slice(0, 6);
       relatedRow.innerHTML = mismo.map(x => `
         <button type="button" class="shop-related-card" data-ficha="${esc(x.id)}">
           ${x.image ? `<img src="${esc(x.image)}" alt="" loading="lazy">` : '<span>📦</span>'}
