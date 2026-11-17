@@ -182,9 +182,8 @@
 
   function tarjeta(p, i) {
     const imagen = p.image
-      ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.classList.add('rota')">`
-      : '';
-    const precioTxt = /€/.test(p.price || '') ? p.price : (p.price ? `${p.price} €` : 'Ver precio');
+      ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="${i < 18 ? 'eager' : 'lazy'}" decoding="async" onerror="this.classList.add('rota')">`
+      : '';    const precioTxt = /€/.test(p.price || '') ? p.price : (p.price ? `${p.price} €` : 'Ver precio');
     const enlace = p.affiliateUrl || '#';
     // Badge "Más vendido": determinista por id, sin tocar datos.
     const vendido = (String(p.id).charCodeAt(0) + (String(p.id).length * 7)) % 5 === 0;
@@ -350,7 +349,7 @@
       const mismo = state.all
         .filter(x => x.id !== p.id && s(x.subcategory) === s(p.subcategory))
         .sort(() => Math.random() - 0.5)
-        .slice(0, 18);      relatedRow.innerHTML = mismo.map(x => `
+        .slice(0, 30);      relatedRow.innerHTML = mismo.map(x => `
         <button type="button" class="shop-related-card" data-ficha="${esc(x.id)}">
           ${x.image ? `<img src="${esc(x.image)}" alt="" loading="lazy">` : '<span>📦</span>'}
           <span class="shop-related-name">${esc(x.name)}</span>

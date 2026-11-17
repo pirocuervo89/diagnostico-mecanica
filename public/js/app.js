@@ -4227,7 +4227,7 @@ function renderTpGrid() {
     return `
       <article class="tp-card">
         <div class="tp-media">
-          <img src="${esc(item.image)}" alt="${esc(item.name)}" loading="${index < 24 ? 'eager' : 'lazy'}" decoding="async" style="object-position:${50 + (index % 3) * 5}% ${50 + (index % 2) * 6}%">
+          <img src="${esc(item.image)}" alt="${esc(item.name)}" loading="${index < 36 ? 'eager' : 'lazy'}" decoding="async" style="object-position:${50 + (index % 3) * 5}% ${50 + (index % 2) * 6}%">
           <span class="tp-price" title="Coste orientativo">${esc(item.price || '€')}</span>
           <span class="tp-ref" title="${item.photoKind === 'tienda' ? 'Foto del vendedor' : item.photoKind === 'referencia' ? 'Foto libre de esa pieza (Wikimedia Commons)' : 'Commons no tiene foto libre de esta pieza concreta: se muestra la de su categoría'}">${TP_PHOTO_LABEL[item.photoKind] || 'Foto de referencia'}</span>
         </div>
