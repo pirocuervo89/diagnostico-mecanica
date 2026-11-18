@@ -1512,6 +1512,10 @@ export function tyresIndex() {
 
 export function sitemapXml() {
   const today = new Date().toISOString().slice(0, 10);
+  const talleresAlternates = [
+    ...TALLERES_LANGS.map(code => ({ lang: TALLERES_I18N[code].htmlLang, href: talleresPath(code) })),
+    { lang: 'x-default', href: '/talleres' }
+  ];
   const entries = [
     { loc: '/', priority: '1.0', changefreq: 'daily' },
     { loc: '/diagnostico-gratis', priority: '0.9', changefreq: 'weekly' },
@@ -1519,12 +1523,12 @@ export function sitemapXml() {
     { loc: '/productos', priority: '0.9', changefreq: 'daily' },
     { loc: '/motores', priority: '0.9', changefreq: 'weekly' },
     { loc: '/coches', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/talleres', priority: '0.8', changefreq: 'monthly' },
-    { loc: '/en/talleres', priority: '0.7', changefreq: 'monthly' },
-    { loc: '/pt/talleres', priority: '0.7', changefreq: 'monthly' },
-    { loc: '/fr/talleres', priority: '0.7', changefreq: 'monthly' },
-    { loc: '/de/talleres', priority: '0.7', changefreq: 'monthly' },
-    { loc: '/it/talleres', priority: '0.7', changefreq: 'monthly' },
+    { loc: '/talleres', alternates: talleresAlternates, priority: '0.8', changefreq: 'monthly' },
+    { loc: '/en/talleres', alternates: talleresAlternates, priority: '0.7', changefreq: 'monthly' },
+    { loc: '/pt/talleres', alternates: talleresAlternates, priority: '0.7', changefreq: 'monthly' },
+    { loc: '/fr/talleres', alternates: talleresAlternates, priority: '0.7', changefreq: 'monthly' },
+    { loc: '/de/talleres', alternates: talleresAlternates, priority: '0.7', changefreq: 'monthly' },
+    { loc: '/it/talleres', alternates: talleresAlternates, priority: '0.7', changefreq: 'monthly' },
     { loc: '/contacto', priority: '0.5', changefreq: 'yearly' },
     { loc: '/neumaticos', priority: '0.8', changefreq: 'weekly' },
     ...products().map(item => ({ loc: `/producto/${item.id}`, priority: '0.7', changefreq: 'weekly' })),
@@ -1535,9 +1539,14 @@ export function sitemapXml() {
       .map(([slug]) => ({ loc: `/legal/${slug}.html`, priority: '0.3', changefreq: 'yearly' }))
   ];
 
-  const urls = entries.map(entry => `  <url>\n    <loc>${abs(entry.loc)}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${entry.changefreq}</changefreq>\n    <priority>${entry.priority}</priority>\n  </url>`).join('\n');
+  const urls = entries.map(entry => {
+    const alternates = entry.alternates
+      ? `\n${entry.alternates.map(alt => `    <xhtml:link rel="alternate" hreflang="${alt.lang}" href="${abs(alt.href)}"/>`).join('\n')}`
+      : '';
+    return `  <url>\n    <loc>${abs(entry.loc)}</loc>${alternates}\n    <lastmod>${today}</lastmod>\n    <changefreq>${entry.changefreq}</changefreq>\n    <priority>${entry.priority}</priority>\n  </url>`;
+  }).join('\n');
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>\n`;
 }
 
 export function urlCount() {
