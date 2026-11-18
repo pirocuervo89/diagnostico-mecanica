@@ -50,7 +50,12 @@ router.get('/motores', (_req, res) => sendHtml(res, enginesIndex()));
 router.get('/neumaticos', (_req, res) => sendHtml(res, tyresIndex()));
 router.get('/coches', (_req, res) => sendHtml(res, vehiclesIndex()));
 router.get('/contacto', (_req, res) => sendHtml(res, contactPage()));
-router.get('/talleres', (_req, res) => sendHtml(res, talleresPage()));
+router.get('/talleres', (_req, res) => sendHtml(res, talleresPage('es')));
+router.get('/en/talleres', (_req, res) => sendHtml(res, talleresPage('en')));
+router.get('/pt/talleres', (_req, res) => sendHtml(res, talleresPage('pt')));
+router.get('/fr/talleres', (_req, res) => sendHtml(res, talleresPage('fr')));
+router.get('/de/talleres', (_req, res) => sendHtml(res, talleresPage('de')));
+router.get('/it/talleres', (_req, res) => sendHtml(res, talleresPage('it')));
 
 router.get('/coche/:id', (req, res) => {
   const page = vehiclePage(req.params.id);

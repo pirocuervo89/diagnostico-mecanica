@@ -225,7 +225,9 @@ const NAV = [
   ['/contacto', 'Contacto']
 ];
 
-function layout({ title, description, canonical, image, robots, jsonLd, crumbs, body, published }) {
+const OG_LOCALES = { es: 'es_ES', en: 'en_GB', pt: 'pt_PT', fr: 'fr_FR', de: 'de_DE', it: 'it_IT' };
+
+function layout({ title, description, canonical, image, robots, jsonLd, crumbs, body, published, lang = 'es', alternates = [] }) {
   const site = legal().brand || 'Diagnóstico y Mecánica';
   const graph = jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>` : '';
   const crumbHtml = crumbs.map((crumb, index) => {
@@ -237,7 +239,7 @@ function layout({ title, description, canonical, image, robots, jsonLd, crumbs, 
   }).join('');
 
   return `<!doctype html>
-<html lang="es">
+<html lang="${esc(lang)}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -246,12 +248,13 @@ function layout({ title, description, canonical, image, robots, jsonLd, crumbs, 
   <meta name="description" content="${esc(description)}">
   <meta name="robots" content="${esc(robots || 'index,follow,max-image-preview:large')}">
   <link rel="canonical" href="${esc(canonical)}">
+  ${alternates.map(alt => `<link rel="alternate" hreflang="${esc(alt.lang)}" href="${esc(alt.href)}">`).join('\n  ')}
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="${esc(site)}">
   <meta property="og:title" content="${esc(title)}">
   <meta property="og:description" content="${esc(description)}">
   <meta property="og:url" content="${esc(canonical)}">
-  <meta property="og:locale" content="es_ES">
+  <meta property="og:locale" content="${esc(OG_LOCALES[lang] || 'es_ES')}">
   ${image ? `<meta property="og:image" content="${esc(image)}">\n  <meta name="twitter:card" content="summary_large_image">` : ''}
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/fonts/fonts.css">
@@ -301,6 +304,9 @@ function layout({ title, description, canonical, image, robots, jsonLd, crumbs, 
     .lead-form .status { font-size: 13px; color: var(--muted); }
     .lead-form .status.ok { color: var(--ok); }
     .lead-form .status.error { color: #f87171; }
+    .lang-switch { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; font: 600 12px/1.4 var(--mono); color: var(--muted-2); }
+    .lang-switch a, .lang-switch span { padding: 5px 9px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; color: var(--muted); }
+    .lang-switch span { border-color: var(--accent); color: var(--accent); }
     @media (max-width: 720px) { .lead-form { grid-template-columns: 1fr; } }
   </style>
   ${graph}
@@ -814,63 +820,307 @@ export function contactPage() {
 
 // ---------------------------------------------------------------- talleres
 
-export function talleresPage() {
-  const data = legal();
-  const canonical = abs('/talleres');
-  const site = data.brand || 'Diagnóstico y Mecánica';
+const TALLERES_LANGS = ['es', 'en', 'pt', 'fr', 'de', 'it'];
+
+const TALLERES_I18N = {
+  es: {
+    langName: 'Español',
+    kicker: 'Para talleres y flotas',
+    h1: 'Diagnóstico guiado para tu taller',
+    lead: 'Convierte síntomas, códigos DTC y datos del coche en un informe ordenado para el taller: posibles causas, comprobaciones y un presupuesto orientativo que puedes revisar con el cliente. Sin instalar nada y sin cambiar tu forma de trabajar.',
+    benefitsTitle: 'Qué te llevas',
+    benefits: [
+      '<strong>Un informe claro por coche:</strong> síntomas, códigos, causas probables y pasos de comprobación.',
+      '<strong>Menos idas y venidas:</strong> el cliente entiende el problema antes de dejar el coche.',
+      '<strong>Base para presupuestar:</strong> piezas y actuaciones orientativas, sin inventar precios.',
+      '<strong>Prueba con un coche real:</strong> solicita una demostración y valora el resultado.'
+    ],
+    howTitle: 'Cómo funciona',
+    steps: [
+      'Nos cuentas el coche, el síntoma y, si lo tienes, el código DTC.',
+      'Preparamos el informe con la base técnica de la web.',
+      'Lo revisas con el cliente y decides si te encaja para el taller.'
+    ],
+    formTitle: 'Solicita una demostración',
+    formIntro: 'Déjanos los datos del taller y un caso real. Si prefieres, escribe desde la',
+    contact: 'página de contacto',
+    labels: { workshop: 'Taller', city: 'Ciudad', name: 'Nombre', email: 'Email', phone: 'Teléfono', message: 'Coche o síntoma', consent: 'Acepto que estos datos se usen para responder a esta solicitud.', privacy: 'Privacidad' },
+    placeholders: { workshop: 'Nombre del taller', city: 'Ciudad o provincia', name: 'Tu nombre', email: 'tu@email.com', phone: 'Opcional', message: 'Marca, modelo, año, motor, síntoma y código DTC si lo tienes.' },
+    submit: 'Solicitar demostración',
+    sending: 'Enviando…',
+    success: 'Solicitud registrada. Te escribimos al correo indicado.',
+    error: 'No se pudo enviar la solicitud.',
+    note: 'El informe es una ayuda al diagnóstico: no sustituye la revisión física, las instrucciones del fabricante ni la medición con instrumentos.',
+    metaTitle: 'Diagnóstico para talleres y flotas | Diagnóstico y Mecánica',
+    metaDescription: 'Informes de diagnóstico guiado para talleres: síntomas, códigos DTC, causas probables y comprobaciones. Solicita una demostración con un coche real.',
+    breadcrumb: 'Talleres',
+    serviceName: 'Diagnóstico guiado para talleres',
+    serviceType: 'Diagnóstico mecánico asistido',
+    areaServed: 'ES',
+    topic: 'Talleres',
+    htmlLang: 'es',
+    image: '/promo/talleres-1080.png'
+  },
+  en: {
+    langName: 'English',
+    kicker: 'For workshops and fleets',
+    h1: 'Guided diagnostics for your workshop',
+    lead: 'Turn symptoms, DTC codes and vehicle data into an organised workshop report: likely causes, checks and an indicative estimate you can review with the customer. No installation and no change to how you work.',
+    benefitsTitle: 'What you get',
+    benefits: [
+      '<strong>A clear report per vehicle:</strong> symptoms, codes, likely causes and checks.',
+      '<strong>Fewer back-and-forths:</strong> the customer understands the problem before leaving the car.',
+      '<strong>A basis for quoting:</strong> indicative parts and work, without invented prices.',
+      '<strong>Test it on a real car:</strong> request a demo and judge the result.'
+    ],
+    howTitle: 'How it works',
+    steps: [
+      'Tell us the car, the symptom and the DTC code if you have it.',
+      "We prepare the report using the site's technical base.",
+      'Review it with the customer and decide if it fits your workshop.'
+    ],
+    formTitle: 'Request a demo',
+    formIntro: 'Leave your workshop details and a real case. You can also use the',
+    contact: 'contact page',
+    labels: { workshop: 'Workshop', city: 'City', name: 'Name', email: 'Email', phone: 'Phone', message: 'Car or symptom', consent: 'I agree that this data will be used to answer this request.', privacy: 'Privacy' },
+    placeholders: { workshop: 'Workshop name', city: 'City or region', name: 'Your name', email: 'you@email.com', phone: 'Optional', message: 'Make, model, year, engine, symptom and DTC code if available.' },
+    submit: 'Request demo',
+    sending: 'Sending…',
+    success: 'Request received. We will write to the email provided.',
+    error: 'The request could not be sent.',
+    note: 'The report is a diagnostic aid: it does not replace a physical inspection, manufacturer instructions or instrument measurements.',
+    metaTitle: 'Workshop and fleet diagnostics | Diagnóstico y Mecánica',
+    metaDescription: 'Guided diagnostic reports for workshops: symptoms, DTC codes, likely causes and checks. Request a demo with a real car.',
+    breadcrumb: 'Workshops',
+    serviceName: 'Guided diagnostics for workshops',
+    serviceType: 'Assisted mechanical diagnostics',
+    areaServed: 'Europe',
+    topic: 'Workshops',
+    htmlLang: 'en',
+    image: '/promo/talleres-en.png'
+  },
+  pt: {
+    langName: 'Português',
+    kicker: 'Para oficinas e frotas',
+    h1: 'Diagnóstico guiado para a sua oficina',
+    lead: 'Transforme sintomas, códigos DTC e dados do veículo num relatório organizado para a oficina: causas prováveis, verificações e um orçamento indicativo que pode rever com o cliente. Sem instalar nada e sem mudar a sua forma de trabalhar.',
+    benefitsTitle: 'O que recebe',
+    benefits: [
+      '<strong>Um relatório claro por veículo:</strong> sintomas, códigos, causas prováveis e passos de verificação.',
+      '<strong>Menos idas e vindas:</strong> o cliente entende o problema antes de deixar o carro.',
+      '<strong>Base para orçamentar:</strong> peças e intervenções indicativas, sem inventar preços.',
+      '<strong>Teste com um carro real:</strong> peça uma demonstração e avalie o resultado.'
+    ],
+    howTitle: 'Como funciona',
+    steps: [
+      'Diga-nos o carro, o sintoma e, se tiver, o código DTC.',
+      'Preparamos o relatório com a base técnica do site.',
+      'Reveja com o cliente e decida se se adapta à sua oficina.'
+    ],
+    formTitle: 'Peça uma demonstração',
+    formIntro: 'Deixe os dados da oficina e um caso real. Se preferir, use a',
+    contact: 'página de contacto',
+    labels: { workshop: 'Oficina', city: 'Cidade', name: 'Nome', email: 'Email', phone: 'Telefone', message: 'Carro ou sintoma', consent: 'Aceito que estes dados sejam usados para responder a este pedido.', privacy: 'Privacidade' },
+    placeholders: { workshop: 'Nome da oficina', city: 'Cidade ou região', name: 'O seu nome', email: 'voce@email.com', phone: 'Opcional', message: 'Marca, modelo, ano, motor, sintoma e código DTC se tiver.' },
+    submit: 'Pedir demonstração',
+    sending: 'A enviar…',
+    success: 'Pedido registado. Escrevemos para o email indicado.',
+    error: 'Não foi possível enviar o pedido.',
+    note: 'O relatório é uma ajuda ao diagnóstico: não substitui a inspeção física, as instruções do fabricante nem a medição com instrumentos.',
+    metaTitle: 'Diagnóstico para oficinas e frotas | Diagnóstico y Mecánica',
+    metaDescription: 'Relatórios de diagnóstico guiado para oficinas: sintomas, códigos DTC, causas prováveis e verificações. Peça uma demonstração com um carro real.',
+    breadcrumb: 'Oficinas',
+    serviceName: 'Diagnóstico guiado para oficinas',
+    serviceType: 'Diagnóstico mecânico assistido',
+    areaServed: 'Portugal',
+    topic: 'Oficinas',
+    htmlLang: 'pt',
+    image: '/promo/talleres-pt.png'
+  },
+  fr: {
+    langName: 'Français',
+    kicker: 'Pour garages et flottes',
+    h1: 'Diagnostic guidé pour votre garage',
+    lead: "Transformez les symptômes, les codes DTC et les données du véhicule en un rapport clair pour le garage : causes probables, contrôles et estimation indicative à revoir avec le client. Sans installation et sans changer votre façon de travailler.",
+    benefitsTitle: 'Ce que vous obtenez',
+    benefits: [
+      '<strong>Un rapport clair par véhicule :</strong> symptômes, codes, causes probables et contrôles.',
+      "<strong>Moins d'allers-retours :</strong> le client comprend le problème avant de laisser la voiture.",
+      '<strong>Une base pour le devis :</strong> pièces et interventions indicatives, sans prix inventés.',
+      '<strong>Testez sur une voiture réelle :</strong> demandez une démo et jugez le résultat.'
+    ],
+    howTitle: 'Comment ça marche',
+    steps: [
+      'Dites-nous la voiture, le symptôme et, si possible, le code DTC.',
+      'Nous préparons le rapport avec la base technique du site.',
+      "Relisez-le avec le client et décidez s'il convient à votre garage."
+    ],
+    formTitle: 'Demander une démo',
+    formIntro: 'Laissez les coordonnées du garage et un cas réel. Vous pouvez aussi utiliser la',
+    contact: 'page contact',
+    labels: { workshop: 'Garage', city: 'Ville', name: 'Nom', email: 'Email', phone: 'Téléphone', message: 'Voiture ou symptôme', consent: "J'accepte que ces données soient utilisées pour répondre à cette demande.", privacy: 'Confidentialité' },
+    placeholders: { workshop: 'Nom du garage', city: 'Ville ou région', name: 'Votre nom', email: 'vous@email.com', phone: 'Facultatif', message: 'Marque, modèle, année, moteur, symptôme et code DTC si disponible.' },
+    submit: 'Demander une démo',
+    sending: 'Envoi…',
+    success: "Demande enregistrée. Nous écrirons à l'email indiqué.",
+    error: "Impossible d'envoyer la demande.",
+    note: "Le rapport est une aide au diagnostic : il ne remplace pas l'inspection physique, les instructions du constructeur ni les mesures avec des instruments.",
+    metaTitle: 'Diagnostic pour garages et flottes | Diagnóstico y Mecánica',
+    metaDescription: 'Rapports de diagnostic guidé pour garages : symptômes, codes DTC, causes probables et contrôles. Demandez une démo avec une voiture réelle.',
+    breadcrumb: 'Garages',
+    serviceName: 'Diagnostic guidé pour garages',
+    serviceType: 'Diagnostic mécanique assisté',
+    areaServed: 'France',
+    topic: 'Garages',
+    htmlLang: 'fr',
+    image: '/promo/talleres-fr.png'
+  },
+  de: {
+    langName: 'Deutsch',
+    kicker: 'Für Werkstätten und Flotten',
+    h1: 'Geführte Diagnose für Ihre Werkstatt',
+    lead: 'Verwandeln Sie Symptome, DTC-Codes und Fahrzeugdaten in einen übersichtlichen Werkstattbericht: wahrscheinliche Ursachen, Prüfungen und eine indikative Kostenschätzung, die Sie mit dem Kunden besprechen können. Ohne Installation und ohne Ihre Arbeitsweise zu ändern.',
+    benefitsTitle: 'Das erhalten Sie',
+    benefits: [
+      '<strong>Ein klarer Bericht pro Fahrzeug:</strong> Symptome, Codes, wahrscheinliche Ursachen und Prüfschritte.',
+      '<strong>Weniger Hin und Her:</strong> Der Kunde versteht das Problem, bevor er das Auto abgibt.',
+      '<strong>Grundlage für das Angebot:</strong> indikative Teile und Arbeiten, ohne erfundene Preise.',
+      '<strong>Test mit einem echten Fahrzeug:</strong> Fordern Sie eine Demo an und beurteilen Sie das Ergebnis.'
+    ],
+    howTitle: 'So funktioniert es',
+    steps: [
+      'Nennen Sie uns Fahrzeug, Symptom und, falls vorhanden, den DTC-Code.',
+      'Wir erstellen den Bericht auf Basis der technischen Datenbank der Website.',
+      'Prüfen Sie ihn mit dem Kunden und entscheiden Sie, ob er zu Ihrer Werkstatt passt.'
+    ],
+    formTitle: 'Demo anfordern',
+    formIntro: 'Hinterlassen Sie die Daten Ihrer Werkstatt und einen realen Fall. Alternativ können Sie die',
+    contact: 'Kontaktseite',
+    labels: { workshop: 'Werkstatt', city: 'Stadt', name: 'Name', email: 'E-Mail', phone: 'Telefon', message: 'Fahrzeug oder Symptom', consent: 'Ich stimme zu, dass diese Daten zur Beantwortung dieser Anfrage verwendet werden.', privacy: 'Datenschutz' },
+    placeholders: { workshop: 'Name der Werkstatt', city: 'Stadt oder Region', name: 'Ihr Name', email: 'sie@email.com', phone: 'Optional', message: 'Marke, Modell, Baujahr, Motor, Symptom und DTC-Code falls vorhanden.' },
+    submit: 'Demo anfordern',
+    sending: 'Wird gesendet…',
+    success: 'Anfrage registriert. Wir schreiben an die angegebene E-Mail.',
+    error: 'Die Anfrage konnte nicht gesendet werden.',
+    note: 'Der Bericht ist eine Diagnosehilfe: Er ersetzt keine körperliche Prüfung, keine Herstellerangaben und keine Messung mit Instrumenten.',
+    metaTitle: 'Diagnose für Werkstätten und Flotten | Diagnóstico y Mecánica',
+    metaDescription: 'Geführte Diagnoseberichte für Werkstätten: Symptome, DTC-Codes, wahrscheinliche Ursachen und Prüfungen. Fordern Sie eine Demo mit einem echten Fahrzeug an.',
+    breadcrumb: 'Werkstätten',
+    serviceName: 'Geführte Diagnose für Werkstätten',
+    serviceType: 'Unterstützte mechanische Diagnose',
+    areaServed: 'DE',
+    topic: 'Werkstätten',
+    htmlLang: 'de',
+    image: '/promo/talleres-de.png'
+  },
+  it: {
+    langName: 'Italiano',
+    kicker: 'Per officine e flotte',
+    h1: 'Diagnosi guidata per la tua officina',
+    lead: "Trasforma sintomi, codici DTC e dati del veicolo in un rapporto ordinato per l'officina: cause probabili, controlli e un preventivo indicativo da rivedere con il cliente. Senza installare nulla e senza cambiare il tuo modo di lavorare.",
+    benefitsTitle: 'Cosa ottieni',
+    benefits: [
+      '<strong>Un rapporto chiaro per veicolo:</strong> sintomi, codici, cause probabili e controlli.',
+      '<strong>Meno andirivieni:</strong> il cliente capisce il problema prima di lasciare l\'auto.',
+      '<strong>Una base per il preventivo:</strong> ricambi e interventi indicativi, senza prezzi inventati.',
+      '<strong>Prova su un\'auto reale:</strong> richiedi una demo e valuta il risultato.'
+    ],
+    howTitle: 'Come funziona',
+    steps: [
+      "Dicci l'auto, il sintomo e, se lo hai, il codice DTC.",
+      'Prepariamo il rapporto con la base tecnica del sito.',
+      'Rivedilo con il cliente e decidi se fa per la tua officina.'
+    ],
+    formTitle: 'Richiedi una demo',
+    formIntro: "Lascia i dati dell'officina e un caso reale. In alternativa, usa la",
+    contact: 'pagina contatti',
+    labels: { workshop: 'Officina', city: 'Città', name: 'Nome', email: 'Email', phone: 'Telefono', message: 'Auto o sintomo', consent: 'Accetto che questi dati siano usati per rispondere a questa richiesta.', privacy: 'Privacy' },
+    placeholders: { workshop: "Nome dell'officina", city: 'Città o regione', name: 'Il tuo nome', email: 'tu@email.com', phone: 'Facoltativo', message: 'Marca, modello, anno, motore, sintomo e codice DTC se disponibile.' },
+    submit: 'Richiedi demo',
+    sending: 'Invio…',
+    success: "Richiesta registrata. Scriveremo all'email indicata.",
+    error: 'Impossibile inviare la richiesta.',
+    note: "Il rapporto è un aiuto alla diagnosi: non sostituisce l'ispezione fisica, le istruzioni del costruttore o le misurazioni con strumenti.",
+    metaTitle: 'Diagnosi per officine e flotte | Diagnóstico y Mecánica',
+    metaDescription: "Rapporti di diagnosi guidata per officine: sintomi, codici DTC, cause probabili e controlli. Richiedi una demo con un'auto reale.",
+    breadcrumb: 'Officine',
+    serviceName: 'Diagnosi guidata per officine',
+    serviceType: 'Diagnosi meccanica assistita',
+    areaServed: 'IT',
+    topic: 'Officine',
+    htmlLang: 'it',
+    image: '/promo/talleres-it.png'
+  }
+};
+
+const talleresPath = lang => lang === 'es' ? '/talleres' : `/${lang}/talleres`;
+
+export function talleresPage(lang = 'es') {
+  const t = TALLERES_I18N[lang] || TALLERES_I18N.es;
+  const canonical = abs(talleresPath(lang));
+  const site = legal().brand || 'Diagnóstico y Mecánica';
+  const languages = TALLERES_LANGS.map(code => ({ code, ...TALLERES_I18N[code] }));
+  const alternates = [
+    ...languages.map(item => ({ lang: item.htmlLang, href: abs(talleresPath(item.code)) })),
+    { lang: 'x-default', href: abs('/talleres') }
+  ];
+  const langSwitch = languages.map(item => item.code === lang
+    ? `<span>${esc(item.langName)}</span>`
+    : `<a href="${talleresPath(item.code)}" hreflang="${item.htmlLang}" lang="${item.htmlLang}">${esc(item.langName)}</a>`
+  ).join(' · ');
 
   const body = `
-    <p class="legal-kicker">Para talleres y flotas</p>
-    <h1 class="seo-h1">Diagnóstico guiado para tu taller</h1>
-    <p class="seo-lead">Convierte síntomas, códigos DTC y datos del coche en un informe ordenado para el taller: posibles causas, comprobaciones y un presupuesto orientativo que puedes revisar con el cliente. Sin instalar nada y sin cambiar tu forma de trabajar.</p>
+    <p class="legal-kicker">${esc(t.kicker)}</p>
+    <h1 class="seo-h1">${esc(t.h1)}</h1>
+    <p class="seo-lead">${esc(t.lead)}</p>
+    <nav class="lang-switch" aria-label="${esc(t.langName)}">${langSwitch}</nav>
 
-    <h2 class="seo-h2">Qué te llevas</h2>
+    <h2 class="seo-h2">${esc(t.benefitsTitle)}</h2>
     <ul class="seo-list">
-      <li><strong>Un informe claro por coche:</strong> síntomas, códigos, causas probables y pasos de comprobación.</li>
-      <li><strong>Menos idas y venidas:</strong> el cliente entiende el problema antes de dejar el coche.</li>
-      <li><strong>Base para presupuestar:</strong> piezas y actuaciones orientativas, sin inventar precios.</li>
-      <li><strong>Prueba con un coche real:</strong> solicita una demostración y valora el resultado.</li>
+      ${t.benefits.map(item => `<li>${item}</li>`).join('\n      ')}
     </ul>
 
-    <h2 class="seo-h2">Cómo funciona</h2>
+    <h2 class="seo-h2">${esc(t.howTitle)}</h2>
     <ol class="seo-list">
-      <li>Nos cuentas el coche, el síntoma y, si lo tienes, el código DTC.</li>
-      <li>Preparamos el informe con la base técnica de la web.</li>
-      <li>Lo revisas con el cliente y decides si te encaja para el taller.</li>
+      ${t.steps.map(item => `<li>${esc(item)}</li>`).join('\n      ')}
     </ol>
 
-    <h2 class="seo-h2">Solicita una demostración</h2>
-    <p>Déjanos los datos del taller y un caso real. Si prefieres, escribe a <a href="/contacto">contacto</a>.</p>
+    <h2 class="seo-h2">${esc(t.formTitle)}</h2>
+    <p>${esc(t.formIntro)} <a href="/contacto">${esc(t.contact)}</a>.</p>
     <form id="talleresForm" class="lead-form" novalidate>
-      <label>Taller<input name="workshop" maxlength="120" required autocomplete="organization" placeholder="Nombre del taller"></label>
-      <label>Ciudad<input name="city" maxlength="80" autocomplete="address-level2" placeholder="Ciudad o provincia"></label>
-      <label>Nombre<input name="name" maxlength="120" required autocomplete="name" placeholder="Tu nombre"></label>
-      <label>Email<input name="email" type="email" required autocomplete="email" placeholder="tu@email.com"></label>
-      <label>Teléfono<input name="phone" maxlength="40" autocomplete="tel" placeholder="Opcional"></label>
-      <label class="full">Coche o síntoma<textarea name="message" required minlength="10" maxlength="2000" placeholder="Marca, modelo, año, motor, síntoma y código DTC si lo tienes."></textarea></label>
-      <label class="check-row full"><input type="checkbox" required> <span>Acepto que estos datos se usen para responder a esta solicitud. <a href="/legal/privacidad.html">Privacidad</a>.</span></label>
-      <button type="submit">Solicitar demostración</button>
+      <label>${esc(t.labels.workshop)}<input name="workshop" maxlength="120" required autocomplete="organization" placeholder="${esc(t.placeholders.workshop)}"></label>
+      <label>${esc(t.labels.city)}<input name="city" maxlength="80" autocomplete="address-level2" placeholder="${esc(t.placeholders.city)}"></label>
+      <label>${esc(t.labels.name)}<input name="name" maxlength="120" required autocomplete="name" placeholder="${esc(t.placeholders.name)}"></label>
+      <label>${esc(t.labels.email)}<input name="email" type="email" required autocomplete="email" placeholder="${esc(t.placeholders.email)}"></label>
+      <label>${esc(t.labels.phone)}<input name="phone" maxlength="40" autocomplete="tel" placeholder="${esc(t.placeholders.phone)}"></label>
+      <label class="full">${esc(t.labels.message)}<textarea name="message" required minlength="10" maxlength="2000" placeholder="${esc(t.placeholders.message)}"></textarea></label>
+      <label class="check-row full"><input type="checkbox" required> <span>${esc(t.labels.consent)} <a href="/legal/privacidad.html">${esc(t.labels.privacy)}</a>.</span></label>
+      <button type="submit">${esc(t.submit)}</button>
       <div id="talleresStatus" class="status full" role="status" aria-live="polite"></div>
     </form>
-    <p class="seo-note">El informe es una ayuda al diagnóstico: no sustituye la revisión física, las instrucciones del fabricante ni la medición con instrumentos.</p>
+    <p class="seo-note">${esc(t.note)}</p>
     <script>
       (() => {
         const form = document.getElementById('talleresForm');
         if (!form) return;
         const status = document.getElementById('talleresStatus');
         const button = form.querySelector('button[type="submit"]');
+        const topic = ${JSON.stringify(t.topic)};
+        const sending = ${JSON.stringify(t.sending)};
+        const success = ${JSON.stringify(t.success)};
+        const errorText = ${JSON.stringify(t.error)};
         form.addEventListener('submit', async (event) => {
           event.preventDefault();
           if (!form.reportValidity()) return;
           const data = new FormData(form);
           const message = [
-            'Taller: ' + (data.get('workshop') || ''),
-            'Ciudad: ' + (data.get('city') || ''),
-            'Teléfono: ' + (data.get('phone') || ''),
+            'Workshop: ' + (data.get('workshop') || ''),
+            'City: ' + (data.get('city') || ''),
+            'Phone: ' + (data.get('phone') || ''),
             '',
             data.get('message') || ''
           ].join('\\n');
-          status.textContent = 'Enviando…';
+          status.textContent = sending;
           status.className = 'status full';
           button.disabled = true;
           try {
@@ -880,14 +1130,14 @@ export function talleresPage() {
               body: JSON.stringify({
                 name: data.get('name'),
                 email: data.get('email'),
-                topic: 'Talleres',
+                topic,
                 message
               })
             });
             const result = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(result.error || 'No se pudo enviar la solicitud.');
+            if (!response.ok) throw new Error(result.error || errorText);
             form.reset();
-            status.textContent = 'Solicitud registrada. Te escribimos al correo indicado.';
+            status.textContent = success;
             status.className = 'status full ok';
           } catch (error) {
             status.textContent = error.message;
@@ -902,24 +1152,27 @@ export function talleresPage() {
 
   return {
     html: layout({
-      title: 'Diagnóstico para talleres y flotas | Diagnóstico y Mecánica',
-      description: clip('Informes de diagnóstico guiado para talleres: síntomas, códigos DTC, causas probables y comprobaciones. Solicita una demostración con un coche real.', MAX_DESC),
+      title: t.metaTitle,
+      description: clip(t.metaDescription, MAX_DESC),
       canonical,
+      image: abs(t.image),
+      lang: t.htmlLang,
+      alternates,
       jsonLd: {
         '@context': 'https://schema.org',
         '@type': 'WebPage',
         url: canonical,
-        name: 'Diagnóstico para talleres',
-        inLanguage: 'es-ES',
+        name: t.serviceName,
+        inLanguage: t.htmlLang,
         about: {
           '@type': 'Service',
-          name: 'Diagnóstico guiado para talleres',
-          serviceType: 'Diagnóstico mecánico asistido',
-          areaServed: 'ES',
+          name: t.serviceName,
+          serviceType: t.serviceType,
+          areaServed: t.areaServed,
           provider: { '@type': 'Organization', name: site }
         }
       },
-      crumbs: crumbsFor([{ label: 'Talleres' }]),
+      crumbs: crumbsFor([{ label: t.breadcrumb }]),
       body
     })
   };
@@ -1267,6 +1520,11 @@ export function sitemapXml() {
     { loc: '/motores', priority: '0.9', changefreq: 'weekly' },
     { loc: '/coches', priority: '0.8', changefreq: 'weekly' },
     { loc: '/talleres', priority: '0.8', changefreq: 'monthly' },
+    { loc: '/en/talleres', priority: '0.7', changefreq: 'monthly' },
+    { loc: '/pt/talleres', priority: '0.7', changefreq: 'monthly' },
+    { loc: '/fr/talleres', priority: '0.7', changefreq: 'monthly' },
+    { loc: '/de/talleres', priority: '0.7', changefreq: 'monthly' },
+    { loc: '/it/talleres', priority: '0.7', changefreq: 'monthly' },
     { loc: '/contacto', priority: '0.5', changefreq: 'yearly' },
     { loc: '/neumaticos', priority: '0.8', changefreq: 'weekly' },
     ...products().map(item => ({ loc: `/producto/${item.id}`, priority: '0.7', changefreq: 'weekly' })),
@@ -1283,5 +1541,5 @@ export function sitemapXml() {
 }
 
 export function urlCount() {
-  return 9 + products().length + engines().length + vehicles().length + tyres().length + 6;
+  return 14 + products().length + engines().length + vehicles().length + tyres().length + 6;
 }

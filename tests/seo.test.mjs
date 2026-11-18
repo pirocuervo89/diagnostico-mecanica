@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
   contactPage,
+  talleresPage,
   vehiclePage,
   vehicles,
   vehiclesIndex,
@@ -31,13 +32,26 @@ test('el sitemap incluye todo el contenido y es XML válido', () => {
   assert.ok(xml.startsWith('<?xml'));
   assert.ok(xml.trim().endsWith('</urlset>'));
   const locs = xml.match(/<loc>/g) || [];
-  assert.equal(locs.length, 9 + products().length + engines().length + vehicles().length + tyres().length + 6);
+  assert.equal(locs.length, 14 + products().length + engines().length + vehicles().length + tyres().length + 6);
   assert.ok(xml.includes('/diagnostico-gratis</loc>'));
   assert.ok(xml.includes('/proteccion</loc>'));
   assert.ok(xml.includes('/productos</loc>'));
   assert.ok(xml.includes('/talleres</loc>'));
+  assert.ok(xml.includes('/en/talleres</loc>'));
+  assert.ok(xml.includes('/it/talleres</loc>'));
   assert.ok(xml.includes(`/producto/${firstProduct.id}</loc>`));
   assert.ok(xml.includes(`/motor/${firstEngine.id}</loc>`));
+});
+
+test('la página de talleres está en seis idiomas y enlaza los alternates', () => {
+  for (const lang of ['es', 'en', 'pt', 'fr', 'de', 'it']) {
+    const page = talleresPage(lang);
+    assert.ok(page, lang);
+    assert.match(page.html, new RegExp(`<html lang="${lang}">`));
+    assert.ok(page.html.includes('hreflang="es"'));
+    assert.ok(page.html.includes('hreflang="en"'));
+    assert.ok(page.html.includes('id="talleresForm"'));
+  }
 });
 
 test('la ficha de producto tiene título, canónico y datos de Product', () => {
