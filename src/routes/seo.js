@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   contactPage,
+  talleresPage,
   vehiclePage,
   vehiclesIndex,
   productPage,
@@ -49,6 +50,7 @@ router.get('/motores', (_req, res) => sendHtml(res, enginesIndex()));
 router.get('/neumaticos', (_req, res) => sendHtml(res, tyresIndex()));
 router.get('/coches', (_req, res) => sendHtml(res, vehiclesIndex()));
 router.get('/contacto', (_req, res) => sendHtml(res, contactPage()));
+router.get('/talleres', (_req, res) => sendHtml(res, talleresPage()));
 
 router.get('/coche/:id', (req, res) => {
   const page = vehiclePage(req.params.id);

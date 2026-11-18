@@ -31,10 +31,11 @@ test('el sitemap incluye todo el contenido y es XML válido', () => {
   assert.ok(xml.startsWith('<?xml'));
   assert.ok(xml.trim().endsWith('</urlset>'));
   const locs = xml.match(/<loc>/g) || [];
-  assert.equal(locs.length, 8 + products().length + engines().length + vehicles().length + tyres().length + 6);
+  assert.equal(locs.length, 9 + products().length + engines().length + vehicles().length + tyres().length + 6);
   assert.ok(xml.includes('/diagnostico-gratis</loc>'));
   assert.ok(xml.includes('/proteccion</loc>'));
   assert.ok(xml.includes('/productos</loc>'));
+  assert.ok(xml.includes('/talleres</loc>'));
   assert.ok(xml.includes(`/producto/${firstProduct.id}</loc>`));
   assert.ok(xml.includes(`/motor/${firstEngine.id}</loc>`));
 });

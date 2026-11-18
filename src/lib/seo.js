@@ -221,6 +221,7 @@ const NAV = [
   ['/motores', 'Motores y averías'],
   ['/coches', 'Fichas de coche'],
   ['/neumaticos', 'Neumáticos'],
+  ['/talleres', 'Talleres'],
   ['/contacto', 'Contacto']
 ];
 
@@ -288,6 +289,19 @@ function layout({ title, description, canonical, image, robots, jsonLd, crumbs, 
     .seo-badge { display: inline-block; font: 600 12px/1 var(--mono); padding: 5px 9px; border-radius: 999px;
       background: var(--accent-soft); color: #c4b5fd; border: 1px solid rgba(167,139,250,.28); margin: 0 6px 6px 0; }
     .seo-pager { display: flex; gap: 10px; align-items: center; margin: 26px 0 0; font-size: 14px; }
+    .lead-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin: 18px 0 0; }
+    .lead-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
+    .lead-form input, .lead-form textarea { background: var(--bg-soft); border: 1px solid var(--line); color: var(--text); border-radius: 9px; padding: 11px 12px; font: inherit; width: 100%; box-sizing: border-box; }
+    .lead-form textarea { min-height: 110px; resize: vertical; }
+    .lead-form .full { grid-column: 1 / -1; }
+    .lead-form .check-row { flex-direction: row; align-items: flex-start; gap: 8px; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+    .lead-form .check-row input { width: 18px; height: 18px; accent-color: #a78bfa; margin-top: 2px; flex: none; }
+    .lead-form button { justify-self: start; background: var(--accent); color: #0b0b12; border: 0; border-radius: 9px; padding: 12px 18px; font: 700 14px/1 var(--display); cursor: pointer; }
+    .lead-form button:disabled { opacity: .6; cursor: wait; }
+    .lead-form .status { font-size: 13px; color: var(--muted); }
+    .lead-form .status.ok { color: var(--ok); }
+    .lead-form .status.error { color: #f87171; }
+    @media (max-width: 720px) { .lead-form { grid-template-columns: 1fr; } }
   </style>
   ${graph}
 </head>
@@ -798,6 +812,119 @@ export function contactPage() {
   };
 }
 
+// ---------------------------------------------------------------- talleres
+
+export function talleresPage() {
+  const data = legal();
+  const canonical = abs('/talleres');
+  const site = data.brand || 'Diagnóstico y Mecánica';
+
+  const body = `
+    <p class="legal-kicker">Para talleres y flotas</p>
+    <h1 class="seo-h1">Diagnóstico guiado para tu taller</h1>
+    <p class="seo-lead">Convierte síntomas, códigos DTC y datos del coche en un informe ordenado para el taller: posibles causas, comprobaciones y un presupuesto orientativo que puedes revisar con el cliente. Sin instalar nada y sin cambiar tu forma de trabajar.</p>
+
+    <h2 class="seo-h2">Qué te llevas</h2>
+    <ul class="seo-list">
+      <li><strong>Un informe claro por coche:</strong> síntomas, códigos, causas probables y pasos de comprobación.</li>
+      <li><strong>Menos idas y venidas:</strong> el cliente entiende el problema antes de dejar el coche.</li>
+      <li><strong>Base para presupuestar:</strong> piezas y actuaciones orientativas, sin inventar precios.</li>
+      <li><strong>Prueba con un coche real:</strong> solicita una demostración y valora el resultado.</li>
+    </ul>
+
+    <h2 class="seo-h2">Cómo funciona</h2>
+    <ol class="seo-list">
+      <li>Nos cuentas el coche, el síntoma y, si lo tienes, el código DTC.</li>
+      <li>Preparamos el informe con la base técnica de la web.</li>
+      <li>Lo revisas con el cliente y decides si te encaja para el taller.</li>
+    </ol>
+
+    <h2 class="seo-h2">Solicita una demostración</h2>
+    <p>Déjanos los datos del taller y un caso real. Si prefieres, escribe a <a href="/contacto">contacto</a>.</p>
+    <form id="talleresForm" class="lead-form" novalidate>
+      <label>Taller<input name="workshop" maxlength="120" required autocomplete="organization" placeholder="Nombre del taller"></label>
+      <label>Ciudad<input name="city" maxlength="80" autocomplete="address-level2" placeholder="Ciudad o provincia"></label>
+      <label>Nombre<input name="name" maxlength="120" required autocomplete="name" placeholder="Tu nombre"></label>
+      <label>Email<input name="email" type="email" required autocomplete="email" placeholder="tu@email.com"></label>
+      <label>Teléfono<input name="phone" maxlength="40" autocomplete="tel" placeholder="Opcional"></label>
+      <label class="full">Coche o síntoma<textarea name="message" required minlength="10" maxlength="2000" placeholder="Marca, modelo, año, motor, síntoma y código DTC si lo tienes."></textarea></label>
+      <label class="check-row full"><input type="checkbox" required> <span>Acepto que estos datos se usen para responder a esta solicitud. <a href="/legal/privacidad.html">Privacidad</a>.</span></label>
+      <button type="submit">Solicitar demostración</button>
+      <div id="talleresStatus" class="status full" role="status" aria-live="polite"></div>
+    </form>
+    <p class="seo-note">El informe es una ayuda al diagnóstico: no sustituye la revisión física, las instrucciones del fabricante ni la medición con instrumentos.</p>
+    <script>
+      (() => {
+        const form = document.getElementById('talleresForm');
+        if (!form) return;
+        const status = document.getElementById('talleresStatus');
+        const button = form.querySelector('button[type="submit"]');
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          if (!form.reportValidity()) return;
+          const data = new FormData(form);
+          const message = [
+            'Taller: ' + (data.get('workshop') || ''),
+            'Ciudad: ' + (data.get('city') || ''),
+            'Teléfono: ' + (data.get('phone') || ''),
+            '',
+            data.get('message') || ''
+          ].join('\\n');
+          status.textContent = 'Enviando…';
+          status.className = 'status full';
+          button.disabled = true;
+          try {
+            const response = await fetch('/api/contact', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: data.get('name'),
+                email: data.get('email'),
+                topic: 'Talleres',
+                message
+              })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.error || 'No se pudo enviar la solicitud.');
+            form.reset();
+            status.textContent = 'Solicitud registrada. Te escribimos al correo indicado.';
+            status.className = 'status full ok';
+          } catch (error) {
+            status.textContent = error.message;
+            status.className = 'status full error';
+          } finally {
+            button.disabled = false;
+          }
+        });
+      })();
+    </script>
+  `;
+
+  return {
+    html: layout({
+      title: 'Diagnóstico para talleres y flotas | Diagnóstico y Mecánica',
+      description: clip('Informes de diagnóstico guiado para talleres: síntomas, códigos DTC, causas probables y comprobaciones. Solicita una demostración con un coche real.', MAX_DESC),
+      canonical,
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        url: canonical,
+        name: 'Diagnóstico para talleres',
+        inLanguage: 'es-ES',
+        about: {
+          '@type': 'Service',
+          name: 'Diagnóstico guiado para talleres',
+          serviceType: 'Diagnóstico mecánico asistido',
+          areaServed: 'ES',
+          provider: { '@type': 'Organization', name: site }
+        }
+      },
+      crumbs: crumbsFor([{ label: 'Talleres' }]),
+      body
+    })
+  };
+}
+
 // ---------------------------------------------------------------- coches
 
 export function vehicles() {
@@ -1139,6 +1266,7 @@ export function sitemapXml() {
     { loc: '/productos', priority: '0.9', changefreq: 'daily' },
     { loc: '/motores', priority: '0.9', changefreq: 'weekly' },
     { loc: '/coches', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/talleres', priority: '0.8', changefreq: 'monthly' },
     { loc: '/contacto', priority: '0.5', changefreq: 'yearly' },
     { loc: '/neumaticos', priority: '0.8', changefreq: 'weekly' },
     ...products().map(item => ({ loc: `/producto/${item.id}`, priority: '0.7', changefreq: 'weekly' })),
@@ -1155,5 +1283,5 @@ export function sitemapXml() {
 }
 
 export function urlCount() {
-  return 8 + products().length + engines().length + vehicles().length + tyres().length + 6;
+  return 9 + products().length + engines().length + vehicles().length + tyres().length + 6;
 }
