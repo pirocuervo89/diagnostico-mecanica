@@ -2490,7 +2490,9 @@ async function buyReport() {
     return;
   }
   const original = buy ? buy.textContent : '';
-  if (!payState.status?.configured && payLinkReady()) {
+  // El Payment Link live es la vía real de cobro. La API puede estar en test;
+  // si el enlace está disponible, se usa siempre para no perder ventas reales.
+  if (payLinkReady()) {
     payNote('Abriendo la pasarela segura de Stripe. Tras pagar, envía los datos del vehículo a selupiro@gmail.com para recibir el informe.');
     window.open(payLink(), '_blank', 'noopener');
     return;
@@ -2536,10 +2538,12 @@ async function initPayments() {
   }
   const status = payState.status;
   const link = payLinkReady();
-  buy.textContent = status.configured || link ? `Comprar informe · ${status.priceLabel}` : 'Pago no configurado';
-  buy.disabled = !status.configured && !link;
-  payBadge(status.configured ? (status.mode === 'test' ? 'Stripe · pruebas' : 'Stripe · activo') : (link ? 'Stripe · enlace de pago' : 'Sin configurar'));
-  payNote(status.configured ? (status.note || '') : (link ? 'Pago seguro con Stripe. Tras pagar, envía los datos del vehículo a selupiro@gmail.com para recibir el informe.' : (status.note || '')));
+  buy.textContent = `Comprar informe · ${status.priceLabel}`;
+  buy.disabled = !link && !status.configured;
+  payBadge(link ? 'Stripe · activo' : (status.configured ? (status.mode === 'test' ? 'Stripe · pruebas' : 'Stripe · activo') : 'Sin configurar'));
+  payNote(link
+    ? 'Pago seguro con Stripe. Tras pagar, envía los datos del vehículo a selupiro@gmail.com para recibir el informe.'
+    : (status.note || ''));
   buy.addEventListener('click', buyReport);
   addTrialButton(buy, status);
 
