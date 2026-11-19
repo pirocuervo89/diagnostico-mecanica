@@ -1853,7 +1853,7 @@ function planDePeticion(req) {
   }
 }
 
-function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock = '', maxWords = MAX_AI_REPLY_WORDS, pushFull = true }) {
+function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock = '', dtcBlock = '', maxWords = MAX_AI_REPLY_WORDS, pushFull = true }) {
   const engine = context.engineReliability;
   const knownIssues = Array.isArray(context.knownIssues) ? context.knownIssues : [];
 
@@ -1880,6 +1880,8 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     // contesta cosas que el usuario no ha dicho.
     '### Consulta del usuario (esto es lo que hay que responder)',
     clip(query, 1200),
+    '',
+    dtcBlock,
     '',
     '### Reglas obligatorias de esta respuesta',
     `- Responde en español, sin tablas, con listas cortas, y no superes ${maxWords} palabras.`,
@@ -2015,6 +2017,22 @@ router.post('/chat/ai', async (req, res) => {
     vehicle
   });
 
+  // Si el usuario nombra un código que está en la base, ese significado manda:
+  // el modelo no debe traducirlo de memoria (decía que P0299 era sobre-presión
+  // cuando la ficha dice "presión insuficiente").
+  const codigoPedido = (String(query).toUpperCase().match(/\b[PCBU]\d{4}\b/) || [])[0] || context.dtc;
+  const fichaDtc = codigoPedido
+    ? safeDtcList.find(d => String(d.code || '').toUpperCase() === String(codigoPedido).toUpperCase())
+    : null;
+  const dtcBlock = fichaDtc
+    ? [
+        '### Código DTC verificado en la base (dato oficial)',
+        `${fichaDtc.code}: ${fichaDtc.title}${fichaDtc.system ? ` (${fichaDtc.system})` : ''}.`,
+        fichaDtc.description ? clip(fichaDtc.description, 300) : '',
+        'Usa EXACTAMENTE este significado. No lo traduzcas de memoria ni lo cambies: si la base dice que la presión es insuficiente, no escribas sobre-presión.'
+      ].filter(Boolean).join('\n')
+    : '';
+
   const plan = planDePeticion(req);
   const prompt = chatAiPrompt({
     query,
@@ -2022,6 +2040,7 @@ router.post('/chat/ai', async (req, res) => {
     forumBlock,
     webReferences,
     symptomBlock: sintomasInternosBlock(query, context),
+    dtcBlock,
     maxWords: plan.aiWords || MAX_AI_REPLY_WORDS,
     pushFull: plan.id !== 'full'
   });
