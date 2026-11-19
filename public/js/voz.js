@@ -37,6 +37,18 @@
 
   if (!canRead && !canHear) return;
 
+  // Chrome en Android devuelve getVoices() vacío hasta que el motor de voz
+  // arranca, y entonces no se puede elegir una voz española: se habla con la
+  // que haya por defecto. Se pide al cargar y se refresca cuando llega.
+  if (canRead) {
+    try { synth.getVoices(); } catch (_) {}
+    if (typeof synth.addEventListener === 'function') {
+      synth.addEventListener('voiceschanged', () => {
+        try { synth.getVoices(); } catch (_) {}
+      });
+    }
+  }
+
   const store = {
     get(key, fallback) {
       try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
@@ -117,8 +129,27 @@
   function resumenHablado(texto) {
     let texto2 = String(texto || '').trim();
     if (!texto2) return '';
-    const facil = texto2.match(/en f[aá]cil[:,]?\s*([\s\S]+)/i);
-    if (facil && facil[1].trim()) texto2 = facil[1].trim();
+    // Se lee el diagnóstico (las dos primeras frases) y se cierra con la línea
+    // "En fácil". Antes solo se leía esa línea y el usuario se quedaba sin la
+    // explicación; con esto se entiende qué pasa sin tragarse el informe entero.
+    const facil = texto2.match(/en f[aá]cil[:,]?\s*([^\n]+)/i);
+    const cuerpo = facil && facil.index > 0 ? texto2.slice(0, facil.index) : texto2;
+    const corto = (cuerpo.match(/[^.!?]+[.!?]*/g) || [])
+      .map(s => s.trim())
+      .filter(s => s && !/^[-•*·]|^\d+[).]\s/.test(s));
+    let cabeza = '';
+    for (const frase of corto) {
+      if (cabeza && cabeza.length + frase.length > 210) break;
+      cabeza = cabeza ? `${cabeza} ${frase}` : frase;
+      if (cabeza.length > 150) break;
+    }
+    if (facil && facil[1]) {
+      const cierre = facil[1].trim().slice(0, 140);
+      texto2 = cabeza ? `${cabeza} ${cierre}` : cierre;
+    } else {
+      texto2 = cabeza || texto2;
+    }
+    texto2 = texto2.replace(/[*_`#>|]/g, ' ').replace(/\s{2,}/g, ' ').trim();
     const frases = texto2.match(/[^.!?]+[.!?]*/g) || [texto2];
     let salida = '';
     for (const frase of frases) {
@@ -134,6 +165,28 @@
     return salida.length > 240 ? `${salida.slice(0, 237).trim()}…` : salida;
   }
 
+  // Trocea el texto en frases de como mucho ~150 caracteres. Ni una frase
+  // cortada por la mitad al oído ni una locución tan larga que el motor la
+  // abandone.
+  function trocear(texto) {
+    const frases = (texto.match(/[^.!?]+[.!?]*/g) || [texto])
+      .map(s => s.trim())
+      .filter(Boolean);
+    const trozos = [];
+    let buf = '';
+    for (const frase of frases) {
+      const junto = buf ? `${buf} ${frase}` : frase;
+      if (buf && junto.length > 150) {
+        trozos.push(buf);
+        buf = frase;
+      } else {
+        buf = junto;
+      }
+    }
+    if (buf) trozos.push(buf);
+    return trozos.length ? trozos : [texto];
+  }
+
   function stopSpeaking() {
     if (synth) synth.cancel();
     if (speakingBubble) {
@@ -147,30 +200,52 @@
   function speak(bubble) {
     if (!canRead || !bubble) return;
     if (speakingBubble === bubble && synth.speaking) { stopSpeaking(); return; }
+    // Si el motor aún no ha publicado sus voces, se le da un instante antes de
+    // hablar: así se elige la voz española en vez de la que venga por defecto.
+    if (!synth.getVoices().length && bubble.dataset.vozRetry !== '1') {
+      bubble.dataset.vozRetry = '1';
+      try { synth.getVoices(); } catch (_) {}
+      setTimeout(() => speak(bubble), 400);
+      return;
+    }
     stopSpeaking();
     const text = resumenHablado(plainText(bubble));
     if (!text) return;
 
-    const parts = text.match(/[\s\S]{1,220}(?:[.!?]|$)/g) || [text];
-    const utter = new SpeechSynthesisUtterance(parts.join(' '));
-    utter.lang = lang;
+    // Chrome en Android corta las locuciones largas a media frase (bug conocido
+    // del motor de voz). Se habla por trozos cortos encadenados: así no se
+    // queda a medias aunque la respuesta sea larga.
+    const trozos = trocear(text);
     const { voice, male } = pickSpanishVoice();
-    utter.voice = voice || null;
-    // Voz de hombre, grave y de confianza. Si el móvil no trae ninguna voz
-    // masculina en español, se baja el tono para que suene a hombre igual.
-    utter.pitch = male ? 0.85 : 0.58;
-    utter.rate = 1.08;
-    utter.volume = 1;
+
     speakingBubble = bubble;
     bubble.classList.add('voz-speaking');
     const btn = bubble.querySelector('.voz-btn');
     if (btn) btn.setAttribute('aria-pressed', 'true');
-    utter.onend = utter.onerror = () => {
+
+    const terminar = () => {
       bubble.classList.remove('voz-speaking');
       if (btn) btn.setAttribute('aria-pressed', 'false');
       if (speakingBubble === bubble) speakingBubble = null;
     };
-    synth.speak(utter);
+
+    const decir = i => {
+      if (i >= trozos.length) { terminar(); return; }
+      if (speakingBubble !== bubble) return; // se ha cancelado
+      const utter = new SpeechSynthesisUtterance(trozos[i]);
+      utter.lang = lang;
+      utter.voice = voice || null;
+      // Bajar el tono a 0,58 convertía la voz de Google TTS en un dibujo
+      // animado: forzado y difícil de entender. Casi natural, y el tono grave
+      // solo se insinúa cuando de verdad hay una voz masculina.
+      utter.pitch = male ? 0.9 : 1;
+      utter.rate = 1.02;
+      utter.volume = 1;
+      utter.onend = () => decir(i + 1);
+      utter.onerror = () => decir(i + 1);
+      synth.speak(utter);
+    };
+    decir(0);
   }
 
   // ---------------------------------------------------------------- botón leer

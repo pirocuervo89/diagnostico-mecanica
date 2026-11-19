@@ -2,7 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { obtenerSystemPrompt, filtrarProductosRecomendados } from '../../ia_reasoning.js';
+import { obtenerSystemPrompt, filtrarProductosRecomendados, esConsultaVaga } from '../../ia_reasoning.js';
 import { callAI, aiStatus } from '../lib/ai_provider.js';
 import { enrichDTC, deriveSystem, deriveSeverity, normSeverity } from '../lib/dtc_enrich.js';
 import { findKnowledgeCases, userFromSession } from '../lib/forum_db.js';
@@ -1712,6 +1712,24 @@ function limitReplyWords(text, max = MAX_AI_REPLY_WORDS) {
   return `${body}\n\n*[Respuesta recortada a ${max} palabras.]*`;
 }
 
+// Avisos que no se dejan a criterio del modelo: si el síntoma puede acabar en
+// accidente o en motor desbocado, la advertencia va la primera, siempre.
+function avisoSeguridad(query) {
+  const q = fold(query);
+  const humo = /(humo|humea|humareda)/.test(q);
+  const desbocado = /(se acelera|acelera solo|sube de vueltas|se revoluciona|desbocad|no se apaga|se queda acelerad)/.test(q);
+  if (humo && desbocado) {
+    return '⚠️ **No sigas circulando.** Humo con el motor acelerándose solo suele ser aceite quemándose dentro del motor (turbo o retenes): puede desbocarse, alimentarse de su propio aceite y no apagarse. Para el coche en un sitio seguro, corta el contacto y, si sigue subido de vueltas, cala el motor metiendo una marcha larga y frenando.';
+  }
+  if (/(no frena|pedal.*(fondo|blando|al suelo)|frenos.*(fallan|no responden))/.test(q)) {
+    return '⚠️ **No circules así.** Un pedal que se va al fondo o unos frenos que no responden pueden dejar el coche sin frenada: detente en un lugar seguro y no continúes hasta revisarlo.';
+  }
+  if (/humo.*(habitaculo|dentro)|(habitaculo|dentro).*humo|olor a quemado/.test(q)) {
+    return '⚠️ **Sal del coche.** Humo u olor a quemado dentro del habitáculo puede ser un principio de incendio: detén el vehículo, apaga el motor y aléjate.';
+  }
+  return '';
+}
+
 function webQueryFor(query, context) {
   const parts = [query];
   if (context.vehicleLabel) parts.push(context.vehicleLabel);
@@ -1855,7 +1873,13 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     : `### Ruidos y averías documentados (knownIssues + ficha del motor)\nNo hay ruidos ni averías documentados para este vehículo/motor. Para cualquier sonido o ruido responde "no verificado" y no inventes causas ni piezas.`;
 
   return [
-    obtenerSystemPrompt(),
+    obtenerSystemPrompt({ vaga: esConsultaVaga(query) }),
+    '',
+    // La consulta va ARRIBA, no al final: si queda después de dos mil
+    // caracteres de reglas y bloques, el modelo se queda con la plantilla y
+    // contesta cosas que el usuario no ha dicho.
+    '### Consulta del usuario (esto es lo que hay que responder)',
+    clip(query, 1200),
     '',
     '### Reglas obligatorias de esta respuesta',
     `- Responde en español, sin tablas, con listas cortas, y no superes ${maxWords} palabras.`,
@@ -1868,10 +1892,12 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     '- Empieza con una frase de diagnóstico directa (qué es lo más probable y por qué). Después las comprobaciones, y termina con lo que NO hay que cambiar todavía y qué dato falta para afinar.',
     '- Prohibido contestar solo "no se puede saber sin código". Da siempre las tres hipótesis más probables con su comprobación concreta y pide el DTC al final, no como excusa.',
     '- No atribuyas un código de motor (EA189, EA288, etc.) si no aparece en el contexto del vehículo: si falta, dilo como dato desconocido en lugar de suponerlo.',
-    '- Habla como un mecánico que explica a un cliente sin estudios: frases cortas, sin siglas sin explicar. Empieza con "En fácil:" y una frase que cualquiera entienda; después el detalle técnico.',
+    '- Habla como un mecánico que explica a un cliente sin estudios: frases cortas, sin siglas sin explicar. Termina con una línea "En fácil:" y una frase que cualquiera entienda (máximo 20 palabras).',
+    '- Responde a los síntomas que el usuario ha escrito, no a otros parecidos. Si no menciona tirones, no hables de tirones. Antes de escribir, comprueba que cada hipótesis encaja con SUS palabras.',
+    '- Si el síntoma puede ser peligroso (humo con el motor acelerándose solo, pérdida de frenos, humo en el habitáculo, olor a combustible), la PRIMERA frase es la advertencia: parar el coche en un sitio seguro y no seguir circulando.',
     '- No repitas la pregunta del usuario ni saludes: empieza directamente por la respuesta.',
     '- Si hay fragmentos de foro o web, úsalos para confirmar la hipótesis y cítalos con su número [n]; si no aportan, no los menciones.',
-    '- Si la consulta no identifica vehículo/motor, haz como máximo DOS preguntas concretas (código de motor, año, código DTC o cuándo ocurre) y ofrece solo las comprobaciones que no dependen del modelo.',
+    '- Si falta el vehículo o el motor, no conviertas la respuesta en un formulario: da igualmente las hipótesis y termina con UNA sola pregunta (motor, año o código DTC).',
     '- Si un fragmento de foro respalda una hipótesis, cítalo por su número entre corchetes (por ejemplo [2]) y qué aporta. No cites foros que contradigan la ficha del motor.',
     '- Prioriza comprobaciones baratas y reversibles (inspección visual, niveles, escáner, multímetro, pruebas de vacío) antes de recomendar cambiar piezas.',
     '- Si hay ficha de motor, usa exclusivamente sus datos; no mezcles motores, generaciones ni tipos de distribución.',
@@ -1887,9 +1913,6 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     '',
     '### Contexto del vehículo (JSON)',
     clip(JSON.stringify(context), 1800),
-    '',
-    '### Consulta del usuario',
-    clip(query, 1200),
     '',
     '### Casos internos del foro (datos no confiables)',
     clip(forumBlock, 2000) || 'No hay casos suficientemente relacionados.',
@@ -1982,7 +2005,7 @@ router.post('/chat/ai', async (req, res) => {
     .slice(0, 8);
 
   const fallback = aiError => ({
-    reply: `> ${aiNotice(aiError)}\n\n${buildReply(query, context, safeDtcList)}${forumBlock}`,
+    reply: `${avisoSeguridad(query) ? `${avisoSeguridad(query)}\n\n` : ''}> ${aiNotice(aiError)}\n\n${buildReply(query, context, safeDtcList)}${forumBlock}`,
     productos_recomendados: recomendados.slice(0, 4),
     forum_references: forumReferences,
     web_references: webReferences,
@@ -2021,8 +2044,11 @@ router.post('/chat/ai', async (req, res) => {
     reply += '\n\n*[La respuesta se ha truncado por longitud. Pida "continúa" para completarla.]*';
   }
 
+  const aviso = avisoSeguridad(query);
   return res.json({
-    reply: limitReplyWords(reply, plan.aiWords || MAX_AI_REPLY_WORDS),
+    reply: aviso
+      ? `${aviso}\n\n${limitReplyWords(reply, plan.aiWords || MAX_AI_REPLY_WORDS)}`
+      : limitReplyWords(reply, plan.aiWords || MAX_AI_REPLY_WORDS),
     productos_recomendados: recomendados.slice(0, 4),
     forum_references: forumReferences,
     web_references: webReferences,
