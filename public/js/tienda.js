@@ -182,7 +182,7 @@
 
   function tarjeta(p, i) {
     const imagen = p.image
-      ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="${i < 60 ? 'eager' : 'lazy'}" decoding="async" onerror="this.classList.add('rota')">`
+      ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="${i < 120 ? 'eager' : 'lazy'}" decoding="async" onerror="this.classList.add('rota')">`
       : '';    const precioTxt = /€/.test(p.price || '') ? p.price : (p.price ? `${p.price} €` : 'Ver precio');
     const enlace = p.affiliateUrl || '#';
     // Badge "Más vendido": determinista por id, sin tocar datos.
