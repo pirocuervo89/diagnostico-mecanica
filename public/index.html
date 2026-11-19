@@ -38,6 +38,7 @@
   <link rel="stylesheet" href="/css/nebula.css?v=20261118n">
   <link rel="stylesheet" href="/css/neofuturista.css?v=20261118a">
   <link rel="stylesheet" href="/css/apex.css?v=20261119a">
+  <link rel="stylesheet" href="/css/protocolo.css?v=20261118pdx">
   <meta property="og:type" content="website">  <meta property="og:site_name" content="Diagnóstico y Mecánica">
   <meta property="og:title" content="Diagnóstico y Mecánica · Plataforma Automotriz">
   <meta property="og:description" content="Síntomas, códigos DTC, lectura OBD-II, catálogo de taller, asistente IA e informes técnicos para tu coche.">
@@ -820,6 +821,72 @@
         <button id="obdVin" class="btn ghost" type="button" disabled><svg class="ic"><use href="#i-search"></use></svg> Leer VIN</button>
         <button id="obdClear" class="btn ghost danger" type="button" disabled><svg class="ic"><use href="#i-close"></use></svg> Borrar códigos</button>
       </div>
+
+      <section class="pdx-hud" id="pdxHud" aria-labelledby="pdxTitle">
+        <div class="pdx-hud-head">
+          <div class="pdx-hud-title">
+            <span class="pdx-kicker"><i></i> HUD · CAPA DE ENLACE</span>
+            <h3 id="pdxTitle">PROTOCOLO DE DIAGNÓSTICO</h3>
+            <p class="pdx-hud-sub">Secuencia de enlace OBD-II sobre la conexión real del panel. La demo solo anima este HUD: no abre el puerto ni lee la ECU.</p>
+          </div>
+          <div class="pdx-hud-state">
+            <span class="pdx-demo-flag" id="pdxDemoBadge" hidden>DEMO</span>
+            <span class="pdx-live" id="pdxLiveState" data-state="offline" role="status" aria-live="polite" aria-atomic="true"><i aria-hidden="true"></i><b id="pdxLiveStateText">Desconectado</b></span>
+            <span class="pdx-source" id="pdxSourceText">Panel OBD sin conexión</span>
+          </div>
+        </div>
+
+        <div class="pdx-grid">
+          <div class="pdx-radar" role="group" aria-label="Radar ilustrativo de módulos: ECU, ABS, SRS y TCU. No consulta los módulos del vehículo.">
+            <svg class="pdx-radar-svg" viewBox="0 0 260 260" aria-hidden="true" focusable="false">
+              <circle class="pdx-ring" cx="130" cy="130" r="122"></circle>
+              <circle class="pdx-ring dash" cx="130" cy="130" r="92"></circle>
+              <circle class="pdx-ring" cx="130" cy="130" r="62"></circle>
+              <circle class="pdx-ring dash" cx="130" cy="130" r="34"></circle>
+              <path class="pdx-cross" d="M130 8v244M8 130h244M44 44l172 172M216 44 44 216"></path>
+            </svg>
+            <span class="pdx-radar-sweep" aria-hidden="true"></span>
+            <span class="pdx-radar-core" aria-hidden="true">OBD</span>
+            <ul class="pdx-nodes">
+              <li class="pdx-node n-ecu" data-node="ECU"><span class="pdx-node-dot" aria-hidden="true"></span><b>ECU</b><small>Motor</small></li>
+              <li class="pdx-node n-abs" data-node="ABS"><span class="pdx-node-dot" aria-hidden="true"></span><b>ABS</b><small>Frenos</small></li>
+              <li class="pdx-node n-srs" data-node="SRS"><span class="pdx-node-dot" aria-hidden="true"></span><b>SRS</b><small>Airbag</small></li>
+              <li class="pdx-node n-tcu" data-node="TCU"><span class="pdx-node-dot" aria-hidden="true"></span><b>TCU</b><small>Cambio</small></li>
+            </ul>
+          </div>
+
+          <div class="pdx-body">
+            <div class="pdx-chips" role="group" aria-label="Protocolos OBD-II contemplados en la configuración">
+              <span class="pdx-chip" data-proto="ATSP6">CAN 11/500</span>
+              <span class="pdx-chip" data-proto="ATSP7">CAN 29/500</span>
+              <span class="pdx-chip" data-proto="ATSP4 ATSP5">KWP2000</span>
+              <span class="pdx-chip" data-proto="ATSP3">ISO 9141</span>
+              <span class="pdx-chip" data-proto="ATSP1">J1850 PWM</span>
+              <span class="pdx-chip" data-proto="ATSP2">J1850 VPW</span>
+              <span class="pdx-chip" data-proto="ATSPA">J1939</span>
+            </div>
+
+            <ol class="pdx-steps" aria-label="Pasos del protocolo de diagnóstico">
+              <li class="pdx-step" data-step="1"><span class="pdx-step-dot" aria-hidden="true">1</span><b>Enlace</b><small>Espera</small></li>
+              <li class="pdx-step" data-step="2"><span class="pdx-step-dot" aria-hidden="true">2</span><b>Handshake</b><small>Espera</small></li>
+              <li class="pdx-step" data-step="3"><span class="pdx-step-dot" aria-hidden="true">3</span><b>Negociación</b><small>Espera</small></li>
+              <li class="pdx-step" data-step="4"><span class="pdx-step-dot" aria-hidden="true">4</span><b>ECU</b><small>Espera</small></li>
+              <li class="pdx-step" data-step="5"><span class="pdx-step-dot" aria-hidden="true">5</span><b>DTC</b><small>Espera</small></li>
+            </ol>
+
+            <div class="pdx-trace-wrap">
+              <div class="pdx-trace-head"><span>TRAZA DE ENLACE</span><span id="pdxTraceMode">EN ESPERA</span></div>
+              <pre class="pdx-trace" id="pdxTrace" tabindex="0" role="log" aria-live="polite" aria-label="Traza de la secuencia de diagnóstico">[--:--:--] HUD listo. Sin conexión con la ECU.
+Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="pdx-hud-foot">
+          <button class="btn ghost sm pdx-demo-btn" id="pdxDemoBtn" type="button" aria-describedby="pdxDemoNote">Simular secuencia</button>
+          <p class="pdx-note" id="pdxDemoNote"><b>Demo = solo animación del HUD.</b> No abre el puerto, no contacta con la ECU y no muestra lecturas. ECU, ABS, SRS y TCU son nodos ilustrativos.</p>
+        </div>
+      </section>
 
       <div class="obd-cockpit">
         <div class="gauge-cluster obd-gauges">
@@ -2295,5 +2362,6 @@
   <script src="/js/astra-fx.js?v=20261117b"></script>
   <script src="/js/nebula-fx.js?v=20261118n"></script>
   <script src="/js/neofx.js?v=20261118a"></script>
-  <script src="/js/apex-fx.js?v=20261119a"></script></body>
+  <script src="/js/apex-fx.js?v=20261119a"></script>
+  <script src="/js/protocolo.js?v=20261118pdx"></script></body>
 </html>
