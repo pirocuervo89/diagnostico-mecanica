@@ -1891,10 +1891,10 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     '- Distingue hechos (datos leídos o documentados) de hipótesis. No inventes códigos, valores, intervalos, compatibilidades ni averías.',
     '- Prohibido el relleno de manual: nada de "podría ser cualquiera de estas causas", "revisa el motor", "acude a un taller" ni listas de diez posibilidades. Da como mucho TRES hipótesis, ordenadas de más a menos probable, y explica en una línea por qué encaja cada una con el síntoma descrito.',
     '- Cada comprobación debe ser accionable: nombra la pieza o el conector exacto, la herramienta y el valor o síntoma que confirma o descarta. Si no sabes el valor, di qué comparar (por ejemplo, lectura en ralentí frente a 2.500 rpm).',
-    '- Empieza con una frase de diagnóstico directa (qué es lo más probable y por qué). Después las comprobaciones, y termina con lo que NO hay que cambiar todavía y qué dato falta para afinar.',
+    '- Sigue el formato de tres bloques del sistema: **Riesgo:** (¿puede circular?), **Qué hacer:** (pasos numerados y ejecutables hoy) y **Qué puede ser:** (causa más probable). Después, una sola pregunta.',
     '- Prohibido contestar solo "no se puede saber sin código". Da siempre las tres hipótesis más probables con su comprobación concreta y pide el DTC al final, no como excusa.',
     '- No atribuyas un código de motor (EA189, EA288, etc.) si no aparece en el contexto del vehículo: si falta, dilo como dato desconocido en lugar de suponerlo.',
-    '- Habla como un mecánico que explica a un cliente sin estudios: frases cortas, sin siglas sin explicar. Termina con una línea "En fácil:" y una frase que cualquiera entienda (máximo 20 palabras).',
+    '- Habla como a un cliente sin estudios y con prisa: frases cortas, sin siglas sin explicar (si aparece una, se aclara entre paréntesis). Cada paso debe poder hacerlo él mismo o pedirlo en el taller con estas palabras.',
     '- Responde a los síntomas que el usuario ha escrito, no a otros parecidos. Si no menciona tirones, no hables de tirones. Antes de escribir, comprueba que cada hipótesis encaja con SUS palabras.',
     '- Si el síntoma puede ser peligroso (humo con el motor acelerándose solo, pérdida de frenos, humo en el habitáculo, olor a combustible), la PRIMERA frase es la advertencia: parar el coche en un sitio seguro y no seguir circulando.',
     '- No repitas la pregunta del usuario ni saludes: empieza directamente por la respuesta.',
@@ -2064,10 +2064,13 @@ router.post('/chat/ai', async (req, res) => {
   }
 
   const aviso = avisoSeguridad(query);
+  // Tope duro: el formato de tres bloques cabe de sobra en 150 palabras y, si
+  // el modelo se enrolla, se corta en la última frase entera, no a media.
+  const topeChat = Math.min(plan.aiWords || MAX_AI_REPLY_WORDS, 150);
   return res.json({
     reply: aviso
-      ? `${aviso}\n\n${limitReplyWords(reply, plan.aiWords || MAX_AI_REPLY_WORDS)}`
-      : limitReplyWords(reply, plan.aiWords || MAX_AI_REPLY_WORDS),
+      ? `${aviso}\n\n${limitReplyWords(reply, topeChat)}`
+      : limitReplyWords(reply, topeChat),
     productos_recomendados: recomendados.slice(0, 4),
     forum_references: forumReferences,
     web_references: webReferences,

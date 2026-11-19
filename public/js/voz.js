@@ -127,42 +127,36 @@
   // Se lee UNA vez y muy corto: qué le pasa y qué hacer, nada más. Todo lo
   // demás queda escrito en pantalla para quien lo quiera leer.
   function resumenHablado(texto) {
-    let texto2 = String(texto || '').trim();
-    if (!texto2) return '';
-    // Se lee el diagnóstico (las dos primeras frases) y se cierra con la línea
-    // "En fácil". Antes solo se leía esa línea y el usuario se quedaba sin la
-    // explicación; con esto se entiende qué pasa sin tragarse el informe entero.
-    const facil = texto2.match(/en f[aá]cil[:,]?\s*([^\n]+)/i);
-    const cuerpo = facil && facil.index > 0 ? texto2.slice(0, facil.index) : texto2;
-    const corto = (cuerpo.match(/[^.!?]+[.!?]*/g) || [])
-      .map(s => s.trim())
-      .filter(s => s && !/^[-•*·]|^\d+[).]\s/.test(s));
-    let cabeza = '';
-    for (const frase of corto) {
-      if (cabeza && cabeza.length + frase.length > 210) break;
-      cabeza = cabeza ? `${cabeza} ${frase}` : frase;
-      if (cabeza.length > 150) break;
+    const plano = String(texto || '')
+      .replace(/[*_`#>|]/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+    if (!plano) return '';
+
+    // Se lee lo que de verdad importa a quien está con el coche delante:
+    // primero si puede circular, después qué tiene que hacer. El resto del
+    // informe se queda escrito en pantalla para quien quiera leerlo.
+    const partes = [];
+    const riesgo = plano.match(/riesgo\s*:?\s*([\s\S]{5,220}?)(?=\s(?:qu[eé] hacer|qu[eé] puede ser|en f[aá]cil)\b|$)/i);
+    if (riesgo && riesgo[1]) partes.push(riesgo[1].trim());
+
+    const hacer = plano.match(/qu[eé] hacer\s*:?\s*([\s\S]{0,320}?)(?=\s(?:qu[eé] puede ser|en f[aá]cil)\b|$)/i);
+    if (hacer && hacer[1]) {
+      const pasos = hacer[1]
+        .split(/(?:\d+[).]\s*|·)/)
+        .map(s => s.trim().replace(/\.$/, ''))
+        .filter(Boolean)
+        .slice(0, 3);
+      if (pasos.length) partes.push(pasos.join('. '));
     }
-    if (facil && facil[1]) {
-      const cierre = facil[1].trim().slice(0, 140);
-      texto2 = cabeza ? `${cabeza} ${cierre}` : cierre;
-    } else {
-      texto2 = cabeza || texto2;
+
+    let salida = partes.join('. ').replace(/\s{2,}/g, ' ').trim();
+    if (!salida) {
+      // Respuestas antiguas o sin formato: lo de siempre, en fácil.
+      const facil = plano.match(/en f[aá]cil[:,]?\s*([^\n]{10,200})/i);
+      salida = facil ? facil[1].trim() : plano.slice(0, 220);
     }
-    texto2 = texto2.replace(/[*_`#>|]/g, ' ').replace(/\s{2,}/g, ' ').trim();
-    const frases = texto2.match(/[^.!?]+[.!?]*/g) || [texto2];
-    let salida = '';
-    for (const frase of frases) {
-      const limpia = frase.trim();
-      if (!limpia) continue;
-      if (/^[-•*·]|^\d+[).]\s/.test(limpia)) continue; // listas y numeraciones
-      const siguiente = salida ? `${salida} ${limpia}` : limpia;
-      if (salida && siguiente.length > 230) break;
-      salida = siguiente;
-      if (salida.length >= 150) break;
-    }
-    if (!salida) salida = texto2.slice(0, 200);
-    return salida.length > 240 ? `${salida.slice(0, 237).trim()}…` : salida;
+    return salida.length > 340 ? `${salida.slice(0, 337).trim()}…` : salida;
   }
 
   // Trocea el texto en frases de como mucho ~150 caracteres. Ni una frase
