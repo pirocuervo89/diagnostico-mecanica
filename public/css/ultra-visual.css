@@ -1,0 +1,406 @@
+/* ==========================================================================
+   ultra-visual.css — capa final de pulido futurista (reversible: quitar link)
+   ========================================================================== */
+:root {
+  --uv-violet: #a78bfa;
+  --uv-cyan: #22d3ee;
+  --uv-lime: #34d399;
+  --uv-rose: #f472b6;
+  --uv-glow: 0 0 34px rgba(139, 92, 246, .45), 0 0 90px rgba(34, 211, 238, .18);
+  --uv-glass: linear-gradient(160deg, rgba(22, 19, 52, .72), rgba(7, 7, 18, .86));
+  --uv-radius: 16px;
+}
+
+/* ---------- Fondo mesh animado ---------- */
+body {
+  background:
+    radial-gradient(1200px 700px at 8% -10%, rgba(139, 92, 246, .18), transparent 60%),
+    radial-gradient(1000px 600px at 92% 0%, rgba(34, 211, 238, .14), transparent 60%),
+    radial-gradient(900px 500px at 50% 110%, rgba(52, 211, 153, .1), transparent 60%),
+    #07080d !important;
+  background-attachment: fixed;
+}
+
+/* ---------- Barra de progreso de scroll ---------- */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 9999;
+  pointer-events: none;
+  background: rgba(255, 255, 255, .04);
+}
+.scroll-progress > span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--uv-violet), var(--uv-cyan), var(--uv-lime), var(--uv-rose));
+  background-size: 200% 100%;
+  animation: uvProgressFlow 3s linear infinite;
+  box-shadow: 0 0 12px rgba(34, 211, 238, .7);
+  transition: width .08s linear;
+}
+@keyframes uvProgressFlow {
+  to { background-position: 200% 0; }
+}
+
+/* ---------- Glassmorphism reforzado ---------- */
+.panel, .shop-hero, .shop-search, .nx-quickguide, .nx-promo, .start-panel,
+.home-scanners, .buying-warning, .buying-toolbar, .tuning-warning, .tp-controls,
+.tyre-search, .tyre-equiv, .tyre-compare, .tyre-wheels, .rel-controls,
+.shop-modal-card, .kpi, .stat {
+  background: var(--uv-glass) !important;
+  border: 1px solid rgba(167, 139, 250, .26) !important;
+  backdrop-filter: blur(24px) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.35) !important;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, .48), inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+  border-radius: var(--uv-radius);
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .3s ease, border-color .3s ease !important;
+}
+.panel:hover, .shop-hero:hover, .nx-promo:hover, .kpi:hover, .stat:hover {
+  border-color: rgba(167, 139, 250, .55) !important;
+  box-shadow: var(--uv-glow), 0 28px 70px rgba(0, 0, 0, .55) !important;
+  transform: translateY(-3px);
+}
+
+/* ---------- Topbar ---------- */
+.topbar {
+  background: rgba(5, 6, 12, .62) !important;
+  backdrop-filter: blur(26px) saturate(1.45) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(1.45) !important;
+  border-bottom: 1px solid rgba(167, 139, 250, .2) !important;
+  box-shadow: 0 14px 48px rgba(0, 0, 0, .42) !important;
+}
+
+/* ---------- Títulos con gradiente ---------- */
+h1, h2, .page-head h2, .shop-hero h2, .nx-hero h1 {
+  background: linear-gradient(120deg, #f5f3ff, #a78bfa, #22d3ee);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: uvTextFlow 7s linear infinite;
+}
+@keyframes uvTextFlow { to { background-position: 200% center; } }
+.eyebrow, .nx-kicker {
+  color: var(--uv-cyan) !important;
+  text-shadow: 0 0 14px rgba(34, 211, 238, .55);
+  letter-spacing: .12em;
+}
+
+/* ---------- Tarjetas de producto ---------- */
+.shop-card, .shop-special-card, .tp-card, .lm-product, .product, .nx-tile {
+  background: linear-gradient(165deg, rgba(18, 16, 42, .88), rgba(7, 7, 18, .96)) !important;
+  border: 1px solid rgba(167, 139, 250, .22) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+  transition: transform .32s cubic-bezier(.22, 1, .36, 1), box-shadow .32s ease, border-color .32s ease, filter .32s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+.shop-card:hover, .shop-special-card:hover, .tp-card:hover, .lm-product:hover, .product:hover, .nx-tile:hover {
+  transform: translateY(-7px) scale(1.015) !important;
+  border-color: rgba(34, 211, 238, .55) !important;
+  box-shadow: var(--uv-glow), 0 30px 70px rgba(0, 0, 0, .58) !important;
+  filter: brightness(1.06);
+}
+.shop-card-media {
+  overflow: hidden;
+}
+.shop-card-media img {
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1), filter .45s ease !important;
+}
+.shop-card:hover .shop-card-media img {
+  transform: scale(1.08) !important;
+  filter: saturate(1.15) brightness(1.05) !important;
+}
+.shop-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(320px 140px at var(--mx, 50%) var(--my, 0%), rgba(34, 211, 238, .16), transparent 64%);
+  opacity: 0;
+  transition: opacity .35s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.shop-card:hover::before { opacity: 1; }
+
+/* ---------- Botones ---------- */
+.btn.primary, .nx-btn-ask, .shop-card-buy, .btn.cyan {
+  background-image: linear-gradient(135deg, #8b5cf6, #6366f1, #22d3ee) !important;
+  background-size: 200% 200% !important;
+  animation: uvBtnFlow 9s ease-in-out infinite;
+  box-shadow: 0 14px 38px rgba(139, 92, 246, .42), inset 0 1px 0 rgba(255, 255, 255, .24) !important;
+  border: 1px solid rgba(255, 255, 255, .1);
+  transition: transform .22s ease, box-shadow .22s ease, filter .22s ease !important;
+}
+@keyframes uvBtnFlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.btn.primary:hover, .nx-btn-ask:hover, .shop-card-buy:hover, .btn.cyan:hover {
+  transform: translateY(-3px) !important;
+  filter: brightness(1.2) !important;
+  box-shadow: var(--uv-glow), 0 20px 48px rgba(139, 92, 246, .55) !important;
+}
+
+/* ---------- Inputs ---------- */
+input, select, textarea {
+  background: rgba(10, 9, 24, .74) !important;
+  border: 1px solid rgba(167, 139, 250, .26) !important;
+  border-radius: 12px !important;
+  transition: border-color .22s ease, box-shadow .22s ease, transform .22s ease !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(34, 211, 238, .75) !important;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, .2), 0 0 22px rgba(34, 211, 238, .28) !important;
+  transform: translateY(-1px);
+}
+
+/* ---------- Instrucciones claras ---------- */
+.shop-how, .nx-quickguide, .nx-how {
+  background: linear-gradient(135deg, rgba(139, 92, 246, .16), rgba(34, 211, 238, .1)) !important;
+  border: 1px solid rgba(167, 139, 250, .42) !important;
+  border-left: 3px solid var(--uv-cyan) !important;
+  box-shadow: 0 0 24px rgba(139, 92, 246, .12), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+  border-radius: 14px !important;
+  padding: 14px 18px !important;
+  position: relative;
+}
+.shop-how b, .nx-quickguide h3, .nx-how b {
+  color: #fff !important;
+  text-shadow: 0 0 12px rgba(139, 92, 246, .4) !important;
+  display: block;
+  margin-bottom: 6px;
+}
+.shop-how span, .nx-quickguide li, .nx-how {
+  display: block;
+  padding: 4px 0 4px 20px;
+  position: relative;
+  color: #d6d2f0 !important;
+  transition: transform .2s ease, color .2s ease;
+}
+.shop-how span:hover, .nx-quickguide li:hover { transform: translateX(4px); color: #fff !important; }
+.shop-how span::before, .nx-quickguide li::before, .nx-how::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--uv-cyan);
+  text-shadow: 0 0 10px rgba(34, 211, 238, .75);
+  font-weight: 700;
+}
+
+/* ---------- Más productos visibles ---------- */
+.shop-grid {
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)) !important;
+  gap: 8px !important;
+}
+.product-grid, .tuning-grid, .tp-grid, .rel-grid, .buying-grid, .lm-families,
+.tyres-grid, .catalog-grid, .home-scanners-grid {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+  gap: 10px !important;
+}
+.shop-card { min-height: 0 !important; }
+.shop-card-media { height: 118px !important; }
+.shop-card-body { padding: 9px !important; }
+.shop-card-title { font-size: 12.5px !important; line-height: 1.22 !important; }
+.shop-card-price { font-size: 15.5px !important; }
+.tp-card, .lm-product, .product { min-height: 0 !important; }
+.tp-media { height: 142px !important; }
+
+/* ---------- Badges ---------- */
+.shop-card-badge, .product-badge, .tag {
+  box-shadow: 0 8px 20px rgba(239, 68, 68, .45) !important;
+  animation: uvBadge 2.6s ease-in-out infinite;
+}
+@keyframes uvBadge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+
+/* ---------- Stats con shine ---------- */
+.shop-hero-stats > div {
+  position: relative;
+  overflow: hidden;
+}
+.shop-hero-stats > div::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 40%, rgba(255, 255, 255, .08), transparent 60%);
+  transform: translateX(-100%);
+  animation: uvShine 4.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes uvShine {
+  0% { transform: translateX(-100%); }
+  50%, 100% { transform: translateX(100%); }
+}
+
+/* ---------- Modal ---------- */
+.shop-modal-card {
+  background: linear-gradient(165deg, rgba(22, 19, 52, .95), rgba(5, 5, 14, .98)) !important;
+  border: 1px solid rgba(167, 139, 250, .5) !important;
+  backdrop-filter: blur(32px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
+  box-shadow: var(--uv-glow), 0 60px 140px rgba(0, 0, 0, .85) !important;
+  border-radius: 22px !important;
+}
+.shop-modal-bg {
+  backdrop-filter: blur(12px) saturate(1.25) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(1.25) !important;
+}
+
+/* ---------- Focus accesible ---------- */
+:focus-visible {
+  outline: 2px solid var(--uv-cyan) !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, .18) !important;
+}
+
+/* ---------- Transiciones globales suaves ---------- */
+button, a, .panel, .shop-card, input, select, textarea {
+  transition: all .25s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress > span, h1, h2, .page-head h2, .shop-hero h2, .nx-hero h1,
+  .btn.primary, .nx-btn-ask, .shop-card-buy, .btn.cyan, .shop-card-badge,
+  .product-badge, .tag, .shop-hero-stats > div::after { animation: none !important; }
+  .shop-card:hover, .nx-tile:hover, .tp-card:hover, .lm-product:hover, .product:hover,
+  .shop-special-card:hover { transform: none !important; }
+  body { background-attachment: scroll !important; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 700px) {
+  .scroll-progress { height: 2px; }
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .product-grid, .tp-grid, .rel-grid, .lm-families { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .shop-card-media { height: 108px !important; }
+  .panel, .shop-search, .shop-hero { backdrop-filter: blur(12px) saturate(1.15) !important; }
+}
+@media (min-width: 1200px) {
+  .shop-grid { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)) !important; }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important; }
+}
+
+/* ==========================================================================
+   NOVA VISUAL LAYER — pulido adicional (reversible: borrar este bloque)
+   ========================================================================== */
+:root {
+  --nv-neon: 0 0 28px rgba(34, 211, 238, .55), 0 0 70px rgba(139, 92, 246, .35);
+  --nv-glass2: linear-gradient(150deg, rgba(30, 24, 68, .78), rgba(6, 6, 16, .9));
+}
+
+/* Fondo con mesh más vivo */
+body {
+  background:
+    radial-gradient(1300px 760px at 6% -12%, rgba(139, 92, 246, .26), transparent 58%),
+    radial-gradient(1100px 640px at 94% -4%, rgba(34, 211, 238, .2), transparent 58%),
+    radial-gradient(980px 560px at 50% 112%, rgba(52, 211, 153, .16), transparent 60%),
+    radial-gradient(700px 400px at 50% 50%, rgba(244, 114, 182, .06), transparent 70%),
+    #05060c !important;
+}
+
+/* Glow global del cursor ya definido; añadimos halo en paneles */
+.panel, .shop-hero, .shop-card, .nx-tile, .tp-card, .lm-product, .product, .shop-special-card {
+  box-shadow: 0 20px 55px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .07), 0 0 0 1px rgba(167, 139, 250, .12) !important;
+}
+.panel:hover, .shop-hero:hover, .shop-card:hover, .nx-tile:hover, .tp-card:hover, .lm-product:hover, .product:hover, .shop-special-card:hover {
+  box-shadow: var(--nv-neon), 0 34px 80px rgba(0, 0, 0, .62) !important;
+}
+
+/* Glassmorphism extra */
+.panel, .shop-search, .shop-hero, .nx-quickguide, .nx-promo, .start-panel, .shop-modal-card {
+  background: var(--nv-glass2) !important;
+  backdrop-filter: blur(28px) saturate(1.45) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.45) !important;
+}
+
+/* Más productos visibles: rejillas más densas */
+.shop-grid {
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)) !important;
+  gap: 7px !important;
+}
+.product-grid, .tuning-grid, .tp-grid, .rel-grid, .buying-grid, .lm-families,
+.tyres-grid, .catalog-grid, .home-scanners-grid {
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)) !important;
+  gap: 8px !important;
+}
+.shop-card-media { height: 108px !important; }
+.shop-card-body { padding: 8px !important; }
+.shop-card-title { font-size: 12px !important; }
+.tp-media { height: 132px !important; }
+@media (min-width: 1200px) {
+  .shop-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)) !important; }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)) !important; }
+}
+@media (max-width: 700px) {
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .product-grid, .tp-grid, .rel-grid, .lm-families { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+/* Instrucciones más claras: pasos con numeración visual */
+.shop-how, .nx-quickguide, .nx-how {
+  background: linear-gradient(135deg, rgba(139, 92, 246, .22), rgba(34, 211, 238, .14)) !important;
+  border: 1px solid rgba(167, 139, 250, .5) !important;
+  border-left: 4px solid var(--uv-cyan) !important;
+  box-shadow: 0 0 30px rgba(139, 92, 246, .18), inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+}
+.shop-how span, .nx-quickguide li, .nx-how {
+  padding-left: 26px !important;
+  line-height: 1.5 !important;
+}
+.shop-how span::before, .nx-quickguide li::before, .nx-how::before {
+  width: 18px; height: 18px; border-radius: 999px;
+  background: radial-gradient(circle, rgba(34, 211, 238, .35), transparent 70%);
+  text-align: center; line-height: 18px;
+  box-shadow: 0 0 12px rgba(34, 211, 238, .6);
+}
+
+/* Animaciones de entrada escalonadas */
+.shop-card, .nx-tile, .tp-card, .lm-product, .product, .shop-special-card {
+  animation: nvFadeUp .55s cubic-bezier(.22, 1, .36, 1) both;
+}
+.shop-card:nth-child(2n) { animation-delay: .04s; }
+.shop-card:nth-child(3n) { animation-delay: .08s; }
+.shop-card:nth-child(4n) { animation-delay: .12s; }
+@keyframes nvFadeUp {
+  from { opacity: 0; transform: translateY(14px) scale(.98); filter: blur(2px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* Brillo en títulos */
+h1, h2, .page-head h2, .shop-hero h2, .nx-hero h1 {
+  text-shadow: 0 0 30px rgba(167, 139, 250, .25);
+}
+
+/* Botones con pulso */
+.btn.primary, .nx-btn-ask, .shop-card-buy, .btn.cyan {
+  animation: nvPulse 4s ease-in-out infinite;
+}
+@keyframes nvPulse {
+  0%, 100% { box-shadow: 0 14px 38px rgba(139, 92, 246, .42); }
+  50% { box-shadow: 0 14px 48px rgba(34, 211, 238, .55), 0 0 24px rgba(139, 92, 246, .45); }
+}
+
+/* Scrollbar futurista */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgba(5, 6, 12, .6); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8b5cf6, #22d3ee);
+  border-radius: 999px;
+  border: 2px solid rgba(5, 6, 12, .6);
+}
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #a78bfa, #67e8f9); }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .shop-card, .nx-tile, .tp-card, .lm-product, .product, .shop-special-card,
+  .btn.primary, .nx-btn-ask, .shop-card-buy, .btn.cyan { animation: none !important; }
+}

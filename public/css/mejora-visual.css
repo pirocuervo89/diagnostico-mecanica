@@ -1,0 +1,472 @@
+/* ==========================================================================
+   mejora-visual.css — capa adicional de acabado futurista (glow, glass,
+   animaciones, transiciones). Se carga al final, es reversible: basta con
+   quitar el <link> del <head>.
+   ========================================================================== */
+
+:root {
+  --mv-violet: #8b5cf6;
+  --mv-cyan: #22d3ee;
+  --mv-lime: #38efa4;
+  --mv-amber: #f39c12;
+  --mv-glow-v: 0 0 26px rgba(139, 92, 246, .5), 0 0 70px rgba(139, 92, 246, .2);
+  --mv-glow-c: 0 0 26px rgba(34, 211, 238, .45), 0 0 70px rgba(34, 211, 238, .16);
+  --mv-glass: linear-gradient(155deg, rgba(26, 22, 56, .78), rgba(8, 8, 20, .9));
+  --mv-radius: 18px;
+}
+
+/* ---------- Fondo animado con partículas ---------- */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, rgba(167, 139, 250, .55), transparent 60%),
+    radial-gradient(1.5px 1.5px at 70% 60%, rgba(34, 211, 238, .5), transparent 60%),
+    radial-gradient(2px 2px at 40% 80%, rgba(56, 239, 164, .45), transparent 60%),
+    radial-gradient(1.5px 1.5px at 85% 20%, rgba(243, 156, 18, .4), transparent 60%);
+  background-size: 240px 240px, 320px 320px, 280px 280px, 360px 360px;
+  animation: mvStars 40s linear infinite;
+  opacity: .55;
+}
+@keyframes mvStars {
+  from { background-position: 0 0, 0 0, 0 0, 0 0; }
+  to { background-position: 240px 240px, -320px 320px, 280px -280px, -360px 360px; }
+}
+
+/* ---------- Glassmorphism reforzado ---------- */
+.panel, .shop-hero, .shop-search, .nx-quickguide, .nx-promo, .start-panel,
+.home-scanners, .buying-warning, .buying-toolbar, .tuning-warning, .tp-controls,
+.tyre-search, .tyre-equiv, .tyre-compare, .tyre-wheels, .rel-controls,
+.shop-modal-card {
+  background: var(--mv-glass) !important;
+  border: 1px solid rgba(167, 139, 250, .22) !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+  box-shadow: 0 20px 56px rgba(0, 0, 0, .46), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+  border-radius: var(--mv-radius);
+  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease, background .28s ease !important;
+}
+.panel:hover, .shop-hero:hover, .nx-promo:hover {
+  border-color: rgba(167, 139, 250, .5) !important;
+  box-shadow: var(--mv-glow-v), 0 26px 64px rgba(0, 0, 0, .52) !important;
+  transform: translateY(-2px);
+}
+
+/* ---------- Topbar glass ---------- */
+.topbar {
+  background: rgba(6, 7, 12, .68) !important;
+  backdrop-filter: blur(22px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.4) !important;
+  border-bottom: 1px solid rgba(167, 139, 250, .18) !important;
+  box-shadow: 0 12px 44px rgba(0, 0, 0, .38) !important;
+}
+
+/* ---------- Glow en navegación ---------- */
+.topbar #nav button.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, .32), rgba(34, 211, 238, .2)) !important;
+  border-color: rgba(167, 139, 250, .65) !important;
+  box-shadow: var(--mv-glow-v), inset 0 0 0 1px rgba(255, 255, 255, .08) !important;
+  color: #fff !important;
+}
+.topbar #nav button:hover {
+  background: rgba(167, 139, 250, .16) !important;
+  border-color: rgba(167, 139, 250, .45) !important;
+  box-shadow: 0 0 16px rgba(139, 92, 246, .25);
+}
+
+/* ---------- Tarjetas con glow y tilt ---------- */
+.nx-tile, .shop-card, .shop-special-card {
+  background: linear-gradient(165deg, rgba(20, 17, 44, .84), rgba(8, 8, 18, .94)) !important;
+  border: 1px solid rgba(167, 139, 250, .2) !important;
+  backdrop-filter: blur(16px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.2) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .3s ease, border-color .3s ease, filter .3s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+.nx-tile::after, .shop-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(360px 160px at var(--mx, 50%) var(--my, 0%), rgba(34, 211, 238, .14), transparent 62%);
+  opacity: 0;
+  transition: opacity .35s ease;
+  pointer-events: none;
+}
+.nx-tile:hover::after, .shop-card:hover::after { opacity: 1; }
+.nx-tile:hover, .shop-card:hover, .shop-special-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(167, 139, 250, .6) !important;
+  box-shadow: var(--mv-glow-v), var(--mv-glow-c), 0 28px 60px rgba(0, 0, 0, .55) !important;
+  filter: brightness(1.05);
+}
+
+/* ---------- Botones con shimmer ---------- */
+.btn.primary, .nx-btn-ask, .shop-card-buy, .btn.cyan {
+  background-image: linear-gradient(135deg, #8b5cf6, #6366f1, #22d3ee, #38efa4, #8b5cf6) !important;
+  background-size: 300% 300% !important;
+  animation: mvBtnFlow 8s ease-in-out infinite;
+  box-shadow: 0 14px 36px rgba(139, 92, 246, .4), inset 0 1px 0 rgba(255, 255, 255, .26) !important;
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+@keyframes mvBtnFlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.btn.primary:hover, .nx-btn-ask:hover, .shop-card-buy:hover, .btn.cyan:hover {
+  filter: brightness(1.18) !important;
+  box-shadow: var(--mv-glow-v), var(--mv-glow-c), 0 18px 44px rgba(139, 92, 246, .55) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* ---------- Inputs con foco neon ---------- */
+input, select, textarea {
+  background: rgba(10, 9, 24, .72) !important;
+  border: 1px solid rgba(167, 139, 250, .24) !important;
+  border-radius: 12px !important;
+  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease, transform .22s ease !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(34, 211, 238, .7) !important;
+  background: rgba(14, 12, 30, .9) !important;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, .22), var(--mv-glow-c) !important;
+  transform: translateY(-1px);
+}
+
+/* ---------- Instrucciones claras y visibles ---------- */
+.shop-how, .nx-quickguide {
+  background: linear-gradient(135deg, rgba(139, 92, 246, .14), rgba(34, 211, 238, .09)) !important;
+  border: 1px solid rgba(167, 139, 250, .38) !important;
+  box-shadow: 0 0 28px rgba(139, 92, 246, .14), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+  border-radius: 14px !important;
+  padding: 14px 18px !important;
+}
+.shop-how b, .nx-quickguide h3 {
+  color: #fff !important;
+  text-shadow: 0 0 14px rgba(139, 92, 246, .4) !important;
+  font-size: 13.5px !important;
+}
+.shop-how span, .nx-quickguide li {
+  position: relative;
+  padding-left: 16px;
+  color: #c9c5e8 !important;
+}
+.shop-how span::before, .nx-quickguide li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: #7fe9fb;
+  text-shadow: 0 0 10px rgba(34, 211, 238, .7);
+  font-weight: 700;
+}
+
+/* ---------- Animaciones de entrada ---------- */
+.view.active {
+  animation: mvViewIn .45s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes mvViewIn {
+  from { opacity: 0; transform: translateY(18px) scale(.99); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.shop-grid > *, .nx-tiles > *, .product-grid > * {
+  animation: mvCardIn .5s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: calc(var(--i, 0) * 35ms);
+}
+@keyframes mvCardIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Modal de ficha con animación ---------- */
+.shop-modal.hidden { display: none; }
+.shop-modal:not([hidden]) { animation: mvFade .2s ease both; }
+.shop-modal-card {
+  animation: mvModalIn .32s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes mvFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mvModalIn {
+  from { opacity: 0; transform: translateY(24px) scale(.96); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.shop-modal-card {
+  background: linear-gradient(165deg, rgba(24, 20, 54, .94), rgba(6, 6, 16, .98)) !important;
+  border: 1px solid rgba(167, 139, 250, .42) !important;
+  backdrop-filter: blur(30px) saturate(1.45) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(1.45) !important;
+  box-shadow: var(--mv-glow-v), var(--mv-glow-c), 0 50px 120px rgba(0, 0, 0, .82) !important;
+  border-radius: 22px !important;
+}
+.shop-modal-bg {
+  backdrop-filter: blur(10px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(1.2) !important;
+}
+
+/* ---------- Stats y KPI con glow ---------- */
+.kpi, .stat, .shop-hero-stats > div {
+  background: var(--mv-glass) !important;
+  border: 1px solid rgba(167, 139, 250, .24) !important;
+  backdrop-filter: blur(16px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.2) !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+  transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease !important;
+}
+.kpi:hover, .shop-hero-stats > div:hover {
+  transform: translateY(-4px);
+  border-color: rgba(34, 211, 238, .5) !important;
+  box-shadow: var(--mv-glow-c), 0 18px 44px rgba(0, 0, 0, .46) !important;
+}
+
+/* ---------- Badges y tira de confianza ---------- */
+.shop-card-badge {
+  box-shadow: 0 8px 22px rgba(239, 68, 68, .5), 0 0 14px rgba(249, 115, 22, .4) !important;
+  animation: mvBadgePulse 2.4s ease-in-out infinite;
+}
+@keyframes mvBadgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+.shop-trust-strip li {
+  text-shadow: 0 0 10px rgba(34, 211, 238, .28) !important;
+}
+.shop-trust-strip .ic {
+  filter: drop-shadow(0 0 8px rgba(34, 211, 238, .65)) !important;
+}
+
+/* ---------- Más productos visibles ---------- */
+.shop-grid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+  gap: 10px !important;
+}
+.product-grid, .tuning-grid, .tp-grid, .rel-grid, .buying-grid, .lm-families {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  gap: 12px !important;
+}
+.shop-card-media { height: 132px !important; }
+.shop-card-price { text-shadow: 0 0 16px rgba(255, 213, 138, .45) !important; font-size: 17px !important; }
+
+/* ---------- Scrollbar futurista ---------- */
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: rgba(6, 7, 12, .7); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(139, 92, 246, .75), rgba(34, 211, 238, .75));
+  border-radius: 999px;
+  border: 2px solid rgba(6, 7, 12, .7);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #a78bfa, #22d3ee);
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  body::after, .btn.primary, .nx-btn-ask, .shop-card-buy, .btn.cyan,
+  .shop-card-badge, .shop-grid > *, .nx-tiles > *, .product-grid > * { animation: none !important; }
+  .view.active, .shop-modal-card, .shop-modal:not([hidden]) { animation: none !important; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 700px) {
+  .panel, .shop-search, .shop-hero, .nx-quickguide, .start-panel { backdrop-filter: blur(12px) saturate(1.15) !important; }
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+/* ==========================================================================
+   Fase extra: más efectos visuales, más productos visibles y pulido general
+   ========================================================================== */
+
+/* ---------- Más productos visibles ---------- */
+.shop-grid {
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)) !important;
+  gap: 8px !important;
+}
+.product-grid, .tuning-grid, .tp-grid, .rel-grid, .buying-grid, .lm-families,
+.tyres-grid, .catalog-grid, .home-scanners-grid {
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)) !important;
+  gap: 10px !important;
+}
+.shop-card { min-height: 0 !important; }
+.shop-card-media { height: 124px !important; }
+.shop-card-body { padding: 10px !important; }
+.shop-card-title { font-size: 13px !important; line-height: 1.25 !important; }
+.shop-card-price { font-size: 16px !important; }
+.tp-card, .lm-product, .product { min-height: 0 !important; }
+.tp-media { height: 150px !important; }
+
+/* ---------- Glow de cursor (blob) ---------- */
+body::before {
+  content: "";
+  position: fixed;
+  left: var(--cursor-x, 50vw);
+  top: var(--cursor-y, 50vh);
+  width: 420px;
+  height: 420px;
+  margin-left: -210px;
+  margin-top: -210px;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, .16), rgba(34, 211, 238, .08) 38%, transparent 70%);
+  filter: blur(12px);
+  mix-blend-mode: screen;
+  transition: left .08s linear, top .08s linear;
+  opacity: .7;
+}
+
+/* ---------- Tarjetas con tilt 3D ---------- */
+.nx-tile, .shop-card, .shop-special-card, .tp-card, .lm-product, .product {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.nx-tile:hover, .shop-card:hover, .shop-special-card:hover, .tp-card:hover, .lm-product:hover, .product:hover {
+  transform: translateY(-6px) scale(1.012) rotateX(2deg) rotateY(-2deg) !important;
+}
+
+/* ---------- Bordes neon animados ---------- */
+.nx-tile, .shop-card, .panel {
+  position: relative;
+}
+.nx-tile::before, .shop-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(120deg, transparent 30%, rgba(139, 92, 246, .7), rgba(34, 211, 238, .7), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .35s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+.nx-tile:hover::before, .shop-card:hover::before { opacity: .9; animation: mvBorderFlow 2.6s linear infinite; }
+@keyframes mvBorderFlow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* ---------- Texto con gradiente animado ---------- */
+.nx-grad, .eyebrow, .nx-kicker {
+  background: linear-gradient(90deg, #a78bfa, #22d3ee, #38efa4, #a78bfa);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: mvTextFlow 6s linear infinite;
+}
+@keyframes mvTextFlow {
+  to { background-position: 200% center; }
+}
+
+/* ---------- Botones con onda (ripple) ---------- */
+.btn, .nx-tile-btn, .shop-card-buy, .shop-cat, .shop-sub, .tp-tab, .chip {
+  position: relative;
+  overflow: hidden;
+}
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  background: rgba(255, 255, 255, .42);
+  animation: mvRipple .6s linear;
+  pointer-events: none;
+}
+@keyframes mvRipple {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ---------- Reveal al hacer scroll ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s ease, transform .6s cubic-bezier(.22, 1, .36, 1);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Instrucciones más claras ---------- */
+.shop-how, .nx-quickguide, .nx-how {
+  border-left: 3px solid rgba(34, 211, 238, .6) !important;
+}
+.shop-how b, .nx-quickguide h3, .nx-how b {
+  letter-spacing: .02em;
+}
+.shop-how span, .nx-quickguide li, .nx-how {
+  transition: transform .2s ease, color .2s ease;
+}
+.shop-how span:hover, .nx-quickguide li:hover {
+  transform: translateX(4px);
+  color: #e9e6ff !important;
+}
+.shop-how span::before, .nx-quickguide li::before, .nx-how::before {
+  content: "▸";
+  color: #7fe9fb;
+  text-shadow: 0 0 10px rgba(34, 211, 238, .75);
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+/* ---------- Badges con pulso ---------- */
+.shop-card-badge, .product-badge, .tag {
+  animation: mvBadgePulse 2.6s ease-in-out infinite;
+}
+@keyframes mvBadgePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+  50% { transform: scale(1.07); box-shadow: 0 0 18px rgba(139, 92, 246, .45); }
+}
+
+/* ---------- KPI / stats con contador glow ---------- */
+.shop-hero-stats > div, .kpi, .stat, .page-meta {
+  position: relative;
+  overflow: hidden;
+}
+.shop-hero-stats > div::after, .kpi::after, .stat::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 40%, rgba(255, 255, 255, .08), transparent 60%);
+  transform: translateX(-100%);
+  animation: mvShine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes mvShine {
+  0% { transform: translateX(-100%); }
+  50%, 100% { transform: translateX(100%); }
+}
+
+/* ---------- Modal con glow reforzado ---------- */
+.shop-modal-card {
+  border: 1px solid rgba(167, 139, 250, .5) !important;
+}
+.shop-modal-card::after {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(circle, rgba(139, 92, 246, .22), transparent 60%);
+  z-index: -1;
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+/* ---------- Reduced motion (ampliado) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  body::before, .ripple, .reveal, .shop-hero-stats > div::after,
+  .kpi::after, .stat::after, .nx-grad, .eyebrow, .nx-kicker { animation: none !important; }
+  .nx-tile, .shop-card, .shop-special-card, .tp-card, .lm-product, .product { transform: none !important; }
+}
+
+/* ---------- Responsive (ampliado) ---------- */
+@media (max-width: 700px) {
+  body::before { display: none; }
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .product-grid, .tp-grid, .rel-grid, .lm-families { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .nx-tile, .shop-card { transform: none !important; }
+}

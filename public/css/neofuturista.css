@@ -1,0 +1,305 @@
+/* ==========================================================================
+   neofuturista.css — capa visual 2026: glow, glassmorphism, animaciones,
+   transiciones, rejillas densas. Reversible: quitar el <link> del <head>.
+   ========================================================================== */
+
+:root {
+  --nf-cyan: #22d3ee;
+  --nf-violet: #a78bfa;
+  --nf-magenta: #f472b6;
+  --nf-lime: #38efa4;
+  --nf-amber: #fbbf24;
+  --nf-glow-c: 0 0 28px rgba(34, 211, 238, .55), 0 0 80px rgba(34, 211, 238, .18);
+  --nf-glow-v: 0 0 28px rgba(167, 139, 250, .55), 0 0 80px rgba(167, 139, 250, .18);
+  --nf-glass: linear-gradient(160deg, rgba(30, 24, 64, .72), rgba(8, 9, 20, .86));
+  --nf-radius: 20px;
+  --nf-ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ---------- Fondo animado ---------- */
+html, body {
+  background: radial-gradient(1200px 700px at 10% -10%, rgba(139, 92, 246, .22), transparent 60%),
+              radial-gradient(1000px 600px at 90% 10%, rgba(34, 211, 238, .16), transparent 60%),
+              radial-gradient(900px 600px at 50% 110%, rgba(244, 114, 182, .12), transparent 60%),
+              #05060d !important;
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(167,139,250,.18), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(34,211,238,.14), transparent 42%),
+    radial-gradient(circle at 50% 80%, rgba(244,114,182,.12), transparent 44%);
+  filter: blur(40px);
+  animation: nfBgDrift 26s ease-in-out infinite alternate;
+}
+@keyframes nfBgDrift {
+  from { transform: translate3d(-2%, -1%, 0) scale(1.02); }
+  to   { transform: translate3d(2%, 1%, 0) scale(1.06); }
+}
+
+/* ---------- Glassmorphism global ---------- */
+.panel, .shop-hero, .shop-search, .nx-quickguide, .nx-promo, .start-panel,
+.home-scanners, .buying-warning, .buying-toolbar, .tuning-warning, .tp-controls,
+.tyre-search, .tyre-equiv, .tyre-compare, .tyre-wheels, .rel-controls,
+.shop-modal-card, .component-panel {
+  background: var(--nf-glass) !important;
+  border: 1px solid rgba(167, 139, 250, .26) !important;
+  backdrop-filter: blur(22px) saturate(1.45) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.45) !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06) !important;
+  border-radius: var(--nf-radius);
+  transition: transform .3s var(--nf-ease), box-shadow .3s var(--nf-ease), border-color .3s var(--nf-ease) !important;
+}
+.panel:hover, .shop-hero:hover, .nx-promo:hover, .shop-special-card:hover {
+  border-color: rgba(167, 139, 250, .6) !important;
+  box-shadow: var(--nf-glow-v), 0 28px 70px rgba(0,0,0,.55) !important;
+  transform: translateY(-3px);
+}
+
+/* ---------- Topbar ---------- */
+.topbar {
+  background: rgba(5, 6, 13, .72) !important;
+  backdrop-filter: blur(24px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.5) !important;
+  border-bottom: 1px solid rgba(167, 139, 250, .2) !important;
+  box-shadow: 0 14px 50px rgba(0,0,0,.42) !important;
+}
+.topbar #nav button.active {
+  background: linear-gradient(135deg, rgba(139,92,246,.38), rgba(34,211,238,.26)) !important;
+  border-color: rgba(167,139,250,.75) !important;
+  box-shadow: var(--nf-glow-v), inset 0 0 0 1px rgba(255,255,255,.1) !important;
+  color: #fff !important;
+  text-shadow: 0 0 12px rgba(167,139,250,.6);
+}
+.topbar #nav button:hover {
+  background: rgba(167,139,250,.18) !important;
+  border-color: rgba(167,139,250,.5) !important;
+  box-shadow: 0 0 20px rgba(139,92,246,.35);
+}
+
+/* ---------- Rejillas más densas: más productos visibles ---------- */
+.shop-grid,
+.product-grid,
+.tp-grid,
+.lm-families,
+.home-scanner-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+  gap: 12px !important;
+}
+@media (min-width: 1200px) {
+  .shop-grid, .product-grid, .tp-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)) !important; }
+}
+@media (max-width: 640px) {
+  .shop-grid, .product-grid, .tp-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+}
+
+/* ---------- Tarjetas de producto ---------- */
+.shop-card, .tp-card, .lm-product, .product {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(165deg, rgba(24, 20, 52, .85), rgba(8, 8, 20, .95)) !important;
+  border: 1px solid rgba(167, 139, 250, .18) !important;
+  transition: transform .35s var(--nf-ease), box-shadow .35s var(--nf-ease), border-color .35s var(--nf-ease) !important;
+  animation: nfFadeUp .5s var(--nf-ease) both;
+}
+.shop-card:hover, .tp-card:hover, .lm-product:hover, .product:hover {
+  transform: translateY(-6px) scale(1.015);
+  border-color: rgba(34, 211, 238, .6) !important;
+  box-shadow: var(--nf-glow-c), 0 20px 48px rgba(0,0,0,.55) !important;
+}
+.shop-card-media img, .tp-media img {
+  transition: transform .6s var(--nf-ease), filter .4s ease !important;
+  filter: saturate(1.05);
+}
+.shop-card:hover .shop-card-media img, .tp-card:hover .tp-media img {
+  transform: scale(1.08);
+  filter: saturate(1.25) brightness(1.05);
+}
+.shop-card-price, .tp-price {
+  color: var(--nf-cyan) !important;
+  text-shadow: 0 0 14px rgba(34, 211, 238, .5);
+  font-weight: 800;
+}
+.shop-card-badge, .home-scanner-rank {
+  background: linear-gradient(135deg, var(--nf-amber), var(--nf-magenta)) !important;
+  color: #0b0b12 !important;
+  box-shadow: 0 0 18px rgba(251, 191, 36, .55);
+  animation: nfPulse 2.4s ease-in-out infinite;
+}
+
+/* ---------- Botones futuristas ---------- */
+.btn, .nx-btn-ask, .shop-card-buy, .shop-cat, .shop-sub, .tp-tab, .chip {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: transform .2s var(--nf-ease), box-shadow .25s ease, background .25s ease, border-color .25s ease !important;
+}
+.btn.primary, .nx-btn-ask {
+  background: linear-gradient(135deg, var(--nf-violet), var(--nf-cyan)) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  box-shadow: 0 10px 30px rgba(139,92,246,.4), inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+.btn.primary:hover, .nx-btn-ask:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--nf-glow-v), 0 16px 40px rgba(139,92,246,.5) !important;
+}
+.btn.ghost:hover, .shop-cat:hover, .shop-sub:hover, .tp-tab:hover {
+  border-color: rgba(34,211,238,.5) !important;
+  box-shadow: 0 0 18px rgba(34,211,238,.25);
+  transform: translateY(-1px);
+}
+.btn:active { transform: translateY(0) scale(.98); }
+
+/* ---------- Inputs focus glow ---------- */
+input, select, textarea, .shop-search-field input {
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(34,211,238,.7) !important;
+  box-shadow: 0 0 0 3px rgba(34,211,238,.18), 0 0 22px rgba(34,211,238,.25) !important;
+  outline: none;
+}
+
+/* ---------- Instrucciones de uso: cajas claras ---------- */
+.shop-how, [class*="how-to"], .quick-guide, .nx-quickguide {
+  position: relative;
+  background: linear-gradient(135deg, rgba(34,211,238,.08), rgba(139,92,246,.08)) !important;
+  border: 1px solid rgba(34,211,238,.28) !important;
+  border-left: 4px solid var(--nf-cyan) !important;
+  border-radius: 14px !important;
+  padding: 14px 18px !important;
+  backdrop-filter: blur(16px) !important;
+}
+.shop-how b, [class*="how-to"] b {
+  color: var(--nf-cyan) !important;
+  text-shadow: 0 0 12px rgba(34,211,238,.4);
+  letter-spacing: .02em;
+}
+.shop-how span {
+  display: inline-block;
+  padding: 4px 10px 4px 0;
+  margin-right: 6px;
+  color: rgba(230, 235, 255, .92);
+}
+.shop-how span::before {
+  content: "▸";
+  color: var(--nf-violet);
+  margin-right: 6px;
+  text-shadow: 0 0 8px rgba(167,139,250,.6);
+}
+
+/* ---------- Eyebrows y títulos ---------- */
+.eyebrow {
+  letter-spacing: .18em;
+  background: linear-gradient(90deg, var(--nf-cyan), var(--nf-violet), var(--nf-magenta));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: 800;
+  text-shadow: none;
+}
+.page-head h2, .shop-hero h2 {
+  background: linear-gradient(120deg, #fff, #c4b5fd, #67e8f9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  filter: drop-shadow(0 0 24px rgba(139,92,246,.35));
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgba(8,9,20,.6); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--nf-violet), var(--nf-cyan));
+  border-radius: 10px;
+  border: 2px solid rgba(8,9,20,.6);
+}
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--nf-cyan), var(--nf-magenta)); }
+
+/* ---------- Reveal / animaciones ---------- */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s var(--nf-ease), transform .6s var(--nf-ease); }
+.reveal.in { opacity: 1; transform: translateY(0); }
+@keyframes nfFadeUp {
+  from { opacity: 0; transform: translateY(16px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes nfPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(251,191,36,.55); }
+  50%      { transform: scale(1.06); box-shadow: 0 0 30px rgba(251,191,36,.85); }
+}
+@keyframes nfShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shop-card-media::after, .tp-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.12) 50%, transparent 60%);
+  background-size: 200% 100%;
+  animation: nfShimmer 4.5s linear infinite;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* ---------- Cursor spotlight ---------- */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(320px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(139,92,246,.12), transparent 60%);
+  mix-blend-mode: screen;
+}
+
+/* ---------- Modales ---------- */
+.shop-modal-bg { backdrop-filter: blur(10px); background: rgba(0,0,0,.7) !important; }
+.shop-modal-card {
+  animation: nfFadeUp .3s var(--nf-ease);
+  box-shadow: var(--nf-glow-v), 0 30px 80px rgba(0,0,0,.7) !important;
+}
+
+/* ---------- Toasts / notices ---------- */
+.notice {
+  border: 1px solid rgba(167,139,250,.25) !important;
+  background: linear-gradient(135deg, rgba(139,92,246,.12), rgba(34,211,238,.08)) !important;
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------- Cursor trail ---------- */
+.nf-cursor-trail {
+  position: fixed;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  background: radial-gradient(circle, rgba(34,211,238,.55), rgba(139,92,246,.25) 40%, transparent 70%);
+  filter: blur(4px);
+  opacity: 0;
+  transition: opacity .25s ease;
+  mix-blend-mode: screen;
+}
+
+/* ---------- Entrada de tarjetas ---------- */
+.nf-in { animation: nfFadeUp .5s var(--nf-ease) both; }

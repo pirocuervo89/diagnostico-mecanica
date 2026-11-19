@@ -1,0 +1,270 @@
+/* supernova.css — capa visual futurista (reversible: borrar este archivo + su <link>) */
+:root {
+  --sn-cyan: #35f0ff;
+  --sn-violet: #9b6bff;
+  --sn-magenta: #ff4fd8;
+  --sn-gold: #ffd166;
+  --sn-glass: rgba(12, 16, 28, 0.55);
+  --sn-glass-2: rgba(20, 26, 46, 0.45);
+  --sn-border: rgba(120, 160, 255, 0.22);
+  --sn-glow: 0 0 24px rgba(53, 240, 255, 0.28), 0 0 60px rgba(155, 107, 255, 0.18);
+  --sn-ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+/* Fondo con malla sutil animada */
+html, body {
+  background-color: #07090f;
+}
+body {
+  background-image:
+    radial-gradient(1200px 700px at 10% -10%, rgba(53, 240, 255, 0.10), transparent 60%),
+    radial-gradient(1000px 600px at 90% 0%, rgba(155, 107, 255, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 50% 100%, rgba(255, 79, 216, 0.08), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Glassmorphism general para paneles */
+.panel, .shop-hero, .shop-search, .shop-how, .tuning-warning, .page-head {
+  background: linear-gradient(180deg, var(--sn-glass), var(--sn-glass-2)) !important;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid var(--sn-border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: box-shadow .35s var(--sn-ease), transform .35s var(--sn-ease), border-color .35s var(--sn-ease);
+}
+.panel:hover, .shop-hero:hover {
+  border-color: rgba(53, 240, 255, 0.45) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45), var(--sn-glow);
+}
+
+/* Tipografía y encabezados con brillo */
+h1, h2, h3, .page-head h2, .shop-hero h2 {
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 18px rgba(53, 240, 255, 0.12);
+}
+.eyebrow {
+  color: var(--sn-cyan) !important;
+  text-shadow: 0 0 12px rgba(53, 240, 255, 0.35);
+}
+
+/* Botones futuristas */
+.btn, button.btn, .shop-cat, .tp-tab, .shop-sub {
+  transition: transform .25s var(--sn-ease), box-shadow .25s var(--sn-ease), background .25s var(--sn-ease), border-color .25s var(--sn-ease) !important;
+  border-radius: 12px !important;
+}
+.btn.primary, a.btn.primary {
+  background: linear-gradient(135deg, var(--sn-cyan), var(--sn-violet)) !important;
+  color: #06080f !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 18px rgba(53, 240, 255, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+.btn.primary::after, a.btn.primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform .6s var(--sn-ease);
+}
+.btn.primary:hover::after, a.btn.primary:hover::after { transform: translateX(100%); }
+.btn.primary:hover, a.btn.primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 28px rgba(53, 240, 255, 0.55), 0 0 40px rgba(155,107,255,0.35);
+}
+.btn.ghost:hover {
+  border-color: var(--sn-cyan) !important;
+  color: var(--sn-cyan) !important;
+  box-shadow: 0 0 16px rgba(53,240,255,0.25);
+  transform: translateY(-1px);
+}
+
+/* Tarjetas de tienda: más densas y con glow */
+.shop-grid, .tp-grid, .product-grid, .lm-grid, .lm-families {
+  gap: 14px !important;
+}
+.shop-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+}
+.tp-grid {
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+}
+.product-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+}
+@media (min-width: 1400px) {
+  .shop-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important; }
+  .tp-grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)) !important; }
+}
+
+.shop-card, .tp-card, .product, .lm-product, .lm-family {
+  background: linear-gradient(180deg, rgba(14,18,34,0.85), rgba(8,11,22,0.75)) !important;
+  border: 1px solid var(--sn-border) !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+  transition: transform .35s var(--sn-ease), box-shadow .35s var(--sn-ease), border-color .35s var(--sn-ease) !important;
+  position: relative;
+}
+.shop-card::before, .tp-card::before, .product::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(400px 200px at var(--mx, 50%) var(--my, 0%), rgba(53,240,255,0.12), transparent 60%);
+  opacity: 0;
+  transition: opacity .35s var(--sn-ease);
+  pointer-events: none;
+  z-index: 1;
+}
+.shop-card:hover, .tp-card:hover, .product:hover {
+  transform: translateY(-6px) !important;
+  border-color: rgba(53, 240, 255, 0.55) !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 30px rgba(53,240,255,0.22), 0 0 60px rgba(155,107,255,0.12) !important;
+}
+.shop-card:hover::before, .tp-card:hover::before, .product:hover::before { opacity: 1; }
+.shop-card-media, .tp-media, .product-media { position: relative; z-index: 2; }
+.shop-card img, .tp-card img, .product img, .lm-product img {
+  transition: transform .5s var(--sn-ease), filter .5s var(--sn-ease) !important;
+}
+.shop-card:hover img, .tp-card:hover img, .product:hover img {
+  transform: scale(1.06) !important;
+  filter: saturate(1.15) brightness(1.05);
+}
+
+/* Badges con glow */
+.shop-card-badge, .product-badge, .shop-card-aff {
+  box-shadow: 0 0 12px rgba(255, 79, 216, 0.35);
+  backdrop-filter: blur(6px);
+}
+.shop-card-aff {
+  background: linear-gradient(135deg, var(--sn-magenta), var(--sn-violet)) !important;
+  color: #fff !important;
+}
+
+/* Precio destacado */
+.shop-card-price, .product-price .price-value, .tp-price {
+  color: var(--sn-gold) !important;
+  text-shadow: 0 0 14px rgba(255, 209, 102, 0.35);
+  font-weight: 800 !important;
+}
+
+/* Inputs y selects */
+input, select, textarea, .shop-search-field input {
+  background: rgba(8, 12, 22, 0.7) !important;
+  border: 1px solid var(--sn-border) !important;
+  border-radius: 10px !important;
+  color: #eaf2ff !important;
+  transition: border-color .25s var(--sn-ease), box-shadow .25s var(--sn-ease) !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--sn-cyan) !important;
+  box-shadow: 0 0 0 3px rgba(53,240,255,0.18), 0 0 20px rgba(53,240,255,0.2) !important;
+  outline: none !important;
+}
+
+/* Categorías tienda */
+.shop-cat {
+  background: rgba(10,14,26,0.6) !important;
+  border: 1px solid var(--sn-border) !important;
+}
+.shop-cat.active {
+  background: linear-gradient(135deg, rgba(53,240,255,0.18), rgba(155,107,255,0.18)) !important;
+  border-color: var(--sn-cyan) !important;
+  box-shadow: 0 0 18px rgba(53,240,255,0.25);
+  color: var(--sn-cyan) !important;
+}
+.shop-cat-count {
+  background: rgba(53,240,255,0.15) !important;
+  color: var(--sn-cyan) !important;
+}
+
+/* Instrucciones de uso: chips claros */
+.shop-how {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+.shop-how b { color: var(--sn-cyan) !important; margin-right: 4px; }
+.shop-how span {
+  background: rgba(53,240,255,0.08) !important;
+  border: 1px solid rgba(53,240,255,0.2) !important;
+  border-radius: 999px !important;
+  padding: 4px 10px !important;
+  font-size: 0.82rem !important;
+  color: #d8e6ff !important;
+  transition: background .25s var(--sn-ease), transform .25s var(--sn-ease);
+}
+.shop-how span:hover {
+  background: rgba(53,240,255,0.16) !important;
+  transform: translateY(-1px);
+}
+
+/* Modal ficha con glassmorphism */
+.shop-modal-card, .product-sheet, .modal-card {
+  background: linear-gradient(180deg, rgba(16,20,36,0.95), rgba(8,11,22,0.95)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--sn-border) !important;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6), var(--sn-glow) !important;
+  border-radius: 20px !important;
+}
+.shop-modal-bg { backdrop-filter: blur(6px); }
+
+/* Scrollbar futurista */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgba(8,12,22,0.6); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--sn-cyan), var(--sn-violet));
+  border-radius: 10px;
+  border: 2px solid rgba(8,12,22,0.6);
+}
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--sn-magenta), var(--sn-cyan)); }
+
+/* Animación de entrada para vistas */
+.view.active { animation: snFadeIn .45s var(--sn-ease) both; }
+@keyframes snFadeIn {
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* Glow en foco de navegación */
+.nav-item.active, .view-tab.active, .tuning-subtab.active {
+  color: var(--sn-cyan) !important;
+  text-shadow: 0 0 14px rgba(53,240,255,0.4);
+}
+.nav-item.active::after, .view-tab.active::after {
+  background: linear-gradient(90deg, var(--sn-cyan), var(--sn-violet)) !important;
+  box-shadow: 0 0 12px rgba(53,240,255,0.5);
+}
+
+/* Carga suave de imágenes */
+.shop-card img, .tp-card img, .product img {
+  animation: snImgIn .6s var(--sn-ease) both;
+}
+@keyframes snImgIn {
+  from { opacity: 0; transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Efecto de pulso en stats */
+.shop-hero-stats b, .page-meta b {
+  color: var(--sn-cyan) !important;
+  text-shadow: 0 0 16px rgba(53,240,255,0.4);
+}
+
+/* Responsive: más productos en móvil */
+@media (max-width: 640px) {
+  .shop-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .tp-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .product-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* Reducir movimiento para accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

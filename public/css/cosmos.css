@@ -1,0 +1,348 @@
+/* cosmos.css — capa visual "cosmos": glassmorphism avanzado, glow, animaciones, transiciones, pulido */
+:root {
+  --c-cyan: #22d3ee;
+  --c-amber: #f59e0b;
+  --c-violet: #a78bfa;
+  --c-lime: #a3e635;
+  --c-rose: #fb7185;
+  --c-glass: rgba(12, 16, 26, .55);
+  --c-glass-2: rgba(20, 26, 40, .72);
+  --c-border: rgba(255, 255, 255, .16);
+  --c-ease: cubic-bezier(.22, 1, .36, 1);
+  --c-spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* Fondo cósmico animado */
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(34, 211, 238, .12), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(245, 158, 11, .1), transparent 60%),
+    radial-gradient(1000px 600px at 50% 110%, rgba(167, 139, 250, .12), transparent 60%),
+    #08090b !important;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    conic-gradient(from 180deg at 50% 50%, rgba(34, 211, 238, .05), transparent 30%, rgba(245, 158, 11, .05), transparent 60%, rgba(167, 139, 250, .05), transparent 90%);
+  animation: cSpin 40s linear infinite;
+  mix-blend-mode: screen;
+  opacity: .7;
+}
+@keyframes cSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { body::before { display: none; } }
+
+/* Orbes flotantes */
+.c-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: .35;
+  pointer-events: none;
+  z-index: 0;
+  animation: cOrbFloat 24s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+.c-orb.o1 { width: 320px; height: 320px; background: #22d3ee; top: 10%; left: 5%; animation-delay: 0s; }
+.c-orb.o2 { width: 280px; height: 280px; background: #f59e0b; top: 60%; right: 8%; animation-delay: -8s; }
+.c-orb.o3 { width: 360px; height: 360px; background: #a78bfa; bottom: 5%; left: 40%; animation-delay: -16s; }
+@keyframes cOrbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.08); }
+  66% { transform: translate(-30px, 40px) scale(.95); }
+}
+@media (prefers-reduced-motion: reduce) { .c-orb { display: none; } }
+
+/* Glassmorphism reforzado */
+.panel, .shop-hero, .shop-search, .shop-how, .nx-quickguide, .nx-promo,
+.shop-modal-card, .topbar, .ambient, .vehicle-dock, .start-panel, .page-head {
+  background: linear-gradient(180deg, rgba(20, 26, 40, .72), rgba(10, 14, 22, .58)) !important;
+  backdrop-filter: blur(18px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+  border: 1px solid var(--c-border) !important;
+  box-shadow: 0 24px 80px -32px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+  transition: transform .4s var(--c-ease), box-shadow .4s var(--c-ease), border-color .4s var(--c-ease) !important;
+}
+.panel:hover, .nx-tile:hover, .shop-card:hover, .shop-special-card:hover {
+  border-color: rgba(34, 211, 238, .45) !important;
+  box-shadow: 0 28px 90px -28px rgba(34, 211, 238, .3), inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+}
+
+/* Topbar glass + glow */
+.topbar {
+  background: rgba(8, 10, 16, .6) !important;
+  backdrop-filter: blur(22px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
+  border-bottom: 1px solid var(--c-border) !important;
+  box-shadow: 0 10px 40px -20px rgba(34, 211, 238, .25) !important;
+}
+
+/* Glow en títulos */
+h1, h2, h3, .nx-grad {
+  text-shadow: 0 0 34px rgba(34, 211, 238, .22), 0 0 12px rgba(245, 158, 11, .12) !important;
+}
+.eyebrow, .nx-kicker {
+  letter-spacing: .16em !important;
+  text-shadow: 0 0 14px rgba(245, 158, 11, .3) !important;
+}
+
+/* Botones magnéticos + ripple */
+.btn, .nx-tile-btn, .shop-card-buy, .shop-cat, .shop-sub, .shop-special-card {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: transform .3s var(--c-spring), box-shadow .3s var(--c-ease), background .3s var(--c-ease), color .3s var(--c-ease) !important;
+  will-change: transform !important;
+}
+.btn:hover, .nx-tile-btn:hover, .shop-card-buy:hover, .shop-cat:hover, .shop-sub:hover, .shop-special-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, .4), 0 16px 40px -12px rgba(34, 211, 238, .45) !important;
+}
+.btn:active, .nx-tile-btn:active, .shop-card-buy:active {
+  transform: translateY(0) scale(.97) !important;
+}
+.btn::after, .nx-tile-btn::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .24), transparent 48%) !important;
+  opacity: 0 !important;
+  transition: opacity .3s ease !important;
+  pointer-events: none !important;
+}
+.btn:hover::after, .nx-tile-btn:hover::after { opacity: 1 !important; }
+
+/* Tarjetas de tienda: más densas y con glow */
+.shop-grid {
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)) !important;
+  gap: 8px !important;
+}
+.shop-card {
+  background: linear-gradient(180deg, rgba(22, 28, 40, .88), rgba(10, 14, 22, .75)) !important;
+  border: 1px solid var(--c-border) !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  transition: transform .35s var(--c-spring), box-shadow .35s var(--c-ease), border-color .35s var(--c-ease) !important;
+  animation: cCardIn .55s var(--c-ease) both !important;
+}
+.shop-card:hover {
+  transform: translateY(-8px) scale(1.02) !important;
+  box-shadow: 0 28px 60px -18px rgba(34, 211, 238, .4) !important;
+  border-color: var(--c-cyan) !important;
+  z-index: 2 !important;
+}
+.shop-card-media img {
+  transition: transform .6s var(--c-ease), filter .4s ease !important;
+  filter: saturate(1.08) contrast(1.03) !important;
+}
+.shop-card:hover .shop-card-media img {
+  transform: scale(1.1) !important;
+  filter: saturate(1.25) contrast(1.06) !important;
+}
+.shop-card-badge {
+  animation: cPulse 2s ease-in-out infinite !important;
+}
+@keyframes cPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, .55); }
+  50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+}
+@keyframes cCardIn {
+  from { opacity: 0; transform: translateY(20px) scale(.95); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Catálogo y grids de productos: más denso */
+.product-grid, .tp-grid, .rel-grid, .lm-families, .tyre-grid, .tut-grid {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)) !important;
+  gap: 8px !important;
+}
+
+/* Instrucciones de uso: más claras y vistosas */
+.shop-how, .nx-quickguide {
+  position: relative !important;
+  overflow: hidden !important;
+  background: linear-gradient(180deg, rgba(34, 211, 238, .06), rgba(245, 158, 11, .04)) !important;
+}
+.shop-how::before, .nx-quickguide::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0; left: 0; right: 0 !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent, var(--c-cyan), var(--c-amber), var(--c-violet), transparent) !important;
+  animation: cSweep 5s linear infinite !important;
+}
+@keyframes cSweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.shop-how b, .nx-quickguide h3 {
+  color: var(--c-amber) !important;
+  text-shadow: 0 0 18px rgba(245, 158, 11, .4) !important;
+}
+.shop-how span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 5px 10px !important;
+  margin: 2px 4px 2px 0 !important;
+  border-radius: 999px !important;
+  background: rgba(34, 211, 238, .1) !important;
+  border: 1px solid rgba(34, 211, 238, .22) !important;
+  font-size: 12px !important;
+  transition: background .2s ease, transform .2s var(--c-spring) !important;
+}
+.shop-how span:hover {
+  background: rgba(34, 211, 238, .2) !important;
+  transform: translateY(-2px) !important;
+}
+.nx-quickguide ol li {
+  padding: 10px 12px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, .03) !important;
+  border: 1px solid rgba(255, 255, 255, .07) !important;
+  margin-bottom: 8px !important;
+  transition: transform .2s var(--c-spring), background .2s ease, border-color .2s ease !important;
+}
+.nx-quickguide ol li:hover {
+  transform: translateX(6px) !important;
+  background: rgba(34, 211, 238, .08) !important;
+  border-color: rgba(34, 211, 238, .25) !important;
+}
+.nx-quickguide ol li b { color: var(--c-cyan) !important; }
+
+/* Modales */
+.shop-modal-bg {
+  backdrop-filter: blur(10px) !important;
+  background: rgba(0, 0, 0, .6) !important;
+}
+.shop-modal-card {
+  background: linear-gradient(180deg, rgba(22, 28, 42, .92), rgba(10, 14, 22, .85)) !important;
+  border: 1px solid var(--c-border) !important;
+  box-shadow: 0 50px 120px -30px rgba(0, 0, 0, .85), 0 0 80px -20px rgba(34, 211, 238, .3) !important;
+  animation: cModalIn .4s var(--c-spring) !important;
+}
+@keyframes cModalIn {
+  from { opacity: 0; transform: translateY(40px) scale(.94); }
+  to { opacity: 1; transform: none; }
+}
+.shop-modal-close:hover {
+  transform: rotate(90deg) scale(1.15) !important;
+  background: rgba(251, 113, 133, .25) !important;
+  color: var(--c-rose) !important;
+}
+
+/* Hero car glow */
+.nx-car img {
+  filter: drop-shadow(0 0 50px rgba(34, 211, 238, .3)) !important;
+  transition: filter .6s ease, transform .6s var(--c-ease) !important;
+}
+.nx-car:hover img {
+  filter: drop-shadow(0 0 70px rgba(245, 158, 11, .4)) !important;
+  transform: scale(1.03) !important;
+}
+.nx-car-ring {
+  box-shadow: 0 0 80px 8px rgba(34, 211, 238, .4) !important;
+  animation: cRing 4s ease-in-out infinite !important;
+}
+@keyframes cRing {
+  0%, 100% { transform: scale(1); opacity: .65; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* Tiles */
+.nx-tile {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: transform .35s var(--c-spring), box-shadow .35s var(--c-ease), border-color .35s var(--c-ease) !important;
+}
+.nx-tile::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(34, 211, 238, .14), transparent 55%) !important;
+  opacity: 0 !important;
+  transition: opacity .4s ease !important;
+  pointer-events: none !important;
+}
+.nx-tile:hover::before { opacity: 1 !important; }
+.nx-tile:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 24px 60px -20px rgba(34, 211, 238, .35) !important;
+}
+.nx-tile-num {
+  text-shadow: 0 0 16px rgba(245, 158, 11, .45) !important;
+}
+
+/* Badges y categorías */
+.shop-cat.active, .shop-sub.active {
+  background: linear-gradient(135deg, rgba(34, 211, 238, .25), rgba(245, 158, 11, .2)) !important;
+  box-shadow: 0 0 28px -6px rgba(34, 211, 238, .5) !important;
+  border-color: var(--c-cyan) !important;
+  color: #fff !important;
+}
+
+/* Notices */
+.notice {
+  border: 1px solid rgba(34, 211, 238, .25) !important;
+  background: linear-gradient(180deg, rgba(34, 211, 238, .1), rgba(245, 158, 11, .05)) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(8px) !important;
+  animation: cFadeIn .45s var(--c-ease) !important;
+}
+@keyframes cFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Scroll progress */
+.scroll-progress span {
+  background: linear-gradient(90deg, var(--c-cyan), var(--c-amber), var(--c-violet)) !important;
+  box-shadow: 0 0 12px rgba(34, 211, 238, .6) !important;
+}
+
+/* Inputs focus */
+input, select, textarea {
+  transition: border-color .25s ease, box-shadow .25s ease, background .25s ease !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--c-cyan) !important;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, .2), 0 0 28px -8px rgba(34, 211, 238, .5) !important;
+  outline: none !important;
+}
+
+/* Reveal */
+.c-reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity .65s var(--c-ease), transform .65s var(--c-ease);
+}
+.c-reveal.is-visible { opacity: 1; transform: none; }
+
+/* Footer legal */
+.shop-legal {
+  padding: 12px 14px !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, .03) !important;
+  border: 1px dashed rgba(255, 255, 255, .12) !important;
+}
+
+/* Responsive: más productos visibles */
+@media (max-width: 760px) {
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; }
+  .product-grid, .tp-grid, .rel-grid, .lm-families, .tyre-grid, .tut-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; }
+  .c-orb { display: none !important; }
+}
+@media (max-width: 420px) {
+  .shop-grid { grid-template-columns: 1fr !important; }
+  .product-grid, .tp-grid, .rel-grid, .lm-families, .tyre-grid, .tut-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}

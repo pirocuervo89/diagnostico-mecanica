@@ -1,0 +1,290 @@
+/* nextgen.css — capa visual futurista (glassmorphism, glow, animaciones, transiciones) */
+:root {
+  --ng-glow: 0 0 40px rgba(243, 156, 18, .35), 0 0 90px rgba(34, 211, 238, .18);
+  --ng-glass: rgba(18, 22, 28, .55);
+  --ng-glass-strong: rgba(12, 15, 20, .72);
+  --ng-border: rgba(255, 255, 255, .16);
+  --ng-neon: #22d3ee;
+  --ng-amber: #f39c12;
+  --ng-violet: #a78bfa;
+}
+
+/* ---- Fondo animado con malla de luz ---- */
+body {
+  background:
+    radial-gradient(1200px 600px at 12% -10%, rgba(243, 156, 18, .16), transparent 60%),
+    radial-gradient(900px 500px at 88% 0%, rgba(34, 211, 238, .14), transparent 60%),
+    radial-gradient(700px 400px at 50% 110%, rgba(167, 139, 250, .12), transparent 65%),
+    var(--bg);
+  background-attachment: fixed;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 85%);
+  opacity: .6;
+  animation: ngGridDrift 24s linear infinite;
+}
+@keyframes ngGridDrift {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 46px 46px, 46px 46px; }
+}
+
+/* ---- Glassmorphism universal para paneles y tarjetas ---- */
+.panel, .shop-hero, .shop-search, .nx-tile, .shop-special-card,
+.tp-card, .lm-product, .product, .tyre-card, .buying-card,
+.garage-card, .forum-case-card, .cap-card, .contact-card,
+.home-action-btn, .dg-step-card, .dg-side-card, .obd-scanner {
+  background: linear-gradient(160deg, rgba(22, 27, 34, .78), rgba(10, 13, 18, .86)) !important;
+  backdrop-filter: blur(18px) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.35) !important;
+  border: 1px solid var(--ng-border) !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+  transition: transform .28s cubic-bezier(.2, .8, .2, 1), border-color .28s ease, box-shadow .28s ease, background .28s ease !important;
+}
+.panel:hover, .nx-tile:hover, .shop-special-card:hover, .tp-card:hover,
+.lm-product:hover, .product:hover, .tyre-card:hover, .buying-card:hover,
+.garage-card:hover, .forum-case-card:hover, .cap-card:hover,
+.contact-card:hover, .home-action-btn:hover, .dg-step-card:hover,
+.dg-side-card:hover, .obd-scanner:hover {
+  border-color: rgba(243, 156, 18, .45) !important;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, .55), 0 0 0 1px rgba(243, 156, 18, .22), 0 0 56px rgba(243, 156, 18, .16), inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+}
+
+/* ---- Tarjetas de tienda: mas compactas y visibles ---- */
+.shop-grid {
+  grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)) !important;
+  gap: 12px !important;
+}
+.product-grid, .tuning-grid, .tp-grid, .rel-grid, .buying-grid,
+.lm-families, .tyre-grid {
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)) !important;
+  gap: 12px !important;
+}
+.shop-card {
+  min-height: 0 !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+}
+.shop-card-media { height: 128px !important; padding: 8px !important; }
+.shop-card-body { padding: 10px 11px 11px !important; gap: 4px !important; }
+.shop-card-title { font-size: 13px !important; line-height: 1.28 !important; }
+.shop-card-price { font-size: 17px !important; text-shadow: 0 0 18px rgba(255, 213, 138, .5) !important; }
+.shop-card-brand, .shop-card-aff, .shop-card-badge {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* ---- Glow en bordes (animado) ---- */
+.shop-card, .nx-tile, .shop-special-card, .tp-card, .panel {
+  position: relative;
+}
+.shop-card::before, .nx-tile::before, .shop-special-card::before, .tp-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(120deg, transparent 30%, rgba(243, 156, 18, .55), rgba(34, 211, 238, .55), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .35s ease;
+  pointer-events: none;
+  z-index: 2;
+  animation: ngBorderSpin 4s linear infinite;
+}
+.shop-card:hover::before, .nx-tile:hover::before, .shop-special-card:hover::before, .tp-card:hover::before { opacity: 1; }
+@keyframes ngBorderSpin {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* ---- Botones con glow y shimmer ---- */
+.btn, .nx-tile-btn, .shop-card-buy, .shop-cat, .shop-sub {
+  transition: transform .2s cubic-bezier(.2, .8, .2, 1), box-shadow .2s ease, filter .2s ease, background .2s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+.btn.primary, .nx-tile-btn, .shop-card-buy, .btn.cyan {
+  background: linear-gradient(135deg, #f39c12, #ff7a18 55%, #ffb53d) !important;
+  color: #0b0d10 !important;
+  box-shadow: 0 10px 30px rgba(243, 156, 18, .45), 0 0 0 1px rgba(255, 255, 255, .08) inset !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .25);
+}
+.btn.primary:hover, .nx-tile-btn:hover, .shop-card-buy:hover, .btn.cyan:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 16px 44px rgba(243, 156, 18, .6), 0 0 60px rgba(243, 156, 18, .35) !important;
+  filter: brightness(1.08) !important;
+}
+.btn.primary::after, .nx-tile-btn::after, .shop-card-buy::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -120%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent);
+  transform: skewX(-20deg);
+  transition: left .7s ease;
+}
+.btn.primary:hover::after, .nx-tile-btn:hover::after, .shop-card-buy:hover::after { left: 160%; }
+
+/* ---- Badges y chips con pulso ---- */
+.shop-card-badge, .shop-card-aff, .tag, .badge, .chip {
+  box-shadow: 0 0 18px rgba(243, 156, 18, .35) !important;
+}
+.shop-card-badge {
+  animation: ngPulse 2.4s ease-in-out infinite !important;
+}
+@keyframes ngPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(243, 156, 18, .35); transform: scale(1); }
+  50% { box-shadow: 0 0 26px rgba(243, 156, 18, .7); transform: scale(1.04); }
+}
+
+/* ---- Instrucciones de uso: aspecto de pasos numerados ---- */
+.shop-how, [aria-label^="Cómo usar"] {
+  background: linear-gradient(135deg, rgba(243, 156, 18, .08), rgba(34, 211, 238, .06)) !important;
+  border: 1px solid rgba(243, 156, 18, .22) !important;
+  border-left: 3px solid var(--ng-amber) !important;
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px 14px !important;
+  align-items: center !important;
+}
+.shop-how b, [aria-label^="Cómo usar"] b {
+  color: var(--ng-amber) !important;
+  text-shadow: 0 0 14px rgba(243, 156, 18, .4) !important;
+  width: 100% !important;
+  margin-bottom: 2px !important;
+}
+.shop-how span, [aria-label^="Cómo usar"] span {
+  background: rgba(255, 255, 255, .04) !important;
+  border: 1px solid rgba(255, 255, 255, .08) !important;
+  border-radius: 999px !important;
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  color: var(--text) !important;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease !important;
+}
+.shop-how span:hover, [aria-label^="Cómo usar"] span:hover {
+  background: rgba(243, 156, 18, .12) !important;
+  border-color: rgba(243, 156, 18, .35) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ---- Hero y cabeceras con glow tipográfico ---- */
+.shop-hero h2, .page-head h2, .nx-hero h1, .nx-hero h2 {
+  background: linear-gradient(120deg, #fff 0%, #ffd58a 40%, #22d3ee 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 0 24px rgba(243, 156, 18, .25));
+}
+.eyebrow {
+  color: var(--ng-cyan) !important;
+  text-shadow: 0 0 12px rgba(34, 211, 238, .45) !important;
+  letter-spacing: .18em !important;
+}
+
+/* ---- Modal de ficha con glassmorphism ---- */
+.shop-modal-card {
+  background: linear-gradient(165deg, rgba(18, 22, 30, .92), rgba(8, 10, 14, .96)) !important;
+  backdrop-filter: blur(24px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.4) !important;
+  border: 1px solid rgba(255, 255, 255, .18) !important;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, .7), 0 0 80px rgba(243, 156, 18, .18) !important;
+}
+.shop-modal-bg { backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
+
+/* ---- Animaciones de entrada ---- */
+.view.active, .shop-card, .nx-tile, .tp-card, .lm-product, .product {
+  animation: ngFadeUp .55s cubic-bezier(.2, .8, .2, 1) both;
+}
+@keyframes ngFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.shop-grid > .shop-card { animation-delay: calc(var(--i, 0) * 28ms); }
+
+/* ---- Cursor glow global ---- */
+body::after {
+  content: '';
+  position: fixed;
+  left: var(--cursor-x, 50vw);
+  top: var(--cursor-y, 50vh);
+  width: 420px; height: 420px;
+  margin-left: -210px; margin-top: -210px;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(circle, rgba(243, 156, 18, .10), rgba(34, 211, 238, .06) 40%, transparent 70%);
+  mix-blend-mode: screen;
+  transition: opacity .3s ease;
+}
+
+/* ---- Barra de progreso de scroll ---- */
+.scroll-progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9999; pointer-events: none; }
+.scroll-progress > span {
+  display: block; height: 100%; width: 0%;
+  background: linear-gradient(90deg, #f39c12, #22d3ee, #a78bfa);
+  box-shadow: 0 0 14px rgba(243, 156, 18, .7), 0 0 24px rgba(34, 211, 238, .5);
+  transition: width .1s linear;
+}
+
+/* ---- Chips y categorías con glow ---- */
+.shop-cat, .shop-sub {
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+.shop-cat.active, .shop-sub.active {
+  background: linear-gradient(135deg, rgba(243, 156, 18, .22), rgba(243, 156, 18, .08)) !important;
+  border-color: rgba(243, 156, 18, .55) !important;
+  box-shadow: 0 0 24px rgba(243, 156, 18, .35) !important;
+  color: #ffd58a !important;
+}
+
+/* ---- Inputs con focus glow ---- */
+input, select, textarea {
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(34, 211, 238, .6) !important;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, .18), 0 0 24px rgba(34, 211, 238, .25) !important;
+  outline: none !important;
+}
+
+/* ---- Trust strip con glow ---- */
+.shop-trust-strip li {
+  transition: transform .2s ease, color .2s ease !important;
+}
+.shop-trust-strip li:hover { transform: translateY(-2px); color: #fff !important; }
+
+/* ---- Reducir movimiento ---- */
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after, .shop-card-badge { animation: none !important; }
+  .shop-card::before, .nx-tile::before, .shop-special-card::before, .tp-card::before { animation: none !important; }
+  .view.active, .shop-card, .nx-tile, .tp-card, .lm-product, .product { animation: none !important; }
+  * { transition-duration: .01ms !important; }
+}
+
+/* ---- Móvil: mantener denso pero legible ---- */
+@media (max-width: 640px) {
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .product-grid, .tuning-grid, .tp-grid, .rel-grid, .buying-grid,
+  .lm-families, .tyre-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  body::after { display: none !important; }
+}
