@@ -441,7 +441,7 @@
 /* Con una ruta puesta, el mapa cede altura en el móvil para que el panel
    (maniobra, ETA y botón de arrancar) quede por encima de la barra inferior. */
 @media (max-width: 700px) {
-  #view-ruta .ruta-shell.ruta-con-ruta .ruta-map { height: clamp(290px, 44vh, 430px); }
+  #view-ruta .ruta-shell.ruta-con-ruta .ruta-map { height: clamp(250px, 39vh, 380px); }
   #view-ruta .ruta-shell.ruta-con-ruta { margin-bottom: 6px; }
 }
 .ruta-panel { scroll-margin-bottom: 96px; }
