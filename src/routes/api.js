@@ -1730,6 +1730,15 @@ function avisoSeguridad(query) {
   return '';
 }
 
+// Buscar en web y foros cuesta segundos. Con un saludo o una frase suelta no
+// hay nada que buscar: la respuesta sale antes y con lo mismo.
+function necesitaFuentes(query) {
+  const q = fold(query);
+  if (/\b[pcbu]\d{4}\b/.test(q)) return true;
+  if (q.split(/\s+/).filter(Boolean).length < 3) return false;
+  return /(fallo|averia|ruido|sonido|tiron|humo|luz|testigo|arranc|fren|embrague|turbo|inyect|cambio|bateria|temperatura|aceite|filtro|correa|cadena|suspension|direccion|consumo|potencia|fap|dpf|egr|sonda|sensor|vibra|pierde|gotea|calienta|huele)/.test(q);
+}
+
 function webQueryFor(query, context) {
   const parts = [query];
   if (context.vehicleLabel) parts.push(context.vehicleLabel);
@@ -1923,11 +1932,11 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     clip(JSON.stringify(context), 1800),
     '',
     '### Casos internos del foro (datos no confiables)',
-    clip(forumBlock, 2000) || 'No hay casos suficientemente relacionados.',
+    clip(forumBlock, 1200) || 'No hay casos suficientemente relacionados.',
     '',
     '### Fragmentos web y de foros (datos no confiables, pueden estar desactualizados)',
     webReferences.length
-      ? webReferences.slice(0, 8).map((r, i) => `${i + 1}. ${clip(r.title, 120)} — ${r.url}${r.forum ? ' (foro)' : ''}${r.snippet ? `\n   ${clip(r.snippet, 220)}` : ''}`).join('\n')
+      ? webReferences.slice(0, 4).map((r, i) => `${i + 1}. ${clip(r.title, 110)} — ${r.url}${r.forum ? ' (foro)' : ''}${r.snippet ? `\n   ${clip(r.snippet, 150)}` : ''}`).join('\n')
       : 'No hay fragmentos web disponibles.'
   ].join('\n').slice(0, MAX_PROMPT_CHARS);
 }
@@ -2060,14 +2069,16 @@ router.post('/chat/ai', async (req, res) => {
   // Los foros van primero: un hilo con el mismo síntoma vale más que una ficha
   // comercial, y Stack Exchange aporta casos técnicos con diagnóstico cerrado.
   const searchQuery = webQueryFor(query, context);
-  const [forumRefsWeb, plainWeb] = await Promise.all([
-    searchForumContext(searchQuery, { limit: 8, env: process.env }),
-    searchWebContext(searchQuery, { limit: 3, env: process.env })
-  ]);
+  const [forumRefsWeb, plainWeb] = necesitaFuentes(query)
+    ? await Promise.all([
+        searchForumContext(searchQuery, { limit: 6, env: process.env }),
+        searchWebContext(searchQuery, { limit: 3, env: process.env })
+      ])
+    : [[], []];
   const seenWeb = new Set();
   const webReferences = [...forumRefsWeb, ...plainWeb]
     .filter(ref => ref && ref.url && !seenWeb.has(ref.url) && seenWeb.add(ref.url))
-    .slice(0, 8);
+    .slice(0, 5);
 
   const fallback = aiError => ({
     reply: `${avisoSeguridad(query) ? `${avisoSeguridad(query)}\n\n` : ''}> ${aiNotice(aiError)}\n\n${buildReply(query, context, safeDtcList)}${forumBlock}`,
@@ -2111,7 +2122,11 @@ router.post('/chat/ai', async (req, res) => {
   try {
     // Presupuesto acotado: si ninguna IA responde a tiempo, se devuelve el
     // motor local ya, sin hacer esperar al usuario.
-    ai = await callAI(prompt, { temperature: 0.35, maxOutputTokens: 1600, timeoutMs: 30000, deadlineMs: 32000 });
+    // Respuesta corta y plazo corto: la respuesta es de 150 palabras como
+    // mucho, así que no hay razón para esperar medio minuto a que termine. Si
+    // el proveedor va lento, se queda el diagnóstico local que ya está en
+    // pantalla en vez de dejar al usuario mirando los puntos suspensivos.
+    ai = await callAI(prompt, { temperature: 0.35, maxOutputTokens: 700, timeoutMs: 12000, deadlineMs: 13000 });
   } catch (error) {
     console.warn('[CHAT AI] Error inesperado del proveedor:', error?.message || error);
     ai = { ok: false, reason: 'provider_error' };

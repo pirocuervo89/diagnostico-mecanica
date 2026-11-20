@@ -970,7 +970,7 @@ function initUniversalSearch() {
       } else {
         window.MayaEscuchar?.();
       }
-    }, 450);
+    }, 120);
   };
 
   input.addEventListener('keydown', e => {
@@ -2336,6 +2336,15 @@ async function submitChat(text) {
       }
     };
 
+    // Las dos fases salen a la vez: la local contesta al instante y la IA ya
+    // está trabajando mientras el usuario lee, en vez de sumar un viaje de ida
+    // y vuelta entero antes de pedirla.
+    const aiPendiente = api('/api/chat/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(err => ({ __error: err }));
+
     const res = await api('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2352,12 +2361,9 @@ async function submitChat(text) {
     if (res.ai_pending) {
       const aiThinking = addBubble('<i></i><i></i><i></i>', 'assistant typing', true);
       try {
-        const aiRes = await api('/api/chat/ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        const aiRes = await aiPendiente;
         if (aiThinking) aiThinking.remove();
+        if (aiRes && aiRes.__error) throw aiRes.__error;
         if (aiRes?.source === 'ai_provider' && aiRes.reply) {
           const aiBubble = addBubble(
             `<div class="chat-ai-head">ANÁLISIS IA CONTRASTADO</div>${formatMarkdown(aiRes.reply)}${chatMeta(aiRes)}`,

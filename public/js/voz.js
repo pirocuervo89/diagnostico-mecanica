@@ -199,7 +199,7 @@
     if (!synth.getVoices().length && bubble.dataset.vozRetry !== '1') {
       bubble.dataset.vozRetry = '1';
       try { synth.getVoices(); } catch (_) {}
-      setTimeout(() => speak(bubble), 400);
+      setTimeout(() => speak(bubble), 250);
       return;
     }
     stopSpeaking();
@@ -275,7 +275,7 @@
         const todas = document.querySelectorAll('#chatBox .bubble.assistant:not(.typing)');
         const ultima = todas[todas.length - 1];
         if (ultima === bubble) speak(bubble);
-      }, 300);
+      }, 120);
     }
   }
 
@@ -497,7 +497,7 @@
     // aún no ha publicado voces, se espera un poco en vez de hablar sin voz.
     const decir = (intento = 0) => {
       if (!synth.getVoices().length && intento < 3) {
-        setTimeout(() => decir(intento + 1), 400);
+        setTimeout(() => decir(intento + 1), 250);
         return;
       }
       const { voice, male } = pickSpanishVoice();
@@ -573,12 +573,24 @@
     const input = document.getElementById('chatInput');
     const form = document.getElementById('chatForm');
     const texto = (input?.value || '').trim();
+    const inicioEspera = Date.now();
     dictando = false;
     try { wakeRec?.stop?.(); } catch (_e) {}
     if (!texto || !form) return;
     form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-    // Se deja de escuchar mientras Maya habla, para no oírse a sí misma.
-    setTimeout(() => { if (llamadaActiva) abrirEscucha(); }, 16000);
+    // Se vuelve a escuchar en cuanto Maya TERMINA de hablar, no con una espera
+    // fija de 16 s: antes la conversación tenía un hueco muerto enorme y ahora
+    // el micrófono se reabre solo un instante después de la última palabra.
+    const reanudar = () => { if (llamadaActiva) abrirEscucha(); };
+    let hablo = false;
+    const vigilante = setInterval(() => {
+      if (!llamadaActiva) { clearInterval(vigilante); return; }
+      if (synth && (synth.speaking || synth.pending)) { hablo = true; return; }
+      if (hablo) { clearInterval(vigilante); setTimeout(reanudar, 120); return; }
+      // Sin voz instalada nunca llega a hablar: no se deja al usuario colgado.
+      if (Date.now() - inicioEspera > 6000) { clearInterval(vigilante); reanudar(); }
+    }, 250);
+    setTimeout(() => { clearInterval(vigilante); reanudar(); }, 22000);
   }
 
   async function abrirEscucha() {
@@ -615,7 +627,9 @@
 
       if (input) input.value = `${input.value} ${trozo}`.trim().slice(0, 4000);
       clearTimeout(timerSilencio);
-      timerSilencio = setTimeout(enviarDictado, 1800);
+      // 1,1 s de silencio basta: antes se esperaba casi el doble y la charla
+      // se sentía a cámara lenta.
+      timerSilencio = setTimeout(enviarDictado, 1100);
     };
 
     wakeRec.onend = () => {
@@ -657,10 +671,10 @@
     añadirBotonLlamada();
     // Saludo al entrar en el chat, tanto por menú como por la barra inferior.
     document.querySelectorAll('[data-view="chat"]').forEach(b => {
-      b.addEventListener('click', () => setTimeout(() => saludarMaya(true), 900));
+      b.addEventListener('click', () => saludarMaya(true));
     });
     if (document.querySelector('.view.active')?.id === 'view-chat') {
-      setTimeout(() => saludarMaya(true), 1200);
+      setTimeout(() => saludarMaya(true), 150);
     }
     if (store.get(STORE_LLAMADA) === '1') {
       // El micrófono necesita un gesto: se arranca al primer toque.
