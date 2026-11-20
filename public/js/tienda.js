@@ -91,10 +91,13 @@
     const q = s(state.query);
     if (q) {
       const terms = q.split(/\s+/).filter(Boolean);
-      list = list.filter(p => {
-        const text = s(`${p.name} ${p.manufacturer} ${p.subcategory} ${p.category}`);
-        return terms.every(t => text.includes(t));
-      });
+      const texto = p => s(`${p.name} ${p.manufacturer} ${p.subcategory} ${p.category}`);
+      const todos = list.filter(p => terms.every(t => texto(p).includes(t)));
+      // «bombillas h7 led» puede estar escrito como «Lámpara H7 LED»: si no
+      // aparece todo junto, basta con que coincida alguna palabra con peso.
+      list = todos.length
+        ? todos
+        : list.filter(p => terms.some(t => t.length > 2 && texto(p).includes(t)));
     }
     const orden = [...list];
     if (state.sort === 'price-asc') orden.sort((a, b) => a.priceNum - b.priceNum);
