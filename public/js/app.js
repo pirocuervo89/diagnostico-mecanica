@@ -1,5 +1,11 @@
 // Diagnóstico y Mecánica - Script Principal
 const $ = s => document.querySelector(s);
+// Helper de tracking GA4 con respeto al consentimiento (RGPD)
+function gtagTrack(name, params) {
+  if (typeof gtag !== 'function') return;
+  if (window.dymConsent && !window.dymConsent.has('analytics')) return;
+  gtagTrack(name, params);
+}
 const $$ = s => [...document.querySelectorAll(s)];
 
 // ---------------------------------------------------------------
@@ -459,6 +465,9 @@ function setVehicleState(vehicle, origin = 'catalog') {
 
   const txt = [currentVehicle.brand, currentVehicle.model, currentVehicle.engine].filter(Boolean).join(' ');
   if (!txt) return false;
+  if (typeof gtag === 'function') {
+    gtagTrack('vehicle_selected', { brand: currentVehicle.brand, model: currentVehicle.model, engine: currentVehicle.engine, origin });
+  }
 
   const homeName = $('#homeVehicleName');
   if (homeName) homeName.textContent = txt;
@@ -1303,6 +1312,7 @@ async function searchDtc(overrideQ = null, overridePrefix = null) {
 
   const q = overrideQ !== null ? overrideQ : ($('#dtcSearch')?.value || '').trim();
   const prefix = overridePrefix || '';
+  if (typeof gtag === 'function') gtagTrack('dtc_search', { search_term: q || prefix || '' });
 
   resultsContainer.innerHTML = '<div style="color:var(--muted);padding:15px;">Buscando en la base de datos de 9.201 códigos...</div>';
 
@@ -2383,6 +2393,7 @@ async function submitChat(text) {
   const query = String(text || '').trim();
   if (!query || chatBusy) return;
   chatBusy = true;
+  if (typeof gtag === 'function') gtagTrack('diagnosis_started');
   const chatSubmit = chatForm?.querySelector('button[type="submit"]');
   if (chatSubmit) chatSubmit.disabled = true;
   if (chatInput) chatInput.value = '';
@@ -2433,6 +2444,7 @@ async function submitChat(text) {
     if (thinkingBubble) thinkingBubble.remove();
     const localBubble = addBubble(formatMarkdown(res.reply || '') + chatMeta(res), 'assistant', true);
     renderChatExtras(res);
+    if (typeof gtag === 'function') gtagTrack('diagnosis_completed');
     scrollToBubbleStart(localBubble);
 
     // El backend nuevo responde primero con el motor experto y deja la IA en
@@ -2514,6 +2526,7 @@ document.addEventListener('click', event => {
   }
   const informe = event.target.closest('[data-informe]');
   if (informe) {
+    if (typeof gtag === 'function') gtagTrack('report_requested');
     const texto = informe.closest('.bubble')?.innerText?.trim() || '';
     const campo = document.getElementById('fSymptoms');
     if (campo) {
@@ -4040,6 +4053,34 @@ if (contactForm) {
 const footerYear = $('#footerYear');
 if (footerYear) footerYear.textContent = new Date().getFullYear();
 
+// Newsletter (Brevo) — suscripción desde footer
+const newsletterForm = $('#newsletterForm');
+if (newsletterForm) {
+  newsletterForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = ($('#newsletterEmail') || {}).value || '';
+    const msg = $('#newsletterMsg');
+    const btn = newsletterForm.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+    try {
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'footer' })
+      });
+      const data = await res.json();
+      if (msg) {
+        msg.textContent = data.message || data.error || 'Error';
+        msg.style.color = data.ok ? '#4ade80' : '#f87171';
+      }
+      if (data.ok && typeof gtagTrack === 'function') gtagTrack('newsletter_subscribe', { source: 'footer' });
+    } catch (err) {
+      if (msg) { msg.textContent = 'Error de conexión'; msg.style.color = '#f87171'; }
+    }
+    if (btn) btn.disabled = false;
+  });
+}
+
 // Atajo: "/" enfoca el buscador de síntomas cuando no se está escribiendo.
 document.addEventListener('keydown', e => {
   if (e.key !== '/' || e.target.matches('input, textarea, select')) return;
@@ -4884,6 +4925,16 @@ if (relSearchInput) {
 
 // Carga bajo demanda y enlaces desde el buscador universal.
 document.addEventListener('viewchange', e => {
+  // GA4: page_view manual para SPA (send_page_view desactivado en config)
+  if (typeof gtag === 'function') {
+    gtagTrack('page_view', {
+      page_title: document.title,
+      page_location: location.href,
+      page_path: '/' + (e.detail.name || 'home')
+    });
+    if (e.detail.name === 'obd') gtagTrack('obd2_opened');
+    if (e.detail.name === 'planes') gtagTrack('subscription_view');
+  }
   if (e.detail.name === 'vehiculos') loadVehicles();
   if (e.detail.name === 'tuning') {
     loadTuning();
@@ -4906,6 +4957,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initHomeScanners();
   const initial = location.hash.slice(1);
   if (initial) showView(initial);
+  else if (typeof gtag === 'function') {
+    gtagTrack('page_view', { page_title: document.title, page_location: location.href, page_path: '/home' });
+  }
   // Sin hash se queda la portada (view-home, ya activa en el HTML): el coche,
   // la pregunta a la IA y la ficha técnica están en la primera pantalla.
   Promise.all([
@@ -4920,6 +4974,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.addEventListener('hashchange', () => showView(location.hash.slice(1), true));
+
+// GA4: delegado global de clics (affiliate_click, product_view, tutorial_opened)
+document.addEventListener('click', (e) => {
+  if (typeof gtag !== 'function') return;
+  const a = e.target.closest('a[href]');
+  if (a) {
+    const href = a.getAttribute('href') || '';
+    if (/amazon|autodoc|aliexpress|temu/i.test(href)) {
+      gtagTrack('affiliate_click', { link_url: href, link_text: (a.textContent || '').trim().slice(0, 100) });
+    }
+    const tut = a.closest('[data-tutorial-id]');
+    if (tut) gtagTrack('tutorial_opened', { tutorial_id: tut.dataset.tutorialId || '' });
+  }
+  const prod = e.target.closest('[data-product-id]');
+  if (prod) gtagTrack('product_view', { product_id: prod.dataset.productId || '' });
+});
 
 // -------------------------------------------------------------
 // PWA: instalación en Android y funcionamiento sin conexión

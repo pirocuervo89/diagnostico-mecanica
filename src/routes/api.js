@@ -1,5 +1,6 @@
 import express from 'express';
 import fs from 'fs';
+import pkg from '../../package.json' with { type: 'json' };
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { obtenerSystemPrompt, filtrarProductosRecomendados, esConsultaVaga } from '../../ia_reasoning.js';
@@ -13,6 +14,8 @@ import { scanVehicleDocument } from '../lib/document_scan.js';
 import { findEquivalents, sizeSummary, rimWidthRange, checkWheelFit } from '../lib/tyres.js';
 import { autodocUrlFor, autodocSearch, aliexpressUrlFor, temuUrlFor } from '../lib/tiendas.js';
 import { transcribeAudio, transcribeWithGemini } from '../lib/voice_transcribe.js';
+import { getSearchConsoleData } from '../lib/gsc_api.js';
+import { getGA4Data } from '../lib/ga4_api.js';
 
 // Búsqueda insensible a mayúsculas y acentos.
 const fold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -288,8 +291,10 @@ router.get('/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'diagnostico-mecanica',
+    version: pkg.version,
     time: new Date().toISOString(),
     startedAt: ARRANQUE,
+    uptime: process.uptime(),
     commit: String(process.env.RENDER_GIT_COMMIT || '').slice(0, 7)
   });
 });
@@ -550,6 +555,147 @@ router.post('/contact', (req, res) => {
   }
 
   res.json({ ok: true, message: 'Mensaje registrado. Gracias por contactar.' });
+});
+
+// Suscripción a newsletter (Brevo).
+// Guarda el email localmente y, si hay BREVO_API_KEY, lo añade al contacto en Brevo
+// y envía un email de bienvenida. Sin clave, solo se registra localmente.
+router.post('/newsletter/subscribe', async (req, res) => {
+  const body = req.body || {};
+  const email = String(body.email || '').trim();
+  const name = String(body.name || '').trim().slice(0, 120);
+  const source = String(body.source || 'web').trim().slice(0, 40);
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Introduce un email válido.' });
+  }
+
+  // Guardar localmente en data/newsletter.json
+  const newsletterFile = path.join(DATA_DIR, 'newsletter.json');
+  let list = [];
+  try {
+    if (fs.existsSync(newsletterFile)) list = JSON.parse(fs.readFileSync(newsletterFile, 'utf8'));
+    if (!Array.isArray(list)) list = [];
+  } catch { list = []; }
+
+  // Evitar duplicados
+  if (list.some(e => e.email.toLowerCase() === email.toLowerCase())) {
+    return res.json({ ok: true, message: 'Ya estás suscrito. ¡Gracias!' });
+  }
+
+  const entry = { email, name, source, date: new Date().toISOString() };
+  list.push(entry);
+  try {
+    fs.writeFileSync(newsletterFile, JSON.stringify(list, null, 2));
+  } catch (e) {
+    console.error(`[NEWSLETTER] No se pudo guardar: ${e.message}`);
+    return res.status(500).json({ error: 'No se pudo registrar la suscripción.' });
+  }
+
+  // Integrar con Brevo si hay API key
+  const apiKey = String(process.env.BREVO_API_KEY || '').trim();
+  if (apiKey) {
+    try {
+      // Crear contacto en Brevo
+      const contactRes = await fetch('https://api.brevo.com/v3/contacts', {
+        method: 'POST',
+        headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          attributes: name ? { FIRSTNAME: name } : {},
+          listIds: [],
+          updateEnabled: true
+        }),
+        signal: AbortSignal.timeout(10000)
+      });
+
+      if (!contactRes.ok && contactRes.status !== 409) {
+        console.warn(`[BREVO] Error creando contacto: ${contactRes.status}`);
+      }
+
+      // Enviar email de bienvenida
+      const senderEmail = process.env.BREVO_SENDER_EMAIL || 'noreply@diagnosticoymecanica.com';
+      const senderName = process.env.BREVO_SENDER_NAME || 'Diagnóstico y Mecánica';
+      const emailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sender: { name: senderName, email: senderEmail },
+          to: [{ email, name: name || email }],
+          subject: '¡Bienvenido a Diagnóstico y Mecánica! 🔧',
+          htmlContent: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+            <h1 style="color:#ff6b35;">¡Bienvenido! 👋</h1>
+            <p>Gracias por suscribirte a <strong>Diagnóstico y Mecánica</strong>, la app que te ayuda a entender qué le pasa a tu coche.</p>
+            <p>Esto es lo que puedes hacer ahora:</p>
+            <ul>
+              <li>🔍 Diagnosticar averías por síntomas, código DTC o foto</li>
+              <li>🔧 Consultar tutoriales de reparación paso a paso</li>
+              <li>🛒 Encontrar recambios y herramientas al mejor precio</li>
+              <li>🗺️ Usar el GPS tipo Waze con MAYA como copiloto</li>
+            </ul>
+            <p><a href="https://diagnosticoymecanica.com" style="display:inline-block;background:#ff6b35;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Abrir la app</a></p>
+            <p style="color:#666;font-size:12px;margin-top:20px;">Puedes darte de baja en cualquier momento respondiendo a este email.</p>
+          </div>`
+        }),
+        signal: AbortSignal.timeout(10000)
+      });
+
+      if (!emailRes.ok) {
+        console.warn(`[BREVO] Error enviando bienvenida: ${emailRes.status}`);
+      } else {
+        console.log(`[BREVO] Suscripción + bienvenida enviada a ${email}`);
+      }
+    } catch (e) {
+      console.warn(`[BREVO] Error: ${e.message}`);
+    }
+  }
+
+  res.json({ ok: true, message: '¡Suscripción confirmada! Revisa tu email.' });
+});
+
+// Búsqueda de imágenes (Pexels, gratis). Sin API key devuelve array vacío.
+router.get('/images/search', async (req, res) => {
+  const q = String(req.query.q || '').trim().slice(0, 100);
+  const perPage = Math.min(15, Math.max(1, Number(req.query.per_page) || 5));
+  const apiKey = String(process.env.PEXELS_API_KEY || '').trim();
+  if (!q) return res.json({ photos: [], total: 0 });
+  if (!apiKey) return res.json({ photos: [], total: 0, notice: 'PEXELS_API_KEY no configurada' });
+  try {
+    const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=${perPage}&orientation=landscape`;
+    const r = await fetch(url, { headers: { Authorization: apiKey }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return res.json({ photos: [], total: 0, error: `Pexels ${r.status}` });
+    const data = await r.json();
+    const photos = (data.photos || []).map(p => ({
+      id: p.id,
+      url: p.src?.large || p.src?.medium,
+      thumb: p.src?.tiny || p.src?.small,
+      alt: p.alt || q,
+      photographer: p.photographer,
+      pexelsUrl: p.url
+    }));
+    res.json({ photos, total: data.total_results || photos.length });
+  } catch (e) {
+    console.warn('[PEXELS] Error:', e.message);
+    res.json({ photos: [], total: 0, error: e.message });
+  }
+});
+
+// Search Console: métricas de búsqueda (requiere GOOGLE_SERVICE_ACCOUNT_JSON).
+router.get('/search-console', async (req, res) => {
+  const days = Math.min(90, Math.max(1, Number(req.query.days) || 28));
+  const endDate = new Date().toISOString().slice(0, 10);
+  const startDate = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+  const result = await getSearchConsoleData(startDate, endDate);
+  res.json(result);
+});
+
+// GA4 Data API: métricas de visitas (requiere GOOGLE_SERVICE_ACCOUNT_JSON + GA4_PROPERTY_ID).
+router.get('/analytics', async (req, res) => {
+  const days = Math.min(90, Math.max(1, Number(req.query.days) || 28));
+  const endDate = new Date().toISOString().slice(0, 10);
+  const startDate = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+  const result = await getGA4Data(startDate, endDate);
+  res.json(result);
 });
 
 router.get('/dtc', (req, res) => {

@@ -52,9 +52,26 @@
   <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Diagnóstico y Mecánica","inLanguage":"es-ES","description":"Plataforma de diagnóstico automotriz: síntomas, códigos DTC, OBD-II, catálogo de taller e informes técnicos.","potentialAction":{"@type":"SearchAction","target":"https://diagnostico-mecanica.onrender.com/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Diagnóstico y Mecánica","applicationCategory":"UtilitiesApplication","operatingSystem":"Web, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","ratingCount":"120"}}</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+  gtag('js', new Date());
+</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-S72LBY47R8"></script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KFM5KW36');</script>
+<!-- End Google Tag Manager -->
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KFM5KW36"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <a class="skip" href="#contenido">Saltar al contenido</a>
 
 <!-- Arranque: presenta la consola y se retira sola (2,8 s o al tocar). -->
@@ -2340,6 +2357,14 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     </nav>
     <span class="footer-affiliate">Como Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables.</span>
   </div>
+  <div class="footer-newsletter" style="grid-column:1/-1;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06);text-align:center;">
+    <p style="margin:0 0 8px;font-size:12px;color:var(--muted,#8a93a6);">📧 Recibe tutoriales y novedades por email</p>
+    <form id="newsletterForm" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <input type="email" id="newsletterEmail" placeholder="tu@email.com" required style="padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-size:13px;min-width:200px;">
+      <button type="submit" style="padding:8px 16px;border-radius:8px;border:none;background:#ff6b35;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Suscribirme</button>
+    </form>
+    <p id="newsletterMsg" style="margin:6px 0 0;font-size:11px;color:var(--muted,#8a93a6);"></p>
+  </div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="Navegación de la app">
@@ -2375,10 +2400,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 
 <script src="/js/consent.js?v=20261110a"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  function dymGaConfig(){ if (window.dymConsent && window.dymConsent.has('analytics')) gtag('config', 'G-S72LBY47R8'); }
+  function dymGaConfig(){ if (window.dymConsent && window.dymConsent.has('analytics')) { gtag('consent', 'update', { analytics_storage: 'granted' }); gtag('config', 'G-S72LBY47R8', { send_page_view: false }); gtag('config', 'G-YZ9M5QSG2Z', { send_page_view: false }); } else { gtag('consent', 'update', { analytics_storage: 'denied' }); } }
   dymGaConfig();
   window.addEventListener('dym:consent', dymGaConfig);
 </script>
