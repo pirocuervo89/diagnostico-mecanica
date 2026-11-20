@@ -2375,7 +2375,8 @@ async function submitChat(text) {
         vehicleId: currentVehicle.id,
         brand: currentVehicle.brand,
         model: currentVehicle.model,
-        engine: currentVehicle.engine
+        engine: currentVehicle.engine,
+        dtcs: window.OBDEstado?.dtcs || []
       }
     };
 
@@ -3821,6 +3822,19 @@ function initOBD() {
     resetTelemetry();
   });
 
+  // Los códigos leídos se guardan: la ruta avisa en marcha si aparece una
+  // avería nueva y el chat los usa como contexto la próxima vez.
+  function guardarOBD(codigos) {
+    const datos = {
+      dtcs: Array.isArray(codigos) ? codigos.slice(0, 40) : [],
+      ts: Date.now()
+    };
+    try { localStorage.setItem('dm_obd_ultimo', JSON.stringify(datos)); } catch (_e) { /* sin espacio */ }
+    window.OBDEstado = datos;
+    try { window.dispatchEvent(new CustomEvent('obd:dtcs', { detail: datos })); } catch (_e) { /* nada */ }
+  }
+  try { window.OBDEstado = JSON.parse(localStorage.getItem('dm_obd_ultimo') || 'null'); } catch (_e) { window.OBDEstado = null; }
+
   $('#obdRead')?.addEventListener('click', async () => {
     if (obdState.reading) return;
     obdState.reading = true;
@@ -3829,6 +3843,7 @@ function initOBD() {
       const result = await obdManager.readDTCs();
       obdState.dtcs = result.all || [];
       renderObdDtcs(obdState.dtcs);
+      guardarOBD(obdState.dtcs);
       obdSetStatus(`Lectura finalizada: ${obdState.dtcs.length} código(s) detectado(s).`, 'connected');
     } catch (err) {
       obdSetStatus(`No se pudieron leer los códigos: ${err.message}`, 'error');
@@ -3869,6 +3884,7 @@ function initOBD() {
       await obdManager.clearDTCs();
       obdState.dtcs = [];
       renderObdDtcs([]);
+      guardarOBD([]);
       obdSetStatus('Códigos borrados. Recuerda: la avería mecánica puede persistir.', 'connected');
     } catch (err) {
       obdSetStatus(`No se pudieron borrar los códigos: ${err.message}`, 'error');

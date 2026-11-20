@@ -2098,7 +2098,7 @@ router.post('/chat/ai', async (req, res) => {
   const fichaDtc = codigoPedido
     ? safeDtcList.find(d => String(d.code || '').toUpperCase() === String(codigoPedido).toUpperCase())
     : null;
-  const dtcBlock = fichaDtc
+  let dtcBlock = fichaDtc
     ? [
         '### Código DTC verificado en la base (dato oficial)',
         `${fichaDtc.code}: ${fichaDtc.title}${fichaDtc.system ? ` (${fichaDtc.system})` : ''}.`,
@@ -2106,6 +2106,15 @@ router.post('/chat/ai', async (req, res) => {
         'Usa EXACTAMENTE este significado. No lo traduzcas de memoria ni lo cambies: si la base dice que la presión es insuficiente, no escribas sobre-presión.'
       ].filter(Boolean).join('\n')
     : '';
+
+  // Si el OBD ha leído averías, el modelo tiene que verlas: son datos del
+  // coche real, no una suposición del usuario.
+  const obdCodes = Array.isArray(context?.dtcs)
+    ? context.dtcs.filter(c => /^[PCBU]\d{4}$/i.test(String(c))).slice(0, 12)
+    : [];
+  if (obdCodes.length) {
+    dtcBlock += `${dtcBlock ? '\n\n' : ''}### Averías leídas por el OBD del coche\n${obdCodes.join(', ')}. Tenlas en cuenta al responder: si alguna explica el síntoma, dilo y ordena la gravedad.`;
+  }
 
   const plan = planDePeticion(req);
   const prompt = chatAiPrompt({

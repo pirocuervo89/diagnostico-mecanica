@@ -19,7 +19,10 @@ const PRESETS = {
     kind: 'openai',
     baseUrl: 'https://api.groq.com/openai/v1',
     model: 'openai/gpt-oss-120b',
-    keyEnv: 'GROQ_API_KEY'
+    keyEnv: 'GROQ_API_KEY',
+    // Si el plan gratuito agota la cuota de un modelo, se prueba otro del
+    // mismo proveedor antes de saltar de servicio. La cuota es por modelo.
+    altModels: ['llama-3.3-70b-versatile', 'openai/gpt-oss-20b']
   },
   openrouter: {
     id: 'openrouter',
@@ -27,7 +30,8 @@ const PRESETS = {
     kind: 'openai',
     baseUrl: 'https://openrouter.ai/api/v1',
     model: 'meta-llama/llama-3.3-70b-instruct:free',
-    keyEnv: 'OPENROUTER_API_KEY'
+    keyEnv: 'OPENROUTER_API_KEY',
+    altModels: ['google/gemma-3-27b-it:free', 'deepseek/deepseek-chat-v3-0324:free']
   },
   mistral: {
     id: 'mistral',
@@ -68,7 +72,8 @@ const PRESETS = {
     kind: 'gemini',
     baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
     model: 'gemini-3.1-flash-lite',
-    keyEnv: 'GEMINI_API_KEY'
+    keyEnv: 'GEMINI_API_KEY',
+    altModels: ['gemini-2.5-flash-lite', 'gemini-2.5-flash']
   },
   // Preset gratuito y sin clave: último recurso cuando no hay nada configurado
   // o cuando todas las claves fallan. No admite imágenes.
@@ -79,7 +84,8 @@ const PRESETS = {
     baseUrl: 'https://text.pollinations.ai/openai',
     model: 'openai-fast',
     keyEnv: '',
-    free: true
+    free: true,
+    altModels: ['openai', 'mistral']
   }
 };
 
@@ -749,13 +755,36 @@ export async function callAI(prompt, opts = {}) {
       ...(provider.free ? { maxOutputTokens: Math.min(requestedMax, 3000) } : {}),
       timeoutMs: Math.max(2000, Math.min(wantedTimeout, hardCap, remaining))
     };
-    const result = provider.kind === 'gemini'
-      ? await callGemini(provider, prompt, effectiveOpts)
-      : (provider.id === 'pollinations'
-        ? await callPollinationsFree(provider, prompt, { ...effectiveOpts, env })
-        : await callOpenAICompatible(provider, prompt, effectiveOpts));
+    // Cambio de modelo automático: los planes gratuitos dan cuota POR MODELO,
+    // así que si uno se queda sin plan se prueba otro del mismo proveedor antes
+    // de saltar de servicio. Solo se rota por cuota o clave: un fallo de red no
+    // mejora probando otro modelo. AI_MODEL fija el modelo y desactiva la rotación.
+    const modelos = [provider.model];
+    if (!String(env.AI_MODEL || '').trim()) {
+      const preset = PRESETS[provider.id] || PRESETS[String(provider.id).replace(/[_-].*$/, '')];
+      for (const modelo of preset?.altModels || []) {
+        if (modelo && !modelos.includes(modelo)) modelos.push(modelo);
+      }
+    }
+
+    let result = null;
+    for (const modelo of modelos) {
+      const actual = modelo === provider.model
+        ? provider
+        : { ...provider, model: modelo, label: `${provider.label} · ${String(modelo).split('/').pop()}` };
+      result = actual.kind === 'gemini'
+        ? await callGemini(actual, prompt, effectiveOpts)
+        : (actual.id === 'pollinations'
+          ? await callPollinationsFree(actual, prompt, { ...effectiveOpts, env })
+          : await callOpenAICompatible(actual, prompt, effectiveOpts));
+      if (result.ok) {
+        if (provider.free) lastFreeCallAt = Date.now();
+        return result;
+      }
+      if (!['quota', 'auth'].includes(result.reason)) break;
+      console.log(`[IA] ${actual.label}: ${result.reason}; se prueba otro modelo`);
+    }
     if (provider.free) lastFreeCallAt = Date.now();
-    if (result.ok) return result;
     attempts.push({ provider: provider.id, reason: result.reason, status: result.status });
   }
 

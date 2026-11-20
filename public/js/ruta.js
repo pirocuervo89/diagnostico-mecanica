@@ -13,24 +13,37 @@
   const elAviso = $('#rutaAviso');
   const elVel = $('#rutaVelocidad');
   const elGps = $('#rutaGps');
+  const elNoche = $('#rutaNoche');
+  const elMicro = $('#rutaMicro');
   const elInfo = $('#rutaInfo');
 
   let mapa = null;
+  let capaTiles = null;
   let yo = null;
   let halo = null;
   let destino = null;
-  let capaRadares = null;
+  let capaAvisos = null;
   let capaRuta = null;
   let capaRutaGlow = null;
-  let ruta = null;
+  let alternativas = [];
+  let seleccion = 0;
   let paso = 0;
   let navegando = false;
   let siguiendo = false;
   let ultimaPos = null;
   let ultimaVez = 0;
   let velocidad = 0;
+  let rumbo = 0;
   let avisados = new Set();
+  let avisos = [];
+  let limites = [];
   let temporizadorBusqueda = 0;
+  let noche = true;
+  let reconocimiento = null;
+  let codigosOBD = new Set();
+
+  const CLAVE_NOCHE = 'dm_ruta_noche';
+  const CLAVE_OBD = 'dm_obd_ultimo';
 
   // ------------------------------------------------------------ utilidades
   const metros = m => (m >= 1000 ? `${(m / 1000).toFixed(m >= 10000 ? 0 : 1)} km` : `${Math.round(m)} m`);
@@ -46,6 +59,13 @@
     const dLon = (bLon - aLon) * rad;
     const h = Math.sin(dLat / 2) ** 2 + Math.cos(aLat * rad) * Math.cos(bLat * rad) * Math.sin(dLon / 2) ** 2;
     return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function rumboEntre(a, b) {
+    const rad = Math.PI / 180;
+    const y = Math.sin((b.lon - a.lon) * rad) * Math.cos(b.lat * rad);
+    const x = Math.cos(a.lat * rad) * Math.sin(b.lat * rad) - Math.sin(a.lat * rad) * Math.cos(b.lat * rad) * Math.cos((b.lon - a.lon) * rad);
+    return (Math.atan2(y, x) / rad + 360) % 360;
   }
 
   function instruccion(s) {
@@ -65,7 +85,17 @@
     return `Gira ${giro}${nombre}`;
   }
 
-  function pitido() {
+  function flecha(s) {
+    const m = `${s?.type || ''} ${s?.modifier || ''}`;
+    if (/roundabout|rotary/.test(m)) return '↻';
+    if (/left/.test(m)) return '↰';
+    if (/right/.test(m)) return '↱';
+    if (/uturn/.test(m)) return '↺';
+    if (/arrive/.test(m)) return '⚑';
+    return '↑';
+  }
+
+  function pitido(frecuencia = 880) {
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return;
@@ -73,19 +103,19 @@
       const osc = ctx.createOscillator();
       const gan = ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.value = 880;
+      osc.frequency.value = frecuencia;
       gan.gain.setValueAtTime(.0001, ctx.currentTime);
-      gan.gain.exponentialRampToValueAtTime(.25, ctx.currentTime + .03);
-      gan.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + .45);
+      gan.gain.exponentialRampToValueAtTime(.28, ctx.currentTime + .03);
+      gan.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + .5);
       osc.connect(gan).connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + .5);
-      setTimeout(() => ctx.close?.(), 800);
+      osc.stop(ctx.currentTime + .55);
+      setTimeout(() => ctx.close?.(), 900);
     } catch (_e) { /* sin audio */ }
   }
 
   function decir(texto) {
-    try { window.MayaHablar?.(texto); } catch (_e) { /* la voz es opcional */ }
+    try { window.MayaHablar?.(texto); } catch (_e) { /* opcional */ }
   }
 
   function avisar(texto, tono = 'info', ms = 6000) {
@@ -97,7 +127,7 @@
     avisar._t = setTimeout(() => { elAviso.hidden = true; }, ms);
   }
 
-  // ------------------------------------------------------------ mapa
+  // ------------------------------------------------------------ mapa y tema
   function cuandoLeaflet(cb, intentos = 0) {
     if (window.L) { cb(); return; }
     if (intentos > 40) {
@@ -107,105 +137,154 @@
     setTimeout(() => cuandoLeaflet(cb, intentos + 1), 250);
   }
 
-  function initMapa() {
-    if (mapa || !window.L) return;
-    mapa = L.map(elMapa, {
-      zoomControl: false,
-      attributionControl: true,
-      preferCanvas: true
-    }).setView([40.4168, -3.7038], 6);
+  function temaInicial() {
+    try {
+      const guardado = localStorage.getItem(CLAVE_NOCHE);
+      if (guardado === '0') return false;
+      if (guardado === '1') return true;
+    } catch (_e) { /* sin almacenamiento */ }
+    const hora = new Date().getHours();
+    return hora >= 20 || hora < 7;
+  }
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  function aplicarTema(oscuro) {
+    noche = oscuro;
+    if (!mapa) return;
+    if (capaTiles) mapa.removeLayer(capaTiles);
+    const url = oscuro
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+    capaTiles = L.tileLayer(url, {
       maxZoom: 20,
       subdomains: 'abcd',
       attribution: '&copy; OpenStreetMap &copy; CARTO'
     }).addTo(mapa);
+    view.querySelector('.ruta-shell')?.setAttribute('data-tema', oscuro ? 'noche' : 'dia');
+    if (elNoche) {
+      elNoche.dataset.on = oscuro ? '1' : '0';
+      elNoche.setAttribute('aria-pressed', String(oscuro));
+      elNoche.title = oscuro ? 'Cambiar a mapa de día' : 'Cambiar a mapa de noche';
+    }
+    try { localStorage.setItem(CLAVE_NOCHE, oscuro ? '1' : '0'); } catch (_e) { /* nada */ }
+  }
 
-    capaRadares = L.layerGroup().addTo(mapa);
+  function initMapa() {
+    if (mapa || !window.L) return;
+    mapa = L.map(elMapa, { zoomControl: false, attributionControl: true, preferCanvas: true })
+      .setView([40.4168, -3.7038], 6);
+    aplicarTema(temaInicial());
+    capaAvisos = L.layerGroup().addTo(mapa);
     mapa.on('dragstart', () => { siguiendo = false; });
     setTimeout(() => mapa.invalidateSize(), 250);
   }
 
+  // ------------------------------------------------------------ marcadores
   function iconoYo() {
     return L.divIcon({
       className: 'ruta-punto',
-      html: '<span class="ruta-punto-halo"></span><span class="ruta-punto-coche"></span>',
-      iconSize: [34, 34],
-      iconAnchor: [17, 17]
+      html: `<span class="ruta-punto-halo"></span>
+        <span class="ruta-coche"><svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 16.5h14M6.5 16.5v1.8c0 .4-.3.7-.7.7h-1c-.4 0-.7-.3-.7-.7v-1.8M19.9 16.5v1.8c0 .4-.3.7-.7.7h-1c-.4 0-.7-.3-.7-.7v-1.8" fill="none" stroke="#04121c" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M3.6 16.5v-3.1c0-.5.3-.9.8-1l1.3-.4 1.7-3.1c.2-.4.6-.6 1-.6h6.9c.4 0 .8.2 1 .6l1.7 3.1 1.3.4c.5.1.8.5.8 1v3.1c0 .4-.3.7-.7.7H4.3c-.4 0-.7-.3-.7-.7Z" fill="#eaf7ff" stroke="#04121c" stroke-width="1.4"/>
+          <path d="M7.2 12.2h9.6l-1.2-2.4H8.4Z" fill="#38e1ff"/>
+        </svg></span>`,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
     });
   }
 
   function iconoDestino() {
-    return L.divIcon({
-      className: 'ruta-destino',
-      html: '<span></span>',
-      iconSize: [26, 26],
-      iconAnchor: [13, 24]
-    });
+    return L.divIcon({ className: 'ruta-destino', html: '<span></span>', iconSize: [26, 26], iconAnchor: [13, 24] });
   }
 
-  function iconoRadar(r) {
+  const ICONO_AVISO = { radar: '🚨', camara: '📷', obra: '🚧', senal: '🚦', peligro: '⚠️' };
+
+  function iconoAviso(a) {
+    const etiqueta = a.maxspeed ? String(a.maxspeed).replace(/[^0-9]/g, '') : ICONO_AVISO[a.kind] || '⚠️';
     return L.divIcon({
-      className: 'ruta-radar',
-      html: `<span>${r.maxspeed ? String(r.maxspeed).replace(/[^0-9]/g, '') : '📷'}</span>`,
+      className: `ruta-aviso ruta-aviso-${a.kind}`,
+      html: `<span>${etiqueta}</span>`,
       iconSize: [30, 30],
       iconAnchor: [15, 15]
     });
   }
 
   // ------------------------------------------------------------ GPS
-  function pintarVelocidad(v) {
+  function pintarVelocidad(v, limite) {
     if (!elVel) return;
     elVel.hidden = false;
     elVel.querySelector('b').textContent = String(Math.max(0, Math.round(v)));
+    const marca = elVel.querySelector('small');
+    if (marca) marca.textContent = limite ? `LÍMITE ${limite}` : '';
+    const exceso = limite && v > limite + 5;
+    elVel.classList.toggle('exceso', Boolean(exceso));
+  }
+
+  function limiteActual(lat, lon) {
+    if (!limites.length || !alternativas[seleccion]) return null;
+    const geo = alternativas[seleccion].geometry;
+    let mejor = -1;
+    let mejorD = Infinity;
+    for (let i = 0; i < geo.length; i += 4) {
+      const d = distancia(lat, lon, geo[i][0], geo[i][1]);
+      if (d < mejorD) { mejorD = d; mejor = i; }
+    }
+    if (mejor < 0) return null;
+    let valor = null;
+    for (const l of limites) {
+      if (l.node <= mejor && l.kmh) valor = l.kmh;
+    }
+    return valor;
+  }
+
+  function girarCoche(icono, grados) {
+    const coche = icono?.querySelector?.('.ruta-coche') || icono;
+    if (coche) coche.style.transform = `rotate(${grados}deg)`;
   }
 
   function alMover(pos) {
-    const { latitude: lat, longitude: lon, accuracy, speed } = pos.coords;
-    ultimaPos = { lat, lon };
+    const { latitude: lat, longitude: lon, accuracy, speed, heading } = pos.coords;
     const ahora = Date.now();
-    if (Number.isFinite(speed) && speed !== null) velocidad = speed * 3.6;
-    else if (ultimaVez) {
-      const dt = (ahora - ultimaVez) / 1000;
-      if (dt > .8) velocidad = distancia(mapa._ultLat, mapa._ultLon, lat, lon) / dt * 3.6;
+    if (ultimaPos) {
+      if (Number.isFinite(heading) && heading !== null) rumbo = heading;
+      else if (distancia(ultimaPos.lat, ultimaPos.lon, lat, lon) > 4) rumbo = rumboEntre(ultimaPos, { lat, lon });
     }
+    if (Number.isFinite(speed) && speed !== null) velocidad = speed * 3.6;
+    else if (ultimaPos && ultimaVez) {
+      const dt = (ahora - ultimaVez) / 1000;
+      if (dt > .8) velocidad = distancia(ultimaPos.lat, ultimaPos.lon, lat, lon) / dt * 3.6;
+    }
+    ultimaPos = { lat, lon };
     ultimaVez = ahora;
-    mapa._ultLat = lat;
-    mapa._ultLon = lon;
-    pintarVelocidad(Math.min(velocidad, 260));
+
+    const limite = limiteActual(lat, lon);
+    pintarVelocidad(Math.min(velocidad, 260), limite);
 
     if (!yo) {
       yo = L.marker([lat, lon], { icon: iconoYo(), zIndexOffset: 500 }).addTo(mapa);
-      halo = L.circle([lat, lon], {
-        radius: Math.min(accuracy || 25, 200),
-        color: '#38e1ff', weight: 1, fillColor: '#38e1ff', fillOpacity: .12
-      }).addTo(mapa);
-      if (!destino) mapa.setView([lat, lon], 15);
+      halo = L.circle([lat, lon], { radius: Math.min(accuracy || 25, 200), color: '#38e1ff', weight: 1, fillColor: '#38e1ff', fillOpacity: .12 }).addTo(mapa);
+      if (!destino) mapa.setView([lat, lon], 16);
     } else {
       yo.setLatLng([lat, lon]);
       halo.setLatLng([lat, lon]);
       halo.setRadius(Math.min(accuracy || 25, 200));
     }
+    girarCoche(yo.getElement(), rumbo);
 
     if (siguiendo || navegando) mapa.setView([lat, lon], navegando ? 17 : 16, { animate: true });
     if (navegando) seguirRuta(lat, lon);
-    vigilarRadares(lat, lon);
+    vigilarAvisos(lat, lon);
   }
 
   function errorGps(err) {
-    const texto = err && err.code === 1
+    avisar(err && err.code === 1
       ? 'Dale permiso de ubicación al navegador para ver dónde estás.'
-      : 'No se pudo leer el GPS. Sal al exterior y vuelve a intentarlo.';
-    avisar(texto, 'aviso', 8000);
+      : 'No se pudo leer el GPS. Sal al exterior y vuelve a intentarlo.', 'aviso', 8000);
   }
 
   function arrancarGps() {
     if (!navigator.geolocation) { avisar('Este navegador no tiene GPS disponible.', 'aviso', 8000); return; }
-    navigator.geolocation.watchPosition(alMover, errorGps, {
-      enableHighAccuracy: true,
-      maximumAge: 4000,
-      timeout: 20000
-    });
+    navigator.geolocation.watchPosition(alMover, errorGps, { enableHighAccuracy: true, maximumAge: 4000, timeout: 20000 });
   }
 
   // ------------------------------------------------------------ búsqueda
@@ -239,18 +318,12 @@
     }
   }
 
-  elBuscar?.addEventListener('submit', e => {
-    e.preventDefault();
-    buscar(elDestino.value);
-  });
-
+  elBuscar?.addEventListener('submit', e => { e.preventDefault(); buscar(elDestino.value); });
   elDestino?.addEventListener('input', () => {
     clearTimeout(temporizadorBusqueda);
-    const valor = elDestino.value;
-    if (valor.trim().length < 3) { elResultados.hidden = true; return; }
-    temporizadorBusqueda = setTimeout(() => buscar(valor), 550);
+    if (elDestino.value.trim().length < 3) { elResultados.hidden = true; return; }
+    temporizadorBusqueda = setTimeout(() => buscar(elDestino.value), 550);
   });
-
   elResultados?.addEventListener('click', e => {
     const btn = e.target.closest('[data-lat]');
     if (!btn) return;
@@ -264,7 +337,6 @@
     if (!mapa) return;
     if (destino) mapa.removeLayer(destino);
     destino = L.marker([lat, lon], { icon: iconoDestino() }).addTo(mapa);
-    mapa.fitBounds(L.latLngBounds([lat, lon], ultimaPos ? [ultimaPos.lat, ultimaPos.lon] : [lat + .01, lon + .01]), { padding: [50, 50] });
 
     const desde = ultimaPos || { lat: mapa.getCenter().lat, lon: mapa.getCenter().lng };
     elPanel.hidden = false;
@@ -274,39 +346,66 @@
       const r = await fetch(`/api/ruta/route?from=${desde.lat},${desde.lon}&to=${lat},${lon}`);
       const datos = await r.json();
       if (!r.ok || !datos.route) throw new Error(datos.error || 'Sin ruta');
-      ruta = datos.route;
+      alternativas = Array.isArray(datos.routes) && datos.routes.length ? datos.routes : [datos.route];
+      limites = Array.isArray(datos.route.limits) ? datos.route.limits : [];
+      seleccion = 0;
       paso = 0;
+      avisados.clear();
       pintarRuta();
       pintarPanel();
-      cargarRadares();
+      cargarAvisos();
     } catch (err) {
       elPanel.innerHTML = `<p class="ruta-error">${err.message || 'No se pudo calcular la ruta.'}</p>`;
     }
   }
 
+  function rutaActiva() { return alternativas[seleccion] || null; }
+
   function pintarRuta() {
+    const ruta = rutaActiva();
     if (!ruta || !mapa) return;
     if (capaRuta) mapa.removeLayer(capaRuta);
     if (capaRutaGlow) mapa.removeLayer(capaRutaGlow);
-    const puntos = ruta.geometry;
-    capaRutaGlow = L.polyline(puntos, { color: '#38e1ff', weight: 16, opacity: .16, lineCap: 'round' }).addTo(mapa);
-    capaRuta = L.polyline(puntos, { color: '#5ce6ff', weight: 5, opacity: .95, lineCap: 'round' }).addTo(mapa);
+    capaRutaGlow = L.polyline(ruta.geometry, { color: '#38e1ff', weight: 17, opacity: .15, lineCap: 'round' }).addTo(mapa);
+    capaRuta = L.polyline(ruta.geometry, { color: '#5ce6ff', weight: 5, opacity: .96, lineCap: 'round' }).addTo(mapa);
     mapa.fitBounds(capaRuta.getBounds(), { padding: [40, 40] });
   }
 
   function pintarPanel() {
+    const ruta = rutaActiva();
     if (!ruta || !elPanel) return;
     const s = ruta.steps[paso] || ruta.steps[0];
+    const otras = alternativas.length > 1 ? `
+      <div class="ruta-alternativas" role="group" aria-label="Rutas disponibles">
+        ${alternativas.map((r, i) => `
+          <button type="button" class="ruta-alt${i === seleccion ? ' activa' : ''}" data-ruta="${i}">
+            <b>${i === 0 ? 'Rápida' : `Alt. ${i + 1}`}</b><small>${metros(r.distance)} · ${minutos(r.duration)}</small>
+          </button>`).join('')}
+      </div>` : '';
     elPanel.innerHTML = `
       <div class="ruta-resumen">
-        <div><b>${metros(ruta.distance)}</b><span>${minutos(ruta.duration)}</span></div>
+        <div class="ruta-flecha">${flecha(s)}</div>
+        <div class="ruta-datos"><b>${metros(ruta.distance)}</b><span>${minutos(ruta.duration)}</span></div>
         <div class="ruta-sig"><small>SIGUIENTE</small><strong>${instruccion(s)}</strong></div>
       </div>
+      ${otras}
       <div class="ruta-pasos-preview">
-        ${ruta.steps.slice(1, 4).map(p => `<span>${instruccion(p)} · ${metros(p.distance)}</span>`).join('')}
+        ${ruta.steps.slice(paso + 1, paso + 4).map(p => `<span>${flecha(p)} ${instruccion(p)} · ${metros(p.distance)}</span>`).join('')}
       </div>
       <button type="button" class="ruta-empezar" id="rutaEmpezar">${navegando ? 'Detener navegación' : 'Iniciar navegación'}</button>`;
+
     elPanel.querySelector('#rutaEmpezar')?.addEventListener('click', alternarNavegacion);
+    elPanel.querySelectorAll('[data-ruta]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        seleccion = Number(btn.dataset.ruta) || 0;
+        paso = 0;
+        limites = alternativas[seleccion].limits || limites;
+        avisados.clear();
+        pintarRuta();
+        pintarPanel();
+        cargarAvisos();
+      });
+    });
   }
 
   function alternarNavegacion() {
@@ -314,9 +413,10 @@
     if (navegando) {
       siguiendo = true;
       paso = 0;
-      avisar('Navegación iniciada. Te aviso de los radares del camino.', 'ok', 5000);
+      avisar('Navegación iniciada. Te aviso de radares, obras y averías.', 'ok', 5000);
       if (ultimaPos) mapa.setView([ultimaPos.lat, ultimaPos.lon], 17);
-      decir('Navegación iniciada');
+      decir('Navegación iniciada. Nos vamos.');
+      revisarOBD(true);
     } else {
       decir('Navegación detenida');
       avisar('Navegación detenida.', 'info', 3000);
@@ -325,6 +425,7 @@
   }
 
   function restante(lat, lon) {
+    const ruta = rutaActiva();
     if (!ruta) return 0;
     let total = 0;
     for (let i = paso; i < ruta.steps.length; i += 1) total += ruta.steps[i].distance || 0;
@@ -334,10 +435,11 @@
   }
 
   function seguirRuta(lat, lon) {
+    const ruta = rutaActiva();
     const s = ruta?.steps[paso];
     if (!s) return;
     const d = Number.isFinite(s.lat) ? distancia(lat, lon, s.lat, s.lon) : 0;
-    if (d < 40 && paso < ruta.steps.length - 1) {
+    if (d < 45 && paso < ruta.steps.length - 1) {
       paso += 1;
       const siguiente = ruta.steps[paso];
       decir(instruccion(siguiente));
@@ -345,66 +447,125 @@
       pintarPanel();
     }
     const quedan = restante(lat, lon);
-    const resumen = elPanel.querySelector('.ruta-resumen div b');
+    const resumen = elPanel.querySelector('.ruta-datos b');
     if (resumen) resumen.textContent = metros(quedan);
   }
 
-  // ------------------------------------------------------------ radares
-  async function cargarRadares() {
-    if (!ruta || !mapa || !capaRadares) return;
+  // ------------------------------------------------------------ avisos (OSM)
+  async function cargarAvisos() {
+    const ruta = rutaActiva();
+    if (!ruta || !mapa || !capaAvisos) return;
     const puntos = ruta.geometry;
     const lat = puntos.reduce((a, p) => a + p[0], 0) / puntos.length;
     const lon = puntos.reduce((a, p) => a + p[1], 0) / puntos.length;
     try {
-      const r = await fetch(`/api/ruta/radares?lat=${lat}&lon=${lon}&radio=9000`);
+      const r = await fetch(`/api/ruta/avisos?lat=${lat}&lon=${lon}&radio=9000`);
       const datos = await r.json();
-      const lista = Array.isArray(datos.radares) ? datos.radares : [];
-      capaRadares.clearLayers();
-      lista.forEach(rad => {
-        L.marker([rad.lat, rad.lon], { icon: iconoRadar(rad), title: rad.maxspeed ? `Radar ${rad.maxspeed}` : 'Radar' })
-          .bindPopup(`${rad.kind === 'radar' ? 'Radar de velocidad' : 'Cámara'}${rad.maxspeed ? ` · ${rad.maxspeed}` : ''}`)
-          .addTo(capaRadares);
+      avisos = Array.isArray(datos.avisos) ? datos.avisos : [];
+      capaAvisos.clearLayers();
+      avisos.forEach(a => {
+        L.marker([a.lat, a.lon], { icon: iconoAviso(a), title: `${a.kind}${a.maxspeed ? ` ${a.maxspeed}` : ''}` })
+          .bindPopup(`${a.label}${a.maxspeed ? ` · ${a.maxspeed}` : ''}${a.name ? ` · ${a.name}` : ''}`)
+          .addTo(capaAvisos);
       });
-      if (lista.length && elInfo) elInfo.textContent = `${lista.length} radares conocidos en la zona`;
-    } catch (_e) { /* sin radares se navega igual */ }
+      if (elInfo) {
+        elInfo.textContent = avisos.length
+          ? `${avisos.length} avisos en la zona (${avisos.filter(a => a.kind === 'radar').length} radares)`
+          : 'Sin avisos conocidos en esta zona';
+      }
+    } catch (_e) { /* sin avisos se navega igual */ }
   }
 
-  function vigilarRadares(lat, lon) {
-    if (!capaRadares) return;
-    capaRadares.eachLayer(capa => {
-      const p = capa.getLatLng();
-      const d = distancia(lat, lon, p.lat, p.lng);
-      const id = `${p.lat.toFixed(5)},${p.lng.toFixed(5)}`;
-      if (d < 650 && !avisados.has(id)) {
-        avisados.add(id);
-        capa.setZIndexOffset(800);
-        avisar(`Radar a ${metros(d)}${/^\d+$/.test(String(capa.options.title || '').replace(/\D/g, '')) ? '' : ''}`, 'radar', 8000);
-        pitido();
-        try { navigator.vibrate?.([60, 40, 60]); } catch (_e) {}
-        decir(`Atención, radar a ${metros(Math.round(d / 50) * 50)}`);
-      }
-    });
+  function vigilarAvisos(lat, lon) {
+    if (!capaAvisos) return;
+    const pendientes = avisos.filter(a => !avisados.has(a.id));
+    for (const a of pendientes) {
+      const d = distancia(lat, lon, a.lat, a.lon);
+      const radio = a.kind === 'senal' ? 180 : a.kind === 'radar' ? 700 : 450;
+      if (d > radio) continue;
+      avisados.add(a.id);
+      const texto = a.kind === 'radar'
+        ? `Radar a ${metros(d)}${a.maxspeed ? `, límite ${a.maxspeed}` : ''}`
+        : `${a.label} a ${metros(d)}`;
+      avisar(texto, a.kind === 'radar' ? 'radar' : 'aviso', 9000);
+      pitido(a.kind === 'radar' ? 980 : 700);
+      try { navigator.vibrate?.([60, 40, 60]); } catch (_e) {}
+      decir(texto);
+    }
   }
+
+  // ------------------------------------------------------------ OBD conectado
+  function leerOBD() {
+    try { return JSON.parse(localStorage.getItem(CLAVE_OBD) || 'null'); } catch (_e) { return null; }
+  }
+
+  function gravedad(codigo) {
+    const c = String(codigo).toUpperCase();
+    if (/^P0(1|2|3|5|6|7|8)/.test(c)) return 'alta';
+    if (/^P0(4|9)|^P2/.test(c)) return 'media';
+    if (/^U|^B/.test(c)) return 'baja';
+    return 'media';
+  }
+
+  function revisarOBD(primera = false) {
+    const datos = leerOBD();
+    const lista = Array.isArray(datos?.dtcs) ? datos.dtcs : [];
+    if (!lista.length) return;
+    const nuevos = lista.filter(c => !codigosOBD.has(c));
+    lista.forEach(c => codigosOBD.add(c));
+    if (!nuevos.length) return;
+    const graves = nuevos.filter(c => gravedad(c) === 'alta');
+    const texto = nuevos.length === 1
+      ? `Nueva avería detectada: ${nuevos[0]}`
+      : `Nuevas averías detectadas: ${nuevos.join(', ')}`;
+    avisar(`${texto}${graves.length ? ' · gravedad alta, revisa el motor' : ' · revisa cuando puedas'}`, graves.length ? 'radar' : 'aviso', 12000);
+    pitido(graves.length ? 1200 : 620);
+    decir(`${texto}. ${graves.length ? 'Gravedad alta. Reduce la marcha y revisa el motor.' : 'No es urgente.'}`);
+    if (!primera && window.MayaHablar) {
+      // Deja rastro para el chat: la IA verá el código la próxima vez.
+      try { window.dispatchEvent(new CustomEvent('ruta:obd', { detail: { dtcs: nuevos } })); } catch (_e) {}
+    }
+  }
+
+  // ------------------------------------------------------------ voz
+  function dictarDestino() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { avisar('Este navegador no permite dictar. Escribe el destino.', 'aviso', 6000); return; }
+    if (reconocimiento) { try { reconocimiento.stop(); } catch (_e) {} reconocimiento = null; }
+    reconocimiento = new SR();
+    reconocimiento.lang = 'es-ES';
+    reconocimiento.interimResults = false;
+    reconocimiento.maxAlternatives = 1;
+    avisar('Te escucho… di el destino o «nos vamos».', 'info', 7000);
+    reconocimiento.onresult = event => {
+      const dicho = String(event.results?.[0]?.[0]?.transcript || '').trim();
+      if (!dicho) return;
+      if (/nos vamos|vamos|arranca|inicia/i.test(dicho) && rutaActiva()) { alternarNavegacion(); return; }
+      const limpio = dicho.replace(/^(ll[eé]vame|llevar|ir|ve|vamos|ruta)\s+(a|hacia|para)?\s*/i, '').trim();
+      elDestino.value = limpio || dicho;
+      buscar(elDestino.value);
+    };
+    reconocimiento.onerror = () => avisar('No te he oído. Prueba otra vez.', 'aviso', 5000);
+    reconocimiento.onend = () => { reconocimiento = null; };
+    try { reconocimiento.start(); } catch (_e) { avisar('No se pudo abrir el micrófono.', 'aviso', 5000); }
+  }
+
+  elMicro?.addEventListener('click', dictarDestino);
+  elNoche?.addEventListener('click', () => aplicarTema(!noche));
+  elGps?.addEventListener('click', () => {
+    siguiendo = true;
+    if (ultimaPos) mapa?.setView([ultimaPos.lat, ultimaPos.lon], 16);
+    else avisar('Esperando al GPS…', 'info', 4000);
+  });
 
   // ------------------------------------------------------------ arranque
   function iniciarVista() {
     cuandoLeaflet(() => {
       initMapa();
       mapa?.invalidateSize();
-      if (!navigator.geolocation) return;
-      navigator.geolocation.getCurrentPosition(
-        () => { if (!navegando) arrancarGps(); },
-        () => {},
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
+      revisarOBD(true);
     });
   }
-
-  elGps?.addEventListener('click', () => {
-    siguiendo = true;
-    if (ultimaPos) mapa?.setView([ultimaPos.lat, ultimaPos.lon], 16);
-    else avisar('Esperando al GPS…', 'info', 4000);
-  });
 
   document.addEventListener('viewchange', e => {
     if (e.detail?.name !== 'ruta') return;
@@ -417,6 +578,9 @@
       window.showView?.('ruta') || document.querySelector('[data-view="ruta"]')?.click();
     }
   });
+
+  window.addEventListener('obd:dtcs', () => revisarOBD());
+  setInterval(() => revisarOBD(), 45000);
 
   if (document.querySelector('.view.active')?.id === 'view-ruta') iniciarVista();
 

@@ -76,33 +76,52 @@ router.get('/route', async (req, res) => {
   if (guardado) return res.json({ route: guardado, cached: true });
 
   try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${fLon},${fLat};${tLon},${tLat}?overview=full&geometries=geojson&steps=true&alternatives=false`;
-    const datos = await pedirJson(url, 12000);
-    const ruta = datos?.routes?.[0];
-    if (!ruta) return res.status(404).json({ error: 'No hay ruta por carretera hasta ese punto' });
+    // alternatives: hasta tres caminos para que el usuario elija; annotations
+    // con maxspeed para poder enseñar el límite de la vía por la que va.
+    const url = `https://router.project-osrm.org/route/v1/driving/${fLon},${fLat};${tLon},${tLat}?overview=full&geometries=geojson&steps=true&alternatives=true&annotations=nodes,maxspeed`;
+    const datos = await pedirJson(url, 14000);
+    if (!Array.isArray(datos?.routes) || !datos.routes.length) {
+      return res.status(404).json({ error: 'No hay ruta por carretera hasta ese punto' });
+    }
 
-    const steps = [];
-    (ruta.legs?.[0]?.steps || []).forEach(s => {
-      const m = s.maneuver || {};
-      steps.push({
-        type: m.type || 'continue',
-        modifier: m.modifier || '',
-        name: s.name || '',
-        distance: Math.round(s.distance || 0),
-        lat: m.location?.[1],
-        lon: m.location?.[0]
+    const normalizar = ruta => {
+      const steps = [];
+      (ruta.legs?.[0]?.steps || []).forEach(s => {
+        const m = s.maneuver || {};
+        steps.push({
+          type: m.type || 'continue',
+          modifier: m.modifier || '',
+          name: s.name || '',
+          distance: Math.round(s.distance || 0),
+          lat: m.location?.[1],
+          lon: m.location?.[0]
+        });
       });
-    });
 
-    const salida = {
-      distance: Math.round(ruta.distance || 0),
-      duration: Math.round(ruta.duration || 0),
-      geometry: (ruta.geometry?.coordinates || []).map(c => [c[1], c[0]]),
-      steps
+      // Límites de velocidad por tramo: OSRM da un valor por segmento y el
+      // índice del nodo de la geometría donde empieza ese tramo.
+      const anot = ruta.legs?.[0]?.annotation || {};
+      const nodos = Array.isArray(anot.nodes) ? anot.nodes : [];
+      const velocidades = Array.isArray(anot.maxspeed) ? anot.maxspeed : [];
+      const limits = velocidades.map((v, i) => {
+        const kmh = typeof v === 'number' ? Math.round(v) : (parseInt(String(v).match(/(\d+)/)?.[1] || '', 10) || 0);
+        return { node: nodos[i] ?? -1, kmh };
+      }).filter(l => l.kmh > 0 && l.node >= 0);
+
+      return {
+        distance: Math.round(ruta.distance || 0),
+        duration: Math.round(ruta.duration || 0),
+        geometry: (ruta.geometry?.coordinates || []).map(c => [c[1], c[0]]),
+        steps,
+        limits
+      };
     };
 
+    const routes = datos.routes.slice(0, 3).map(normalizar);
+    const salida = { route: routes[0], routes };
+
     recordar(clave, 15 * 60 * 1000, salida);
-    res.json({ route: salida });
+    res.json(salida);
   } catch (_e) {
     res.status(502).json({ error: 'El servicio de rutas no responde. Inténtalo en un momento.' });
   }
@@ -112,23 +131,30 @@ router.get('/route', async (req, res) => {
 // OpenStreetMap tiene los radares fijos mapeados. No es el aviso en tiempo real
 // de Waze: son los puntos conocidos y su velocidad, que es lo que se puede usar
 // gratis y sin depender de otra app.
-router.get('/radares', async (req, res) => {
+router.get('/avisos', async (req, res) => {
   const lat = num(req.query.lat, -90, 90);
   const lon = num(req.query.lon, -180, 180);
   const radio = num(req.query.radio, 500, 12000) || 6000;
   if (lat === null || lon === null) return res.status(400).json({ error: 'Faltan coordenadas' });
 
-  const clave = `rad|${lat.toFixed(2)},${lon.toFixed(2)}|${Math.round(radio / 1000)}`;
+  const clave = `aviso|${lat.toFixed(2)},${lon.toFixed(2)}|${Math.round(radio / 1000)}`;
   const guardado = leer(clave);
-  if (guardado) return res.json({ radares: guardado, cached: true });
+  if (guardado) return res.json({ avisos: guardado, radares: guardado.filter(a => a.kind === 'radar'), cached: true });
 
+  // Radares fijos, semáforos, obras y peligros señalados en OpenStreetMap. No
+  // es el aviso en directo de Waze: es lo que la comunidad tiene mapeado, que
+  // se puede usar gratis y sin depender de otra app.
   const consulta = `[out:json][timeout:20];
     (
       node["highway"="speed_camera"](around:${radio},${lat},${lon});
       node["enforcement"="maxspeed"](around:${radio},${lat},${lon});
       node["man_made"="surveillance"]["surveillance:type"="ALPR"](around:${radio},${lat},${lon});
+      node["highway"="traffic_signals"](around:${radio},${lat},${lon});
+      node["hazard"](around:${radio},${lat},${lon});
+      node["highway"="construction"](around:${radio},${lat},${lon});
+      way["highway"="construction"](around:${radio},${lat},${lon});
     );
-    out body 80;`;
+    out center tags 120;`;
 
   // Overpass rechaza (406) las peticiones sin User-Agent propio y a veces
   // tarda: se prueban dos servidores y, si ambos fallan, se sigue sin radares.
@@ -158,22 +184,36 @@ router.get('/radares', async (req, res) => {
 
   try {
     if (!datos) throw new Error('sin datos');
-    const radares = (datos?.elements || [])
-      .filter(n => Number.isFinite(n.lat) && Number.isFinite(n.lon))
-      .map(n => ({
-        id: String(n.id),
-        lat: n.lat,
-        lon: n.lon,
-        maxspeed: n.tags?.maxspeed || '',
-        kind: n.tags?.highway === 'speed_camera' ? 'radar' : 'camara',
-        name: n.tags?.name || n.tags?.ref || ''
-      }));
+    const etiquetas = { radar: 'Radar', camara: 'Cámara', obra: 'Obras', senal: 'Semáforo', peligro: 'Peligro' };
+    const avisos = (datos?.elements || [])
+      .map(n => {
+        const lat2 = Number.isFinite(n.lat) ? n.lat : n.center?.lat;
+        const lon2 = Number.isFinite(n.lon) ? n.lon : n.center?.lon;
+        const t = n.tags || {};
+        let kind = '';
+        if (t.highway === 'speed_camera' || t.enforcement === 'maxspeed') kind = 'radar';
+        else if (t.man_made === 'surveillance') kind = 'camara';
+        else if (t.highway === 'traffic_signals') kind = 'senal';
+        else if (t.highway === 'construction' || t.construction) kind = 'obra';
+        else if (t.hazard) kind = 'peligro';
+        if (!kind || !Number.isFinite(lat2) || !Number.isFinite(lon2)) return null;
+        return {
+          id: String(n.id),
+          lat: lat2,
+          lon: lon2,
+          maxspeed: t.maxspeed || '',
+          kind,
+          label: etiquetas[kind] || 'Aviso',
+          name: t.name || t.ref || t.hazard || t.description || ''
+        };
+      })
+      .filter(Boolean);
 
-    recordar(clave, 30 * 60 * 1000, radares);
-    res.json({ radares });
+    recordar(clave, 30 * 60 * 1000, avisos);
+    res.json({ avisos, radares: avisos.filter(a => a.kind === 'radar') });
   } catch (_e) {
-    // Sin radares la navegación sigue funcionando: no es un error de la ruta.
-    res.json({ radares: [], aviso: 'No se pudieron cargar los radares ahora mismo' });
+    // Sin avisos la navegación sigue funcionando: no es un error de la ruta.
+    res.json({ avisos: [], radares: [], aviso: 'No se pudieron cargar los avisos ahora mismo' });
   }
 });
 
