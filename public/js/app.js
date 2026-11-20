@@ -2,6 +2,49 @@
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
+// ---------------------------------------------------------------
+// MAYA: la IA pide una acción y la app la ejecuta. Todo lo que puede
+// pasar por aquí está en una lista blanca: si el modelo escribe otra
+// cosa, se ignora. Nunca se ejecuta código que venga del servidor.
+// ---------------------------------------------------------------
+const VISTAS_MAYA = new Set([
+  'home', 'inicio', 'chat', 'garaje', 'obd', 'dtc', 'testigos', 'productos',
+  'tutoriales', 'tuning', 'vehiculos', 'diagnostico'
+]);
+
+function ejecutarMaya(acciones) {
+  if (!Array.isArray(acciones) || !acciones.length) return;
+  for (const accion of acciones.slice(0, 2)) {
+    const hacer = String((accion && accion.hacer) || '').toLowerCase();
+    if (hacer === 'abrir') {
+      const donde = String(accion.donde || '').toLowerCase();
+      if (VISTAS_MAYA.has(donde)) showView(donde === 'inicio' ? 'home' : donde);
+    } else if (hacer === 'camara') {
+      // Lo mismo que el botón de la cámara: lleva a testigos y abre el archivo.
+      window.__homeLightFlow = true;
+      showView('testigos');
+      setTimeout(() => document.getElementById('tlFile')?.click(), 260);
+    } else if (hacer === 'conectar_obd') {
+      showView('obd');
+      // En el móvil no hay Web Serial: si el navegador no lo soporta pero sí
+      // Bluetooth, se elige solo ese modo para que el botón no falle.
+      setTimeout(() => {
+        const sel = document.getElementById('obdMode');
+        if (sel && !('serial' in navigator) && 'bluetooth' in navigator) {
+          sel.value = 'bluetooth';
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        document.getElementById('obdConnect')?.click();
+      }, 500);
+    } else if (hacer === 'productos') {
+      showView('productos');
+    } else if (hacer === 'tutoriales') {
+      showView('tutoriales');
+    }
+  }
+}
+window.Maya = { ejecutar: ejecutarMaya, ver: showView };
+
 // Utilidad segura para llamadas API
 async function api(url, options = {}) {
   const res = await fetch(url, options);
@@ -2289,6 +2332,8 @@ async function submitChat(text) {
           );
           renderChatExtras(aiRes);
           scrollToBubbleStart(aiBubble);
+          // Si Maya ha pedido moverse por la app, se hace aquí.
+          ejecutarMaya(aiRes.maya);
         } else {
           const meta = localBubble?.querySelector('.chat-meta');
           if (meta) meta.textContent = 'La IA no está disponible ahora. Se mantiene el diagnóstico del motor experto local.';
