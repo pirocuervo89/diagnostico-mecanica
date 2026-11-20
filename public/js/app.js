@@ -63,17 +63,18 @@ function ejecutarMaya(acciones) {
       showView('tienda');
       setTimeout(() => {
         // La tienda filtra con #shopQuery; el catálogo de piezas usa
-        // #catalogQuery. Se rellenan los dos que existan y la tienda recibe su
-        // evento de escritura, que es el que dispara el filtrado real.
+        // #catalogQuery. Se rellenan los dos que existan y luego se pide a la
+        // tienda que filtre y baje hasta los resultados, no hasta el cajón.
         const tienda = document.getElementById('shopQuery');
         const catalogo = document.getElementById('catalogQuery');
-        if (tienda) {
-          tienda.value = que;
+        if (tienda) tienda.value = que;
+        if (catalogo) catalogo.value = que;
+        if (window.Tienda?.buscar) {
+          window.Tienda.buscar(que, { scroll: true });
+        } else if (tienda) {
           tienda.dispatchEvent(new Event('input', { bubbles: true }));
           tienda.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        if (catalogo) catalogo.value = que;
-        if (!tienda && catalogo) {
+        } else if (catalogo) {
           document.getElementById('catalogSearchForm')?.requestSubmit();
         }
       }, 600);

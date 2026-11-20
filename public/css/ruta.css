@@ -30,7 +30,7 @@
   padding: 2px 7px !important;
 }
 .ruta-map .leaflet-control-attribution a { color: rgba(140, 226, 255, .85) !important; }
-.ruta-map .leaflet-tile-pane { filter: saturate(.9) contrast(1.02) brightness(.95); }
+.ruta-map .leaflet-tile-pane { filter: saturate(1.05) contrast(1.03); }
 
 /* mi posición */
 .ruta-punto span { position: absolute; inset: 0; border-radius: 50%; }
@@ -471,10 +471,10 @@
 }
 .nx-ruta-cta-grande .ic { width: 22px; height: 22px; }
 
-/* Carreteras con color de verdad */
-.ruta-map .leaflet-tile-pane { filter: saturate(1.3) contrast(1.05) brightness(1.02); }
+/* Carreteras con color de verdad (teselas Esri, sin marca de agua) */
+.ruta-map .leaflet-tile-pane { filter: saturate(1.22) contrast(1.05) brightness(1.02); }
 .ruta-shell[data-tema="noche"] .ruta-map .leaflet-tile-pane {
-  filter: saturate(1.55) contrast(1.14) brightness(1.18) hue-rotate(-6deg);
+  filter: saturate(1.25) contrast(1.08) brightness(1.14);
 }
 .ruta-shell {
   border-color: rgba(56, 225, 255, .26);

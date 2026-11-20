@@ -365,10 +365,21 @@
     }
   }
 
-  function buscar(term) {
-    state.query = term;
+  // Buscar deja los resultados a la vista: con una consulta activa el tutorial
+  // de uso estorba, así que el CSS lo esconde (body.shop-filtrando).
+  async function buscar(term, opciones = {}) {
+    state.query = term || '';
     state.shown = PAGE;
+    document.body.classList.toggle('shop-filtrando', !!s(state.query));
+    const input = $('shopQuery');
+    if (input && input.value !== state.query) input.value = state.query;
+    const clear = $('shopClearQuery');
+    if (clear) clear.hidden = !state.query;
+    if (!state.loaded) await cargar().catch(() => {});
     pintarGrid();
+    if (opciones.scroll && s(state.query)) {
+      setTimeout(() => $('shopCount')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+    }
   }
 
   function init() {
@@ -417,5 +428,8 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.Tienda = { recargar: () => { state.loaded = false; state.loading = null; return cargar(); } };
+  window.Tienda = {
+    recargar: () => { state.loaded = false; state.loading = null; return cargar(); },
+    buscar: (que, opciones) => buscar(que, opciones)
+  };
 })();

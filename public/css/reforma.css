@@ -4000,3 +4000,9 @@ body.shop-modal-open { overflow: hidden; }
   .plans-grid { grid-template-columns: 1fr; gap: 12px; }
   .plan-card { padding: 18px 16px 16px; }
 }
+
+/* Con una búsqueda activa en la tienda, los resultados mandan: el tutorial y
+   la burbuja de instalar se apartan para no taparlos. */
+body.shop-filtrando #view-tienda .shop-how,
+body.shop-filtrando #view-tienda .shop-trust-strip { display: none !important; }
+body.shop-filtrando .pwa-install { display: none !important; }

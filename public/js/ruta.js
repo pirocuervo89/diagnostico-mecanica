@@ -157,13 +157,15 @@
     noche = oscuro;
     if (!mapa) return;
     if (capaTiles) mapa.removeLayer(capaTiles);
+    // CARTO empezó a devolver teselas con la marca de agua «API KEY REQUIRED»
+    // y OpenStreetMap bloquea el uso desde apps. Esri sirve las dos capas sin
+    // clave: gris oscuro de noche y callejero de día.
     const url = oscuro
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+      ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+      : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
     capaTiles = L.tileLayer(url, {
-      maxZoom: 20,
-      subdomains: 'abcd',
-      attribution: '&copy; OpenStreetMap &copy; CARTO'
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap &copy; Esri'
     }).addTo(mapa);
     view.querySelector('.ruta-shell')?.setAttribute('data-tema', oscuro ? 'noche' : 'dia');
     if (elNoche) {
