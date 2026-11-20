@@ -49,6 +49,7 @@
 
   const CLAVE_NOCHE = 'dm_ruta_noche';
   const CLAVE_OBD = 'dm_obd_ultimo';
+  const CLAVE_POS = 'dm_ruta_ultima';
 
   // ------------------------------------------------------------ utilidades
   const metros = m => (m >= 1000 ? `${(m / 1000).toFixed(m >= 10000 ? 0 : 1)} km` : `${Math.round(m)} m`);
@@ -260,6 +261,7 @@
     }
     ultimaPos = { lat, lon };
     ultimaVez = ahora;
+    try { localStorage.setItem(CLAVE_POS, JSON.stringify({ lat, lon, ts: ahora })); } catch (_e) { /* sin espacio */ }
 
     const limite = limiteActual(lat, lon);
     pintarVelocidad(Math.min(velocidad, 260), limite);
@@ -297,6 +299,17 @@
     clearTimeout(temporizadorGps);
     temporizadorGps = setTimeout(() => {
       if (ultimaPos || sondeoGps) return;
+      // Sin señal (parking, túnel, interior) no se deja el mapa vacío: se pinta
+      // la última posición conocida y se sigue intentando el GPS de verdad.
+      if (!ultimaPos) {
+        try {
+          const guardada = JSON.parse(localStorage.getItem(CLAVE_POS) || 'null');
+          if (guardada && Number.isFinite(guardada.lat) && Number.isFinite(guardada.lon)) {
+            alMover({ coords: { latitude: guardada.lat, longitude: guardada.lon, accuracy: null, speed: null, heading: null } });
+            avisar('Sin señal GPS: te muestro tu última posición conocida.', 'info', 7000);
+          }
+        } catch (_e) { /* nada guardado */ }
+      }
       sondeoGps = setInterval(() => {
         if (ultimaPos) { clearInterval(sondeoGps); sondeoGps = 0; return; }
         navigator.geolocation.getCurrentPosition(
