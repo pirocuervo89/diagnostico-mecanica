@@ -526,7 +526,9 @@
     if (saludoHecho) return;
     if (document.querySelector('.view.active')?.id !== 'view-chat') return;
     saludoHecho = true;
-    pintarBurbujaMaya(SALUDO);
+    // Si la app ya saludó por su cuenta, no se repite el texto: solo se habla.
+    const yaSaludado = /qu[eé] le pasa a tu coche/i.test(document.getElementById('chatBox')?.innerText || '');
+    if (!yaSaludado) pintarBurbujaMaya(SALUDO);
     if (hablar) hablarTexto(SALUDO);
   }
 

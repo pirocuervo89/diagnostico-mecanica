@@ -955,8 +955,9 @@ function initUniversalSearch() {
   const abrirMaya = (texto = '') => {
     closeUniversalResults();
     showView('chat');
+    // Se saluda ya, dentro del toque: si se retrasa, Chrome no deja hablar.
+    window.MayaSaludo?.(true);
     setTimeout(() => {
-      window.MayaSaludo?.(true);
       const campo = document.getElementById('chatInput');
       if (texto) {
         const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
