@@ -182,6 +182,7 @@
   }
 
   function stopSpeaking() {
+    hablandoSenal = false;
     if (synth) synth.cancel();
     if (speakingBubble) {
       speakingBubble.classList.remove('voz-speaking');
@@ -189,6 +190,9 @@
       if (btn) btn.setAttribute('aria-pressed', 'false');
       speakingBubble = null;
     }
+    // cancel() no siempre dispara «end»: sin esto la señal podía quedarse
+    // congelada en «Maya está hablando» aunque ya estuviera escuchando.
+    setTimeout(pintarSenal, 0);
   }
 
   function speak(bubble) {
@@ -214,10 +218,14 @@
 
     speakingBubble = bubble;
     bubble.classList.add('voz-speaking');
+    hablandoSenal = true;
+    pintarSenal();
     const btn = bubble.querySelector('.voz-btn');
     if (btn) btn.setAttribute('aria-pressed', 'true');
 
     const terminar = () => {
+      hablandoSenal = false;
+      pintarSenal();
       bubble.classList.remove('voz-speaking');
       if (btn) btn.setAttribute('aria-pressed', 'false');
       if (speakingBubble === bubble) speakingBubble = null;
@@ -476,27 +484,29 @@
          sin tener que mirar el chat, y pastilla con el estado en palabras. */
       #mayaSenal { position: fixed; inset: 0; pointer-events: none; z-index: 9998; }
       #mayaSenal[hidden] { display: none; }
-      #mayaSenal .maya-marco { position: absolute; inset: 0; border: 0 solid transparent; border-radius: 16px;
+      #mayaSenal .maya-marco { position: absolute; inset: 0; border: 0 solid transparent;
         transition: border-color .25s ease, box-shadow .25s ease; }
-      #mayaSenal .maya-pastilla { position: absolute; left: 50%; bottom: calc(92px + env(safe-area-inset-bottom, 0px));
-        transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 999px;
-        font-size: 12.5px; line-height: 1.2; white-space: nowrap; color: #e5e7eb; background: rgba(8, 9, 11, .88);
+      /* Arriba a la derecha y pequena: no tapa el chat ni los botones del pie,
+         que es lo que pasaba centrada. */
+      #mayaSenal .maya-pastilla { position: absolute; right: 10px; bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+        display: flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 999px;
+        font-size: 12px; line-height: 1.2; white-space: nowrap; color: #e5e7eb; background: rgba(8, 9, 11, .9);
         border: 1px solid rgba(148, 163, 184, .35); box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
       #mayaSenal .maya-pastilla i { width: 9px; height: 9px; border-radius: 50%; background: #f5a524; flex: 0 0 auto; }
-      #mayaSenal[data-estado="escucha"] .maya-marco { border-width: 3px; border-color: rgba(245, 165, 36, .7);
+      #mayaSenal[data-estado="escucha"] .maya-marco { border-width: 5px; border-color: rgba(245, 165, 36, .8);
         animation: mayaPulso 2.4s ease-in-out infinite; }
       #mayaSenal[data-estado="escucha"] .maya-pastilla i { animation: mayaPunto 1.2s ease-in-out infinite; }
-      #mayaSenal[data-estado="atenta"] .maya-marco { border-width: 4px; border-color: rgba(34, 197, 94, .85);
+      #mayaSenal[data-estado="atenta"] .maya-marco { border-width: 6px; border-color: rgba(34, 197, 94, .9);
         animation: mayaPulso 1s ease-in-out infinite; }
       #mayaSenal[data-estado="atenta"] .maya-pastilla { border-color: rgba(34, 197, 94, .6); color: #bbf7d0; }
       #mayaSenal[data-estado="atenta"] .maya-pastilla i { background: #22c55e; animation: mayaPunto .7s ease-in-out infinite; }
-      #mayaSenal[data-estado="habla"] .maya-marco { border-width: 3px; border-color: rgba(96, 165, 250, .5); }
+      #mayaSenal[data-estado="habla"] .maya-marco { border-width: 4px; border-color: rgba(96, 165, 250, .65); }
       #mayaSenal[data-estado="habla"] .maya-pastilla i { background: #60a5fa; border-radius: 2px; }
       #mayaSenal[data-estado="piensa"] .maya-marco { border-width: 2px; border-color: rgba(148, 163, 184, .4); }
       #mayaSenal[data-estado="piensa"] .maya-pastilla i { background: #94a3b8; }
       @keyframes mayaPulso {
-        0%, 100% { box-shadow: inset 0 0 18px rgba(245, 165, 36, .10); opacity: .5; }
-        50% { box-shadow: inset 0 0 36px rgba(245, 165, 36, .26); opacity: 1; }
+        0%, 100% { box-shadow: inset 0 0 26px rgba(245, 165, 36, .12), 0 0 14px rgba(245, 165, 36, .25); opacity: .6; }
+        50% { box-shadow: inset 0 0 52px rgba(245, 165, 36, .30), 0 0 26px rgba(245, 165, 36, .55); opacity: 1; }
       }
       @keyframes mayaPunto { 0%, 100% { transform: scale(.75); opacity: .55; } 50% { transform: scale(1.15); opacity: 1; } }
       @media (prefers-reduced-motion: reduce) {
@@ -516,15 +526,43 @@
   let saludoHecho = false;
   let timerSilencio = 0;
   let escuchando = false;
+  // Se marca a mano: en este móvil el motor de voz falla antes de emitir
+  // eventos y `synth.speaking` se queda en falso, así que el marco nunca se
+  // ponía azul mientras Maya hablaba.
+  let hablandoSenal = false;
+
+  // La pantalla no puede apagarse mientras Maya acompaña al conductor: con el
+  // móvil en el soporte, apagarse significa perder micrófono y voz aunque el
+  // usuario haya pedido manos libres. Se libera al colgar y al ocultar la app.
+  let wakeLock = null;
+  let ultimaVibracion = 0;
+
+  function vibrar(patron) {
+    // Solo Android/Chrome vibra; en iPhone y escritorio no hace nada.
+    try { navigator.vibrate?.(patron); } catch (_e) { /* sin vibración */ }
+  }
+
+  async function pedirPantallaEncendida() {
+    if (wakeLock || !navigator.wakeLock?.request) return;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener?.('release', () => { wakeLock = null; });
+    } catch (_e) { wakeLock = null; }
+  }
+
+  function soltarPantallaEncendida() {
+    try { wakeLock?.release?.(); } catch (_e) { /* ya liberado */ }
+    wakeLock = null;
+  }
 
   // Señal de estado: se ve de reojo sin dejar de mirar al coche. El marco
   // rodea toda la pantalla (ámbar = escuchando, verde = te oigo ahora,
   // azul = está hablando, gris = pensando) y la pastilla lo dice en palabras.
   const SENAL_TEXTO = {
-    escucha: 'Maya te escucha',
-    atenta: 'Te oigo…',
-    habla: 'Maya está hablando',
-    piensa: 'Un momento…'
+    escucha: 'Escuchando',
+    atenta: 'Te oigo',
+    habla: 'Hablando',
+    piensa: 'Conectando…'
   };
 
   function crearSenal() {
@@ -543,17 +581,28 @@
     if (!el) return;
     let estado = 'off';
     if (llamadaActiva) {
-      if (synth && (synth.speaking || synth.pending)) estado = 'habla';
+      if (hablandoSenal) estado = 'habla';
       else if (dictando) estado = 'atenta';
       else if (escuchando) estado = 'escucha';
       else estado = 'piensa';
     }
-    el.hidden = estado === 'off';
-    if (estado === 'off') return;
+    if (estado === 'off') {
+      el.hidden = true;
+      return;
+    }
+    el.hidden = false;
     if (el.dataset.estado !== estado) {
       el.dataset.estado = estado;
       const texto = el.querySelector('.maya-pastilla b');
       if (texto) texto.textContent = SENAL_TEXTO[estado] || '';
+      // Aviso háptico: se nota al empezar a escuchar y al oír «Maya», sin
+      // mirar la pantalla ni soltar el volante. Los reinicios del micrófono
+      // (que repiten «escucha» cada pocos segundos) no vibran.
+      const ahora = Date.now();
+      if (estado === 'atenta' && ahora - ultimaVibracion > 800) {
+        vibrar([40, 60, 40]);
+        ultimaVibracion = ahora;
+      }
     }
   }
 
@@ -579,6 +628,19 @@
       u.pitch = male ? 0.9 : 1;
       u.rate = 1.02;
       u.volume = 1;
+      // Con el motor sin voces instaladas no llega ningún evento: el estado se
+      // cierra igual por `onend`, por `onerror` o por el reloj de seguridad.
+      const cerrar = () => {
+        if (!hablandoSenal) return;
+        hablandoSenal = false;
+        pintarSenal();
+      };
+      u.onend = cerrar;
+      u.onerror = cerrar;
+      clearTimeout(hablarTexto._t);
+      hablarTexto._t = setTimeout(cerrar, 20000);
+      hablandoSenal = true;
+      pintarSenal();
       synth.speak(u);
     };
     decir(0);
@@ -678,7 +740,10 @@
     wakeRec.interimResults = true;
     wakeRec.maxAlternatives = 1;
 
+    // El estado «escuchando» solo se pinta cuando el micrófono está de verdad
+    // abierto: si el permiso está bloqueado no se puede decir que te escucha.
     wakeRec.onstart = () => { escuchando = true; pintarSenal(); };
+    wakeRec.onaudiostart = () => { escuchando = true; pintarSenal(); };
 
     wakeRec.onresult = event => {
       let trozo = '';
@@ -711,7 +776,8 @@
 
     wakeRec.onend = () => {
       escuchando = false;
-      pintarSenal();
+      // Sin repintar: entre que se cierra y se reabre el micrófono el marco se
+      // ponía gris y parpadeaba cada pocos segundos.
       if (llamadaActiva && !dictando) setTimeout(() => abrirEscucha(), 500);
     };
     wakeRec.onerror = event => {
@@ -732,6 +798,13 @@
     setBotonLlamada(true);
     const auto = document.getElementById('vozAuto');
     if (auto) auto.setAttribute('aria-pressed', 'true');
+    // Se muestra el estado ya y se pide la pantalla encendida dentro del toque:
+    // el permiso del micrófono puede tardar y el usuario necesita saber que sí.
+    pintarSenal();
+    pedirPantallaEncendida();
+    // Doble pulso suave: confirma que Maya ya escucha sin mirar la pantalla.
+    vibrar([18, 80, 18]);
+    ultimaVibracion = Date.now();
     await abrirEscucha();
     pintarSenal();
     hint('Maya está escuchando. Llámala por su nombre.', 5000);
@@ -744,6 +817,7 @@
     try { wakeRec?.abort?.(); } catch (_e) {}
     wakeRec = null;
     escuchando = false;
+    soltarPantallaEncendida();
     pintarSenal();
     setBotonLlamada(false);
     hint('Maya deja de escuchar.', 2500);
@@ -793,6 +867,14 @@
       ['start', 'end', 'error'].forEach(ev => synth.addEventListener?.(ev, pintarSenal));
       synth.onvoiceschanged = () => pickSpanishVoice();
     }
+    // Al volver a la app (o al desbloquear el móvil) se recupera la pantalla
+    // encendida; el navegador la suelta sola cuando la pestaña se oculta.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && llamadaActiva) {
+        pedirPantallaEncendida();
+        pintarSenal();
+      }
+    });
   }
 
   // Desde cualquier punto de la app: saludar y ponerse a escuchar. La portada
