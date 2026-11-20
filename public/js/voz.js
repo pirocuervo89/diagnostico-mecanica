@@ -486,9 +486,9 @@
       #mayaSenal[hidden] { display: none; }
       #mayaSenal .maya-marco { position: absolute; inset: 0; border: 0 solid transparent;
         transition: border-color .25s ease, box-shadow .25s ease; }
-      /* Arriba a la derecha y pequena: no tapa el chat ni los botones del pie,
-         que es lo que pasaba centrada. */
-      #mayaSenal .maya-pastilla { position: absolute; right: 10px; bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+      /* Abajo a la IZQUIERDA: centrada tapaba el chat y a la derecha chocaba
+         con el botón flotante de «Instalar app». */
+      #mayaSenal .maya-pastilla { position: absolute; left: 10px; bottom: calc(96px + env(safe-area-inset-bottom, 0px));
         display: flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 999px;
         font-size: 12px; line-height: 1.2; white-space: nowrap; color: #e5e7eb; background: rgba(8, 9, 11, .9);
         border: 1px solid rgba(148, 163, 184, .35); box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
