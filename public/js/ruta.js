@@ -46,6 +46,9 @@
   let temporizadorGps = 0;
   let sondeoGps = 0;
   let nombreDestino = '';
+  let destinoCoord = null;
+  let fueraRuta = 0;
+  let ultimoRecalculo = 0;
 
   const CLAVE_NOCHE = 'dm_ruta_noche';
   const CLAVE_OBD = 'dm_obd_ultimo';
@@ -372,6 +375,8 @@
   async function fijarDestino(lat, lon, nombre = '') {
     if (!mapa) return;
     nombreDestino = nombre || nombreDestino || 'Destino';
+    destinoCoord = { lat, lon };
+    fueraRuta = 0;
     if (destino) mapa.removeLayer(destino);
     destino = L.marker([lat, lon], { icon: iconoDestino() }).addTo(mapa);
 
@@ -402,14 +407,14 @@
 
   function rutaActiva() { return alternativas[seleccion] || null; }
 
-  function pintarRuta() {
+  function pintarRuta(ajustar = true) {
     const ruta = rutaActiva();
     if (!ruta || !mapa) return;
     if (capaRuta) mapa.removeLayer(capaRuta);
     if (capaRutaGlow) mapa.removeLayer(capaRutaGlow);
     capaRutaGlow = L.polyline(ruta.geometry, { color: '#38e1ff', weight: 17, opacity: .15, lineCap: 'round' }).addTo(mapa);
     capaRuta = L.polyline(ruta.geometry, { color: '#5ce6ff', weight: 5, opacity: .96, lineCap: 'round' }).addTo(mapa);
-    mapa.fitBounds(capaRuta.getBounds(), { padding: [40, 40] });
+    if (ajustar) mapa.fitBounds(capaRuta.getBounds(), { padding: [40, 40] });
   }
 
   function horaDeLlegada(segundos) {
@@ -498,12 +503,62 @@
     return total;
   }
 
+  // Metros entre el coche y la línea de la ruta. Si se separa de forma
+  // sostenida, el usuario se ha desviado y hay que trazar otra.
+  function distanciaARuta(lat, lon) {
+    const pts = rutaActiva()?.geometry || [];
+    if (pts.length < 2) return 0;
+    const rad = Math.PI / 180;
+    const cos = Math.cos(lat * rad);
+    const aM = (la, lo) => [(lo - lon) * cos * 111320, (la - lat) * 110540];
+    let mejor = Infinity;
+    for (let i = 1; i < pts.length; i += 1) {
+      const [ax, ay] = aM(pts[i - 1][0], pts[i - 1][1]);
+      const [bx, by] = aM(pts[i][0], pts[i][1]);
+      const dx = bx - ax;
+      const dy = by - ay;
+      const largo = dx * dx + dy * dy;
+      const t = largo ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / largo)) : 0;
+      const d = Math.hypot(ax + t * dx, ay + t * dy);
+      if (d < mejor) mejor = d;
+    }
+    return mejor;
+  }
+
+  async function recalcular(lat, lon) {
+    if (!destinoCoord || Date.now() - ultimoRecalculo < 15000) return;
+    ultimoRecalculo = Date.now();
+    avisar('Te has salido de la ruta. Busco otra…', 'info', 6000);
+    decir('Recalculando ruta');
+    try {
+      const r = await fetch(`/api/ruta/route?from=${lat},${lon}&to=${destinoCoord.lat},${destinoCoord.lon}`);
+      const datos = await r.json();
+      if (!r.ok || !datos.route) throw new Error(datos.error || 'Sin ruta');
+      alternativas = Array.isArray(datos.routes) && datos.routes.length ? datos.routes : [datos.route];
+      if (Array.isArray(datos.route.limits) && datos.route.limits.length) limites = datos.route.limits;
+      seleccion = 0;
+      paso = 0;
+      avisados.clear();
+      pintarRuta(false);
+      pintarPanel();
+      mapa.setView([lat, lon], 17);
+      cargarAvisos();
+    } catch (_e) {
+      avisar('No se pudo recalcular. Sigue la ruta marcada.', 'aviso', 6000);
+    }
+  }
+
   function seguirRuta(lat, lon) {
     const ruta = rutaActiva();
     const s = ruta?.steps[paso];
     if (!s) return;
+    const desvio = distanciaARuta(lat, lon);
+    if (navegando) {
+      fueraRuta = desvio > 60 ? fueraRuta + 1 : 0;
+      if (fueraRuta >= 2) { fueraRuta = 0; recalcular(lat, lon); }
+    }
     const d = Number.isFinite(s.lat) ? distancia(lat, lon, s.lat, s.lon) : 0;
-    if (d < 45 && paso < ruta.steps.length - 1) {
+    if (desvio <= 60 && d < 45 && paso < ruta.steps.length - 1) {
       paso += 1;
       const siguiente = ruta.steps[paso];
       decir(instruccion(siguiente));
