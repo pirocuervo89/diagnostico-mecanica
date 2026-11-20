@@ -151,6 +151,9 @@
         }, 350);
       }));
     }
+    if (!dtcs.length && /testigo/i.test(titulo)) {
+      actions.appendChild(accion('Ver el testigo', () => abrirVista('testigos')));
+    }
     if (Array.isArray(datos.tutorials) && datos.tutorials.length) {
       actions.appendChild(accion('Tutoriales', () => abrirVista('tutoriales')));
     }
