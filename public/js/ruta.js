@@ -168,6 +168,11 @@
       : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
     capaTiles = L.tileLayer(url, {
       maxZoom: 19,
+      // La capa oscura de Esri solo sirve teselas hasta el zoom 16: por encima
+      // devuelve un cartel blanco de «Map data not available». Se escala la
+      // última buena, aunque se vea algo más blanda, en vez de dejar el mapa
+      // en blanco justo cuando toca conducir.
+      maxNativeZoom: oscuro ? 16 : 19,
       attribution: '&copy; OpenStreetMap &copy; Esri'
     }).addTo(mapa);
     view.querySelector('.ruta-shell')?.setAttribute('data-tema', oscuro ? 'noche' : 'dia');
