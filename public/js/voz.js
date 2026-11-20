@@ -471,6 +471,37 @@
       .bubble.voz-speaking { box-shadow: 0 0 0 1px var(--accent, #f5a524) inset; }
       .voz-mic.listening { border-color: #ef4444; color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, .18); }
       @media (max-width: 560px) { .voz-btn { position: static; margin-top: 8px; } .voz-chip { font-size: 12px; } }
+
+      /* Señal de escucha: marco en los bordes de la pantalla, visible de reojo
+         sin tener que mirar el chat, y pastilla con el estado en palabras. */
+      #mayaSenal { position: fixed; inset: 0; pointer-events: none; z-index: 9998; }
+      #mayaSenal[hidden] { display: none; }
+      #mayaSenal .maya-marco { position: absolute; inset: 0; border: 0 solid transparent; border-radius: 16px;
+        transition: border-color .25s ease, box-shadow .25s ease; }
+      #mayaSenal .maya-pastilla { position: absolute; left: 50%; bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+        transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 999px;
+        font-size: 12.5px; line-height: 1.2; white-space: nowrap; color: #e5e7eb; background: rgba(8, 9, 11, .88);
+        border: 1px solid rgba(148, 163, 184, .35); box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
+      #mayaSenal .maya-pastilla i { width: 9px; height: 9px; border-radius: 50%; background: #f5a524; flex: 0 0 auto; }
+      #mayaSenal[data-estado="escucha"] .maya-marco { border-width: 3px; border-color: rgba(245, 165, 36, .7);
+        animation: mayaPulso 2.4s ease-in-out infinite; }
+      #mayaSenal[data-estado="escucha"] .maya-pastilla i { animation: mayaPunto 1.2s ease-in-out infinite; }
+      #mayaSenal[data-estado="atenta"] .maya-marco { border-width: 4px; border-color: rgba(34, 197, 94, .85);
+        animation: mayaPulso 1s ease-in-out infinite; }
+      #mayaSenal[data-estado="atenta"] .maya-pastilla { border-color: rgba(34, 197, 94, .6); color: #bbf7d0; }
+      #mayaSenal[data-estado="atenta"] .maya-pastilla i { background: #22c55e; animation: mayaPunto .7s ease-in-out infinite; }
+      #mayaSenal[data-estado="habla"] .maya-marco { border-width: 3px; border-color: rgba(96, 165, 250, .5); }
+      #mayaSenal[data-estado="habla"] .maya-pastilla i { background: #60a5fa; border-radius: 2px; }
+      #mayaSenal[data-estado="piensa"] .maya-marco { border-width: 2px; border-color: rgba(148, 163, 184, .4); }
+      #mayaSenal[data-estado="piensa"] .maya-pastilla i { background: #94a3b8; }
+      @keyframes mayaPulso {
+        0%, 100% { box-shadow: inset 0 0 18px rgba(245, 165, 36, .10); opacity: .5; }
+        50% { box-shadow: inset 0 0 36px rgba(245, 165, 36, .26); opacity: 1; }
+      }
+      @keyframes mayaPunto { 0%, 100% { transform: scale(.75); opacity: .55; } 50% { transform: scale(1.15); opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) {
+        #mayaSenal .maya-marco, #mayaSenal .maya-pastilla i { animation: none !important; opacity: 1; }
+      }
     `;
     document.head.appendChild(style);
   }
@@ -484,6 +515,47 @@
   let dictando = false;
   let saludoHecho = false;
   let timerSilencio = 0;
+  let escuchando = false;
+
+  // Señal de estado: se ve de reojo sin dejar de mirar al coche. El marco
+  // rodea toda la pantalla (ámbar = escuchando, verde = te oigo ahora,
+  // azul = está hablando, gris = pensando) y la pastilla lo dice en palabras.
+  const SENAL_TEXTO = {
+    escucha: 'Maya te escucha',
+    atenta: 'Te oigo…',
+    habla: 'Maya está hablando',
+    piensa: 'Un momento…'
+  };
+
+  function crearSenal() {
+    if (document.getElementById('mayaSenal')) return;
+    const el = document.createElement('div');
+    el.id = 'mayaSenal';
+    el.hidden = true;
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.innerHTML = '<span class="maya-marco"></span><span class="maya-pastilla"><i></i><b></b></span>';
+    document.body.appendChild(el);
+  }
+
+  function pintarSenal() {
+    const el = document.getElementById('mayaSenal');
+    if (!el) return;
+    let estado = 'off';
+    if (llamadaActiva) {
+      if (synth && (synth.speaking || synth.pending)) estado = 'habla';
+      else if (dictando) estado = 'atenta';
+      else if (escuchando) estado = 'escucha';
+      else estado = 'piensa';
+    }
+    el.hidden = estado === 'off';
+    if (estado === 'off') return;
+    if (el.dataset.estado !== estado) {
+      el.dataset.estado = estado;
+      const texto = el.querySelector('.maya-pastilla b');
+      if (texto) texto.textContent = SENAL_TEXTO[estado] || '';
+    }
+  }
 
   // Habla un texto suelto (saludo, aviso) con la misma voz que las respuestas.
   function hablarTexto(texto) {
@@ -575,6 +647,8 @@
     const texto = (input?.value || '').trim();
     const inicioEspera = Date.now();
     dictando = false;
+    escuchando = false;
+    pintarSenal();
     try { wakeRec?.stop?.(); } catch (_e) {}
     if (!texto || !form) return;
     form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
@@ -604,6 +678,8 @@
     wakeRec.interimResults = true;
     wakeRec.maxAlternatives = 1;
 
+    wakeRec.onstart = () => { escuchando = true; pintarSenal(); };
+
     wakeRec.onresult = event => {
       let trozo = '';
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
@@ -615,6 +691,7 @@
       if (!dictando) {
         if (/\bmaya\b/.test(oido)) {
           dictando = true;
+          pintarSenal();
           if (document.querySelector('.view.active')?.id !== 'view-chat' && window.Maya?.ver) {
             window.Maya.ver('chat');
           }
@@ -633,6 +710,8 @@
     };
 
     wakeRec.onend = () => {
+      escuchando = false;
+      pintarSenal();
       if (llamadaActiva && !dictando) setTimeout(() => abrirEscucha(), 500);
     };
     wakeRec.onerror = event => {
@@ -654,6 +733,7 @@
     const auto = document.getElementById('vozAuto');
     if (auto) auto.setAttribute('aria-pressed', 'true');
     await abrirEscucha();
+    pintarSenal();
     hint('Maya está escuchando. Llámala por su nombre.', 5000);
   }
 
@@ -663,6 +743,8 @@
     store.set(STORE_LLAMADA, '0');
     try { wakeRec?.abort?.(); } catch (_e) {}
     wakeRec = null;
+    escuchando = false;
+    pintarSenal();
     setBotonLlamada(false);
     hint('Maya deja de escuchar.', 2500);
   }
@@ -686,6 +768,7 @@
 
   function boot() {
     injectStyles();
+    crearSenal();
     buildBar();
     addMicButton();
     initLlamada();
@@ -704,7 +787,12 @@
       }).observe(box, { childList: true, subtree: true });
     }
     // Chrome carga las voces de forma asíncrona: se refresca el idioma elegido.
-    if (synth) synth.onvoiceschanged = () => pickSpanishVoice();
+    if (synth) {
+      // La señal también refleja cuándo habla Maya: así se sabe sin mirar que
+      // toca esperar y no hablar encima de ella.
+      ['start', 'end', 'error'].forEach(ev => synth.addEventListener?.(ev, pintarSenal));
+      synth.onvoiceschanged = () => pickSpanishVoice();
+    }
   }
 
   // Desde cualquier punto de la app: saludar y ponerse a escuchar. La portada
