@@ -1918,7 +1918,7 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     '',
     '### Mover la app (opcional, una sola acción)',
     'Si además de contestar conviene enseñarle algo al usuario en la app, añade AL FINAL y en una línea aparte exactamente: MAYAJSON {"hacer":"..."}',
-    'Acciones válidas: {"hacer":"abrir","donde":"inicio|chat|garaje|obd|dtc|testigos|productos|tutoriales|tuning|vehiculos|diagnostico"}, {"hacer":"camara"} para pedir una foto del testigo, {"hacer":"camara_docs"} para pedir la foto de la ficha técnica o los papeles del coche, {"hacer":"conectar_obd"} para abrir y conectar el escáner, {"hacer":"productos","que":"aceite"} para enseñar productos, {"hacer":"registro"} para llevar al alta de cuenta.',
+    'Acciones válidas: {"hacer":"abrir","donde":"inicio|chat|garaje|obd|dtc|testigos|productos|tutoriales|tuning|vehiculos|diagnostico|ruta|tienda"}, {"hacer":"camara"} para pedir una foto del testigo, {"hacer":"camara_docs"} para pedir la foto de la ficha técnica o los papeles del coche, {"hacer":"conectar_obd"} para abrir y conectar el escáner, {"hacer":"productos","que":"aceite"} para enseñar productos, {"hacer":"buscar","que":"bombillas h7 led"} para abrir la tienda con esa búsqueda hecha, {"hacer":"ruta","que":"Puerta del Sol, Madrid"} para poner el destino en el GPS y trazar la ruta, {"hacer":"registro"} para llevar al alta de cuenta.',
     'Si el usuario quiere añadir su coche al garaje, o no lo tiene guardado, pídele la foto de la ficha técnica (tarjeta ITV o permiso de circulación) y usa camara_docs: de ahí salen marca, modelo, versión, matrícula y bastidor. Si no tiene cuenta, ofrécele crearla y usa registro.',
     'Usa como máximo UNA acción por respuesta y solo si ayuda de verdad (por ejemplo: pide la foto del testigo y abre la cámara). Si no aporta nada, no escribas la línea. Nunca menciones MAYAJSON en el texto ni expliques la acción: el usuario solo debe ver que la app le lleva a lo que necesita.',
     '',
@@ -1946,7 +1946,8 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
 // para que el usuario nunca vea JSON ni pueda ejecutarse algo no previsto.
 const VISTAS_MAYA = new Set([
   'inicio', 'chat', 'garaje', 'obd', 'dtc', 'testigos', 'productos',
-  'tutoriales', 'tuning', 'vehiculos', 'diagnostico'
+  'tutoriales', 'tuning', 'vehiculos', 'diagnostico', 'ruta', 'tienda',
+  'planes', 'foro', 'informe', 'sala'
 ]);
 
 // Si el modelo no manda acción, se deduce de lo que pide el usuario. Así la app
@@ -1960,6 +1961,27 @@ function accionesPorReglas(query) {
   if (/(registr|crear cuenta|darme de alta|hacer(me)? una cuenta|mi perfil)/.test(q)) {
     return [{ hacer: 'registro' }];
   }
+  // GPS: «llévame a la Puerta del Sol», «cómo llego a Valencia», «ruta a...».
+  // Es lo primero porque el destino puede contener palabras de productos.
+  const irA = q.match(/(?:ll[eé]vame|ir|vamos|ruta|c[oó]mo llego|llegar|destino)\s+(?:a|hasta|para|hacia)\s+(.{3,80})/);
+  if (irA) {
+    const destino = irA[1].replace(/^la\s+|^el\s+|^los\s+|^las\s+/, '').replace(/[¿?¡!.,;]+$/g, '').trim();
+    if (destino) return [{ hacer: 'ruta', que: destino.slice(0, 60) }];
+  }
+
+  // Tienda: «dame los productos de bombillas H7 LED», «busca filtros de aceite».
+  const pideProducto = /(bombilla|led|xenon|aceite|filtro|pastilla|disco|amortiguador|bujia|bujía|llanta|neum[aá]tico|bateria|batería|limpiaparabrisas|escape|silencioso|embrague|correa|bomba)/.test(q);
+  const verboProducto = /(dame|busca|ens[eé][ñn]ame|mu[eé]stra(?:me)?|quiero|tienes|hay|vende|precio)/.test(q);
+  if (pideProducto && verboProducto) {
+    const que = q
+      .replace(/^(hola|oye|por favor|buenas)\s+/g, '')
+      .replace(/(?:dame|busca|ens[eé][ñn]ame|mu[eé]stra(?:me)?|quiero|tienes|hay|vende|precio)\s+(?:los\s+|las\s+|el\s+|la\s+|un\s+|una\s+)?(?:productos?|recambios?|repuestos?|piezas?)?\s*(?:que tengas?\s+)?(?:de\s+|para\s+|en\s+)?/g, '')
+      .replace(/[¿?¡!.,;]+/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+    if (que) return [{ hacer: 'buscar', donde: 'tienda', que: que.slice(0, 60) }];
+  }
+
   const mover = /(ens[eé]|mu[eé]str|abre|ll[eé]vame|conect|usa|quiero ver|vamos a)/.test(q);
   if (/(conectar|conecta|conectalo|escaner|esc[áa]ner|scanner|obd)/.test(q) && mover) {
     return [{ hacer: 'conectar_obd' }];
@@ -1988,6 +2010,9 @@ function extraerMaya(texto) {
           const accion = { hacer };
           if (a.que) accion.que = String(a.que).slice(0, 60);
           acciones.push(accion);
+        } else if (hacer === 'ruta' || hacer === 'buscar') {
+          const que = String(a.que || '').trim().slice(0, 60);
+          if (que) acciones.push({ hacer, que });
         }
       }
     } catch (_e) {
@@ -2039,6 +2064,7 @@ router.post('/chat', (req, res) => {
     productos_recomendados: recomendados.slice(0, 4),
     forum_references: forumReferences,
     source: 'expert_rules',
+    maya: accionesPorReglas(query),
     ai_pending: true,
     vehicle: chatVehicle(vehicleRecord, context)
   });

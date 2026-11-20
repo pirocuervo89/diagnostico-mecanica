@@ -409,3 +409,220 @@
   .ruta-fab-noche { bottom: 250px; }
   .ruta-alt small { font-size: 9px; }
 }
+
+/* ============================================================
+   RUTA · capa viva: pestaña GPS, coche de la portada y estilo Waze
+   ============================================================ */
+
+/* La pestaña GPS de la barra inferior: no puede quedar escondida. */
+.tabbar-ruta { color: #a5f3fc; }
+.tabbar-ruta .ic { filter: drop-shadow(0 0 10px rgba(34, 211, 238, .8)); }
+.tabbar-ruta.active { color: #eafcff; }
+.tabbar-ruta.active::after {
+  background: linear-gradient(90deg, #22d3ee, #8b5cf6);
+  box-shadow: 0 0 16px rgba(34, 211, 238, .95);
+}
+.tabbar-ruta::before {
+  content: '';
+  position: absolute;
+  top: 2px; left: 50%;
+  width: 38px; height: 38px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34, 211, 238, .3), transparent 70%);
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .tabbar { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .tabbar-btn { gap: 2px; }
+  .tabbar-btn span { font-size: 9px; letter-spacing: 0; }
+}
+
+/* CTA grande de la portada: «¿Dónde vamos?» */
+.nx-ruta-cta-grande {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 17px;
+  border-radius: 16px;
+  border: 1px solid rgba(56, 225, 255, .48);
+  background: linear-gradient(120deg, rgba(34, 211, 238, .2), rgba(139, 92, 246, .24));
+  box-shadow: 0 16px 36px -22px rgba(56, 225, 255, .95), inset 0 1px 0 rgba(255, 255, 255, .09);
+  color: #eafcff;
+  font-size: 15px;
+  font-weight: 750;
+}
+.nx-ruta-cta-grande span { display: flex; flex-direction: column; line-height: 1.15; text-align: left; }
+.nx-ruta-cta-grande small {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgba(174, 240, 255, .85);
+}
+.nx-ruta-cta-grande .ic { width: 22px; height: 22px; }
+
+/* Carreteras con color de verdad */
+.ruta-map .leaflet-tile-pane { filter: saturate(1.3) contrast(1.05) brightness(1.02); }
+.ruta-shell[data-tema="noche"] .ruta-map .leaflet-tile-pane {
+  filter: saturate(1.55) contrast(1.14) brightness(1.18) hue-rotate(-6deg);
+}
+.ruta-shell {
+  border-color: rgba(56, 225, 255, .26);
+  box-shadow: 0 34px 90px -44px rgba(0, 0, 0, .98), 0 0 60px -40px rgba(56, 225, 255, .55), inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+/* El coche es el de la portada: foto fija dentro de un disco y flecha de rumbo. */
+.ruta-rumbo {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  transition: transform .3s linear;
+  will-change: transform;
+}
+.ruta-rumbo::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: -3px;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 10px solid #22d3ee;
+  filter: drop-shadow(0 0 7px rgba(34, 211, 238, .95));
+}
+.ruta-coche {
+  inset: 8px;
+  display: block;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 211, 238, .95);
+  background: #08111b;
+  box-shadow: 0 0 0 3px rgba(3, 10, 18, .85), 0 0 24px rgba(34, 211, 238, .85);
+}
+.ruta-coche img {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: 54% 62%;
+  transform: scale(1.35);
+}
+.ruta-coche svg { display: none; }
+
+/* HUD: llegada, zoom */
+.ruta-eta {
+  position: absolute;
+  top: 70px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(6, 12, 22, .9);
+  border: 1px solid rgba(56, 225, 255, .36);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 14px 30px -18px #000;
+  color: #dff6ff;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.ruta-eta[hidden] { display: none; }
+.ruta-eta b { font-size: 14px; color: #fff; }
+.ruta-eta i {
+  padding-left: 9px;
+  border-left: 1px solid rgba(148, 172, 208, .32);
+  font-style: normal;
+  font-weight: 750;
+  color: #9ef2ff;
+}
+.ruta-alert { top: 112px; }
+
+.ruta-zoom {
+  position: absolute;
+  right: 12px; top: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ruta-zoom button {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 172, 208, .28);
+  background: rgba(8, 12, 20, .88);
+  color: #bfeeff;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+.ruta-zoom button:active { transform: scale(.95); }
+
+/* Panel con pinta de navegador: maniobra grande y botón verde */
+.ruta-panel {
+  padding: 12px 12px 11px;
+  background: linear-gradient(180deg, rgba(10, 16, 28, .96), rgba(5, 9, 16, .99));
+  border-color: rgba(56, 225, 255, .22);
+}
+.ruta-destino-linea {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 2px 8px;
+  color: #9fd8ff;
+  font-size: 11.5px;
+  min-width: 0;
+}
+.ruta-destino-linea b {
+  color: #e8f6ff;
+  font-size: 12.5px;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ruta-flecha {
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  font-size: 25px;
+  border: 0;
+  background: linear-gradient(140deg, #22d3ee, #6d5efc);
+  color: #03121c;
+  box-shadow: 0 14px 28px -16px rgba(34, 211, 238, .95);
+}
+.ruta-resumen { align-items: center; gap: 11px; }
+.ruta-sig { flex: 1 1 auto; }
+.ruta-sig small { color: #7ee7ff; letter-spacing: .13em; font-size: 9px; }
+.ruta-sig strong { font-size: 14.5px; line-height: 1.28; }
+.ruta-datos { text-align: right; flex: 0 0 auto; }
+.ruta-datos b { font-size: 17px; }
+.ruta-empezar {
+  background: linear-gradient(120deg, #29e27c, #0fd6a0);
+  color: #04231a;
+  font-size: 15px;
+  box-shadow: 0 16px 34px -18px rgba(41, 226, 124, .95);
+}
+.ruta-alt.activa {
+  border-color: rgba(139, 92, 246, .75);
+  background: rgba(139, 92, 246, .18);
+  color: #f0e9ff;
+  box-shadow: 0 0 22px -10px rgba(139, 92, 246, .95);
+}
+
+/* Mapa de día: los nuevos controles también cambian */
+.ruta-shell[data-tema="dia"] .ruta-eta,
+.ruta-shell[data-tema="dia"] .ruta-zoom button {
+  background: rgba(255, 255, 255, .96);
+  color: #0e1a2b;
+  border-color: rgba(20, 35, 55, .16);
+}
+.ruta-shell[data-tema="dia"] .ruta-sig strong,
+.ruta-shell[data-tema="dia"] .ruta-destino-linea b,
+.ruta-shell[data-tema="dia"] .ruta-eta b { color: #0e1a2b; }
+.ruta-shell[data-tema="dia"] .ruta-panel {
+  background: rgba(255, 255, 255, .97);
+  border-color: rgba(20, 35, 55, .14);
+}

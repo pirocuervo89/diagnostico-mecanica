@@ -43,7 +43,7 @@
   <link rel="stylesheet" href="/css/aurora.css?v=20261119a">
   <link rel="stylesheet" href="/css/halo.css?v=20261120b">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="/css/ruta.css?v=20261120b">
+  <link rel="stylesheet" href="/css/ruta.css?v=20261120d">
   <meta property="og:type" content="website">  <meta property="og:site_name" content="Diagnóstico y Mecánica">
   <meta property="og:title" content="Diagnóstico y Mecánica · Plataforma Automotriz">
   <meta property="og:description" content="Síntomas, códigos DTC, lectura OBD-II, catálogo de taller, asistente IA e informes técnicos para tu coche.">
@@ -231,8 +231,9 @@
           <div id="universalResults" class="universal-results hidden" role="listbox" aria-label="Resultados de búsqueda"></div>
         </div>
         <div class="nx-quick-cta">
-          <button class="nx-ruta-cta" type="button" data-home-ruta>
-            <svg class="ic"><use href="#i-pin"></use></svg> Ruta y radares
+          <button class="nx-ruta-cta nx-ruta-cta-grande" type="button" data-home-ruta>
+            <svg class="ic"><use href="#i-pin"></use></svg>
+            <span>¿Dónde vamos?<small>Ruta GPS · radares y límites</small></span>
           </button>
           <button class="nx-shop-cta" type="button" data-home-shop>
             <svg class="ic"><use href="#i-cart"></use></svg>
@@ -1933,7 +1934,12 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
           <button type="submit" aria-label="Buscar destino"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
         </form>
         <div id="rutaResultados" class="ruta-results" hidden></div>
+        <div id="rutaEta" class="ruta-eta" hidden></div>
         <div id="rutaAviso" class="ruta-alert" hidden></div>
+        <div class="ruta-zoom" role="group" aria-label="Zoom del mapa">
+          <button id="rutaMas" type="button" aria-label="Acercar">+</button>
+          <button id="rutaMenos" type="button" aria-label="Alejar">−</button>
+        </div>
         <button id="rutaGps" class="ruta-fab" type="button" aria-label="Centrar en mi posición" title="Centrar en mi posición">
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
         </button>
@@ -2338,6 +2344,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <nav class="tabbar" id="tabbar" aria-label="Navegación de la app">
   <button class="tabbar-btn active" data-view="home" type="button" aria-label="Inicio"><svg class="ic"><use href="#i-gauge"></use></svg><span>Inicio</span></button>
   <button class="tabbar-btn" data-view="garaje" type="button" aria-label="Mi garaje"><svg class="ic"><use href="#i-car"></use></svg><span>Garaje</span></button>
+  <button class="tabbar-btn tabbar-ruta" data-view="ruta" type="button" aria-label="Ruta GPS: ¿dónde vamos?"><svg class="ic"><use href="#i-pin"></use></svg><span>GPS</span></button>
   <button class="tabbar-btn" data-view="obd" type="button" aria-label="Escáner OBD"><svg class="ic"><use href="#i-cpu"></use></svg><span>OBD</span></button>
   <button class="tabbar-btn" data-view="chat" type="button" aria-label="Chat con la IA"><svg class="ic"><use href="#i-chat"></use></svg><span>IA</span></button>
   <button class="tabbar-btn tabbar-shop" data-view="tienda" type="button" aria-label="Tienda de recambios y ofertas"><svg class="ic"><use href="#i-cart"></use></svg><span>Tienda</span></button>
@@ -2377,13 +2384,13 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <script src="/js/obd.js?v=20261105c"></script>
 <script src="/js/tutorials.js?v=20261026d"></script>
 
-<script src="/js/voz.js?v=20261120m"></script>
+<script src="/js/voz.js?v=20261120n"></script>
 <script src="/js/micro-permiso.js?v=20261120b"></script>
 
 <script src="/js/visual-glow.js?v=20261116c"></script>
 <script src="/js/tienda.js?v=20261116h"></script>
 <script src="/js/planes.js?v=20261113a"></script>
-<script src="/js/app.js?v=20261120i"></script>
+<script src="/js/app.js?v=20261120j"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>
@@ -2424,5 +2431,5 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
   <script src="/js/omega-fx.js?v=20261119a"></script>
   <script src="/js/aurora-fx.js?v=20261119a"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/js/ruta.js?v=20261120d"></script></body>
+  <script src="/js/ruta.js?v=20261120e"></script></body>
 </html>

@@ -16,6 +16,7 @@
   const elNoche = $('#rutaNoche');
   const elMicro = $('#rutaMicro');
   const elInfo = $('#rutaInfo');
+  const elEta = $('#rutaEta');
 
   let mapa = null;
   let capaTiles = null;
@@ -44,6 +45,7 @@
   let gpsIniciado = false;
   let temporizadorGps = 0;
   let sondeoGps = 0;
+  let nombreDestino = '';
 
   const CLAVE_NOCHE = 'dm_ruta_noche';
   const CLAVE_OBD = 'dm_obd_ultimo';
@@ -186,13 +188,14 @@
     return L.divIcon({
       className: 'ruta-punto',
       html: `<span class="ruta-punto-halo"></span>
-        <span class="ruta-coche"><svg viewBox="0 0 24 24" aria-hidden="true">
+        <span class="ruta-rumbo"></span>
+        <span class="ruta-coche"><img src="/img/hero/golf-hero.webp" alt="" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M5 16.5h14M6.5 16.5v1.8c0 .4-.3.7-.7.7h-1c-.4 0-.7-.3-.7-.7v-1.8M19.9 16.5v1.8c0 .4-.3.7-.7.7h-1c-.4 0-.7-.3-.7-.7v-1.8" fill="none" stroke="#04121c" stroke-width="1.5" stroke-linecap="round"/>
           <path d="M3.6 16.5v-3.1c0-.5.3-.9.8-1l1.3-.4 1.7-3.1c.2-.4.6-.6 1-.6h6.9c.4 0 .8.2 1 .6l1.7 3.1 1.3.4c.5.1.8.5.8 1v3.1c0 .4-.3.7-.7.7H4.3c-.4 0-.7-.3-.7-.7Z" fill="#eaf7ff" stroke="#04121c" stroke-width="1.4"/>
           <path d="M7.2 12.2h9.6l-1.2-2.4H8.4Z" fill="#38e1ff"/>
         </svg></span>`,
-      iconSize: [40, 40],
-      iconAnchor: [20, 20]
+      iconSize: [56, 56],
+      iconAnchor: [28, 28]
     });
   }
 
@@ -235,9 +238,12 @@
     return mejor ? mejor.kmh : null;
   }
 
+  // El coche es el mismo de la portada: la foto va fija y lo que gira es la
+  // flecha del rumbo, como el avatar de Waze. Girar la foto de tres cuartos
+  // dejaba el coche atravesado en el mapa.
   function girarCoche(icono, grados) {
-    const coche = icono?.querySelector?.('.ruta-coche') || icono;
-    if (coche) coche.style.transform = `rotate(${grados}deg)`;
+    const rumboEl = icono?.querySelector?.('.ruta-rumbo') || icono;
+    if (rumboEl) rumboEl.style.transform = `rotate(${grados}deg)`;
   }
 
   function alMover(pos) {
@@ -344,12 +350,13 @@
     if (!btn) return;
     elResultados.hidden = true;
     elDestino.value = btn.dataset.nombre || 'Destino';
-    fijarDestino(Number(btn.dataset.lat), Number(btn.dataset.lon));
+    fijarDestino(Number(btn.dataset.lat), Number(btn.dataset.lon), btn.dataset.nombre || 'Destino');
   });
 
   // ------------------------------------------------------------ ruta
-  async function fijarDestino(lat, lon) {
+  async function fijarDestino(lat, lon, nombre = '') {
     if (!mapa) return;
+    nombreDestino = nombre || nombreDestino || 'Destino';
     if (destino) mapa.removeLayer(destino);
     destino = L.marker([lat, lon], { icon: iconoDestino() }).addTo(mapa);
 
@@ -386,28 +393,52 @@
     mapa.fitBounds(capaRuta.getBounds(), { padding: [40, 40] });
   }
 
+  function horaDeLlegada(segundos) {
+    const t = new Date(Date.now() + Math.max(0, segundos) * 1000);
+    return t.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function pintarEta(ruta, segundos) {
+    if (!elEta || !ruta) return;
+    elEta.hidden = false;
+    elEta.innerHTML = `<b>${minutos(segundos)}</b><span>${metros(ruta.distance)}</span><i>${horaDeLlegada(segundos)}</i>`;
+  }
+
   function pintarPanel() {
     const ruta = rutaActiva();
     if (!ruta || !elPanel) return;
     const s = ruta.steps[paso] || ruta.steps[0];
+    const aSiguiente = s && Number.isFinite(s.lat) && ultimaPos
+      ? distancia(ultimaPos.lat, ultimaPos.lon, s.lat, s.lon)
+      : s?.distance || 0;
     const otras = alternativas.length > 1 ? `
       <div class="ruta-alternativas" role="group" aria-label="Rutas disponibles">
         ${alternativas.map((r, i) => `
           <button type="button" class="ruta-alt${i === seleccion ? ' activa' : ''}" data-ruta="${i}">
-            <b>${i === 0 ? 'Rápida' : `Alt. ${i + 1}`}</b><small>${metros(r.distance)} · ${minutos(r.duration)}</small>
+            <b>${i === 0 ? 'Recomendada' : `Alternativa ${i + 1}`}</b><small>${metros(r.distance)} · ${minutos(r.duration)}</small>
           </button>`).join('')}
       </div>` : '';
     elPanel.innerHTML = `
-      <div class="ruta-resumen">
-        <div class="ruta-flecha">${flecha(s)}</div>
-        <div class="ruta-datos"><b>${metros(ruta.distance)}</b><span>${minutos(ruta.duration)}</span></div>
-        <div class="ruta-sig"><small>SIGUIENTE</small><strong>${instruccion(s)}</strong></div>
+      <div class="ruta-destino-linea">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>
+        <b>${nombreDestino || 'Destino'}</b>
       </div>
-      ${otras}
-      <div class="ruta-pasos-preview">
-        ${ruta.steps.slice(paso + 1, paso + 4).map(p => `<span>${flecha(p)} ${instruccion(p)} · ${metros(p.distance)}</span>`).join('')}
-      </div>
-      <button type="button" class="ruta-empezar" id="rutaEmpezar">${navegando ? 'Detener navegación' : 'Iniciar navegación'}</button>`;
+      <div class="ruta-sheet">
+        <div class="ruta-resumen">
+          <div class="ruta-flecha">${flecha(s)}</div>
+          <div class="ruta-sig">
+            <small>${navegando ? `EN ${metros(aSiguiente)}` : 'PRÓXIMO PASO'}</small>
+            <strong>${instruccion(s)}</strong>
+          </div>
+          <div class="ruta-datos"><b>${metros(ruta.distance)}</b><span>${minutos(ruta.duration)}</span></div>
+        </div>
+        ${otras}
+        <div class="ruta-pasos-preview">
+          ${ruta.steps.slice(paso + 1, paso + 4).map(p => `<span>${flecha(p)} ${instruccion(p)} · ${metros(p.distance)}</span>`).join('')}
+        </div>
+        <button type="button" class="ruta-empezar" id="rutaEmpezar">${navegando ? '⏹ Detener navegación' : '▶ Iniciar navegación'}</button>
+      </div>`;
+    pintarEta(ruta, ruta.duration);
 
     elPanel.querySelector('#rutaEmpezar')?.addEventListener('click', alternarNavegacion);
     elPanel.querySelectorAll('[data-ruta]').forEach(btn => {
@@ -463,6 +494,16 @@
     const quedan = restante(lat, lon);
     const resumen = elPanel.querySelector('.ruta-datos b');
     if (resumen) resumen.textContent = metros(quedan);
+    const ruta = rutaActiva();
+    if (ruta) {
+      const proporcion = ruta.distance ? Math.min(1, quedan / ruta.distance) : 0;
+      pintarEta(ruta, ruta.duration * proporcion);
+      const distanciaTurno = elPanel.querySelector('.ruta-sig small');
+      const siguiente = ruta.steps[paso];
+      if (distanciaTurno && siguiente && Number.isFinite(siguiente.lat)) {
+        distanciaTurno.textContent = `EN ${metros(distancia(lat, lon, siguiente.lat, siguiente.lon))}`;
+      }
+    }
   }
 
   // ------------------------------------------------------------ avisos (OSM)
@@ -572,6 +613,8 @@
   }
 
   elMicro?.addEventListener('click', dictarDestino);
+  $('#rutaMas')?.addEventListener('click', () => mapa?.zoomIn());
+  $('#rutaMenos')?.addEventListener('click', () => mapa?.zoomOut());
   elNoche?.addEventListener('click', () => aplicarTema(!noche));
   elGps?.addEventListener('click', () => {
     siguiendo = true;
@@ -609,7 +652,32 @@
 
   if (document.querySelector('.view.active')?.id === 'view-ruta') iniciarVista();
 
+  // La IA llama aquí cuando el usuario dice «llévame a...». Se busca el sitio,
+  // se abre la ruta y se traza sola; si no se encuentra, se dice claro.
+  async function irA(texto) {
+    const q = String(texto || '').trim();
+    window.showView?.('ruta');
+    await new Promise(r => setTimeout(r, 500));
+    cuandoLeaflet(async () => {
+      initMapa();
+      if (!gpsIniciado) arrancarGps();
+      if (q.length < 3) { elDestino?.focus(); return; }
+      elDestino.value = q;
+      try {
+        const r = await fetch(`/api/ruta/geocode?q=${encodeURIComponent(q)}`);
+        const datos = await r.json();
+        const primero = (datos.results || [])[0];
+        if (!primero) { avisar(`No encuentro «${q}». Prueba con la calle y la ciudad.`, 'aviso', 8000); return; }
+        fijarDestino(primero.lat, primero.lon, primero.name || q);
+        decir(`Vamos a ${primero.name || q}`);
+      } catch (_e) {
+        avisar('No se pudo buscar ese destino. Revisa la conexión.', 'aviso', 6000);
+      }
+    });
+  }
+
   window.Ruta = {
-    ir: (lat, lon) => { window.showView?.('ruta'); setTimeout(() => fijarDestino(lat, lon), 700); }
+    ir: (lat, lon, nombre) => { window.showView?.('ruta'); setTimeout(() => fijarDestino(lat, lon, nombre), 700); },
+    irA
   };
 })();

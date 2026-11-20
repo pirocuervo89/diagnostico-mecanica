@@ -828,11 +828,15 @@
         return;
       }
 
+      // Si el usuario empieza a hablar mientras Maya habla, Maya se calla:
+      // es una conversación, no dos monólogos a la vez.
+      if (hablandoSenal) stopSpeaking();
       if (input) input.value = `${input.value} ${trozo}`.trim().slice(0, 4000);
       clearTimeout(timerSilencio);
-      // 1,1 s de silencio basta: antes se esperaba casi el doble y la charla
-      // se sentía a cámara lenta.
-      timerSilencio = setTimeout(enviarDictado, 1100);
+      // 2,6 s de silencio antes de contestar: el tiempo que necesita una
+      // persona para pensar la siguiente palabra. Con 1 s se cortaba a quien
+      // hablaba despacio o hacía una pausa para respirar.
+      timerSilencio = setTimeout(enviarDictado, 2600);
     };
 
     wakeRec.onend = () => {

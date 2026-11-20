@@ -9,7 +9,8 @@ const $$ = s => [...document.querySelectorAll(s)];
 // ---------------------------------------------------------------
 const VISTAS_MAYA = new Set([
   'home', 'inicio', 'chat', 'garaje', 'obd', 'dtc', 'testigos', 'productos',
-  'tutoriales', 'tuning', 'vehiculos', 'diagnostico'
+  'tutoriales', 'tuning', 'vehiculos', 'diagnostico', 'ruta', 'tienda',
+  'planes', 'foro', 'informe', 'sala'
 ]);
 
 function ejecutarMaya(acciones) {
@@ -51,6 +52,23 @@ function ejecutarMaya(acciones) {
       showView('productos');
     } else if (hacer === 'tutoriales') {
       showView('tutoriales');
+    } else if (hacer === 'ruta') {
+      // «Llévame a...»: la IA abre el GPS y busca el destino sola.
+      const que = String(accion.que || '').trim();
+      showView('ruta');
+      setTimeout(() => window.Ruta?.irA?.(que), 700);
+    } else if (hacer === 'buscar') {
+      // «Dame las bombillas H7 LED»: abre la tienda con la búsqueda hecha.
+      const que = String(accion.que || '').trim();
+      showView('tienda');
+      setTimeout(() => {
+        const input = document.getElementById('catalogQuery');
+        if (!input) return;
+        input.value = que;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        document.getElementById('catalogSearchForm')?.requestSubmit();
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 600);
     }
   }
 }
