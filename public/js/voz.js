@@ -488,6 +488,10 @@
   // Habla un texto suelto (saludo, aviso) con la misma voz que las respuestas.
   function hablarTexto(texto) {
     if (!canRead || !texto) return;
+    // Sin voces instaladas no se oye nada: se avisa en vez de quedarse mudo.
+    if (!synth.getVoices().length) {
+      hint('Este móvil no tiene voz instalada. Ajustes › Voz › Instalar datos de voz.', 9000);
+    }
     stopSpeaking();
     // Una sola locución: el saludo no depende del troceo en frases. Si el motor
     // aún no ha publicado voces, se espera un poco en vez de hablar sin voz.
