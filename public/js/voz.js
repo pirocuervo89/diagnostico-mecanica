@@ -475,10 +475,186 @@
     document.head.appendChild(style);
   }
 
+  // ------------------------------------------------- modo llamada ("Di Maya")
+
+  const STORE_LLAMADA = 'dm_voz_llamada';
+  const SALUDO = 'Hola, soy Maya. ¿Cuál es tu problema?';
+  let llamadaActiva = false;
+  let wakeRec = null;
+  let dictando = false;
+  let saludoHecho = false;
+  let timerSilencio = 0;
+
+  // Habla un texto suelto (saludo, aviso) con la misma voz que las respuestas.
+  function hablarTexto(texto) {
+    if (!canRead || !texto) return;
+    stopSpeaking();
+    const { voice, male } = pickSpanishVoice();
+    const trozos = trocear(texto);
+    const decir = i => {
+      if (i >= trozos.length) return;
+      const u = new SpeechSynthesisUtterance(trozos[i]);
+      u.lang = lang;
+      u.voice = voice || null;
+      u.pitch = male ? 0.9 : 1;
+      u.rate = 1.02;
+      u.volume = 1;
+      u.onend = () => decir(i + 1);
+      u.onerror = () => decir(i + 1);
+      synth.speak(u);
+    };
+    decir(0);
+  }
+
+  function pintarBurbujaMaya(texto) {
+    try {
+      if (typeof window.addBubble === 'function') {
+        window.addBubble(`<p>${texto}</p>`, 'assistant', true);
+      }
+    } catch (_e) { /* si el chat aún no existe, solo se habla */ }
+  }
+
+  // Saludo de bienvenida: una vez por sesión, con texto y voz.
+  function saludarMaya(hablar = true) {
+    if (saludoHecho) return;
+    if (document.querySelector('.view.active')?.id !== 'view-chat') return;
+    saludoHecho = true;
+    pintarBurbujaMaya(SALUDO);
+    if (hablar) hablarTexto(SALUDO);
+  }
+
+  function setBotonLlamada(pulsado) {
+    const btn = document.getElementById('vozLlamada');
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', String(pulsado));
+    btn.innerHTML = pulsado ? '🎙️ Maya te escucha' : '🎙️ Di «Maya»';
+  }
+
+  function añadirBotonLlamada() {
+    if (document.getElementById('vozLlamada') || !canHear) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'vozLlamada';
+    btn.className = 'voz-chip';
+    btn.setAttribute('aria-pressed', 'false');
+    btn.innerHTML = '🎙️ Di «Maya»';
+    btn.title = 'Maya escucha y responde cuando la llamas por su nombre';
+    btn.addEventListener('click', () => {
+      if (llamadaActiva) pararLlamada();
+      else activarLlamada();
+    });
+    const barra = document.querySelector('.voz-bar');
+    const form = document.getElementById('chatForm');
+    if (barra) barra.appendChild(btn);
+    else if (form && form.parentNode) form.parentNode.insertBefore(btn, form);
+  }
+
+  function enviarDictado() {
+    const input = document.getElementById('chatInput');
+    const form = document.getElementById('chatForm');
+    const texto = (input?.value || '').trim();
+    dictando = false;
+    try { wakeRec?.stop?.(); } catch (_e) {}
+    if (!texto || !form) return;
+    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    // Se deja de escuchar mientras Maya habla, para no oírse a sí misma.
+    setTimeout(() => { if (llamadaActiva) abrirEscucha(); }, 16000);
+  }
+
+  async function abrirEscucha() {
+    if (!llamadaActiva || dictando || !canHear) return;
+    const permitido = await ensureMicPermission();
+    if (!permitido) { pararLlamada(); return; }
+    try { wakeRec?.abort?.(); } catch (_e) {}
+    wakeRec = new Recognition();
+    wakeRec.lang = lang;
+    wakeRec.continuous = true;
+    wakeRec.interimResults = true;
+    wakeRec.maxAlternatives = 1;
+
+    wakeRec.onresult = event => {
+      let trozo = '';
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        trozo += `${event.results[i][0].transcript} `;
+      }
+      const oido = trozo.toLowerCase();
+      const input = document.getElementById('chatInput');
+
+      if (!dictando) {
+        if (/\bmaya\b/.test(oido)) {
+          dictando = true;
+          if (document.querySelector('.view.active')?.id !== 'view-chat' && window.Maya?.ver) {
+            window.Maya.ver('chat');
+          }
+          hint('Te escucho, dime qué le pasa al coche.', 6000);
+          hablarTexto('Dime.');
+          if (input) { input.value = ''; input.placeholder = 'Te escucho…'; }
+        }
+        return;
+      }
+
+      if (input) input.value = `${input.value} ${trozo}`.trim().slice(0, 4000);
+      clearTimeout(timerSilencio);
+      timerSilencio = setTimeout(enviarDictado, 1800);
+    };
+
+    wakeRec.onend = () => {
+      if (llamadaActiva && !dictando) setTimeout(() => abrirEscucha(), 500);
+    };
+    wakeRec.onerror = event => {
+      if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(event.error)) {
+        pararLlamada();
+      }
+    };
+
+    try { wakeRec.start(); } catch (_e) { /* ya estaba en marcha */ }
+  }
+
+  async function activarLlamada() {
+    if (!canHear) { hint('Este navegador no permite escuchar. Escríbele a Maya.', 7000); return; }
+    llamadaActiva = true;
+    store.set(STORE_LLAMADA, '1');
+    autoRead = true;
+    store.set(STORE_READ, '1');
+    setBotonLlamada(true);
+    const auto = document.getElementById('vozAuto');
+    if (auto) auto.setAttribute('aria-pressed', 'true');
+    await abrirEscucha();
+    hint('Maya está escuchando. Llámala por su nombre.', 5000);
+  }
+
+  function pararLlamada() {
+    llamadaActiva = false;
+    dictando = false;
+    store.set(STORE_LLAMADA, '0');
+    try { wakeRec?.abort?.(); } catch (_e) {}
+    wakeRec = null;
+    setBotonLlamada(false);
+    hint('Maya deja de escuchar.', 2500);
+  }
+
+  function initLlamada() {
+    añadirBotonLlamada();
+    // Saludo al entrar en el chat, tanto por menú como por la barra inferior.
+    document.querySelectorAll('[data-view="chat"]').forEach(b => {
+      b.addEventListener('click', () => setTimeout(() => saludarMaya(true), 900));
+    });
+    if (document.querySelector('.view.active')?.id === 'view-chat') {
+      setTimeout(() => saludarMaya(true), 1200);
+    }
+    if (store.get(STORE_LLAMADA) === '1') {
+      // El micrófono necesita un gesto: se arranca al primer toque.
+      const arranque = () => { document.removeEventListener('pointerdown', arranque); activarLlamada(); };
+      document.addEventListener('pointerdown', arranque, { once: true });
+      setBotonLlamada(true);
+    }
+  }
+
   function boot() {
     injectStyles();
     buildBar();
     addMicButton();
+    initLlamada();
     scanBubbles();
     const box = document.getElementById('chatBox');
     if (box) {
