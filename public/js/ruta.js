@@ -494,7 +494,6 @@
     const quedan = restante(lat, lon);
     const resumen = elPanel.querySelector('.ruta-datos b');
     if (resumen) resumen.textContent = metros(quedan);
-    const ruta = rutaActiva();
     if (ruta) {
       const proporcion = ruta.distance ? Math.min(1, quedan / ruta.distance) : 0;
       pintarEta(ruta, ruta.duration * proporcion);
