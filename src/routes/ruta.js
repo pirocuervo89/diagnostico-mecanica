@@ -153,10 +153,12 @@ router.get('/avisos', async (req, res) => {
 
   // Overpass rechaza (406) las peticiones sin User-Agent propio y a veces
   // tarda: se prueban dos servidores y, si ambos fallan, se sigue sin radares.
+  // Primero los espejos con el planeta completo; osm.ch va al final porque su
+  // extracto no cubre bien España y devolvía vacío como si no hubiera nada.
   const servidores = [
-    'https://overpass.osm.ch/api/interpreter',
     'https://overpass-api.de/api/interpreter',
-    'https://overpass.kumi.systems/api/interpreter'
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass.osm.ch/api/interpreter'
   ];
   let datos = null;
   for (const servidor of servidores) {
@@ -209,6 +211,8 @@ router.get('/avisos', async (req, res) => {
     res.json({ avisos, radares: avisos.filter(a => a.kind === 'radar') });
   } catch (_e) {
     // Sin avisos la navegación sigue funcionando: no es un error de la ruta.
+    // Se cachea el fallo unos minutos para no castigar a Overpass en cada viaje.
+    recordar(clave, 3 * 60 * 1000, []);
     res.json({ avisos: [], radares: [], aviso: 'No se pudieron cargar los avisos ahora mismo' });
   }
 });

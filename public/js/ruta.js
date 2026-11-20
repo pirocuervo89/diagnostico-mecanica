@@ -41,6 +41,7 @@
   let noche = true;
   let reconocimiento = null;
   let codigosOBD = new Set();
+  let gpsIniciado = false;
 
   const CLAVE_NOCHE = 'dm_ruta_noche';
   const CLAVE_OBD = 'dm_obd_ultimo';
@@ -555,6 +556,7 @@
   elNoche?.addEventListener('click', () => aplicarTema(!noche));
   elGps?.addEventListener('click', () => {
     siguiendo = true;
+    if (!gpsIniciado) { gpsIniciado = true; arrancarGps(); }
     if (ultimaPos) mapa?.setView([ultimaPos.lat, ultimaPos.lon], 16);
     else avisar('Esperando al GPS…', 'info', 4000);
   });
@@ -564,6 +566,9 @@
     cuandoLeaflet(() => {
       initMapa();
       mapa?.invalidateSize();
+      // El GPS se enciende al abrir la vista y no se vuelve a pedir en cada
+      // visita: el reloj de posición sigue vivo mientras la app esté abierta.
+      if (!gpsIniciado) { gpsIniciado = true; arrancarGps(); }
       revisarOBD(true);
     });
   }
