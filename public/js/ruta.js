@@ -42,6 +42,8 @@
   let reconocimiento = null;
   let codigosOBD = new Set();
   let gpsIniciado = false;
+  let temporizadorGps = 0;
+  let sondeoGps = 0;
 
   const CLAVE_NOCHE = 'dm_ruta_noche';
   const CLAVE_OBD = 'dm_obd_ultimo';
@@ -280,7 +282,24 @@
 
   function arrancarGps() {
     if (!navigator.geolocation) { avisar('Este navegador no tiene GPS disponible.', 'aviso', 8000); return; }
+    gpsIniciado = true;
     navigator.geolocation.watchPosition(alMover, errorGps, { enableHighAccuracy: true, maximumAge: 4000, timeout: 20000 });
+    // Respaldo: hay móviles (y posiciones simuladas) donde watchPosition no
+    // entrega nada aunque una consulta puntual sí responde. Si en 8 s no ha
+    // llegado ninguna posición, se pregunta cada 2 s. En cuanto llega una, se
+    // para el sondeo y manda el reloj normal.
+    clearTimeout(temporizadorGps);
+    temporizadorGps = setTimeout(() => {
+      if (ultimaPos || sondeoGps) return;
+      sondeoGps = setInterval(() => {
+        if (ultimaPos) { clearInterval(sondeoGps); sondeoGps = 0; return; }
+        navigator.geolocation.getCurrentPosition(
+          alMover,
+          () => {},
+          { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
+        );
+      }, 2000);
+    }, 8000);
   }
 
   // ------------------------------------------------------------ búsqueda
@@ -556,7 +575,7 @@
   elNoche?.addEventListener('click', () => aplicarTema(!noche));
   elGps?.addEventListener('click', () => {
     siguiendo = true;
-    if (!gpsIniciado) { gpsIniciado = true; arrancarGps(); }
+    if (!gpsIniciado) arrancarGps();
     if (ultimaPos) mapa?.setView([ultimaPos.lat, ultimaPos.lon], 16);
     else avisar('Esperando al GPS…', 'info', 4000);
   });
@@ -568,7 +587,7 @@
       mapa?.invalidateSize();
       // El GPS se enciende al abrir la vista y no se vuelve a pedir en cada
       // visita: el reloj de posición sigue vivo mientras la app esté abierta.
-      if (!gpsIniciado) { gpsIniciado = true; arrancarGps(); }
+      if (!gpsIniciado) arrancarGps();
       revisarOBD(true);
     });
   }
