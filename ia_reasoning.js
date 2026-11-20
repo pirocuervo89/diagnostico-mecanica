@@ -42,9 +42,9 @@ function esConsultaVaga(consulta) {
 function obtenerSystemPrompt({ vaga = false } = {}) {
     const bloqueVago = vaga
         ? `- El mensaje del usuario no dice nada concreto: contesta SOLO con
-  "¿Qué deseas?" seguido, en la misma línea, de dos o tres opciones claras
-  (por ejemplo: «¿saber qué avería te sale, revisar un síntoma o calcular
-  cuánto puede costar?»). Nada más: ni saludo largo ni explicaciones.`
+  "Soy Maya. ¿Qué deseas?" seguido, en la misma línea, de dos o tres opciones
+  claras (por ejemplo: «¿saber qué avería te sale, revisar un síntoma o
+  calcular cuánto puede costar?»). Nada más: ni saludo largo ni explicaciones.`
         : `- El usuario ya ha contado lo que le pasa. NO preguntes "¿Qué deseas?" ni
   pidas permiso: contesta directamente a su avería. Preguntar qué desea a
   quien acaba de describir un síntoma es un error grave.`;
