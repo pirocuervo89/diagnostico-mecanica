@@ -2503,6 +2503,11 @@ if (chatBox && chatScrollBtn) {
 }
 
 // La conversación se recuerda entre visitas: al volver, sigue donde estaba.
+// El saludo que viene escrito en el HTML también lleva sus acciones.
+function decorarSaludoFijo() {
+  document.querySelectorAll('#chatBox .bubble.assistant:not(.typing)').forEach(decorarBurbuja);
+}
+
 (function restaurarChat() {
   if (!chatBox) return;
   let hist = [];
@@ -2518,6 +2523,8 @@ if (chatBox && chatScrollBtn) {
   document.querySelector('.chat-shell')?.classList.add('conversacion');
   chatBox.scrollTop = chatBox.scrollHeight;
 })();
+
+decorarSaludoFijo();
 
 // -------------------------------------------------------------
 // VISTA: GENERADOR DE INFORMES TÉCNICOS
