@@ -67,7 +67,7 @@
 }
 
 /* HUD flotante */
-.ruta-hud { position: absolute; inset: 0; pointer-events: none; }
+.ruta-hud { position: absolute; inset: 0; pointer-events: none; z-index: 900; }
 .ruta-hud > * { pointer-events: auto; }
 
 .ruta-search {
@@ -441,9 +441,14 @@
 /* Con una ruta puesta, el mapa cede altura en el móvil para que el panel
    (maniobra, ETA y botón de arrancar) quede por encima de la barra inferior. */
 @media (max-width: 700px) {
-  #view-ruta .ruta-shell.ruta-con-ruta .ruta-map { height: clamp(250px, 39vh, 380px); }
+  #view-ruta .ruta-shell.ruta-con-ruta .ruta-map { height: clamp(320px, 58vh, 470px); }
   #view-ruta .ruta-shell.ruta-con-ruta { margin-bottom: 6px; }
+  /* El panel cabe sobre el mapa sin comerse la ruta entera. */
+  #view-ruta .ruta-panel { max-height: 44vh; overflow-y: auto; }
 }
+
+/* Con una ruta puesta, la burbuja de instalar no tapa el pie del mapa. */
+body.viendo-ruta .pwa-install { display: none !important; }
 .ruta-panel { scroll-margin-bottom: 96px; }
 
 /* CTA grande de la portada: «¿Dónde vamos?» */

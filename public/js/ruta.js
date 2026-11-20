@@ -709,6 +709,7 @@
   }
 
   document.addEventListener('viewchange', e => {
+    document.body.classList.toggle('viendo-ruta', e.detail?.name === 'ruta');
     if (e.detail?.name !== 'ruta') return;
     iniciarVista();
     setTimeout(() => mapa?.invalidateSize(), 200);
@@ -723,7 +724,10 @@
   window.addEventListener('obd:dtcs', () => revisarOBD());
   setInterval(() => revisarOBD(), 45000);
 
-  if (document.querySelector('.view.active')?.id === 'view-ruta') iniciarVista();
+  if (document.querySelector('.view.active')?.id === 'view-ruta') {
+    document.body.classList.add('viendo-ruta');
+    iniciarVista();
+  }
 
   // La IA llama aquí cuando el usuario dice «llévame a...». Se busca el sitio,
   // se abre la ruta y se traza sola; si no se encuentra, se dice claro.
