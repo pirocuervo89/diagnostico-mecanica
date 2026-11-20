@@ -76,9 +76,10 @@ router.get('/route', async (req, res) => {
   if (guardado) return res.json({ route: guardado, cached: true });
 
   try {
-    // alternatives: hasta tres caminos para que el usuario elija; annotations
-    // con maxspeed para poder enseñar el límite de la vía por la que va.
-    const url = `https://router.project-osrm.org/route/v1/driving/${fLon},${fLat};${tLon},${tLat}?overview=full&geometries=geojson&steps=true&alternatives=true&annotations=nodes,maxspeed`;
+    // alternatives: hasta tres caminos para que el usuario elija. OJO: el OSRM
+    // público rechaza `annotations=maxspeed` (400); el límite de la vía se
+    // obtiene de los tags de OpenStreetMap en /avisos.
+    const url = `https://router.project-osrm.org/route/v1/driving/${fLon},${fLat};${tLon},${tLat}?overview=full&geometries=geojson&steps=true&alternatives=true`;
     const datos = await pedirJson(url, 14000);
     if (!Array.isArray(datos?.routes) || !datos.routes.length) {
       return res.status(404).json({ error: 'No hay ruta por carretera hasta ese punto' });
@@ -98,15 +99,8 @@ router.get('/route', async (req, res) => {
         });
       });
 
-      // Límites de velocidad por tramo: OSRM da un valor por segmento y el
-      // índice del nodo de la geometría donde empieza ese tramo.
-      const anot = ruta.legs?.[0]?.annotation || {};
-      const nodos = Array.isArray(anot.nodes) ? anot.nodes : [];
-      const velocidades = Array.isArray(anot.maxspeed) ? anot.maxspeed : [];
-      const limits = velocidades.map((v, i) => {
-        const kmh = typeof v === 'number' ? Math.round(v) : (parseInt(String(v).match(/(\d+)/)?.[1] || '', 10) || 0);
-        return { node: nodos[i] ?? -1, kmh };
-      }).filter(l => l.kmh > 0 && l.node >= 0);
+      // Los límites de la vía vienen de /avisos (tags maxspeed de OSM).
+      const limits = [];
 
       return {
         distance: Math.round(ruta.distance || 0),
@@ -153,8 +147,9 @@ router.get('/avisos', async (req, res) => {
       node["hazard"](around:${radio},${lat},${lon});
       node["highway"="construction"](around:${radio},${lat},${lon});
       way["highway"="construction"](around:${radio},${lat},${lon});
+      way["highway"]["maxspeed"](around:${radio},${lat},${lon});
     );
-    out center tags 120;`;
+    out center tags 220;`;
 
   // Overpass rechaza (406) las peticiones sin User-Agent propio y a veces
   // tarda: se prueban dos servidores y, si ambos fallan, se sigue sin radares.
@@ -184,7 +179,7 @@ router.get('/avisos', async (req, res) => {
 
   try {
     if (!datos) throw new Error('sin datos');
-    const etiquetas = { radar: 'Radar', camara: 'Cámara', obra: 'Obras', senal: 'Semáforo', peligro: 'Peligro' };
+    const etiquetas = { radar: 'Radar', camara: 'Cámara', obra: 'Obras', senal: 'Semáforo', peligro: 'Peligro', limite: 'Límite' };
     const avisos = (datos?.elements || [])
       .map(n => {
         const lat2 = Number.isFinite(n.lat) ? n.lat : n.center?.lat;
@@ -196,6 +191,7 @@ router.get('/avisos', async (req, res) => {
         else if (t.highway === 'traffic_signals') kind = 'senal';
         else if (t.highway === 'construction' || t.construction) kind = 'obra';
         else if (t.hazard) kind = 'peligro';
+        else if (t.maxspeed && t.highway) kind = 'limite';
         if (!kind || !Number.isFinite(lat2) || !Number.isFinite(lon2)) return null;
         return {
           id: String(n.id),

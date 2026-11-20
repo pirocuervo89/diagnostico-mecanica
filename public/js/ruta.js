@@ -220,21 +220,16 @@
     elVel.classList.toggle('exceso', Boolean(exceso));
   }
 
+  // Límite de la vía: el tag maxspeed del tramo de OpenStreetMap más cercano.
   function limiteActual(lat, lon) {
-    if (!limites.length || !alternativas[seleccion]) return null;
-    const geo = alternativas[seleccion].geometry;
-    let mejor = -1;
-    let mejorD = Infinity;
-    for (let i = 0; i < geo.length; i += 4) {
-      const d = distancia(lat, lon, geo[i][0], geo[i][1]);
-      if (d < mejorD) { mejorD = d; mejor = i; }
-    }
-    if (mejor < 0) return null;
-    let valor = null;
+    if (!limites.length) return null;
+    let mejor = null;
+    let mejorD = 60;
     for (const l of limites) {
-      if (l.node <= mejor && l.kmh) valor = l.kmh;
+      const d = distancia(lat, lon, l.lat, l.lon);
+      if (d < mejorD) { mejorD = d; mejor = l; }
     }
-    return valor;
+    return mejor ? mejor.kmh : null;
   }
 
   function girarCoche(icono, grados) {
@@ -347,7 +342,7 @@
       const datos = await r.json();
       if (!r.ok || !datos.route) throw new Error(datos.error || 'Sin ruta');
       alternativas = Array.isArray(datos.routes) && datos.routes.length ? datos.routes : [datos.route];
-      limites = Array.isArray(datos.route.limits) ? datos.route.limits : [];
+      if (Array.isArray(datos.route.limits) && datos.route.limits.length) limites = datos.route.limits;
       seleccion = 0;
       paso = 0;
       avisados.clear();
@@ -399,7 +394,6 @@
       btn.addEventListener('click', () => {
         seleccion = Number(btn.dataset.ruta) || 0;
         paso = 0;
-        limites = alternativas[seleccion].limits || limites;
         avisados.clear();
         pintarRuta();
         pintarPanel();
@@ -462,15 +456,22 @@
       const r = await fetch(`/api/ruta/avisos?lat=${lat}&lon=${lon}&radio=9000`);
       const datos = await r.json();
       avisos = Array.isArray(datos.avisos) ? datos.avisos : [];
+      // Los límites de velocidad no se pintan como chinchetas: son demasiados.
+      // Se usan para el velocímetro.
+      limites = avisos
+        .filter(a => a.kind === 'limite')
+        .map(a => ({ lat: a.lat, lon: a.lon, kmh: parseInt(String(a.maxspeed).match(/(\d+)/)?.[1] || '', 10) || 0 }))
+        .filter(l => l.kmh > 0);
       capaAvisos.clearLayers();
-      avisos.forEach(a => {
+      avisos.filter(a => a.kind !== 'limite').forEach(a => {
         L.marker([a.lat, a.lon], { icon: iconoAviso(a), title: `${a.kind}${a.maxspeed ? ` ${a.maxspeed}` : ''}` })
           .bindPopup(`${a.label}${a.maxspeed ? ` · ${a.maxspeed}` : ''}${a.name ? ` · ${a.name}` : ''}`)
           .addTo(capaAvisos);
       });
+      const visibles = avisos.filter(a => a.kind !== 'limite');
       if (elInfo) {
-        elInfo.textContent = avisos.length
-          ? `${avisos.length} avisos en la zona (${avisos.filter(a => a.kind === 'radar').length} radares)`
+        elInfo.textContent = visibles.length
+          ? `${visibles.length} avisos en la zona (${visibles.filter(a => a.kind === 'radar').length} radares)`
           : 'Sin avisos conocidos en esta zona';
       }
     } catch (_e) { /* sin avisos se navega igual */ }
