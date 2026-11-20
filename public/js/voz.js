@@ -489,18 +489,20 @@
   function hablarTexto(texto) {
     if (!canRead || !texto) return;
     stopSpeaking();
-    const { voice, male } = pickSpanishVoice();
-    const trozos = trocear(texto);
-    const decir = i => {
-      if (i >= trozos.length) return;
-      const u = new SpeechSynthesisUtterance(trozos[i]);
+    // Una sola locución: el saludo no depende del troceo en frases. Si el motor
+    // aún no ha publicado voces, se espera un poco en vez de hablar sin voz.
+    const decir = (intento = 0) => {
+      if (!synth.getVoices().length && intento < 3) {
+        setTimeout(() => decir(intento + 1), 400);
+        return;
+      }
+      const { voice, male } = pickSpanishVoice();
+      const u = new SpeechSynthesisUtterance(texto);
       u.lang = lang;
       u.voice = voice || null;
       u.pitch = male ? 0.9 : 1;
       u.rate = 1.02;
       u.volume = 1;
-      u.onend = () => decir(i + 1);
-      u.onerror = () => decir(i + 1);
       synth.speak(u);
     };
     decir(0);
@@ -526,9 +528,14 @@
     if (saludoHecho) return;
     if (document.querySelector('.view.active')?.id !== 'view-chat') return;
     saludoHecho = true;
-    // Si la app ya saludó por su cuenta, no se repite el texto: solo se habla.
-    const yaSaludado = /qu[eé] le pasa a tu coche/i.test(document.getElementById('chatBox')?.innerText || '');
-    if (!yaSaludado) pintarBurbujaMaya(SALUDO);
+    // Si la app ya había escrito su bienvenida, se sustituye por la de Maya:
+    // un solo saludo y con su nombre.
+    const box = document.getElementById('chatBox');
+    const previa = box && /qu[eé] le pasa a tu coche/i.test(box.innerText || '')
+      ? [...box.querySelectorAll('.bubble.assistant')].find(b => /qu[eé] le pasa a tu coche/i.test(b.innerText || ''))
+      : null;
+    if (previa) previa.innerHTML = `<p>${SALUDO}</p>`;
+    else pintarBurbujaMaya(SALUDO);
     if (hablar) hablarTexto(SALUDO);
   }
 
