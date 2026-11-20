@@ -308,6 +308,26 @@
 
 /* botones nuevos del mapa */
 .ruta-fab-noche { bottom: 254px; font-size: 17px; line-height: 1; }
+.ruta-fab-full { bottom: 302px; font-size: 18px; line-height: 1; }
+
+/* Pantalla completa: el mapa ocupa todo el móvil, como un navegador dedicado. */
+.ruta-shell.ruta-completa {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  border-radius: 0;
+  border: 0;
+  margin: 0;
+}
+.ruta-shell.ruta-completa .ruta-map { height: 100%; }
+.ruta-shell.ruta-completa .ruta-search { top: max(12px, env(safe-area-inset-top, 0px)); }
+.ruta-shell.ruta-completa .ruta-fab { bottom: calc(206px + env(safe-area-inset-bottom, 0px)); }
+.ruta-shell.ruta-completa .ruta-fab-noche { bottom: calc(254px + env(safe-area-inset-bottom, 0px)); }
+.ruta-shell.ruta-completa .ruta-fab-full { bottom: calc(302px + env(safe-area-inset-bottom, 0px)); }
+body.ruta-pantalla-completa { overflow: hidden; }
 .ruta-mic {
   width: 38px;
   height: 38px;

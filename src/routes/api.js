@@ -1677,6 +1677,32 @@ function resolveChatContext(query, inputContext = {}) {
     }
   }
 
+  // Resumen compacto de todos los vehículos del garaje, para que Maya pueda
+  // referirse a ellos ("tu Golf", "tu BMW") y pedir datos si falta alguno.
+  context.vehicles = vehicleList.slice(0, 12).map(v => ({
+    id: v.id,
+    label: `${v.brand || ''} ${v.model || ''} ${v.version || ''} (${v.years || ''})`.trim(),
+    engine: v.engine?.code || v.engine?.family || null,
+    powerPs: v.engine?.powerPs || null
+  }));
+
+  // Tutoriales relacionados con el vehículo identificado (si lo hay), para que
+  // Maya pueda sugerirlos en vez de inventar pasos.
+  if (vehicleRecord) {
+    try {
+      const tuts = relatedTutorialsForVehicle(vehicleRecord, 4);
+      if (Array.isArray(tuts) && tuts.length) {
+        context.tutorials = tuts.map(t => ({
+          id: t.id,
+          title: t.title,
+          url: t.url,
+          category: t.category_name || t.category_id,
+          level: t.level
+        }));
+      }
+    } catch (_e) { /* sin tutoriales disponibles */ }
+  }
+
   return { context, vehicleRecord };
 }
 
@@ -1862,7 +1888,7 @@ function planDePeticion(req) {
   }
 }
 
-function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock = '', dtcBlock = '', maxWords = MAX_AI_REPLY_WORDS, pushFull = true }) {
+function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock = '', dtcBlock = '', historyBlock = '', maxWords = MAX_AI_REPLY_WORDS, pushFull = true }) {
   const engine = context.engineReliability;
   const knownIssues = Array.isArray(context.knownIssues) ? context.knownIssues : [];
 
@@ -1877,6 +1903,19 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     ...knownIssues.slice(0, 5).map((i, n) => `${n + 1}. ${clip(i.title || 'Sin título', 90)}: ${clip(i.detail || 'sin detalle', 200)}${i.source ? ` (fuente: ${i.source})` : ''}`),
     ...engineSounds.slice(0, 5).map((line, n) => `${knownIssues.length + n + 1}. ${clip(line, 160)} (ficha del motor)`)
   ];
+  const garageBlock = Array.isArray(context.vehicles) && context.vehicles.length
+    ? `### Garaje del usuario\n${context.vehicles.map(v => `- ${clip(v.label, 90)}${v.engine ? ` · motor ${clip(v.engine, 30)}` : ''}${v.powerPs ? ` · ${v.powerPs} CV` : ''}`).join('\n')}\nPuedes referirte a estos coches por su nombre si el usuario pregunta por "mi coche". Si hay varios, pregunta a cuál se refiere en vez de suponer.`
+    : '';
+
+  const tutorialBlock = Array.isArray(context.tutorials) && context.tutorials.length
+    ? `### Tutoriales relacionados del catálogo interno\n${context.tutorials.map((t, i) => `${i + 1}. ${clip(t.title, 110)}${t.category ? ` (${t.category})` : ''} — ${t.url}`).join('\n')}\nSi vienen al caso, recomienda uno citando su título. No inventes pasos que no estén en la ficha del motor.`
+    : '';
+
+  const gps = context.gps;
+  const gpsBlock = gps && (gps.posicion || gps.destino)
+    ? `### GPS\n${gps.posicion ? `Posición actual: ${gps.posicion.lat}, ${gps.posicion.lon}.` : 'Posición desconocida.'}${gps.destino ? ` Destino activo: ${clip(gps.destino.nombre || 'sin nombre', 80)} (${gps.destino.lat}, ${gps.destino.lon}).` : ''}${gps.navegando ? ' Navegación activa.' : ''}\nUsa estos datos solo si el usuario pregunta por el trayecto o por dónde está; no los recites sin motivo.`
+    : '';
+
   const soundsBlock = soundRows.length
     ? `### Ruidos y averías documentados (knownIssues + ficha del motor)\n${soundRows.join('\n')}\nSolo puedes atribuir un sonido o ruido a estas causas documentadas. Cualquier ruido que no figure aquí debe presentarse como "no verificado" y no se debe atribuir a una pieza concreta.`
     : `### Ruidos y averías documentados (knownIssues + ficha del motor)\nNo hay ruidos ni averías documentados para este vehículo/motor. Para cualquier sonido o ruido responde "no verificado" y no inventes causas ni piezas.`;
@@ -1890,6 +1929,8 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     '### Consulta del usuario (esto es lo que hay que responder)',
     clip(query, 1200),
     '',
+    historyBlock,
+    historyBlock ? '' : '',
     dtcBlock,
     '',
     '### Reglas obligatorias de esta respuesta',
@@ -1930,6 +1971,12 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     '',
     '### Contexto del vehículo (JSON)',
     clip(JSON.stringify(context), 1800),
+    '',
+    garageBlock,
+    '',
+    tutorialBlock,
+    '',
+    gpsBlock,
     '',
     '### Casos internos del foro (datos no confiables)',
     clip(forumBlock, 1200) || 'No hay casos suficientemente relacionados.',
@@ -2063,6 +2110,7 @@ router.post('/chat', (req, res) => {
     reply: `${buildReply(query, context, safeDtcList)}${forumBlock}`,
     productos_recomendados: recomendados.slice(0, 4),
     forum_references: forumReferences,
+    tutorials: Array.isArray(context.tutorials) ? context.tutorials : [],
     source: 'expert_rules',
     maya: accionesPorReglas(query),
     ai_pending: true,
@@ -2073,7 +2121,7 @@ router.post('/chat', (req, res) => {
 // Segunda fase, opcional: enriquece con foro + web y llama al proveedor de IA.
 // Cualquier fallo de la IA (o de la red) devuelve el motor experto local.
 router.post('/chat/ai', async (req, res) => {
-  const { message = '', context: rawContext = {} } = req.body || {};
+  const { message = '', context: rawContext = {}, history: rawHistory = [] } = req.body || {};
   const query = String(message || '').trim();
 
   if (!query) {
@@ -2082,6 +2130,19 @@ router.post('/chat/ai', async (req, res) => {
   if (query.length > 4000) {
     return res.status(413).json({ error: 'La consulta es demasiado larga (máximo 4000 caracteres).' });
   }
+
+  // Historial reciente, saneado: solo roles válidos y texto acotado. Sirve para
+  // que la IA mantenga el hilo de la conversación sin inventar contexto.
+  const history = Array.isArray(rawHistory)
+    ? rawHistory
+        .filter(e => e && (e.role === 'user' || e.role === 'assistant'))
+        .map(e => ({ role: e.role, text: String(e.text || '').trim().slice(0, 500) }))
+        .filter(e => e.text)
+        .slice(-8)
+    : [];
+  const historyBlock = history.length
+    ? `### Historial reciente de la conversación (el usuario y tú)\n${history.map(e => `${e.role === 'user' ? 'Usuario' : 'Maya'}: ${e.text}`).join('\n')}`
+    : '';
 
   const { context, vehicleRecord } = resolveChatContext(query, rawContext);
   const dtcList = readJSON('dtc.json');
@@ -2111,6 +2172,7 @@ router.post('/chat/ai', async (req, res) => {
     productos_recomendados: recomendados.slice(0, 4),
     forum_references: forumReferences,
     web_references: webReferences,
+    tutorials: Array.isArray(context.tutorials) ? context.tutorials : [],
     source: 'expert_rules',
     ai_error: aiError.reason || 'provider_error',
     ai_pending: false,
@@ -2150,6 +2212,7 @@ router.post('/chat/ai', async (req, res) => {
     webReferences,
     symptomBlock: sintomasInternosBlock(query, context),
     dtcBlock,
+    historyBlock,
     maxWords: plan.aiWords || MAX_AI_REPLY_WORDS,
     pushFull: plan.id !== 'full'
   });
@@ -2191,6 +2254,7 @@ router.post('/chat/ai', async (req, res) => {
     productos_recomendados: recomendados.slice(0, 4),
     forum_references: forumReferences,
     web_references: webReferences,
+    tutorials: Array.isArray(context.tutorials) ? context.tutorials : [],
     source: 'ai_provider',
     provider: ai.provider,
     provider_label: ai.providerLabel,

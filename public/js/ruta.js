@@ -697,6 +697,54 @@
   $('#rutaMas')?.addEventListener('click', () => mapa?.zoomIn());
   $('#rutaMenos')?.addEventListener('click', () => mapa?.zoomOut());
   elNoche?.addEventListener('click', () => aplicarTema(!noche));
+
+  // Pantalla completa: en el móvil, el mapa ocupa todo y desaparecen cabecera y
+  // pie. Usa la API del navegador si existe y, si no, una capa fija propia.
+  const elShell = view.querySelector('.ruta-shell');
+  const elFull = $('#rutaFull');
+  function pantallaCompletaActiva() {
+    return Boolean(document.fullscreenElement || elShell?.classList.contains('ruta-completa'));
+  }
+  function pintarBotonFull(activa) {
+    if (!elFull) return;
+    elFull.setAttribute('aria-pressed', String(activa));
+    elFull.setAttribute('aria-label', activa ? 'Salir de pantalla completa' : 'Pantalla completa');
+    elFull.title = activa ? 'Salir de pantalla completa' : 'Pantalla completa';
+    elFull.textContent = activa ? '⤢' : '⛶';
+  }
+  async function alternarPantallaCompleta() {
+    const activa = pantallaCompletaActiva();
+    if (activa) {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        try { await document.exitFullscreen(); } catch (_e) { /* ya salió */ }
+      }
+      elShell?.classList.remove('ruta-completa');
+      document.body.classList.remove('ruta-pantalla-completa');
+      pintarBotonFull(false);
+      setTimeout(() => mapa?.invalidateSize(), 180);
+      return;
+    }
+    // En Android el elemento raíz entra en pantalla completa; si el navegador
+    // no lo permite (iOS antiguo), la clase fija hace lo mismo dentro de la app.
+    if (elShell?.requestFullscreen) {
+      try { await elShell.requestFullscreen({ navigationUI: 'hide' }); } catch (_e) { /* fallback */ }
+    }
+    elShell?.classList.add('ruta-completa');
+    document.body.classList.add('ruta-pantalla-completa');
+    pintarBotonFull(true);
+    setTimeout(() => mapa?.invalidateSize(), 220);
+  }
+  elFull?.addEventListener('click', alternarPantallaCompleta);
+  document.addEventListener('fullscreenchange', () => {
+    const activa = Boolean(document.fullscreenElement);
+    if (!activa && elShell?.classList.contains('ruta-completa') && !document.fullscreenElement) {
+      // El usuario salió con el gesto del sistema: se limpia también la clase.
+      elShell.classList.remove('ruta-completa');
+      document.body.classList.remove('ruta-pantalla-completa');
+    }
+    pintarBotonFull(pantallaCompletaActiva());
+    setTimeout(() => mapa?.invalidateSize(), 180);
+  });
   elGps?.addEventListener('click', () => {
     siguiendo = true;
     if (!gpsIniciado) arrancarGps();
@@ -763,6 +811,13 @@
 
   window.Ruta = {
     ir: (lat, lon, nombre) => { window.showView?.('ruta'); setTimeout(() => fijarDestino(lat, lon, nombre), 700); },
-    irA
+    irA,
+    // Estado mínimo para que Maya sepa dónde está el coche y adónde va.
+    // Sin datos de GPS no devuelve posición inventada.
+    estado: () => ({
+      posicion: ultimaPos ? { lat: Number(ultimaPos.lat.toFixed(5)), lon: Number(ultimaPos.lon.toFixed(5)) } : null,
+      destino: destinoCoord ? { lat: Number(destinoCoord.lat.toFixed(5)), lon: Number(destinoCoord.lon.toFixed(5)), nombre: nombreDestino || '' } : null,
+      navegando: Boolean(navegando)
+    })
   };
 })();

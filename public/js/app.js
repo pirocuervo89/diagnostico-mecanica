@@ -2396,6 +2396,12 @@ async function submitChat(text) {
   if (chatInput) chatInput.blur();
 
   try {
+    function stripMayaHtml(html) { return String(html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(); }
+    const history = chatHistoria.slice(0, -1).slice(-6).map(e => ({
+      role: e.t === 'u' ? 'user' : 'assistant',
+      text: stripMayaHtml(e.h)
+    })).filter(e => e.text);
+
     const payload = {
       message: query,
       context: {
@@ -2403,8 +2409,10 @@ async function submitChat(text) {
         brand: currentVehicle.brand,
         model: currentVehicle.model,
         engine: currentVehicle.engine,
-        dtcs: window.OBDEstado?.dtcs || []
-      }
+        dtcs: window.OBDEstado?.dtcs || [],
+        gps: window.Ruta?.estado?.() || null
+      },
+      history
     };
 
     // Las dos fases salen a la vez: la local contesta al instante y la IA ya

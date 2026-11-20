@@ -1,4 +1,4 @@
-const CACHE = 'dm-app-v29';
+const CACHE = 'dm-app-v30';
 const CORE = [
   '/',
   '/index.html',
@@ -18,6 +18,7 @@ const CORE = [
   '/js/micro-permiso.js',
   '/js/obd.js',
   '/js/tutorials.js',
+  '/js/maya-incidente.js',
   '/js/lighting.js',
   '/js/tyres.js',
   '/js/buying.js',

@@ -214,6 +214,17 @@
       <p class="micro-note">${result.vision?.available
         ? `Visión con ${esc(result.vision.providerLabel || result.vision.provider)} · ${esc(result.vision.model || '')}`
         : 'Sin proveedor con visión configurado: el catálogo se filtra por color y descripción, sin inventar una identificación.'}</p>`;
+
+    // Maya explica el testigo en un panel compacto, por escrito y en voz alta.
+    try {
+      if (result.identified && candidates.length && window.MayaIncidente?.mostrar) {
+        const light = candidates[0];
+        window.MayaIncidente.mostrar({
+          titulo: `Testigo encendido: ${light.name || 'avería'}`,
+          forzar: false
+        });
+      }
+    } catch (_e) { /* el panel es opcional */ }
   }
 
   function reset() {
