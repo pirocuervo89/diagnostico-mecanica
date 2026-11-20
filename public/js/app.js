@@ -36,6 +36,17 @@ function ejecutarMaya(acciones) {
         }
         document.getElementById('obdConnect')?.click();
       }, 500);
+    } else if (hacer === 'camara_docs') {
+      // Papeles del coche: abre el escáner de documentos del garaje.
+      showView('garaje');
+      setTimeout(() => document.getElementById('scanFile')?.click(), 550);
+    } else if (hacer === 'registro') {
+      showView('garaje');
+      setTimeout(() => {
+        const btn = [...document.querySelectorAll('#view-garaje button, #view-perfil button')]
+          .find(b => /crear cuenta|registr|darme de alta/i.test(b.innerText || ''));
+        if (btn) btn.click();
+      }, 500);
     } else if (hacer === 'productos') {
       showView('productos');
     } else if (hacer === 'tutoriales') {

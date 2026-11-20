@@ -1909,7 +1909,8 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     '',
     '### Mover la app (opcional, una sola acción)',
     'Si además de contestar conviene enseñarle algo al usuario en la app, añade AL FINAL y en una línea aparte exactamente: MAYAJSON {"hacer":"..."}',
-    'Acciones válidas: {"hacer":"abrir","donde":"inicio|chat|garaje|obd|dtc|testigos|productos|tutoriales|tuning|vehiculos|diagnostico"}, {"hacer":"camara"} para pedir una foto del testigo, {"hacer":"conectar_obd"} para abrir y conectar el escáner, {"hacer":"productos","que":"aceite"} para enseñar productos.',
+    'Acciones válidas: {"hacer":"abrir","donde":"inicio|chat|garaje|obd|dtc|testigos|productos|tutoriales|tuning|vehiculos|diagnostico"}, {"hacer":"camara"} para pedir una foto del testigo, {"hacer":"camara_docs"} para pedir la foto de la ficha técnica o los papeles del coche, {"hacer":"conectar_obd"} para abrir y conectar el escáner, {"hacer":"productos","que":"aceite"} para enseñar productos, {"hacer":"registro"} para llevar al alta de cuenta.',
+    'Si el usuario quiere añadir su coche al garaje, o no lo tiene guardado, pídele la foto de la ficha técnica (tarjeta ITV o permiso de circulación) y usa camara_docs: de ahí salen marca, modelo, versión, matrícula y bastidor. Si no tiene cuenta, ofrécele crearla y usa registro.',
     'Usa como máximo UNA acción por respuesta y solo si ayuda de verdad (por ejemplo: pide la foto del testigo y abre la cámara). Si no aporta nada, no escribas la línea. Nunca menciones MAYAJSON en el texto ni expliques la acción: el usuario solo debe ver que la app le lleva a lo que necesita.',
     '',
     engineBlock,
@@ -1943,6 +1944,13 @@ const VISTAS_MAYA = new Set([
 // se mueve siempre en los casos claros y no depende del humor de la IA.
 function accionesPorReglas(query) {
   const q = fold(query);
+  // Papeles del coche: es la vía para darlo de alta en el garaje sin teclear.
+  if (/(ficha tecnica|papeles|documentacion|permiso de circulacion|tarjeta itv|matricula)/.test(q)) {
+    return [{ hacer: 'camara_docs' }];
+  }
+  if (/(registr|crear cuenta|darme de alta|hacer(me)? una cuenta|mi perfil)/.test(q)) {
+    return [{ hacer: 'registro' }];
+  }
   const mover = /(ens[eé]|mu[eé]str|abre|ll[eé]vame|conect|usa|quiero ver|vamos a)/.test(q);
   if (/(conectar|conecta|conectalo|escaner|esc[áa]ner|scanner|obd)/.test(q) && mover) {
     return [{ hacer: 'conectar_obd' }];
@@ -1967,7 +1975,7 @@ function extraerMaya(texto) {
         if (hacer === 'abrir') {
           const donde = String(a.donde || '').toLowerCase();
           if (VISTAS_MAYA.has(donde)) acciones.push({ hacer: 'abrir', donde });
-        } else if (['camara', 'conectar_obd', 'productos', 'tutoriales'].includes(hacer)) {
+        } else if (['camara', 'camara_docs', 'conectar_obd', 'productos', 'tutoriales', 'registro'].includes(hacer)) {
           const accion = { hacer };
           if (a.que) accion.que = String(a.que).slice(0, 60);
           acciones.push(accion);

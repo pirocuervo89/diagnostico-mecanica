@@ -507,11 +507,18 @@
   }
 
   function pintarBurbujaMaya(texto) {
+    // Primero por la vía normal de la app; si el chat aún no tiene su caja
+    // creada, se escribe la burbuja a mano: el saludo no puede depender de eso.
     try {
-      if (typeof window.addBubble === 'function') {
-        window.addBubble(`<p>${texto}</p>`, 'assistant', true);
-      }
-    } catch (_e) { /* si el chat aún no existe, solo se habla */ }
+      if (typeof window.addBubble === 'function' && window.addBubble(`<p>${texto}</p>`, 'assistant', true)) return;
+    } catch (_e) { /* se sigue por el plan B */ }
+    const box = document.getElementById('chatBox');
+    if (!box) return;
+    const burbuja = document.createElement('div');
+    burbuja.className = 'bubble assistant';
+    burbuja.innerHTML = `<p>${texto}</p>`;
+    box.appendChild(burbuja);
+    box.scrollTop = box.scrollHeight;
   }
 
   // Saludo de bienvenida: una vez por sesión, con texto y voz.
