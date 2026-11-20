@@ -2440,8 +2440,14 @@ async function submitChat(text) {
     if (res.ai_pending) {
       const aiThinking = addBubble('<span class="typing-dots"><i></i><i></i><i></i></span><span class="typing-label">Maya está pensando…</span>', 'assistant typing', true);
       try {
-        const aiRes = await aiPendiente;
+        // Red de seguridad: si la IA no responde en 45 s, se abandona el
+        // turno y se queda la respuesta local. La web nunca se queda anclada.
+        const aiRes = await Promise.race([
+          aiPendiente,
+          new Promise(resolve => setTimeout(() => resolve({ __timeout: true }), 45000))
+        ]);
         if (aiThinking) aiThinking.remove();
+        if (aiRes && aiRes.__timeout) return;
         if (aiRes && aiRes.__error) throw aiRes.__error;
         if (aiRes?.source === 'ai_provider' && aiRes.reply) {
           const aiBubble = addBubble(

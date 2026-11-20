@@ -75,6 +75,42 @@ const PRESETS = {
     keyEnv: 'GEMINI_API_KEY',
     altModels: ['gemini-2.5-flash-lite', 'gemini-2.5-flash']
   },
+  // Cloudflare Workers AI: 10.000 Neurons/día gratis, sin tarjeta, ~80 modelos
+  // (Llama 3.3 70B, gpt-oss-120b, Qwen, Gemma, DeepSeek-R1 distill, Whisper,
+  // FLUX, BGE embeddings). Endpoint OpenAI-compatible. Se construye la URL con
+  // CLOUDFLARE_ACCOUNT_ID. Excelente como segundo proveedor gratuito estable.
+  cloudflare: {
+    id: 'cloudflare',
+    label: 'Cloudflare Workers AI',
+    kind: 'openai',
+    baseUrl: '',
+    model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+    keyEnv: 'CLOUDFLARE_API_TOKEN',
+    accountEnv: 'CLOUDFLARE_ACCOUNT_ID',
+    altModels: ['@cf/openai/gpt-oss-120b', '@cf/meta/llama-3.1-8b-instruct', '@cf/qwen/qwen2.5-72b-instruct']
+  },
+  // SambaNova Cloud: tier gratuito sin tarjeta (20 RPM, 20 RPD, 200K TPD por
+  // modelo). Modelos: DeepSeek-V3.1, Llama 3.3 70B, gpt-oss-120b. Los modelos
+  // en preview son solo para evaluación.
+  sambanova: {
+    id: 'sambanova',
+    label: 'SambaNova Cloud',
+    kind: 'openai',
+    baseUrl: 'https://api.sambanova.ai/v1',
+    model: 'Meta-Llama-3.3-70B-Instruct',
+    keyEnv: 'SAMBANOVA_API_KEY',
+    altModels: ['DeepSeek-V3.1', 'gpt-oss-120b']
+  },
+  // NVIDIA NIM: endpoints gratuitos para prototipado, sin tarjeta. Límites no
+  // publicados; tratar como secundario. Endpoint OpenAI-compatible.
+  nvidia: {
+    id: 'nvidia',
+    label: 'NVIDIA NIM',
+    kind: 'openai',
+    baseUrl: 'https://integrate.api.nvidia.com/v1',
+    model: 'meta/llama-3.3-70b-instruct',
+    keyEnv: 'NVIDIA_API_KEY'
+  },
   // Preset gratuito y sin clave: último recurso cuando no hay nada configurado
   // o cuando todas las claves fallan. No admite imágenes.
   pollinations: {
@@ -91,10 +127,10 @@ const PRESETS = {
 
 // Orden de preferencia cuando no se fuerza AI_PROVIDER: primero el interruptor
 // genérico, después los presets y Gemini al final.
-const AUTO_ORDER = ['compatible', 'groq', 'openrouter', 'mistral', 'cerebras', 'openai', 'gemini'];
+const AUTO_ORDER = ['compatible', 'groq', 'cloudflare', 'openrouter', 'sambanova', 'mistral', 'cerebras', 'nvidia', 'openai', 'gemini'];
 
 // Orden para visión. Pollinations queda fuera a propósito: solo acepta texto.
-const AUTO_VISION_ORDER = ['gemini', 'openai', 'openrouter', 'mistral', 'groq', 'cerebras', 'compatible'];
+const AUTO_VISION_ORDER = ['gemini', 'cloudflare', 'openai', 'openrouter', 'mistral', 'groq', 'cerebras', 'compatible'];
 
 export function listProviders() {
   return Object.values(PRESETS).map(p => ({
@@ -117,7 +153,15 @@ function buildProvider(preset, env) {
   const apiKey = String(env[preset.keyEnv] || '').trim();
   if (!isPollinations && !apiKey) return null;
 
-  let baseUrl = String(env.AI_BASE_URL || '').trim() || preset.baseUrl;
+  // Cloudflare necesita el account_id para construir la URL del endpoint.
+  let presetBaseUrl = preset.baseUrl;
+  if (preset.id === 'cloudflare') {
+    const accountId = String(env[preset.accountEnv || 'CLOUDFLARE_ACCOUNT_ID'] || '').trim();
+    if (!accountId) return null;
+    presetBaseUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1`;
+  }
+
+  let baseUrl = String(env.AI_BASE_URL || '').trim() || presetBaseUrl;
   let model = String(env.AI_MODEL || '').trim() || preset.model;
   if (isPollinations) {
     if (!pollinationsEnabled(env)) return null;

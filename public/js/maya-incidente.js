@@ -179,11 +179,15 @@
       context: { ...vehiculoContexto(), dtcs: dtcs || [], gps: window.Ruta?.estado?.() || null },
       history: []
     };
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 25000);
     const res = await fetch('/api/chat/ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: ctrl.signal
     });
+    clearTimeout(to);
     if (!res.ok) throw new Error(`chat ${res.status}`);
     return res.json();
   }
