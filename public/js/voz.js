@@ -680,6 +680,11 @@
     if (synth) synth.onvoiceschanged = () => pickSpanishVoice();
   }
 
+  // Desde cualquier punto de la app: saludar y ponerse a escuchar. La portada
+  // usa esto en "Preguntar" para que Maya arranque sola.
+  window.MayaSaludo = (hablar = true) => saludarMaya(hablar);
+  window.MayaEscuchar = () => activarLlamada();
+
   // Sin dictado: si algo llama aquí, se abre el teclado del chat.
   window.VozHablar = () => {
     const input = document.getElementById('chatInput');

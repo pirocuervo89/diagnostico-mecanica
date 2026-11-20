@@ -950,19 +950,41 @@ function initUniversalSearch() {
   input.addEventListener('focus', () => {
     if (input.value.trim().length >= 2) runUniversalSearch(false);
   });
+  // "Preguntar" de la portada lleva a Maya: si hay texto, se lo pregunta; si
+  // está vacío, abre el chat, se presenta y se pone a escuchar.
+  const abrirMaya = (texto = '') => {
+    closeUniversalResults();
+    showView('chat');
+    setTimeout(() => {
+      window.MayaSaludo?.(true);
+      const campo = document.getElementById('chatInput');
+      if (texto) {
+        const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+        if (campo) {
+          set.call(campo, texto);
+          campo.dispatchEvent(new Event('input', { bubbles: true }));
+          document.getElementById('chatForm')?.requestSubmit();
+        }
+        input.value = '';
+      } else {
+        window.MayaEscuchar?.();
+      }
+    }, 450);
+  };
+
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
       const q = input.value.trim();
       if (/^[PBCU]\d{4}$/i.test(q)) openUniversalResult('dtc', q.toUpperCase(), q);
-      else runUniversalSearch(true);
+      else abrirMaya(q);
     }
     if (e.key === 'Escape') closeUniversalResults();
   });
   button?.addEventListener('click', () => {
     const q = input.value.trim();
     if (/^[PBCU]\d{4}$/i.test(q)) openUniversalResult('dtc', q.toUpperCase(), q);
-    else runUniversalSearch(true);
+    else abrirMaya(q);
   });
   document.addEventListener('click', e => {
     if (!e.target.closest('.universal-search') && !e.target.closest('#universalResults')) closeUniversalResults();
