@@ -438,6 +438,13 @@
   .tabbar-btn span { font-size: 9px; letter-spacing: 0; }
 }
 
+/* Con una ruta puesta, el mapa cede altura en el móvil para que el panel
+   (maniobra, ETA y botón de arrancar) quede por encima de la barra inferior. */
+@media (max-width: 700px) {
+  #view-ruta .ruta-shell.ruta-con-ruta .ruta-map { height: clamp(290px, 44vh, 430px); }
+  #view-ruta .ruta-shell.ruta-con-ruta { margin-bottom: 6px; }
+}
+
 /* CTA grande de la portada: «¿Dónde vamos?» */
 .nx-ruta-cta-grande {
   display: flex;
