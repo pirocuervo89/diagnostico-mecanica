@@ -443,8 +443,10 @@
 @media (max-width: 700px) {
   #view-ruta .ruta-shell.ruta-con-ruta .ruta-map { height: clamp(320px, 58vh, 470px); }
   #view-ruta .ruta-shell.ruta-con-ruta { margin-bottom: 6px; }
-  /* El panel cabe sobre el mapa sin comerse la ruta entera. */
-  #view-ruta .ruta-panel { max-height: 44vh; overflow-y: auto; }
+  /* En el móvil el panel muestra lo que se usa conduciendo: maniobra, ETA,
+     alternativas y arrancar. La lista larga de pasos se consulta en escritorio. */
+  #view-ruta .ruta-pasos-preview { display: none; }
+  #view-ruta .ruta-shell { scroll-margin-top: 8px; }
 }
 
 /* Con una ruta puesta, la burbuja de instalar no tapa el pie del mapa. */

@@ -73,7 +73,10 @@ router.get('/route', async (req, res) => {
 
   const clave = `ruta|${fLat.toFixed(4)},${fLon.toFixed(4)}|${tLat.toFixed(4)},${tLon.toFixed(4)}`;
   const guardado = leer(clave);
-  if (guardado) return res.json({ route: guardado, cached: true });
+  // La caché guarda el objeto completo {route, routes}: al devolverlo había
+  // que abrirlo, no envolverlo otra vez, o la segunda consulta llegaba sin
+  // geometría y el mapa decía que el servicio no respondía.
+  if (guardado) return res.json({ route: guardado.route, routes: guardado.routes, cached: true });
 
   try {
     // alternatives: hasta tres caminos para que el usuario elija. OJO: el OSRM

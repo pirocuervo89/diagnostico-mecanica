@@ -398,8 +398,11 @@
       cargarAvisos();
       // En el móvil el panel queda al pie del mapa: se deja a la vista para no
       // tener que buscar el botón de arrancar la navegación.
-      view.querySelector('.ruta-shell')?.classList.add('ruta-con-ruta');
-      setTimeout(() => elPanel.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
+      const shell = view.querySelector('.ruta-shell');
+      shell?.classList.add('ruta-con-ruta');
+      // Se encuadra el mapa entero (panel incluido), no solo el panel: si se
+      // centraba el panel, la cabecera del mapa quedaba fuera de pantalla.
+      setTimeout(() => shell?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350);
     } catch (err) {
       elPanel.innerHTML = `<p class="ruta-error">${err.message || 'No se pudo calcular la ruta.'}</p>`;
     }
