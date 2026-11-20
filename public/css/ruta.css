@@ -1,0 +1,280 @@
+/* ============================================================
+   RUTA · mapa, GPS y navegación
+   ============================================================ */
+
+#view-ruta .page-head { margin-bottom: 10px; }
+
+.ruta-shell {
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 172, 208, .18);
+  box-shadow: 0 30px 80px -40px rgba(0, 0, 0, .95), inset 0 1px 0 rgba(255, 255, 255, .05);
+  background: #0a0f18;
+}
+
+.ruta-map {
+  height: clamp(380px, 62vh, 640px);
+  width: 100%;
+  background:
+    radial-gradient(60% 60% at 50% 40%, rgba(56, 225, 255, .07), transparent 70%),
+    #080d15;
+}
+
+/* Leaflet: que parezca parte de la app */
+.ruta-map .leaflet-control-attribution {
+  background: rgba(6, 10, 17, .78) !important;
+  color: rgba(180, 197, 220, .75) !important;
+  font-size: 9.5px !important;
+  border-radius: 8px 0 0 0;
+  padding: 2px 7px !important;
+}
+.ruta-map .leaflet-control-attribution a { color: rgba(140, 226, 255, .85) !important; }
+.ruta-map .leaflet-tile-pane { filter: saturate(.9) contrast(1.02) brightness(.95); }
+
+/* mi posición */
+.ruta-punto span { position: absolute; inset: 0; border-radius: 50%; }
+.ruta-punto-halo {
+  background: radial-gradient(circle, rgba(56, 225, 255, .35), transparent 68%);
+  animation: rutaHalo 2.6s ease-out infinite;
+}
+.ruta-punto-coche {
+  inset: 9px !important;
+  background: radial-gradient(circle at 35% 30%, #d9fbff, #38e1ff 55%, #1d7dff);
+  box-shadow: 0 0 0 2px rgba(6, 12, 20, .85), 0 0 18px rgba(56, 225, 255, .9);
+}
+
+.ruta-destino span {
+  display: block;
+  width: 26px; height: 26px;
+  border-radius: 50% 50% 50% 4px;
+  transform: rotate(-45deg);
+  background: linear-gradient(135deg, #ffd166, #ff7a59);
+  border: 2px solid rgba(255, 255, 255, .75);
+  box-shadow: 0 6px 18px -6px rgba(255, 122, 89, .9);
+}
+
+.ruta-radar span {
+  display: grid; place-items: center;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  background: radial-gradient(circle at 35% 30%, #ff8a7a, #e02424);
+  border: 2px solid rgba(255, 255, 255, .8);
+  box-shadow: 0 0 0 4px rgba(224, 36, 36, .18), 0 6px 16px -6px rgba(224, 36, 36, .95);
+}
+
+/* HUD flotante */
+.ruta-hud { position: absolute; inset: 0; pointer-events: none; }
+.ruta-hud > * { pointer-events: auto; }
+
+.ruta-search {
+  position: absolute;
+  top: 12px; left: 12px; right: 12px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 16px;
+  background: rgba(8, 12, 20, .82);
+  border: 1px solid rgba(148, 172, 208, .22);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  box-shadow: 0 18px 40px -26px rgba(0, 0, 0, .95);
+}
+.ruta-search input {
+  flex: 1;
+  min-height: 38px;
+  border: 0;
+  background: transparent;
+  color: #eaf1ff;
+  font-size: 14.5px;
+  outline: none;
+}
+.ruta-search input::placeholder { color: rgba(147, 164, 190, .8); }
+.ruta-search button {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 12px;
+  background: linear-gradient(135deg, #38e1ff, #8b7bff);
+  color: #04121c;
+  cursor: pointer;
+}
+
+.ruta-results {
+  position: absolute;
+  top: 66px; left: 12px; right: 12px;
+  max-height: 46%;
+  overflow: auto;
+  border-radius: 16px;
+  background: rgba(8, 12, 20, .94);
+  border: 1px solid rgba(148, 172, 208, .2);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 26px 60px -30px rgba(0, 0, 0, .95);
+  padding: 6px;
+}
+.ruta-results[hidden] { display: none; }
+.ruta-result {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 11px 10px;
+  border: 0; border-radius: 12px;
+  background: transparent;
+  color: #e6eefb;
+  text-align: left;
+  cursor: pointer;
+}
+.ruta-result:hover, .ruta-result:focus-visible { background: rgba(56, 225, 255, .1); }
+.ruta-result svg { color: #8fe6ff; flex: 0 0 auto; }
+.ruta-result span { display: flex; flex-direction: column; min-width: 0; }
+.ruta-result b { font-size: 13.5px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ruta-result small { color: rgba(147, 164, 190, .9); font-size: 11px; }
+.ruta-vacio { margin: 10px; color: rgba(160, 178, 202, .9); font-size: 12.5px; }
+
+/* panel de ruta */
+.ruta-panel {
+  position: absolute;
+  left: 12px; right: 12px; bottom: 12px;
+  padding: 13px 14px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(14, 20, 32, .95), rgba(8, 12, 20, .98));
+  border: 1px solid rgba(148, 172, 208, .2);
+  backdrop-filter: blur(18px) saturate(130%);
+  box-shadow: 0 26px 60px -30px rgba(0, 0, 0, .95), inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+.ruta-panel[hidden] { display: none; }
+
+.ruta-resumen { display: flex; align-items: center; gap: 14px; }
+.ruta-resumen > div:first-child { display: flex; flex-direction: column; }
+.ruta-resumen b { font-size: 20px; letter-spacing: -.02em; color: #fff; }
+.ruta-resumen span { font-size: 11.5px; color: rgba(147, 164, 190, .95); }
+.ruta-sig { min-width: 0; }
+.ruta-sig small { display: block; font-size: 9.5px; letter-spacing: .18em; color: rgba(140, 226, 255, .8); }
+.ruta-sig strong { display: block; font-size: 13.5px; font-weight: 600; color: #eaf1ff; line-height: 1.35; }
+
+.ruta-pasos-preview {
+  display: flex; flex-direction: column; gap: 3px;
+  margin: 10px 0 2px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(148, 172, 208, .14);
+}
+.ruta-pasos-preview span { font-size: 11.5px; color: rgba(160, 178, 202, .9); }
+
+.ruta-empezar {
+  width: 100%;
+  margin-top: 11px;
+  min-height: 44px;
+  border: 0; border-radius: 13px;
+  background: linear-gradient(120deg, #2fd8ff, #6aa8ff 45%, #9a7bff);
+  color: #04121c;
+  font-weight: 750;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 14px 32px -16px rgba(56, 225, 255, .8);
+}
+.ruta-empezar:active { transform: scale(.99); }
+
+.ruta-calc { display: flex; align-items: center; gap: 10px; color: #cfe6ff; font-size: 13px; }
+.ruta-calc i {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(56, 225, 255, .3);
+  border-top-color: #38e1ff;
+  animation: rutaGira .8s linear infinite;
+}
+.ruta-error { margin: 0; color: #ffb4a8; font-size: 13px; }
+
+/* velocidad y GPS */
+.ruta-speed {
+  position: absolute;
+  right: 12px; bottom: 132px;
+  width: 64px; height: 64px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: rgba(8, 12, 20, .9);
+  border: 1px solid rgba(56, 225, 255, .35);
+  box-shadow: 0 0 30px -10px rgba(56, 225, 255, .7), inset 0 0 20px rgba(56, 225, 255, .08);
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+.ruta-speed[hidden] { display: none; }
+.ruta-speed b { display: block; font-size: 21px; line-height: 1; color: #eaf6ff; }
+.ruta-speed span { font-size: 9px; letter-spacing: .12em; color: rgba(147, 164, 190, .9); }
+
+.ruta-fab {
+  position: absolute;
+  right: 12px; bottom: 206px;
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 172, 208, .25);
+  background: rgba(8, 12, 20, .9);
+  color: #bff0ff;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.ruta-alert {
+  position: absolute;
+  top: 70px; left: 12px; right: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 620;
+  color: #04121c;
+  background: linear-gradient(120deg, #ffd166, #ff9f6b);
+  box-shadow: 0 20px 44px -24px rgba(255, 159, 107, .95);
+  animation: rutaEntra .3s ease both;
+}
+.ruta-alert[hidden] { display: none; }
+.ruta-alert[data-tono="radar"] { background: linear-gradient(120deg, #ff6b6b, #ff3d3d); color: #fff; }
+.ruta-alert[data-tono="ok"] { background: linear-gradient(120deg, #43ffb0, #38e1ff); }
+.ruta-alert[data-tono="info"] { background: rgba(8, 12, 20, .92); color: #d9e8fb; border: 1px solid rgba(148, 172, 208, .25); }
+
+.ruta-pie {
+  display: flex; flex-wrap: wrap; gap: 8px 14px;
+  align-items: center;
+  margin-top: 10px;
+  color: rgba(160, 178, 202, .9);
+  font-size: 11.5px;
+}
+.ruta-pie b { color: #d6e8ff; }
+.ruta-nota {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 172, 208, .16);
+  background: rgba(14, 20, 32, .55);
+  color: #b9c9df;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.nx-ruta-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin: 12px 0 2px;
+  padding: 10px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 225, 255, .35);
+  background: rgba(56, 225, 255, .1);
+  color: #bff0ff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 620;
+  cursor: pointer;
+}
+.nx-ruta-cta:hover { background: rgba(56, 225, 255, .16); }
+
+@keyframes rutaGira { to { transform: rotate(360deg); } }
+@keyframes rutaEntra { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes rutaHalo {
+  0% { transform: scale(.6); opacity: .9; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ruta-punto-halo, .ruta-calc i, .ruta-alert { animation: none !important; }
+}
+
+@media (max-width: 430px) {
+  .ruta-map { height: clamp(340px, 56vh, 560px); }
+  .ruta-resumen b { font-size: 18px; }
+}

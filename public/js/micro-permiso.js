@@ -164,6 +164,11 @@
     try {
       const status = await navigator.permissions?.query?.({ name: 'microphone' });
       if (status?.state === 'granted') granted = true;
+      // Si el usuario concede el permiso desde la barra del navegador, el
+      // cartel desaparece en el acto sin tener que recargar la página.
+      status?.addEventListener?.('change', () => {
+        if (status.state === 'granted') { granted = true; hidePanel(); }
+      });
       // No se avisa antes de pulsar: el panel sale solo si el permiso falla al
       // intentar grabar, para no asustar con un "bloqueado" prematuro.
     } catch { /* Permission API no disponible: se pedirá al pulsar. */ }
@@ -175,6 +180,19 @@
   // La portada llama aquí cuando el navegador no puede grabar: así el usuario
   // ve el motivo y el botón en vez de un micrófono que no hace nada.
   window.AvisoMicro = () => showPanel(canRequest ? 'denied' : 'unsupported');
+
+  // El aviso se quedaba pegado incluso con el permiso ya concedido (el cartel
+  // de «Micrófono bloqueado» seguía tapando el chat). Se ofrece una salida
+  // limpia y se retira solo cuando el permiso pasa a concedido o cuando el
+  // dictado arranca de verdad (voz.js llama aquí).
+  window.MicPermiso = {
+    ocultar: hidePanel,
+    concedido: () => granted,
+    mostrar: kind => showPanel(kind)
+  };
+  setInterval(() => {
+    if (granted && panel && !panel.hidden) hidePanel();
+  }, 3000);
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

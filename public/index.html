@@ -41,6 +41,9 @@
   <link rel="stylesheet" href="/css/protocolo.css?v=20261118pdx">
   <link rel="stylesheet" href="/css/omega.css?v=20261119a">
   <link rel="stylesheet" href="/css/aurora.css?v=20261119a">
+  <link rel="stylesheet" href="/css/halo.css?v=20261120b">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/css/ruta.css?v=20261120a">
   <meta property="og:type" content="website">  <meta property="og:site_name" content="Diagnóstico y Mecánica">
   <meta property="og:title" content="Diagnóstico y Mecánica · Plataforma Automotriz">
   <meta property="og:description" content="Síntomas, códigos DTC, lectura OBD-II, catálogo de taller, asistente IA e informes técnicos para tu coche.">
@@ -181,6 +184,7 @@
     <button data-view="planes" type="button" title="Planes y precios"><svg class="ic"><use href="#i-file"></use></svg>Planes</button>
     <button data-view="fiabilidad" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Fiabilidad</button>
     <button data-view="chat" type="button"><svg class="ic"><use href="#i-chat"></use></svg>Chat IA</button>
+    <button data-view="ruta" type="button" title="Mapa, GPS, navegación y radares"><svg class="ic"><use href="#i-pin"></use></svg>Ruta</button>
     <button data-view="informe" type="button"><svg class="ic"><use href="#i-file"></use></svg>Informe</button>
     <button data-view="foro" type="button"><svg class="ic"><use href="#i-forum"></use></svg>Foro</button>
     <button data-view="contacto" type="button"><svg class="ic"><use href="#i-mail"></use></svg>Contacto</button>
@@ -225,6 +229,15 @@
           <input id="universalSearch" type="search" autocomplete="off" aria-label="Pregunta a la IA o busca una pieza" aria-expanded="false" aria-controls="universalResults" placeholder="¿Qué le pasa a tu coche?">
           <button id="universalSearchBtn" class="nx-btn-ask" type="button">Preguntar</button>
           <div id="universalResults" class="universal-results hidden" role="listbox" aria-label="Resultados de búsqueda"></div>
+        </div>
+        <div class="nx-quick-cta">
+          <button class="nx-ruta-cta" type="button" data-home-ruta>
+            <svg class="ic"><use href="#i-pin"></use></svg> Ruta y radares
+          </button>
+          <button class="nx-shop-cta" type="button" data-home-shop>
+            <svg class="ic"><use href="#i-cart"></use></svg>
+            <span>Tienda · ofertas y recambios<small>Comparado y verificado</small></span>
+          </button>
         </div>
 
         <ul class="nx-trust">
@@ -1874,8 +1887,11 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
       </div>
 
       <div id="chatBox" class="chat-box" role="log" aria-live="polite" aria-label="Conversación con el asistente técnico">
-        <div class="bubble assistant">¡Hola! ¿Qué le pasa a tu coche? Háblame por el micrófono, escríbelo o hazle una foto a la luz del cuadro. Te pregunto lo que falte y vamos al grano.</div>
+        <div class="bubble assistant"><p>Hola, soy Maya. ¿Cuál es tu problema?</p><p>Cuéntamelo como se lo dirías a un mecánico de confianza: qué notas, cuándo pasa y desde cuándo. Si prefieres, pulsa el micrófono y habla.</p></div>
       </div>
+      <button id="chatScrollBtn" class="chat-scroll-btn" type="button" aria-label="Ir al último mensaje" title="Ir al último mensaje" hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+      </button>
 
       <div class="chat-suggestions" aria-label="Preguntas rápidas">
         <button class="chip" data-prompt="Se me ha encendido una luz en el cuadro" type="button">Se encendió una luz</button>
@@ -1895,6 +1911,42 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     </div>
     <div id="chatForumRefs"></div>
     <div id="chatRecomendados"></div>
+  </section>
+
+  <!-- ===================== RUTA / GPS ===================== -->
+  <section id="view-ruta" class="view">
+    <header class="page-head">
+      <div>
+        <span class="eyebrow">NAVEGACIÓN ASISTIDA</span>
+        <h2>Ruta, GPS y radares</h2>
+        <p>Mapa real, tu posición en vivo y navegación giro a giro. Te aviso de los radares conocidos del camino mientras conduces.</p>
+      </div>
+      <span class="page-meta"><svg class="ic"><use href="#i-pin"></use></svg> Datos de OpenStreetMap</span>
+    </header>
+
+    <div class="ruta-shell">
+      <div id="rutaMap" class="ruta-map" role="application" aria-label="Mapa de navegación"></div>
+      <div class="ruta-hud">
+        <form id="rutaBuscar" class="ruta-search" role="search">
+          <input id="rutaDestino" type="search" autocomplete="off" placeholder="¿A dónde vas? Calle, ciudad o sitio" aria-label="Destino">
+          <button type="submit" aria-label="Buscar destino"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+        </form>
+        <div id="rutaResultados" class="ruta-results" hidden></div>
+        <div id="rutaAviso" class="ruta-alert" hidden></div>
+        <button id="rutaGps" class="ruta-fab" type="button" aria-label="Centrar en mi posición" title="Centrar en mi posición">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        </button>
+        <div id="rutaVelocidad" class="ruta-speed" hidden><div><b>0</b><span>KM/H</span></div></div>
+        <div id="rutaPanel" class="ruta-panel" hidden></div>
+      </div>
+    </div>
+
+    <div class="ruta-pie">
+      <span><b id="rutaInfo">Mapa listo</b></span>
+      <span>Datos: OpenStreetMap · rutas OSRM · radares OSM</span>
+      <span>Conduce con el móvil sujeto y sin manipularlo.</span>
+    </div>
+    <p class="ruta-nota">Los radares son los puntos fijos publicados en OpenStreetMap, no avisos en tiempo real: puede faltar alguno nuevo o haber cambiado. La app no sustituye a la señalización ni a un navegador homologado; respeta siempre los límites de la vía.</p>
   </section>
 
   <!-- ===================== INFORME ===================== -->
@@ -2286,6 +2338,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
   <button class="tabbar-btn" data-view="garaje" type="button" aria-label="Mi garaje"><svg class="ic"><use href="#i-car"></use></svg><span>Garaje</span></button>
   <button class="tabbar-btn" data-view="obd" type="button" aria-label="Escáner OBD"><svg class="ic"><use href="#i-cpu"></use></svg><span>OBD</span></button>
   <button class="tabbar-btn" data-view="chat" type="button" aria-label="Chat con la IA"><svg class="ic"><use href="#i-chat"></use></svg><span>IA</span></button>
+  <button class="tabbar-btn tabbar-shop" data-view="tienda" type="button" aria-label="Tienda de recambios y ofertas"><svg class="ic"><use href="#i-cart"></use></svg><span>Tienda</span></button>
   <button class="tabbar-btn" id="tabbarMore" type="button" aria-label="Más secciones" aria-expanded="false" aria-controls="appMenu"><svg class="ic"><use href="#i-menu"></use></svg><span>Más</span></button>
 </nav>
 
@@ -2322,13 +2375,13 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <script src="/js/obd.js?v=20261105c"></script>
 <script src="/js/tutorials.js?v=20261026d"></script>
 
-<script src="/js/voz.js?v=20261120l"></script>
-<script src="/js/micro-permiso.js?v=20261112a"></script>
+<script src="/js/voz.js?v=20261120m"></script>
+<script src="/js/micro-permiso.js?v=20261120b"></script>
 
 <script src="/js/visual-glow.js?v=20261116c"></script>
 <script src="/js/tienda.js?v=20261116h"></script>
 <script src="/js/planes.js?v=20261113a"></script>
-<script src="/js/app.js?v=20261120e"></script>
+<script src="/js/app.js?v=20261120g"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>
@@ -2367,5 +2420,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
   <script src="/js/apex-fx.js?v=20261119a"></script>
   <script src="/js/protocolo.js?v=20261118pdx"></script>
   <script src="/js/omega-fx.js?v=20261119a"></script>
-  <script src="/js/aurora-fx.js?v=20261119a"></script></body>
+  <script src="/js/aurora-fx.js?v=20261119a"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/js/ruta.js?v=20261120b"></script></body>
 </html>

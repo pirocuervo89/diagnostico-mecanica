@@ -2178,6 +2178,43 @@ const chatRecomendados = $('#chatRecomendados');
 const chatForumRefs = $('#chatForumRefs');
 let chatBusy = false;
 
+// -------------------------------------------------------------
+// CHAT: historial y acciones de mensaje
+// -------------------------------------------------------------
+const CHAT_STORE = 'dm_chat_hist_v1';
+const CHAT_MAX = 80;
+let chatHistoria = [];
+let chatRestaurando = false;
+
+function chatGuardar() {
+  try { localStorage.setItem(CHAT_STORE, JSON.stringify(chatHistoria.slice(-CHAT_MAX))); } catch (_e) { /* sin espacio */ }
+}
+
+function chatAnotar(tipo, html) {
+  if (chatRestaurando) return;
+  chatHistoria.push({ t: tipo === 'user' ? 'u' : 'a', h: html, ts: Date.now() });
+  if (chatHistoria.length > CHAT_MAX) chatHistoria = chatHistoria.slice(-CHAT_MAX);
+  chatGuardar();
+}
+
+// Acciones de cada respuesta. Son iconos sin texto para que no se cuelen en la
+// lectura en voz alta (el texto del botón acabaría leído por Maya).
+function decorarBurbuja(bubble) {
+  if (!bubble || bubble.dataset.deco === '1') return;
+  bubble.dataset.deco = '1';
+  const barra = document.createElement('div');
+  barra.className = 'msg-actions';
+  barra.dataset.hora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  barra.innerHTML = `
+    <button type="button" class="msg-act" data-copiar title="Copiar respuesta" aria-label="Copiar respuesta">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M15 5.6A2.6 2.6 0 0 0 12.4 3H6.6A2.6 2.6 0 0 0 4 5.6v5.8A2.6 2.6 0 0 0 6.6 14"/></svg>
+    </button>
+    <button type="button" class="msg-act" data-informe title="Llevar al informe" aria-label="Llevar al informe técnico">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M19 21H5V3h9l5 5v13Z"/><path d="M8 13h8M8 17h5"/></svg>
+    </button>`;
+  bubble.appendChild(barra);
+}
+
 function addBubble(content, type = 'assistant', isHtml = false) {
   if (!chatBox) return null;
   const bubble = document.createElement('div');
@@ -2187,7 +2224,12 @@ function addBubble(content, type = 'assistant', isHtml = false) {
   } else {
     bubble.textContent = content;
   }
+  bubble.dataset.ts = String(Date.now());
   chatBox.appendChild(bubble);
+  if (!type.includes('typing')) {
+    if (type === 'assistant') decorarBurbuja(bubble);
+    chatAnotar(type, isHtml ? content : `<p>${esc(content)}</p>`);
+  }
   chatBox.scrollTop = chatBox.scrollHeight;
   return bubble;
 }
@@ -2319,10 +2361,11 @@ async function submitChat(text) {
   if (chatInput) chatInput.value = '';
 
   addBubble(query, 'user');
+  document.querySelector('.chat-shell')?.classList.add('conversacion');
   if (chatRecomendados) chatRecomendados.innerHTML = '';
   if (chatForumRefs) chatForumRefs.innerHTML = '';
 
-  const thinkingBubble = addBubble('<i></i><i></i><i></i>', 'assistant typing', true);
+  const thinkingBubble = addBubble('<span class="typing-dots"><i></i><i></i><i></i></span><span class="typing-label">Maya está pensando…</span>', 'assistant typing', true);
   if (chatInput) chatInput.blur();
 
   try {
@@ -2359,7 +2402,7 @@ async function submitChat(text) {
     // El backend nuevo responde primero con el motor experto y deja la IA en
     // segundo plano. Así el usuario empieza a leer al instante.
     if (res.ai_pending) {
-      const aiThinking = addBubble('<i></i><i></i><i></i>', 'assistant typing', true);
+      const aiThinking = addBubble('<span class="typing-dots"><i></i><i></i><i></i></span><span class="typing-label">Maya está pensando…</span>', 'assistant typing', true);
       try {
         const aiRes = await aiPendiente;
         if (aiThinking) aiThinking.remove();
@@ -2410,6 +2453,71 @@ document.getElementById('chatCameraBtn')?.addEventListener('click', () => {
 $$('.chat-suggestions .chip[data-prompt]').forEach(btn => {
   btn.addEventListener('click', () => submitChat(btn.dataset.prompt));
 });
+
+// Voz.js pinta el saludo de Maya por la vía normal de la app.
+window.addBubble = addBubble;
+
+// Copiar o llevar una respuesta al informe, sin tocar el resto del chat.
+document.addEventListener('click', event => {
+  const copiar = event.target.closest('[data-copiar]');
+  if (copiar) {
+    const texto = copiar.closest('.bubble')?.innerText?.trim() || '';
+    const listo = () => {
+      copiar.dataset.ok = '1';
+      copiar.title = 'Copiado';
+      setTimeout(() => { delete copiar.dataset.ok; copiar.title = 'Copiar respuesta'; }, 1400);
+    };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(texto).then(listo).catch(() => {});
+    else listo();
+  }
+  const informe = event.target.closest('[data-informe]');
+  if (informe) {
+    const texto = informe.closest('.bubble')?.innerText?.trim() || '';
+    const campo = document.getElementById('fSymptoms');
+    if (campo) {
+      campo.value = campo.value.trim() ? `${campo.value.trim()}\n\n${texto}` : texto;
+      campo.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    showView('informe');
+    setTimeout(() => { campo?.focus(); campo?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 280);
+  }
+});
+
+// La tienda se abre desde la portada: es la vía de ingresos por afiliación y
+// no puede quedar escondida dentro del menú.
+document.addEventListener('click', event => {
+  if (event.target.closest('[data-home-shop]')) showView('tienda');
+});
+
+// Botón para volver al final cuando el usuario sube a releer.
+const chatScrollBtn = document.getElementById('chatScrollBtn');
+if (chatBox && chatScrollBtn) {
+  chatBox.addEventListener('scroll', () => {
+    const abajo = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 70;
+    chatScrollBtn.hidden = abajo;
+  }, { passive: true });
+  chatScrollBtn.addEventListener('click', () => {
+    chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+    chatScrollBtn.hidden = true;
+  });
+}
+
+// La conversación se recuerda entre visitas: al volver, sigue donde estaba.
+(function restaurarChat() {
+  if (!chatBox) return;
+  let hist = [];
+  try { hist = JSON.parse(localStorage.getItem(CHAT_STORE) || '[]'); } catch (_e) { hist = []; }
+  if (!Array.isArray(hist) || !hist.length) return;
+  const validos = hist.filter(m => m && typeof m.h === 'string' && (m.t === 'u' || m.t === 'a')).slice(-CHAT_MAX);
+  if (!validos.length) return;
+  chatHistoria = validos;
+  chatRestaurando = true;
+  chatBox.innerHTML = '';
+  validos.forEach(m => addBubble(m.h, m.t === 'u' ? 'user' : 'assistant', true));
+  chatRestaurando = false;
+  document.querySelector('.chat-shell')?.classList.add('conversacion');
+  chatBox.scrollTop = chatBox.scrollHeight;
+})();
 
 // -------------------------------------------------------------
 // VISTA: GENERADOR DE INFORMES TÉCNICOS

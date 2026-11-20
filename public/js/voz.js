@@ -183,6 +183,7 @@
 
   function stopSpeaking() {
     hablandoSenal = false;
+    pararAudio();
     if (synth) synth.cancel();
     if (speakingBubble) {
       speakingBubble.classList.remove('voz-speaking');
@@ -197,7 +198,7 @@
 
   function speak(bubble) {
     if (!canRead || !bubble) return;
-    if (speakingBubble === bubble && synth.speaking) { stopSpeaking(); return; }
+    if (speakingBubble === bubble && (synth.speaking || audioActual)) { stopSpeaking(); return; }
     // Si el motor aún no ha publicado sus voces, se le da un instante antes de
     // hablar: así se elige la voz española en vez de la que venga por defecto.
     if (!synth.getVoices().length && bubble.dataset.vozRetry !== '1') {
@@ -209,6 +210,21 @@
     stopSpeaking();
     const text = resumenHablado(plainText(bubble));
     if (!text) return;
+
+    // Sin voces en el teléfono, la voz llega ya sintetizada del servidor: se
+    // oye igual y no hay que mandar a nadie a instalar datos de voz.
+    if (!synth.getVoices().length) {
+      speakingBubble = bubble;
+      bubble.classList.add('voz-speaking');
+      const btnVoz = bubble.querySelector('.voz-btn');
+      if (btnVoz) btnVoz.setAttribute('aria-pressed', 'true');
+      hablarPorAudio(text, () => {
+        bubble.classList.remove('voz-speaking');
+        if (btnVoz) btnVoz.setAttribute('aria-pressed', 'false');
+        if (speakingBubble === bubble) speakingBubble = null;
+      });
+      return;
+    }
 
     // Chrome en Android corta las locuciones largas a media frase (bug conocido
     // del motor de voz). Se habla por trozos cortos encadenados: así no se
@@ -516,6 +532,50 @@
     document.head.appendChild(style);
   }
 
+  // ------------------------------------------------------ voz por audio (TTS)
+  // Android sin datos de voz: se pide el MP3 al servidor y se reproduce. Es la
+  // misma voz de Google, solo que ya sintetizada, así que suena siempre.
+  let audioActual = null;
+  let audioUrl = null;
+
+  function pararAudio() {
+    if (!audioActual) return;
+    const a = audioActual;
+    audioActual = null;
+    try { a.pause(); } catch (_e) { /* ya parado */ }
+    a.onended = null;
+    a.onerror = null;
+    try { a.src = ''; } catch (_e) { /* nada */ }
+    if (audioUrl) { try { URL.revokeObjectURL(audioUrl); } catch (_e) {} audioUrl = null; }
+    hablandoSenal = false;
+    pintarSenal();
+  }
+
+  async function hablarPorAudio(texto, alTerminar) {
+    pararAudio();
+    hablandoSenal = true;
+    pintarSenal();
+    const cerrar = () => {
+      hablandoSenal = false;
+      pintarSenal();
+      if (typeof alTerminar === 'function') alTerminar();
+    };
+    try {
+      const respuesta = await fetch(`/api/tts?tl=es&q=${encodeURIComponent(texto)}`);
+      if (!respuesta.ok) throw new Error(`voz ${respuesta.status}`);
+      const blob = await respuesta.blob();
+      audioUrl = URL.createObjectURL(blob);
+      audioActual = new Audio(audioUrl);
+      audioActual.onended = () => { pararAudio(); cerrar(); };
+      audioActual.onerror = () => { pararAudio(); cerrar(); };
+      await audioActual.play();
+    } catch (_e) {
+      pararAudio();
+      cerrar();
+      hint('No se pudo cargar la voz. Comprueba la conexión.', 5000);
+    }
+  }
+
   // ------------------------------------------------- modo llamada ("Di Maya")
 
   const STORE_LLAMADA = 'dm_voz_llamada';
@@ -609,16 +669,14 @@
   // Habla un texto suelto (saludo, aviso) con la misma voz que las respuestas.
   function hablarTexto(texto) {
     if (!canRead || !texto) return;
-    // Sin voces instaladas no se oye nada: se avisa en vez de quedarse mudo.
-    if (!synth.getVoices().length) {
-      hint('Este móvil no tiene voz instalada. Ajustes › Voz › Instalar datos de voz.', 9000);
-    }
     stopSpeaking();
     // Una sola locución: el saludo no depende del troceo en frases. Si el motor
-    // aún no ha publicado voces, se espera un poco en vez de hablar sin voz.
+    // aún no ha publicado voces, se espera un poco antes de tirar del audio del
+    // servidor (así se usa la voz del sistema cuando existe).
     const decir = (intento = 0) => {
-      if (!synth.getVoices().length && intento < 3) {
-        setTimeout(() => decir(intento + 1), 250);
+      if (!synth.getVoices().length) {
+        if (intento < 2) { setTimeout(() => decir(intento + 1), 250); return; }
+        hablarPorAudio(texto);
         return;
       }
       const { voice, male } = pickSpanishVoice();
@@ -669,8 +727,9 @@
     // Si la app ya había escrito su bienvenida, se sustituye por la de Maya:
     // un solo saludo y con su nombre.
     const box = document.getElementById('chatBox');
-    const previa = box && /qu[eé] le pasa a tu coche/i.test(box.innerText || '')
-      ? [...box.querySelectorAll('.bubble.assistant')].find(b => /qu[eé] le pasa a tu coche/i.test(b.innerText || ''))
+    const yaSaluda = /qu[eé] le pasa a tu coche|soy maya/i;
+    const previa = box && yaSaluda.test(box.innerText || '')
+      ? [...box.querySelectorAll('.bubble.assistant')].find(b => yaSaluda.test(b.innerText || ''))
       : null;
     if (previa) previa.innerHTML = `<p>${SALUDO}</p>`;
     else pintarBurbujaMaya(SALUDO);
@@ -742,8 +801,10 @@
 
     // El estado «escuchando» solo se pinta cuando el micrófono está de verdad
     // abierto: si el permiso está bloqueado no se puede decir que te escucha.
-    wakeRec.onstart = () => { escuchando = true; pintarSenal(); };
-    wakeRec.onaudiostart = () => { escuchando = true; pintarSenal(); };
+    // Si el micrófono arranca de verdad, el aviso de «bloqueado» que pudiera
+    // haber quedado en pantalla ya no tiene sentido: se retira.
+    wakeRec.onstart = () => { escuchando = true; pintarSenal(); window.MicPermiso?.ocultar?.(); };
+    wakeRec.onaudiostart = () => { escuchando = true; pintarSenal(); window.MicPermiso?.ocultar?.(); };
 
     wakeRec.onresult = event => {
       let trozo = '';
@@ -880,6 +941,9 @@
   // Desde cualquier punto de la app: saludar y ponerse a escuchar. La portada
   // usa esto en "Preguntar" para que Maya arranque sola.
   window.MayaSaludo = (hablar = true) => saludarMaya(hablar);
+  // Voz para el resto de la app (avisos de ruta, radares): usa el mismo motor
+  // del sistema o la voz del servidor cuando el móvil no trae ninguna.
+  window.MayaHablar = (texto = '') => hablarTexto(String(texto).slice(0, 300));
   window.MayaEscuchar = () => activarLlamada();
 
   // Sin dictado: si algo llama aquí, se abre el teclado del chat.
