@@ -444,6 +444,7 @@
   #view-ruta .ruta-shell.ruta-con-ruta .ruta-map { height: clamp(290px, 44vh, 430px); }
   #view-ruta .ruta-shell.ruta-con-ruta { margin-bottom: 6px; }
 }
+.ruta-panel { scroll-margin-bottom: 96px; }
 
 /* CTA grande de la portada: «¿Dónde vamos?» */
 .nx-ruta-cta-grande {
