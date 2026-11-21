@@ -1026,6 +1026,23 @@
     ctx3d.fillStyle = '#0e1a2b';
     ctx3d.fillRect(0, horizonte, w, h - horizonte);
 
+    // Objetos en los bordes (árboles/edificios) que pasan
+    const numObj = 8;
+    for (let i = 0; i < numObj; i++) {
+      const z = (i + (scrollOffset3d * numObj)) % numObj / numObj;
+      const scale = 1 - z * 0.8;
+      const y = horizonte + (h - horizonte) * (1 - z);
+      const side = i % 2 === 0 ? -1 : 1;
+      const x = cx + side * (120 + 60 * scale);
+      const objH = 30 * scale;
+      const objW = 8 * scale;
+      ctx3d.fillStyle = side === -1 ? 'rgba(34, 211, 238, .4)' : 'rgba(168, 85, 247, .4)';
+      ctx3d.fillRect(x - objW / 2, y - objH, objW, objH);
+      // Glow
+      ctx3d.fillStyle = side === -1 ? 'rgba(34, 211, 238, .15)' : 'rgba(168, 85, 247, .15)';
+      ctx3d.fillRect(x - objW, y - objH - 5, objW * 2, objH + 10);
+    }
+
     // Carretera: pseudo-3D con segmentos
     const segs = carretera3d;
     if (segs.length === 0) {
