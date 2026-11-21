@@ -1,0 +1,51 @@
+/* ==========================================================================
+   movil-ligero.css — rendimiento en pantallas táctiles.
+   El sitio acumula 25 hojas de estilo con capas decorativas (cristal, orbes,
+   partículas y rejillas fijas). En un móvil eso obliga a la GPU a recomponer
+   cientos de desenfoques en cada frame y el scroll "va a tirones". Aquí se
+   apagan solo los efectos caros; el contenido y la legibilidad no cambian.
+   ========================================================================== */
+
+@media (max-width: 900px), (pointer: coarse) {
+  /* backdrop-filter es el mayor ladrón de frames en Android. El :not() falso
+     sube la especificidad para ganar a las reglas .topbar { ... !important }
+     que ya existen en las demás hojas. */
+  *:not(#movil-ligero-force),
+  *:not(#movil-ligero-force)::before,
+  *:not(#movil-ligero-force)::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Orbes de luz: desenfoques enormes animados sobre una capa fija. */
+  .ambient-glow {
+    filter: none !important;
+    animation: none !important;
+    opacity: .2 !important;
+  }
+
+  /* Rejillas y scanlines fijas: repintan la pantalla entera al hacer scroll. */
+  .ambient-grid,
+  body::before,
+  body::after {
+    display: none !important;
+  }
+
+  /* Partículas, orbes y estelas que crean los scripts de efectos. */
+  .q-particles,
+  .c-orb-wrap,
+  .n-particles,
+  .h-particles,
+  .a-particles,
+  .aurora-orb,
+  .nf-cursor-trail,
+  .ox-cursor-trail {
+    display: none !important;
+  }
+
+  /* Menos animaciones continuas de fondo. */
+  .ambient,
+  .ambient * {
+    animation: none !important;
+  }
+}
