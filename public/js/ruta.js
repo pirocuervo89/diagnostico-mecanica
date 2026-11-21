@@ -1359,6 +1359,211 @@
   // Conectar el botón
   document.getElementById('ruta3dToggle')?.addEventListener('click', toggle3d);
 
+  // ============================================================
+  // ADAS AR · Realidad Aumentada
+  // ============================================================
+  let vistaArActiva = false;
+  let streamAr = null;
+  let animacionAr = null;
+  let canvasAr = null;
+  let ctxAr = null;
+  let videoAr = null;
+  let modeloCoco = null;
+  let deteccionesAr = [];
+  let ultimoAnalisisAr = 0;
+
+  function initAr() {
+    canvasAr = document.getElementById('rutaArCanvas');
+    videoAr = document.getElementById('rutaArVideo');
+    if (!canvasAr || !videoAr) return false;
+    ctxAr = canvasAr.getContext('2d');
+    canvasAr.width = canvasAr.clientWidth || window.innerWidth;
+    canvasAr.height = canvasAr.clientHeight || window.innerHeight;
+    return true;
+  }
+
+  async function iniciarAr() {
+    if (!initAr()) return;
+    try {
+      // Solicitar cámara trasera
+      streamAr = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
+      videoAr.srcObject = streamAr;
+      await videoAr.play();
+      vistaArActiva = true;
+      document.getElementById('rutaArToggle')?.classList.add('activo');
+      document.querySelector('.ruta-shell')?.classList.add('ruta-ar-activo');
+      canvasAr.hidden = false;
+      videoAr.hidden = false;
+      canvasAr.width = canvasAr.clientWidth || window.innerWidth;
+      canvasAr.height = canvasAr.clientHeight || window.innerHeight;
+      // Cargar modelo COCO-SSD (lazy, solo si está disponible)
+      if (typeof cocoSsd !== 'undefined' && !modeloCoco) {
+        cocoSsd.load().then(m => { modeloCoco = m; avisar('Detección de objetos activada.', 'ok', 3000); }).catch(e => console.warn('COCO-SSD no disponible:', e));
+      }
+      const loop = () => {
+        if (!vistaArActiva) return;
+        dibujarAr();
+        animacionAr = requestAnimationFrame(loop);
+      };
+      loop();
+      avisar('ADAS AR activado. Cámara trasera en directo.', 'ok', 4000);
+    } catch (e) {
+      avisar('No se pudo acceder a la cámara. Verifica los permisos.', 'error', 6000);
+      console.error('Error cámara AR:', e);
+    }
+  }
+
+  function detenerAr() {
+    vistaArActiva = false;
+    if (animacionAr) cancelAnimationFrame(animacionAr);
+    animacionAr = null;
+    if (streamAr) {
+      streamAr.getTracks().forEach(t => t.stop());
+      streamAr = null;
+    }
+    if (videoAr) videoAr.srcObject = null;
+    document.getElementById('rutaArToggle')?.classList.remove('activo');
+    document.querySelector('.ruta-shell')?.classList.remove('ruta-ar-activo');
+    if (canvasAr) canvasAr.hidden = true;
+    if (videoAr) videoAr.hidden = true;
+  }
+
+  function toggleAr() {
+    if (vistaArActiva) detenerAr(); else iniciarAr();
+  }
+
+  function dibujarAr() {
+    if (!ctxAr || !canvasAr || !videoAr) return;
+    const w = canvasAr.width, h = canvasAr.height;
+    // Limpiar canvas (transparente para ver el video)
+    ctxAr.clearRect(0, 0, w, h);
+
+    // Detección de objetos (cada 500ms para no saturar)
+    const ahora = Date.now();
+    if (modeloCoco && videoAr.readyState >= 2 && ahora - ultimoAnalisisAr > 500) {
+      ultimoAnalisisAr = ahora;
+      modeloCoco.detect(videoAr).then(preds => {
+        deteccionesAr = preds.filter(p => p.score > 0.5);
+      }).catch(() => {});
+    }
+
+    // Dibujar detecciones
+    for (const d of deteccionesAr) {
+      const [x, y, bw, bh] = d.bbox;
+      const scaleX = w / (videoAr.videoWidth || w);
+      const scaleY = h / (videoAr.videoHeight || h);
+      const rx = x * scaleX, ry = y * scaleY, rw = bw * scaleX, rh = bh * scaleY;
+      // Caja de detección
+      ctxAr.strokeStyle = d.class === 'car' || d.class === 'truck' || d.class === 'bus' ? '#ff4d6d' : '#38e1ff';
+      ctxAr.lineWidth = 2;
+      ctxAr.strokeRect(rx, ry, rw, rh);
+      // Etiqueta
+      ctxAr.fillStyle = d.class === 'car' || d.class === 'truck' || d.class === 'bus' ? 'rgba(255, 77, 109, .8)' : 'rgba(56, 225, 255, .8)';
+      ctxAr.fillRect(rx, ry - 18, rw, 18);
+      ctxAr.fillStyle = '#fff';
+      ctxAr.font = 'bold 11px sans-serif';
+      ctxAr.textAlign = 'left';
+      ctxAr.fillText(`${d.class} ${Math.round(d.score * 100)}%`, rx + 4, ry - 5);
+      // Distancia estimada (aproximada, basada en tamaño del bounding box)
+      if (d.class === 'car' || d.class === 'truck' || d.class === 'bus' || d.class === 'motorcycle') {
+        const distEst = Math.round(2000 / (rh || 1));
+        if (distEst < 200) {
+          ctxAr.fillStyle = distEst < 30 ? '#ff4d6d' : distEst < 60 ? '#fbbf24' : 'rgba(255, 255, 255, .7)';
+          ctxAr.font = 'bold 10px sans-serif';
+          ctxAr.fillText(`~${distEst}m`, rx + 4, ry + rh + 14);
+          if (distEst < 30) {
+            // Aviso de proximidad
+            ctxAr.fillStyle = 'rgba(255, 77, 109, .9)';
+            ctxAr.font = 'bold 12px sans-serif';
+            ctxAr.textAlign = 'center';
+            ctxAr.fillText('⚠ PROXIMIDAD', rx + rw / 2, ry - 25);
+            ctxAr.textAlign = 'left';
+          }
+        }
+      }
+    }
+
+    // Dibujar línea de ruta (azul) sobre la carretera
+    const ruta = rutaActiva();
+    if (ruta && ruta.geometry && ruta.geometry.length > 1) {
+      // Proyectar la ruta en la pantalla (simplificado: línea central con perspectiva)
+      ctxAr.strokeStyle = 'rgba(34, 211, 238, .8)';
+      ctxAr.lineWidth = 6;
+      ctxAr.shadowColor = '#22d3ee';
+      ctxAr.shadowBlur = 15;
+      ctxAr.beginPath();
+      const pts = ruta.geometry;
+      // Dibujar solo los primeros puntos (los que están delante)
+      const numPts = Math.min(20, pts.length);
+      for (let i = 0; i < numPts; i++) {
+        const p = pts[i];
+        // Proyección simplificada: centro de la pantalla con perspectiva
+        const z = i / numPts;
+        const scale = 1 - z * 0.6;
+        const x = w / 2 + (i % 2 === 0 ? -20 : 20) * scale;
+        const y = h * 0.5 + z * h * 0.4;
+        if (i === 0) ctxAr.moveTo(x, y);
+        else ctxAr.lineTo(x, y);
+      }
+      ctxAr.stroke();
+      ctxAr.shadowBlur = 0;
+
+      // Flechas sobre la ruta
+      ctxAr.fillStyle = 'rgba(34, 211, 238, .9)';
+      for (let i = 0; i < numPts; i += 3) {
+        const z = i / numPts;
+        const scale = 1 - z * 0.6;
+        const x = w / 2 + (i % 2 === 0 ? -20 : 20) * scale;
+        const y = h * 0.5 + z * h * 0.4;
+        ctxAr.beginPath();
+        ctxAr.arc(x, y, 4 * scale, 0, Math.PI * 2);
+        ctxAr.fill();
+      }
+    }
+
+    // HUD: velocidad
+    ctxAr.fillStyle = 'rgba(10, 16, 30, .7)';
+    ctxAr.fillRect(10, 10, 90, 40);
+    ctxAr.fillStyle = '#22d3ee';
+    ctxAr.font = 'bold 20px sans-serif';
+    ctxAr.textAlign = 'left';
+    ctxAr.fillText(`${Math.round(velocidad)}`, 20, 36);
+    ctxAr.fillStyle = '#f0f8ff';
+    ctxAr.font = '10px sans-serif';
+    ctxAr.fillText('KM/H', 55, 36);
+
+    // HUD: próxima maniobra
+    const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
+    if (s && s.name) {
+      ctxAr.fillStyle = 'rgba(10, 16, 30, .8)';
+      ctxAr.fillRect(10, h - 60, w - 20, 50);
+      ctxAr.strokeStyle = 'rgba(34, 211, 238, .5)';
+      ctxAr.lineWidth = 2;
+      ctxAr.strokeRect(10, h - 60, w - 20, 50);
+      ctxAr.fillStyle = '#22d3ee';
+      ctxAr.font = 'bold 20px sans-serif';
+      ctxAr.fillText(flechaPara(s), 25, h - 32);
+      ctxAr.fillStyle = '#f0f8ff';
+      ctxAr.font = 'bold 13px sans-serif';
+      ctxAr.fillText(s.name || 'Continúa', 60, h - 32);
+      ctxAr.fillStyle = 'rgba(255, 255, 255, .6)';
+      ctxAr.font = '10px sans-serif';
+      ctxAr.fillText(`En ${s.distance ? (s.distance > 1000 ? (s.distance/1000).toFixed(1)+' km' : s.distance+' m') : ''}`, 60, h - 15);
+    }
+
+    // Modo ADAS AR activo
+    ctxAr.fillStyle = 'rgba(255, 77, 109, .9)';
+    ctxAr.font = 'bold 11px sans-serif';
+    ctxAr.textAlign = 'right';
+    ctxAr.fillText('ADAS AR', w - 15, h - 15);
+  }
+
+  // Conectar el botón AR
+  document.getElementById('rutaArToggle')?.addEventListener('click', toggleAr);
+
   // Iniciar 3D automáticamente al iniciar navegación
   const _alternarNavOriginal = alternarNavegacion;
   alternarNavegacion = function() {
