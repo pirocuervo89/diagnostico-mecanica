@@ -1,4 +1,27 @@
 import express from 'express';
+
+// --- Rate limiter en memoria (sin dependencias) ---
+const _rlBuckets = new Map();
+function rateLimit({ windowMs = 60_000, max = 20, keyFn } = {}) {
+  return (req, res, next) => {
+    const key = (keyFn ? keyFn(req) : (req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'anon'));
+    const now = Date.now();
+    let b = _rlBuckets.get(key);
+    if (!b || now > b.resetAt) { b = { count: 0, resetAt: now + windowMs }; _rlBuckets.set(key, b); }
+    b.count += 1;
+    if (b.count > max) {
+      const retry = Math.ceil((b.resetAt - now) / 1000);
+      res.setHeader('Retry-After', String(retry));
+      return res.status(429).json({ error: 'Demasiadas peticiones. Espera unos segundos.', retry_after: retry });
+    }
+    next();
+  };
+}
+// Limpieza periódica para no acumular IPs
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of _rlBuckets) if (now > v.resetAt + 60_000) _rlBuckets.delete(k);
+}, 5 * 60_000).unref?.();
 import fs from 'fs';
 import pkg from '../../package.json' with { type: 'json' };
 import path from 'path';
@@ -2234,7 +2257,7 @@ router.post('/transcribe', express.raw({ type: 'audio/*', limit: '12mb' }), asyn
 });
 
 // Respuesta local y determinista: no espera a ninguna IA externa.
-router.post('/chat', (req, res) => {
+router.post('/chat', rateLimit({ windowMs: 60_000, max: 30 }), (req, res) => {
   const { message = '', context: rawContext = {} } = req.body || {};
   const query = String(message || '').trim();
 
@@ -2266,7 +2289,7 @@ router.post('/chat', (req, res) => {
 
 // Segunda fase, opcional: enriquece con foro + web y llama al proveedor de IA.
 // Cualquier fallo de la IA (o de la red) devuelve el motor experto local.
-router.post('/chat/ai', async (req, res) => {
+router.post('/chat/ai', rateLimit({ windowMs: 60_000, max: 15 }), async (req, res) => {
   const { message = '', context: rawContext = {}, history: rawHistory = [] } = req.body || {};
   const query = String(message || '').trim();
 
