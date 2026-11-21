@@ -113,7 +113,7 @@
   box-shadow: 0 26px 60px -30px rgba(0, 0, 0, .95);
   padding: 6px;
 }
-.ruta-results[hidden] { display: none; }
+.ruta-results[hidden] { display: none !important; }
 .ruta-result {
   display: flex; align-items: center; gap: 10px;
   width: 100%;
@@ -142,7 +142,7 @@
   backdrop-filter: blur(18px) saturate(130%);
   box-shadow: 0 26px 60px -30px rgba(0, 0, 0, .95), inset 0 1px 0 rgba(255, 255, 255, .05);
 }
-.ruta-panel[hidden] { display: none; }
+.ruta-panel[hidden] { display: none !important; }
 
 .ruta-resumen { display: flex; align-items: center; gap: 14px; }
 .ruta-resumen > div:first-child { display: flex; flex-direction: column; }
@@ -196,7 +196,7 @@
   text-align: center;
   backdrop-filter: blur(10px);
 }
-.ruta-speed[hidden] { display: none; }
+.ruta-speed[hidden] { display: none !important; }
 .ruta-speed b { display: block; font-size: 21px; line-height: 1; color: #eaf6ff; }
 .ruta-speed span { font-size: 9px; letter-spacing: .12em; color: rgba(147, 164, 190, .9); }
 
@@ -225,7 +225,7 @@
   box-shadow: 0 20px 44px -24px rgba(255, 159, 107, .95);
   animation: rutaEntra .3s ease both;
 }
-.ruta-alert[hidden] { display: none; }
+.ruta-alert[hidden] { display: none !important; }
 .ruta-alert[data-tono="radar"] { background: linear-gradient(120deg, #ff6b6b, #ff3d3d); color: #fff; }
 .ruta-alert[data-tono="ok"] { background: linear-gradient(120deg, #43ffb0, #38e1ff); }
 .ruta-alert[data-tono="info"] { background: rgba(8, 12, 20, .92); color: #d9e8fb; border: 1px solid rgba(148, 172, 208, .25); }
@@ -584,7 +584,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   font-size: 12.5px;
   white-space: nowrap;
 }
-.ruta-eta[hidden] { display: none; }
+.ruta-eta[hidden] { display: none !important; }
 .ruta-eta b { font-size: 14px; color: #fff; }
 .ruta-eta i {
   padding-left: 9px;
@@ -723,7 +723,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   gap: 8px;
   z-index: 1200;
 }
-.ruta-reporte[hidden] { display: none; }
+.ruta-reporte[hidden] { display: none !important; }
 .ruta-reporte p { grid-column: 1 / -1; margin: 2px 2px 6px; font-size: 13px; font-weight: 650; color: #cfe6ff; }
 .ruta-reporte button {
   min-height: 54px;
@@ -2142,11 +2142,20 @@ body.viendo-ruta .pwa-install { display: none !important; }
 }
 .ruta-reporte .cerrar {
   grid-column: 1 / -1 !important;
-  min-height: 38px !important;
+  min-height: 44px !important;
   flex-direction: row !important;
-  color: #9fb3cd !important;
-  background: transparent !important;
-  border: 1px solid rgba(148, 172, 208, .15) !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, rgba(239, 68, 68, .3), rgba(220, 38, 38, .3)) !important;
+  border: 1.5px solid rgba(239, 68, 68, .5) !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: transform .15s ease, background .2s ease !important;
+}
+.ruta-reporte .cerrar:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, .5), rgba(220, 38, 38, .5)) !important;
+  transform: scale(1.02) !important;
 }
 
 /* --- Modo conducción: simplificado estilo Waze --- */
@@ -2377,7 +2386,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   z-index: 950;
   backdrop-filter: blur(14px);
 }
-.ruta-banner[hidden] { display: none; }
+.ruta-banner[hidden] { display: none !important; }
 .ruta-banner-flecha {
   flex: 0 0 auto;
   width: 52px; height: 52px;
@@ -2436,7 +2445,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   backdrop-filter: blur(12px);
   z-index: 920;
 }
-.ruta-recientes[hidden] { display: none; }
+.ruta-recientes[hidden] { display: none !important; }
 .ruta-recientes-titulo {
   width: 100%;
   font-size: 9.5px; letter-spacing: .16em;
