@@ -166,8 +166,7 @@ button:hover, .btn:hover {
     font-size: 15px;
   }
 }
-EOF
-echo done
+
 /* --- Chat dios: avatar, typing, animaciones --- */
 .chat-agent .agent-avatar {
   width: 40px; height: 40px; border-radius: 50%;
@@ -197,4 +196,112 @@ echo done
 .chat-suggestions .chip:hover {
   background: rgba(56,225,255,.14);
   border-color: rgba(56,225,255,.45);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(56,225,255,.2);
+}
+
+/* --- Chat dios: mejoras adicionales --- */
+.chat-shell {
+  border-radius: 20px !important;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -24px rgba(0,0,0,.9), 0 0 40px -20px rgba(56,225,255,.3);
+}
+.chat-head {
+  padding: 16px 20px !important;
+  background: linear-gradient(90deg, rgba(56,225,255,.08), rgba(168,85,247,.06), transparent) !important;
+  border-bottom: 1px solid rgba(56,225,255,.15) !important;
+}
+.chat-agent b {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, #38e1ff, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.chat-agent small {
+  font-size: 11px !important;
+  color: rgba(255,255,255,.6) !important;
+}
+.chat-box {
+  padding: 20px 18px !important;
+  gap: 14px !important;
+}
+.chat-box .bubble {
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  max-width: 88% !important;
+}
+.chat-box .bubble.assistant {
+  background: linear-gradient(135deg, rgba(56,225,255,.1), rgba(168,85,247,.08)) !important;
+  border: 1px solid rgba(56,225,255,.2) !important;
+  box-shadow: 0 4px 16px -8px rgba(56,225,255,.3);
+}
+.chat-box .bubble.user {
+  background: linear-gradient(135deg, rgba(56,225,255,.22), rgba(56,225,255,.12)) !important;
+  border: 1px solid rgba(56,225,255,.35) !important;
+}
+.chat-form {
+  padding: 14px 16px !important;
+  background: rgba(10,16,30,.6) !important;
+  border-top: 1px solid rgba(56,225,255,.15) !important;
+  gap: 10px !important;
+}
+.chat-form input {
+  border-radius: 14px !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(56,225,255,.2) !important;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.chat-form input:focus {
+  border-color: rgba(56,225,255,.5) !important;
+  box-shadow: 0 0 0 3px rgba(56,225,255,.1) !important;
+}
+.chat-form button {
+  border-radius: 14px !important;
+  padding: 12px 20px !important;
+  font-weight: 700 !important;
+  background: linear-gradient(135deg, #38e1ff, #a855f7) !important;
+  color: #0b1020 !important;
+  box-shadow: 0 8px 20px -8px rgba(56,225,255,.6);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.chat-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -8px rgba(56,225,255,.8);
+}
+.chat-suggestions {
+  padding: 0 18px 14px !important;
+  gap: 8px !important;
+}
+.chat-suggestions .chip {
+  padding: 8px 14px !important;
+  font-size: 12.5px !important;
+  border-radius: 12px !important;
+  transition: all .2s ease;
+}
+
+/* Typing dots */
+.typing-dots {
+  display: inline-flex; gap: 4px; padding: 4px 2px;
+}
+.typing-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(56,225,255,.6);
+  animation: typingBounce 1.2s ease-in-out infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: .15s; }
+.typing-dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: .4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .chat-box .bubble, .chat-form button, .chat-suggestions .chip {
+    transition: none;
+  }
 }
