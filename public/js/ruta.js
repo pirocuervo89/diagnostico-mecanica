@@ -924,6 +924,10 @@
   let carretera3d = [];
   let progreso3d = 0;
   let signos3d = [];
+  let imagenCoche3d = null;
+  // Cargar la imagen del coche GT4
+  imagenCoche3d = new Image();
+  imagenCoche3d.src = '/img/hero/golf-hero.webp';
 
   function init3d() {
     canvas3d = document.getElementById('ruta3d');
@@ -1005,45 +1009,74 @@
       }
     }
 
-    // Dibujar segmentos de carretera con perspectiva
-    const numSegs = 40;
-    const segW = 200; // ancho de la carretera en el horizonte
-    const roadColor = '#2a3a50';
+    // Dibujar segmentos de carretera con perspectiva (trapezoidal, más realista)
+    const numSegs = 50;
+    const segW = 220; // ancho de la carretera en el horizonte
+    const roadColor = '#1e2d42';
+    const roadColorNear = '#2a3a50';
     const laneColor = '#f0f8ff';
+    const edgeColor = '#38e1ff';
+
+    // Acumular curva para que la carretera se doble progresivamente
+    let curvaAcum = 0;
 
     for (let i = 0; i < numSegs; i++) {
       const idx = Math.min(idxActual + i, segs.length - 1);
       const seg = segs[idx];
       const z = i / numSegs; // 0 = cerca, 1 = lejos
-      const scale = 1 - z * 0.85;
+      const scale = 1 - z * 0.82;
       const y = horizonte + (h - horizonte) * (1 - z);
-      const roadW = segW * scale * (1 + z * 0.5);
-      const curvaOffset = (seg.curva || 0) * z * 30;
+      const roadW = segW * scale * (1 + z * 0.3);
+      curvaAcum += (seg.curva || 0) * (1 - z) * 0.5;
+      const curvaOffset = curvaAcum * z * 40;
       const x = cx + curvaOffset;
 
-      // Dibujar segmento de carretera
-      ctx3d.fillStyle = roadColor;
-      ctx3d.fillRect(x - roadW / 2, y - 2, roadW, 4);
+      // Segmento anterior para trapezoide
+      const zPrev = (i - 1) / numSegs;
+      const scalePrev = 1 - zPrev * 0.82;
+      const yPrev = horizonte + (h - horizonte) * (1 - zPrev);
+      const roadWPrev = segW * scalePrev * (1 + zPrev * 0.3);
+      let curvaAcumPrev = curvaAcum - (seg.curva || 0) * (1 - z) * 0.5;
+      const curvaOffsetPrev = curvaAcumPrev * zPrev * 40;
+      const xPrev = cx + curvaOffsetPrev;
 
-      // Líneas de carril
-      if (i % 2 === 0) {
+      // Dibujar trapezoide de carretera
+      ctx3d.fillStyle = z < 0.5 ? roadColorNear : roadColor;
+      ctx3d.beginPath();
+      ctx3d.moveTo(xPrev - roadWPrev / 2, yPrev);
+      ctx3d.lineTo(xPrev + roadWPrev / 2, yPrev);
+      ctx3d.lineTo(x + roadW / 2, y);
+      ctx3d.lineTo(x - roadW / 2, y);
+      ctx3d.closePath();
+      ctx3d.fill();
+
+      // Líneas de carril (centro)
+      if (i % 3 === 0) {
         ctx3d.strokeStyle = laneColor;
         ctx3d.lineWidth = 2 * scale;
-        ctx3d.setLineDash([8 * scale, 8 * scale]);
+        ctx3d.setLineDash([10 * scale, 10 * scale]);
+        ctx3d.globalAlpha = 0.7;
         ctx3d.beginPath();
-        ctx3d.moveTo(x, y - 2);
-        ctx3d.lineTo(x, y + 2);
+        ctx3d.moveTo(xPrev, yPrev);
+        ctx3d.lineTo(x, y);
         ctx3d.stroke();
         ctx3d.setLineDash([]);
+        ctx3d.globalAlpha = 1;
       }
 
-      // Bordes de la carretera
-      ctx3d.strokeStyle = '#f0f8ff';
-      ctx3d.lineWidth = 3 * scale;
+      // Bordes de la carretera (glow cyan)
+      ctx3d.strokeStyle = edgeColor;
+      ctx3d.lineWidth = 2 * scale;
+      ctx3d.globalAlpha = 0.6;
       ctx3d.beginPath();
-      ctx3d.moveTo(x - roadW / 2, y);
+      ctx3d.moveTo(xPrev - roadWPrev / 2, yPrev);
+      ctx3d.lineTo(x - roadW / 2, y);
+      ctx3d.stroke();
+      ctx3d.beginPath();
+      ctx3d.moveTo(xPrev + roadWPrev / 2, yPrev);
       ctx3d.lineTo(x + roadW / 2, y);
       ctx3d.stroke();
+      ctx3d.globalAlpha = 1;
     }
 
     // Dibujar carteles de autopista
@@ -1057,31 +1090,49 @@
   }
 
   function dibujarCarreteraRecta(w, h, cx, horizonte) {
-    const numSegs = 40;
-    const segW = 200;
+    const numSegs = 50;
+    const segW = 220;
     for (let i = 0; i < numSegs; i++) {
       const z = i / numSegs;
-      const scale = 1 - z * 0.85;
+      const scale = 1 - z * 0.82;
       const y = horizonte + (h - horizonte) * (1 - z);
-      const roadW = segW * scale * (1 + z * 0.5);
-      ctx3d.fillStyle = '#2a3a50';
-      ctx3d.fillRect(cx - roadW / 2, y - 2, roadW, 4);
-      if (i % 2 === 0) {
+      const roadW = segW * scale * (1 + z * 0.3);
+      const zPrev = (i - 1) / numSegs;
+      const scalePrev = 1 - zPrev * 0.82;
+      const yPrev = horizonte + (h - horizonte) * (1 - zPrev);
+      const roadWPrev = segW * scalePrev * (1 + zPrev * 0.3);
+      ctx3d.fillStyle = z < 0.5 ? '#2a3a50' : '#1e2d42';
+      ctx3d.beginPath();
+      ctx3d.moveTo(cx - roadWPrev / 2, yPrev);
+      ctx3d.lineTo(cx + roadWPrev / 2, yPrev);
+      ctx3d.lineTo(cx + roadW / 2, y);
+      ctx3d.lineTo(cx - roadW / 2, y);
+      ctx3d.closePath();
+      ctx3d.fill();
+      if (i % 3 === 0) {
         ctx3d.strokeStyle = '#f0f8ff';
         ctx3d.lineWidth = 2 * scale;
-        ctx3d.setLineDash([8 * scale, 8 * scale]);
+        ctx3d.setLineDash([10 * scale, 10 * scale]);
+        ctx3d.globalAlpha = 0.7;
         ctx3d.beginPath();
-        ctx3d.moveTo(cx, y - 2);
-        ctx3d.lineTo(cx, y + 2);
+        ctx3d.moveTo(cx, yPrev);
+        ctx3d.lineTo(cx, y);
         ctx3d.stroke();
         ctx3d.setLineDash([]);
+        ctx3d.globalAlpha = 1;
       }
-      ctx3d.strokeStyle = '#f0f8ff';
-      ctx3d.lineWidth = 3 * scale;
+      ctx3d.strokeStyle = '#38e1ff';
+      ctx3d.lineWidth = 2 * scale;
+      ctx3d.globalAlpha = 0.6;
       ctx3d.beginPath();
-      ctx3d.moveTo(cx - roadW / 2, y);
+      ctx3d.moveTo(cx - roadWPrev / 2, yPrev);
+      ctx3d.lineTo(cx - roadW / 2, y);
+      ctx3d.stroke();
+      ctx3d.beginPath();
+      ctx3d.moveTo(cx + roadWPrev / 2, yPrev);
       ctx3d.lineTo(cx + roadW / 2, y);
       ctx3d.stroke();
+      ctx3d.globalAlpha = 1;
     }
   }
 
@@ -1123,31 +1174,38 @@
   }
 
   function dibujarCoche3d(w, h) {
-    const carW = 60, carH = 90;
-    const cx = w / 2, cy = h - 120;
+    const carW = 90, carH = 120;
+    const cx = w / 2, cy = h - 150;
     // Sombra
-    ctx3d.fillStyle = 'rgba(0, 0, 0, .5)';
+    ctx3d.fillStyle = 'rgba(0, 0, 0, .6)';
     ctx3d.beginPath();
-    ctx3d.ellipse(cx, cy + carH / 2 + 5, carW / 2 + 5, 8, 0, 0, Math.PI * 2);
+    ctx3d.ellipse(cx, cy + carH / 2 + 8, carW / 2 + 8, 10, 0, 0, Math.PI * 2);
     ctx3d.fill();
-    // Coche (GT4 simplificado)
-    ctx3d.fillStyle = '#eaf7ff';
-    ctx3d.beginPath();
-    ctx3d.roundRect(cx - carW / 2, cy - carH / 2, carW, carH, 8);
-    ctx3d.fill();
-    // Parabrisas
-    ctx3d.fillStyle = '#38e1ff';
-    ctx3d.fillRect(cx - carW / 2 + 8, cy - carH / 2 + 12, carW - 16, 20);
-    // Luces traseras
-    ctx3d.fillStyle = '#ff4d6d';
-    ctx3d.fillRect(cx - carW / 2 + 4, cy + carH / 2 - 8, 8, 4);
-    ctx3d.fillRect(cx + carW / 2 - 12, cy + carH / 2 - 8, 8, 4);
-    // Ruedas
-    ctx3d.fillStyle = '#0a1220';
-    ctx3d.fillRect(cx - carW / 2 - 4, cy - carH / 2 + 10, 6, 18);
-    ctx3d.fillRect(cx + carW / 2 - 2, cy - carH / 2 + 10, 6, 18);
-    ctx3d.fillRect(cx - carW / 2 - 4, cy + carH / 2 - 28, 6, 18);
-    ctx3d.fillRect(cx + carW / 2 - 2, cy + carH / 2 - 28, 6, 18);
+    // Glow bajo el coche
+    const glow = ctx3d.createRadialGradient(cx, cy + carH / 2, 0, cx, cy + carH / 2, carW);
+    glow.addColorStop(0, 'rgba(34, 211, 238, .4)');
+    glow.addColorStop(1, 'rgba(34, 211, 238, 0)');
+    ctx3d.fillStyle = glow;
+    ctx3d.fillRect(cx - carW, cy - carH / 2, carW * 2, carH * 2);
+    // Coche (imagen real del GT4)
+    if (imagenCoche3d && imagenCoche3d.complete) {
+      ctx3d.drawImage(imagenCoche3d, cx - carW / 2, cy - carH / 2, carW, carH);
+    } else {
+      // Fallback: coche dibujado
+      ctx3d.fillStyle = '#eaf7ff';
+      ctx3d.beginPath();
+      ctx3d.roundRect(cx - carW / 2, cy - carH / 2, carW, carH, 12);
+      ctx3d.fill();
+      ctx3d.fillStyle = '#38e1ff';
+      ctx3d.fillRect(cx - carW / 2 + 10, cy - carH / 2 + 15, carW - 20, 25);
+    }
+    // Luces traseras (glow rojo)
+    ctx3d.fillStyle = 'rgba(255, 77, 109, .8)';
+    ctx3d.shadowColor = '#ff4d6d';
+    ctx3d.shadowBlur = 15;
+    ctx3d.fillRect(cx - carW / 2 + 6, cy + carH / 2 - 12, 10, 5);
+    ctx3d.fillRect(cx + carW / 2 - 16, cy + carH / 2 - 12, 10, 5);
+    ctx3d.shadowBlur = 0;
   }
 
   function dibujarHud3d(w, h) {
