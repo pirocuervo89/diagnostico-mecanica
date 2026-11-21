@@ -981,12 +981,34 @@
     ctx3d.fillStyle = '#0a1220';
     ctx3d.fillRect(0, 0, w, h);
 
-    // Cielo con gradiente
+    // Cielo con gradiente (modo noche)
     const grad = ctx3d.createLinearGradient(0, 0, 0, horizonte);
-    grad.addColorStop(0, '#0a1220');
+    grad.addColorStop(0, '#050a14');
+    grad.addColorStop(0.5, '#0a1220');
     grad.addColorStop(1, '#1a2a3f');
     ctx3d.fillStyle = grad;
     ctx3d.fillRect(0, 0, w, horizonte);
+
+    // Estrellas
+    ctx3d.fillStyle = 'rgba(255, 255, 255, .6)';
+    for (let i = 0; i < 30; i++) {
+      const sx = (i * 137 + 50) % w;
+      const sy = (i * 73 + 20) % (horizonte * 0.8);
+      const ss = (i % 3) + 1;
+      ctx3d.fillRect(sx, sy, ss, ss);
+    }
+
+    // Horizonte (línea de luz)
+    ctx3d.strokeStyle = 'rgba(34, 211, 238, .3)';
+    ctx3d.lineWidth = 1;
+    ctx3d.beginPath();
+    ctx3d.moveTo(0, horizonte);
+    ctx3d.lineTo(w, horizonte);
+    ctx3d.stroke();
+
+    // Suelo (pasto/asfalto a los lados)
+    ctx3d.fillStyle = '#0e1a2b';
+    ctx3d.fillRect(0, horizonte, w, h - horizonte);
 
     // Carretera: pseudo-3D con segmentos
     const segs = carretera3d;
