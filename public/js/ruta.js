@@ -1489,22 +1489,30 @@
     // Dibujar línea de ruta (azul) sobre la carretera
     const ruta = rutaActiva();
     if (ruta && ruta.geometry && ruta.geometry.length > 1) {
-      // Proyectar la ruta en la pantalla (simplificado: línea central con perspectiva)
-      ctxAr.strokeStyle = 'rgba(34, 211, 238, .8)';
-      ctxAr.lineWidth = 6;
+      // Proyectar la ruta en la pantalla (perspectiva con curva)
+      ctxAr.strokeStyle = 'rgba(34, 211, 238, .85)';
+      ctxAr.lineWidth = 8;
       ctxAr.shadowColor = '#22d3ee';
-      ctxAr.shadowBlur = 15;
+      ctxAr.shadowBlur = 20;
+      ctxAr.lineCap = 'round';
       ctxAr.beginPath();
       const pts = ruta.geometry;
-      // Dibujar solo los primeros puntos (los que están delante)
       const numPts = Math.min(20, pts.length);
+      // Calcular curva lateral basada en la geometría de la ruta
+      let curvaAcum = 0;
       for (let i = 0; i < numPts; i++) {
-        const p = pts[i];
-        // Proyección simplificada: centro de la pantalla con perspectiva
         const z = i / numPts;
-        const scale = 1 - z * 0.6;
-        const x = w / 2 + (i % 2 === 0 ? -20 : 20) * scale;
-        const y = h * 0.5 + z * h * 0.4;
+        const scale = 1 - z * 0.55;
+        // Curva: desplazamiento lateral que aumenta con la distancia
+        if (i > 0 && i < pts.length - 1) {
+          const a = pts[i - 1], b = pts[i], c = pts[i + 1];
+          const dx1 = b[1] - a[1], dy1 = b[0] - a[0];
+          const dx2 = c[1] - b[1], dy2 = c[0] - b[0];
+          const cross = dx1 * dy2 - dy1 * dx2;
+          curvaAcum += cross * 0.5;
+        }
+        const x = w / 2 + curvaAcum * scale * 0.3;
+        const y = h * 0.45 + z * h * 0.45;
         if (i === 0) ctxAr.moveTo(x, y);
         else ctxAr.lineTo(x, y);
       }
@@ -1512,16 +1520,27 @@
       ctxAr.shadowBlur = 0;
 
       // Flechas sobre la ruta
-      ctxAr.fillStyle = 'rgba(34, 211, 238, .9)';
+      ctxAr.fillStyle = 'rgba(34, 211, 238, .95)';
+      ctxAr.shadowColor = '#22d3ee';
+      ctxAr.shadowBlur = 10;
+      let ca = 0;
       for (let i = 0; i < numPts; i += 3) {
         const z = i / numPts;
-        const scale = 1 - z * 0.6;
-        const x = w / 2 + (i % 2 === 0 ? -20 : 20) * scale;
-        const y = h * 0.5 + z * h * 0.4;
+        const scale = 1 - z * 0.55;
+        if (i > 0 && i < pts.length - 1) {
+          const a = pts[i - 1], b = pts[i], c = pts[i + 1] || pts[i];
+          const dx1 = b[1] - a[1], dy1 = b[0] - a[0];
+          const dx2 = c[1] - b[1], dy2 = c[0] - b[0];
+          const cross = dx1 * dy2 - dy1 * dx2;
+          ca += cross * 0.5;
+        }
+        const x = w / 2 + ca * scale * 0.3;
+        const y = h * 0.45 + z * h * 0.45;
         ctxAr.beginPath();
-        ctxAr.arc(x, y, 4 * scale, 0, Math.PI * 2);
+        ctxAr.arc(x, y, 5 * scale, 0, Math.PI * 2);
         ctxAr.fill();
       }
+      ctxAr.shadowBlur = 0;
     }
 
     // HUD: velocidad
