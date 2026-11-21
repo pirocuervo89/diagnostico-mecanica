@@ -496,7 +496,15 @@
       seguirRuta(lat, lon);
       // Zoom según velocidad: de cerca en ciudad, abierto en autovía, sin que
       // el usuario tenga que tocar el mapa mientras conduce.
-      if (siguiendo) mapa.setView([lat, lon], zoomPorVelocidad(velocidad), { animate: true });
+      if (siguiendo) {
+        const z = zoomPorVelocidad(velocidad);
+        // Modo primera persona: el coche queda en la parte inferior del mapa.
+        // Se desplaza el centro hacia arriba para que la carretera quede delante.
+        const px = mapa.latLngToContainerPoint([lat, lon]);
+        const offset = mapa.getSize().y * 0.32;
+        const target = mapa.containerPointToLatLng([px.x, px.y + offset]);
+        mapa.setView(target, z, { animate: true, duration: 0.5 });
+      }
     } else if (siguiendo) {
       mapa.setView([lat, lon], 16, { animate: true });
     }
@@ -750,6 +758,7 @@
   function alternarNavegacion() {
     navegando = !navegando;
     elShell?.classList.toggle('ruta-conduciendo', navegando);
+    elShell?.classList.toggle('ruta-navegando', navegando);
     if (navegando) {
       siguiendo = true;
       paso = 0;
@@ -760,7 +769,14 @@
       // si el usuario no había elegido tema a mano.
       try { if (localStorage.getItem(CLAVE_NOCHE) === null) aplicarTema(true); } catch (_e) { /* nada */ }
       avisar('Navegación iniciada. Te aviso de radares, obras y averías.', 'ok', 5000);
-      if (ultimaPos) mapa.setView([ultimaPos.lat, ultimaPos.lon], zoomPorVelocidad(velocidad));
+      if (ultimaPos) {
+        // Modo primera persona: el coche queda en la parte inferior del mapa.
+        mapa.setView([ultimaPos.lat, ultimaPos.lon], zoomPorVelocidad(velocidad), { animate: true, duration: 0.8 });
+        // Desplazar el centro hacia arriba para que el coche quede abajo.
+        const px = mapa.latLngToContainerPoint([ultimaPos.lat, ultimaPos.lon]);
+        const target = mapa.containerPointToLatLng([px.x, px.y + mapa.getSize().y * 0.3]);
+        mapa.panTo(target, { animate: true, duration: 0.6 });
+      }
       seguirRumbo(true);
       decir('Navegación iniciada. Nos vamos.');
       revisarOBD(true);

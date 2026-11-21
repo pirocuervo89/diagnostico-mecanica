@@ -1718,12 +1718,12 @@ body.viendo-ruta .pwa-install { display: none !important; }
   filter: saturate(1.35) contrast(1.12) brightness(1.18) !important;
 }
 
-/* --- Buscador: estilo Waze premium --- */
+/* --- Buscador: estilo Waze premium (no solapar con velocímetro) --- */
 .view-gps-fullscreen .ruta-search,
 .ruta-search {
   top: 10px !important;
   left: 10px !important;
-  right: 10px !important;
+  right: 90px !important;
   padding: 4px 4px 4px 14px !important;
   border-radius: 16px !important;
   background: rgba(10, 16, 30, .94) !important;
@@ -1830,7 +1830,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
 }
 .view-gps-fullscreen .ruta-zoom,
 .ruta-zoom {
-  top: 94px !important;
+  top: 96px !important;
   right: 10px !important;
   gap: 6px !important;
 }
@@ -2221,6 +2221,129 @@ body.viendo-ruta .pwa-install { display: none !important; }
   .view-gps-fullscreen .ruta-sig strong { font-size: 13px !important; }
   .view-gps-fullscreen .ruta-datos b { font-size: 16px !important; }
   .view-gps-fullscreen .ruta-empezar { min-height: 44px !important; font-size: 13px !important; }
+}
+
+/* ============================================================
+   GPS · POSICIONAMIENTO LIMPIO DE BOTONES (sin solapamiento)
+   ============================================================ */
+
+/* --- Columna derecha de botones flotantes: ordenados y espaciados --- */
+.view-gps-fullscreen .ruta-fab-gps,
+.ruta-fab-gps { bottom: 200px !important; }
+.view-gps-fullscreen .ruta-fab-noche,
+.ruta-fab-noche { bottom: 150px !important; }
+.view-gps-fullscreen .ruta-fab-full,
+.ruta-fab-full { bottom: 100px !important; }
+.view-gps-fullscreen .ruta-fab-trafico,
+.ruta-fab-trafico { bottom: 50px !important; }
+.view-gps-fullscreen .ruta-fab-chat,
+.ruta-fab-chat { top: auto !important; bottom: 250px !important; }
+.view-gps-fullscreen .ruta-fab-voz,
+.ruta-fab-voz { top: auto !important; bottom: 300px !important; }
+.view-gps-fullscreen .ruta-fab-brujula,
+.ruta-fab-brujula { top: auto !important; bottom: 350px !important; }
+
+/* --- Panel de rotación: izquierda, centrado vertical --- */
+.view-gps-fullscreen .ruta-rotacion-panel,
+.ruta-rotacion-panel {
+  left: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  gap: 6px !important;
+}
+.view-gps-fullscreen .ruta-rotacion-btn,
+.ruta-rotacion-btn {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
+  font-size: 16px !important;
+}
+
+/* --- Botón de reportar: izquierda, arriba --- */
+.view-gps-fullscreen .ruta-fab-reportar,
+.ruta-fab-reportar {
+  left: 10px !important;
+  top: 96px !important;
+  transform: none !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
+  font-size: 18px !important;
+}
+
+/* --- Banner de maniobra: no tapar el buscador --- */
+.view-gps-fullscreen .ruta-banner,
+.ruta-banner {
+  top: 58px !important;
+}
+
+/* --- ETA: no tapar el buscador --- */
+.view-gps-fullscreen .ruta-eta,
+.ruta-eta {
+  top: 58px !important;
+}
+
+/* --- Alertas: no tapar el buscador --- */
+.view-gps-fullscreen .ruta-alert,
+.ruta-alert {
+  top: 58px !important;
+}
+
+/* ============================================================
+   GPS · MODO PRIMERA PERSONA (coche en la carretera, como Waze)
+   ============================================================ */
+
+/* En modo navegación, el mapa se centra en el usuario y rota con su rumbo.
+   El coche aparece en la parte inferior del mapa, avanzando. */
+.ruta-shell.ruta-navegando {
+  --ruta-offset-y: 35%; /* el coche queda en la parte inferior */
+}
+.ruta-shell.ruta-navegando .ruta-map .leaflet-map-pane {
+  transform-origin: 50% 70% !important;
+}
+.ruta-shell.ruta-navegando .ruta-coche {
+  position: fixed !important;
+  bottom: 28% !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 1200 !important;
+  width: 72px !important;
+  height: 72px !important;
+  pointer-events: none !important;
+}
+.ruta-shell.ruta-navegando .ruta-coche img {
+  transform: scale(1.5) !important;
+}
+
+/* Animación del coche avanzando */
+@keyframes cocheAvanzando {
+  0% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
+  100% { transform: translateX(-50%) translateY(0); }
+}
+.ruta-shell.ruta-navegando .ruta-coche {
+  animation: cocheAvanzando 1.2s ease-in-out infinite !important;
+}
+
+/* En modo navegación, ocultar buscador y mostrar solo lo esencial */
+.ruta-shell.ruta-navegando .ruta-search,
+.ruta-shell.ruta-navegando .ruta-recientes,
+.ruta-shell.ruta-navegando .ruta-zoom {
+  display: none !important;
+}
+.ruta-shell.ruta-navegando .ruta-panel {
+  left: 10px !important;
+  right: 10px !important;
+  bottom: 10px !important;
+}
+.ruta-shell.ruta-navegando .ruta-speed {
+  top: 10px !important;
+  right: 10px !important;
+}
+.ruta-shell.ruta-navegando .ruta-banner {
+  top: 10px !important;
+  left: 10px !important;
+  right: 10px !important;
 }
 
 /* Botón flotante para hablar con la IA sin salir de la navegación. */
