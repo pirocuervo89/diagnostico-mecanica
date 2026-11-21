@@ -309,6 +309,8 @@
 /* botones nuevos del mapa */
 .ruta-fab-noche { bottom: 254px; font-size: 17px; line-height: 1; }
 .ruta-fab-full { bottom: 302px; font-size: 18px; line-height: 1; }
+.ruta-fab-3d { bottom: 350px; font-size: 18px; line-height: 1; }
+.ruta-fab-ar { bottom: 398px; font-size: 18px; line-height: 1; }
 
 /* Pantalla completa: el mapa ocupa todo el móvil, como un navegador dedicado. */
 .ruta-shell.ruta-completa {
@@ -2685,6 +2687,51 @@ body.viendo-ruta .pwa-install { display: none !important; }
 #ruta3dToggle.activo {
   background: linear-gradient(135deg, rgba(167, 139, 250, .9), rgba(139, 92, 246, .9)) !important;
   box-shadow: 0 0 0 4px rgba(167, 139, 250, .3), 0 8px 24px -8px rgba(0, 0, 0, .9), 0 0 28px -8px rgba(167, 139, 250, 1) !important;
+}
+
+/* ============================================================
+   ADAS AR · Realidad Aumentada
+   ============================================================ */
+.ruta-ar-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 3;
+  display: none;
+  background: #000;
+}
+.ruta-ar-video.activo { display: block; }
+.ruta-ar-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  display: none;
+  pointer-events: none;
+}
+.ruta-ar-canvas.activo { display: block; }
+.ruta-shell.ruta-ar-activo .ruta-map { display: none; }
+.ruta-shell.ruta-ar-activo .ruta-3d { display: none; }
+.ruta-shell.ruta-ar-activo .ruta-ar-video { display: block; }
+.ruta-shell.ruta-ar-activo .ruta-ar-canvas { display: block; }
+
+#rutaArToggle {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 16px !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  background: linear-gradient(135deg, rgba(255, 77, 109, .6), rgba(255, 107, 138, .6)) !important;
+  border: 2px solid rgba(255, 77, 109, .8) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, .9), 0 0 20px -8px rgba(255, 77, 109, .7) !important;
+}
+#rutaArToggle.activo {
+  background: linear-gradient(135deg, rgba(255, 77, 109, .9), rgba(255, 107, 138, .9)) !important;
+  box-shadow: 0 0 0 4px rgba(255, 77, 109, .3), 0 8px 24px -8px rgba(0, 0, 0, .9), 0 0 28px -8px rgba(255, 77, 109, 1) !important;
 }
 
 /* Botón flotante para hablar con la IA sin salir de la navegación. */
