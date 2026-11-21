@@ -1,4 +1,4 @@
-const CACHE = 'dm-app-v62';
+const CACHE = 'dm-app-v63';
 const CORE = [
   '/',
   '/index.html',
