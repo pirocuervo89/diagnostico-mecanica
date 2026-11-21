@@ -886,6 +886,421 @@ body.viendo-ruta .pwa-install { display: none !important; }
 .ruta-coche { transform: rotate(var(--ruta-contra, 0deg)); }
 .ruta-fab-brujula small { left: 50%; transform: translateX(-50%); }
 
+/* ============================================================
+   GPS PRO · interfaz profesional, grande y colorida
+   ============================================================ */
+
+/* --- Mapa: más grande, más inmersivo --- */
+.ruta-map {
+  height: clamp(520px, 72vh, 820px) !important;
+  border-radius: 20px !important;
+  box-shadow:
+    0 30px 80px -20px rgba(0, 0, 0, .95),
+    0 0 60px -30px rgba(56, 225, 255, .5),
+    inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+  overflow: hidden !important;
+}
+@media (max-width: 700px) {
+  .ruta-map { height: clamp(420px, 62vh, 620px) !important; }
+}
+
+/* --- Shell: borde y sombra profesional --- */
+.ruta-shell {
+  border-radius: 24px !important;
+  border: 1.5px solid rgba(56, 225, 255, .35) !important;
+  box-shadow:
+    0 40px 100px -40px rgba(0, 0, 0, .98),
+    0 0 80px -40px rgba(56, 225, 255, .45),
+    inset 0 1px 0 rgba(255, 255, 255, .07) !important;
+  background: #060b14 !important;
+}
+
+/* --- Buscador: más grande y profesional --- */
+.ruta-search {
+  top: 16px !important;
+  left: 16px !important;
+  right: 16px !important;
+  padding: 8px 8px 8px 18px !important;
+  border-radius: 18px !important;
+  background: rgba(6, 12, 24, .94) !important;
+  border: 1.5px solid rgba(56, 225, 255, .4) !important;
+  box-shadow:
+    0 20px 44px -20px rgba(0, 0, 0, .95),
+    0 0 24px -12px rgba(56, 225, 255, .5) !important;
+  backdrop-filter: blur(20px) saturate(140%) !important;
+}
+.ruta-search input {
+  min-height: 46px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #f0f8ff !important;
+}
+.ruta-search input::placeholder {
+  color: rgba(160, 190, 220, .75) !important;
+  font-size: 15px !important;
+}
+.ruta-search button {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #22d3ee, #6d5efc) !important;
+  font-size: 18px !important;
+  box-shadow: 0 10px 24px -8px rgba(34, 211, 238, .8) !important;
+  transition: transform .15s ease, box-shadow .2s ease !important;
+}
+.ruta-search button:hover {
+  transform: scale(1.08) !important;
+  box-shadow: 0 14px 28px -8px rgba(34, 211, 238, 1) !important;
+}
+
+/* --- Banner de maniobra: más grande y profesional --- */
+.ruta-banner {
+  top: 16px !important;
+  left: 16px !important;
+  right: 16px !important;
+  padding: 14px 18px !important;
+  border-radius: 18px !important;
+  gap: 14px !important;
+  background: linear-gradient(135deg, rgba(10, 16, 28, .97), rgba(5, 9, 16, .99)) !important;
+  border: 1.5px solid rgba(56, 225, 255, .45) !important;
+  box-shadow:
+    0 20px 44px -18px rgba(0, 0, 0, .95),
+    0 0 30px -12px rgba(56, 225, 255, .6) !important;
+  backdrop-filter: blur(18px) !important;
+}
+.ruta-banner-flecha {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 16px !important;
+  font-size: 36px !important;
+  background: linear-gradient(140deg, #22d3ee, #6d5efc) !important;
+  box-shadow: 0 16px 32px -16px rgba(34, 211, 238, 1) !important;
+}
+.ruta-banner-info small {
+  font-size: 11px !important;
+  letter-spacing: .18em !important;
+  color: #7ee7ff !important;
+  font-weight: 700 !important;
+}
+.ruta-banner-info strong {
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+}
+.ruta-banner-eta {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #9ef2ff !important;
+}
+
+/* --- Botones flotantes: más grandes, más coloridos --- */
+.ruta-fab {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 16px !important;
+  font-size: 20px !important;
+  background: linear-gradient(135deg, rgba(34, 211, 238, .3), rgba(109, 94, 252, .3)) !important;
+  border: 1.5px solid rgba(56, 225, 255, .5) !important;
+  color: #7ee7ff !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow:
+    0 12px 28px -12px rgba(0, 0, 0, .9),
+    0 0 24px -12px rgba(56, 225, 255, .6) !important;
+  transition: transform .15s ease, box-shadow .2s ease !important;
+}
+.ruta-fab:hover {
+  transform: scale(1.1) !important;
+  box-shadow:
+    0 16px 32px -12px rgba(0, 0, 0, .9),
+    0 0 32px -10px rgba(56, 225, 255, .9) !important;
+}
+.ruta-fab-noche {
+  background: linear-gradient(135deg, rgba(251, 191, 36, .3), rgba(245, 158, 11, .3)) !important;
+  border-color: rgba(251, 191, 36, .5) !important;
+  color: #fbbf24 !important;
+}
+.ruta-fab-noche:hover {
+  box-shadow: 0 0 32px -10px rgba(251, 191, 36, .9) !important;
+}
+.ruta-fab-full {
+  background: linear-gradient(135deg, rgba(167, 139, 250, .3), rgba(139, 92, 246, .3)) !important;
+  border-color: rgba(167, 139, 250, .5) !important;
+  color: #c4b5fd !important;
+}
+.ruta-fab-trafico.activo {
+  background: linear-gradient(135deg, rgba(34, 197, 94, .4), rgba(234, 179, 8, .4)) !important;
+  border-color: rgba(34, 197, 94, .7) !important;
+  color: #86efac !important;
+  box-shadow: 0 0 24px rgba(34, 197, 94, .7) !important;
+}
+.ruta-fab-chat {
+  background: linear-gradient(135deg, rgba(99, 102, 241, .3), rgba(168, 85, 247, .3)) !important;
+  border-color: rgba(168, 85, 247, .5) !important;
+  color: #c4b5fd !important;
+}
+.ruta-fab-voz {
+  background: linear-gradient(135deg, rgba(236, 72, 153, .3), rgba(219, 39, 119, .3)) !important;
+  border-color: rgba(236, 72, 153, .5) !important;
+  color: #f9a8d4 !important;
+}
+.ruta-fab-brujula {
+  background: linear-gradient(135deg, rgba(56, 189, 248, .3), rgba(14, 165, 233, .3)) !important;
+  border-color: rgba(56, 189, 248, .5) !important;
+  color: #7dd3fc !important;
+}
+.ruta-fab-gps {
+  background: linear-gradient(135deg, rgba(34, 197, 94, .3), rgba(16, 185, 129, .3)) !important;
+  border-color: rgba(34, 197, 94, .5) !important;
+  color: #86efac !important;
+}
+
+/* --- Velocímetro: más grande y profesional --- */
+.ruta-speed {
+  width: 88px !important;
+  height: 88px !important;
+  bottom: 160px !important;
+  right: 16px !important;
+  background: linear-gradient(135deg, rgba(6, 12, 24, .96), rgba(15, 23, 42, .96)) !important;
+  border: 2.5px solid rgba(34, 211, 238, .7) !important;
+  box-shadow:
+    0 0 40px rgba(34, 211, 238, .6),
+    0 16px 32px -16px rgba(0, 0, 0, .9),
+    inset 0 0 24px rgba(34, 211, 238, .12) !important;
+  backdrop-filter: blur(20px) !important;
+}
+.ruta-speed b {
+  font-size: 34px !important;
+  color: #22d3ee !important;
+  text-shadow: 0 0 24px rgba(34, 211, 238, .9) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.03em !important;
+}
+.ruta-speed span {
+  font-size: 10px !important;
+  color: rgba(200, 220, 240, .8) !important;
+  letter-spacing: .12em !important;
+  font-weight: 600 !important;
+}
+.ruta-speed small {
+  color: #fbbf24 !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+}
+.ruta-speed.exceso {
+  border-color: rgba(255, 93, 93, .9) !important;
+  box-shadow:
+    0 0 40px rgba(255, 93, 93, .7),
+    0 16px 32px -16px rgba(0, 0, 0, .9) !important;
+}
+.ruta-speed.exceso b { color: #ffb4b4 !important; }
+
+/* --- Panel de navegación: más grande y profesional --- */
+.ruta-panel {
+  left: 16px !important;
+  right: 16px !important;
+  bottom: 16px !important;
+  padding: 16px 18px !important;
+  border-radius: 20px !important;
+  background: linear-gradient(180deg, rgba(8, 14, 26, .97), rgba(5, 9, 18, .99)) !important;
+  border: 1.5px solid rgba(56, 225, 255, .3) !important;
+  box-shadow:
+    0 24px 56px -20px rgba(0, 0, 0, .98),
+    0 0 32px -16px rgba(56, 225, 255, .45) !important;
+  backdrop-filter: blur(24px) !important;
+}
+.ruta-destino-linea {
+  margin: 0 4px 10px !important;
+  font-size: 13px !important;
+  gap: 8px !important;
+}
+.ruta-destino-linea b {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #f0f8ff !important;
+}
+.ruta-flecha {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 16px !important;
+  font-size: 30px !important;
+  background: linear-gradient(140deg, #22d3ee, #6d5efc) !important;
+  box-shadow: 0 16px 32px -16px rgba(34, 211, 238, 1) !important;
+}
+.ruta-sig small {
+  font-size: 10px !important;
+  letter-spacing: .16em !important;
+  color: #7ee7ff !important;
+  font-weight: 700 !important;
+}
+.ruta-sig strong {
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  color: #f0f8ff !important;
+}
+.ruta-datos b {
+  font-size: 20px !important;
+  color: #22d3ee !important;
+  text-shadow: 0 0 16px rgba(34, 211, 238, .6) !important;
+}
+.ruta-empezar, #rutaEmpezar {
+  min-height: 52px !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, #22d3ee, #6d5efc) !important;
+  box-shadow:
+    0 18px 36px -16px rgba(34, 211, 238, .9),
+    0 0 40px -18px rgba(109, 94, 252, .7) !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+  transition: transform .15s ease, box-shadow .2s ease !important;
+}
+.ruta-empezar:hover, #rutaEmpezar:hover {
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow:
+    0 22px 44px -16px rgba(34, 211, 238, 1),
+    0 0 50px -15px rgba(109, 94, 252, .9) !important;
+}
+
+/* --- Zoom buttons: más grandes --- */
+.ruta-zoom {
+  top: 16px !important;
+  right: 16px !important;
+  gap: 8px !important;
+}
+.ruta-zoom button {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 14px !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, rgba(34, 211, 238, .25), rgba(109, 94, 252, .25)) !important;
+  border: 1.5px solid rgba(56, 225, 255, .45) !important;
+  color: #7ee7ff !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .9) !important;
+  transition: transform .15s ease !important;
+}
+.ruta-zoom button:hover {
+  transform: scale(1.1) !important;
+}
+
+/* --- Alertas: más visibles --- */
+.ruta-alert {
+  top: 16px !important;
+  left: 16px !important;
+  right: 16px !important;
+  padding: 14px 18px !important;
+  border-radius: 14px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 16px 36px -16px rgba(0, 0, 0, .9) !important;
+}
+
+/* --- ETA pill: más grande --- */
+.ruta-eta {
+  top: 16px !important;
+  padding: 9px 16px !important;
+  border-radius: 14px !important;
+  font-size: 13px !important;
+  background: linear-gradient(135deg, rgba(6, 12, 24, .96), rgba(15, 23, 42, .96)) !important;
+  border: 1.5px solid rgba(56, 225, 255, .4) !important;
+  box-shadow: 0 12px 28px -14px rgba(0, 0, 0, .9) !important;
+  backdrop-filter: blur(16px) !important;
+}
+.ruta-eta b {
+  font-size: 16px !important;
+  color: #22d3ee !important;
+  text-shadow: 0 0 16px rgba(34, 211, 238, .7) !important;
+}
+
+/* --- Coche: más grande y visible --- */
+.ruta-coche {
+  width: 64px !important;
+  height: 64px !important;
+  border: 3.5px solid rgba(34, 211, 238, 1) !important;
+  box-shadow:
+    0 0 0 5px rgba(3, 10, 18, .9),
+    0 0 40px rgba(34, 211, 238, 1),
+    0 10px 20px rgba(0, 0, 0, .7) !important;
+}
+.ruta-coche img {
+  transform: scale(1.45) !important;
+  filter: saturate(1.4) contrast(1.2) brightness(1.15) !important;
+}
+.ruta-coche::before {
+  border-left: 8px solid transparent !important;
+  border-right: 8px solid transparent !important;
+  border-bottom: 16px solid #22d3ee !important;
+  top: -18px !important;
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 1)) !important;
+}
+
+/* --- Modo conducción: HUD aún más grande --- */
+.ruta-shell.ruta-conduciendo .ruta-speed {
+  width: 110px !important;
+  height: 110px !important;
+}
+.ruta-shell.ruta-conduciendo .ruta-speed b {
+  font-size: 42px !important;
+}
+.ruta-shell.ruta-conduciendo .ruta-panel {
+  padding: 20px 22px !important;
+}
+.ruta-shell.ruta-conduciendo .ruta-sig strong {
+  font-size: 20px !important;
+}
+.ruta-shell.ruta-conduciendo .ruta-resumen b {
+  font-size: 26px !important;
+}
+.ruta-shell.ruta-conduciendo .ruta-flecha {
+  width: 64px !important;
+  height: 64px !important;
+  font-size: 34px !important;
+}
+
+/* --- Modo día: ajustes --- */
+.ruta-shell[data-tema="dia"] .ruta-search {
+  background: rgba(255, 255, 255, .97) !important;
+  border-color: rgba(20, 35, 55, .2) !important;
+}
+.ruta-shell[data-tema="dia"] .ruta-search input {
+  color: #0e1a2b !important;
+}
+.ruta-shell[data-tema="dia"] .ruta-panel {
+  background: rgba(255, 255, 255, .98) !important;
+  border-color: rgba(20, 35, 55, .16) !important;
+}
+.ruta-shell[data-tema="dia"] .ruta-speed {
+  background: rgba(255, 255, 255, .97) !important;
+  border-color: rgba(20, 120, 180, .4) !important;
+}
+.ruta-shell[data-tema="dia"] .ruta-speed b {
+  color: #0369a1 !important;
+  text-shadow: none !important;
+}
+.ruta-shell[data-tema="dia"] .ruta-fab {
+  background: rgba(255, 255, 255, .96) !important;
+  color: #0e1a2b !important;
+  border-color: rgba(20, 35, 55, .18) !important;
+}
+
+/* --- Responsive móvil: todo más grande --- */
+@media (max-width: 700px) {
+  .ruta-search input { font-size: 15px !important; }
+  .ruta-banner-info strong { font-size: 16px !important; }
+  .ruta-banner-flecha { width: 52px !important; height: 52px !important; font-size: 28px !important; }
+  .ruta-speed { width: 76px !important; height: 76px !important; bottom: 140px !important; }
+  .ruta-speed b { font-size: 28px !important; }
+  .ruta-fab { width: 48px !important; height: 48px !important; }
+  .ruta-zoom button { width: 40px !important; height: 40px !important; font-size: 20px !important; }
+  .ruta-panel { padding: 14px 16px !important; }
+  .ruta-sig strong { font-size: 15px !important; }
+  .ruta-datos b { font-size: 18px !important; }
+  .ruta-empezar { min-height: 48px !important; font-size: 15px !important; }
+}
+
 /* Botón flotante para hablar con la IA sin salir de la navegación. */
 .ruta-fab-chat {
   position: absolute;
