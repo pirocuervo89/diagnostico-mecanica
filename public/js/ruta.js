@@ -919,6 +919,16 @@
     } catch (_e) { /* sin avisos se navega igual */ }
   }
 
+  function flechaPara(s) {
+    const m = s?.modifier || '';
+    if (m === 'left') return '↰';
+    if (m === 'right') return '↱';
+    if (m === 'straight') return '↑';
+    if (s?.type === 'roundabout') return '↻';
+    if (s?.type === 'exit') return '↗';
+    return '↑';
+  }
+
   // ============================================================
   // GPS 3D · Vista de conducción inmersiva (pseudo-3D)
   // ============================================================
@@ -1249,27 +1259,52 @@
 
   function dibujarHud3d(w, h) {
     // Velocidad
-    ctx3d.fillStyle = 'rgba(10, 16, 30, .8)';
-    ctx3d.fillRect(10, 10, 80, 40);
+    ctx3d.fillStyle = 'rgba(10, 16, 30, .85)';
+    ctx3d.fillRect(10, 10, 90, 50);
+    ctx3d.strokeStyle = 'rgba(34, 211, 238, .4)';
+    ctx3d.lineWidth = 1;
+    ctx3d.strokeRect(10, 10, 90, 50);
     ctx3d.fillStyle = '#22d3ee';
-    ctx3d.font = 'bold 24px sans-serif';
+    ctx3d.font = 'bold 28px sans-serif';
     ctx3d.textAlign = 'left';
-    ctx3d.fillText(`${Math.round(velocidad)}`, 20, 38);
+    ctx3d.fillText(`${Math.round(velocidad)}`, 20, 42);
     ctx3d.fillStyle = '#f0f8ff';
     ctx3d.font = '10px sans-serif';
-    ctx3d.fillText('KM/H', 55, 38);
+    ctx3d.fillText('KM/H', 60, 42);
     // Distancia restante
     const ruta = rutaActiva();
     if (ruta) {
       const rest = restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0);
-      ctx3d.fillStyle = 'rgba(10, 16, 30, .8)';
-      ctx3d.fillRect(w - 120, 10, 110, 40);
+      ctx3d.fillStyle = 'rgba(10, 16, 30, .85)';
+      ctx3d.fillRect(w - 130, 10, 120, 50);
+      ctx3d.strokeStyle = 'rgba(34, 211, 238, .4)';
+      ctx3d.strokeRect(w - 130, 10, 120, 50);
+      ctx3d.fillStyle = '#f0f8ff';
+      ctx3d.font = 'bold 16px sans-serif';
+      ctx3d.textAlign = 'right';
+      ctx3d.fillText(rest > 1000 ? `${(rest/1000).toFixed(1)} km` : `${rest} m`, w - 20, 32);
+      ctx3d.font = '11px sans-serif';
+      ctx3d.fillStyle = 'rgba(255, 255, 255, .7)';
+      ctx3d.fillText(ruta.duration ? `${Math.round(ruta.duration/60)} min` : '', w - 20, 50);
+    }
+    // Próxima maniobra (banner inferior)
+    const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
+    if (s && s.name) {
+      ctx3d.fillStyle = 'rgba(10, 16, 30, .9)';
+      ctx3d.fillRect(10, h - 70, w - 20, 60);
+      ctx3d.strokeStyle = 'rgba(34, 211, 238, .5)';
+      ctx3d.lineWidth = 2;
+      ctx3d.strokeRect(10, h - 70, w - 20, 60);
+      ctx3d.fillStyle = '#22d3ee';
+      ctx3d.font = 'bold 24px sans-serif';
+      ctx3d.textAlign = 'left';
+      ctx3d.fillText(flechaPara(s), 25, h - 42);
       ctx3d.fillStyle = '#f0f8ff';
       ctx3d.font = 'bold 14px sans-serif';
-      ctx3d.textAlign = 'right';
-      ctx3d.fillText(rest > 1000 ? `${(rest/1000).toFixed(1)} km` : `${rest} m`, w - 20, 28);
-      ctx3d.font = '10px sans-serif';
-      ctx3d.fillText(ruta.duration ? `${Math.round(ruta.duration/60)} min` : '', w - 20, 42);
+      ctx3d.fillText(s.name || 'Continúa', 60, h - 42);
+      ctx3d.fillStyle = 'rgba(255, 255, 255, .6)';
+      ctx3d.font = '11px sans-serif';
+      ctx3d.fillText(`En ${s.distance ? (s.distance > 1000 ? (s.distance/1000).toFixed(1)+' km' : s.distance+' m') : ''}`, 60, h - 22);
     }
   }
 
