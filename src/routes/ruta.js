@@ -403,4 +403,86 @@ router.post('/avisos/:id/confirmar', (req, res) => {
   res.json({ aviso: { ...aviso, origen: 'comunidad', edadMs: Date.now() - aviso.creado } });
 });
 
+// ------------------------------------------------------------ tráfico en vivo (TomTom + HERE, ambos opcionales)
+// Devuelve segmentos con velocidad actual y congestión. Si no hay clave
+// configurada, responde 204 para que el cliente desactive la capa sin error.
+router.get('/trafico', async (req, res) => {
+  const lat = Number(req.query.lat);
+  const lon = Number(req.query.lon);
+  const bbox = String(req.query.bbox || '').trim();
+  const tomtomKey = String(process.env.TOMTOM_API_KEY || '').trim();
+  const hereKey = String(process.env.HERE_API_KEY || '').trim();
+
+  if (!tomtomKey && !hereKey) {
+    return res.status(204).end();
+  }
+
+  const clave = `trafico:${lat.toFixed(3)},${lon.toFixed(3)}:${bbox}`;
+  const hit = leer(clave);
+  if (hit) return res.json(hit);
+
+  const segmentos = [];
+  let fuente = null;
+
+  // TomTom: flow segment data por punto (rápido, buena cobertura en España)
+  if (tomtomKey && Number.isFinite(lat) && Number.isFinite(lon)) {
+    try {
+      const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=${lat},${lon}&unit=KMPH&key=${encodeURIComponent(tomtomKey)}`;
+      const data = await pedirJson(url, 8000);
+      const fs = data?.flowSegmentData;
+      if (fs) {
+        const current = Number(fs.currentSpeed);
+        const free = Number(fs.freeFlowSpeed);
+        const ratio = free > 0 ? current / free : 1;
+        const nivel = ratio >= 0.8 ? 'fluido' : ratio >= 0.5 ? 'lento' : ratio >= 0.25 ? 'congestionado' : 'parado';
+        segmentos.push({
+          fuente: 'tomtom',
+          lat, lon,
+          speed: current,
+          freeFlow: free,
+          nivel,
+          road: fs.roadName || fs.roadCategory || '',
+          confidence: Number(fs.confidence) || 0
+        });
+        fuente = 'tomtom';
+      }
+    } catch (e) {
+      console.warn('[trafico] tomtom:', e.message);
+    }
+  }
+
+  // HERE: flow por bounding box (más segmentos, mejor para capa de mapa)
+  if (hereKey && bbox) {
+    try {
+      const url = `https://data.traffic.hereapi.com/v7/flow?in=bbox:${bbox}&locationReferencing=shape&apiKey=${encodeURIComponent(hereKey)}`;
+      const data = await pedirJson(url, 10000);
+      const results = data?.results || [];
+      for (const r of results.slice(0, 80)) {
+        const loc = r.location || {};
+        const cur = r.currentFlow || {};
+        const speed = Number(cur.speed);
+        const free = Number(cur.freeFlow);
+        const ratio = free > 0 ? speed / free : 1;
+        const nivel = ratio >= 0.8 ? 'fluido' : ratio >= 0.5 ? 'lento' : ratio >= 0.25 ? 'congestionado' : 'parado';
+        const coords = (loc.shape?.links || []).map(l => (l.points || []).map(p => [p.lat, p.lng])).flat();
+        segmentos.push({
+          fuente: 'here',
+          lat: loc.shape?.links?.[0]?.points?.[0]?.lat,
+          lon: loc.shape?.links?.[0]?.points?.[0]?.lng,
+          speed, freeFlow: free, nivel,
+          road: loc.description || '',
+          coords
+        });
+      }
+      if (results.length) fuente = fuente ? 'tomtom+here' : 'here';
+    } catch (e) {
+      console.warn('[trafico] here:', e.message);
+    }
+  }
+
+  const payload = { fuente, segmentos, at: Date.now() };
+  recordar(clave, 60000, payload);
+  res.json(payload);
+});
+
 export default router;

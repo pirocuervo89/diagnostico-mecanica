@@ -1000,3 +1000,236 @@ body.viendo-ruta .pwa-install { display: none !important; }
 .ruta-shell[data-tema="dia"] .ruta-recientes { background: rgba(255, 255, 255, .96); }
 .ruta-shell[data-tema="dia"] .ruta-reciente { color: #0e1a2b; background: rgba(20, 35, 55, .06); }
 .ruta-shell.ruta-conduciendo .ruta-recientes { display: none; }
+
+/* ============================================================
+   GPS MEJORADO · interfaz moderna, colorida, coche real
+   ============================================================ */
+
+/* --- Coche miniatura: más grande, con sombra y brillo --- */
+.ruta-coche {
+  width: 52px !important;
+  height: 52px !important;
+  inset: auto !important;
+  border-radius: 50% !important;
+  border: 3px solid rgba(34, 211, 238, 1) !important;
+  background: radial-gradient(circle at 30% 30%, rgba(34, 211, 238, .25), #08111b 70%) !important;
+  box-shadow:
+    0 0 0 4px rgba(3, 10, 18, .9),
+    0 0 30px rgba(34, 211, 238, .95),
+    0 8px 16px rgba(0, 0, 0, .6) !important;
+  overflow: hidden !important;
+  transition: transform .2s linear !important;
+}
+.ruta-coche img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: 54% 62% !important;
+  transform: scale(1.4) !important;
+  filter: saturate(1.3) contrast(1.15) brightness(1.1) !important;
+}
+/* Flecha de dirección delante del coche */
+.ruta-coche::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 14px solid #22d3ee;
+  filter: drop-shadow(0 0 8px rgba(34, 211, 238, 1));
+  z-index: 2;
+}
+/* Pulso del coche */
+.ruta-coche::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 211, 238, .6);
+  animation: cochePulso 2s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes cochePulso {
+  0% { transform: scale(1); opacity: .8; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* --- HUD moderno y colorido --- */
+.ruta-hud {
+  background: linear-gradient(180deg, rgba(5, 9, 18, .4), rgba(5, 9, 18, .15)) !important;
+}
+.ruta-search {
+  background: rgba(8, 14, 26, .92) !important;
+  border: 1px solid rgba(56, 225, 255, .35) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 32px -16px rgba(0, 0, 0, .8), 0 0 20px -10px rgba(56, 225, 255, .4) !important;
+  backdrop-filter: blur(16px) !important;
+}
+.ruta-search input {
+  color: #eaf6ff !important;
+  font-weight: 500 !important;
+}
+.ruta-search button {
+  background: linear-gradient(135deg, #22d3ee, #6d5efc) !important;
+  color: #03121c !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 20px -8px rgba(34, 211, 238, .7) !important;
+}
+.ruta-search button:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 12px 24px -8px rgba(34, 211, 238, .9) !important;
+}
+
+/* --- Botones flotantes coloridos --- */
+.ruta-fab {
+  background: linear-gradient(135deg, rgba(34, 211, 238, .25), rgba(109, 94, 252, .25)) !important;
+  border: 1px solid rgba(56, 225, 255, .4) !important;
+  color: #7ee7ff !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 20px -10px rgba(34, 211, 238, .6) !important;
+}
+.ruta-fab:hover {
+  background: linear-gradient(135deg, rgba(34, 211, 238, .4), rgba(109, 94, 252, .4)) !important;
+  transform: scale(1.08) !important;
+  box-shadow: 0 12px 24px -8px rgba(34, 211, 238, .8) !important;
+}
+.ruta-fab-noche {
+  background: linear-gradient(135deg, rgba(251, 191, 36, .25), rgba(245, 158, 11, .25)) !important;
+  border-color: rgba(251, 191, 36, .4) !important;
+  color: #fbbf24 !important;
+}
+
+/* --- Velocímetro colorido --- */
+.ruta-speed {
+  background: linear-gradient(135deg, rgba(8, 14, 26, .95), rgba(15, 23, 42, .95)) !important;
+  border: 2px solid rgba(34, 211, 238, .6) !important;
+  box-shadow: 0 0 30px rgba(34, 211, 238, .5), 0 12px 24px -12px rgba(0, 0, 0, .8) !important;
+  backdrop-filter: blur(16px) !important;
+}
+.ruta-speed b {
+  color: #22d3ee !important;
+  text-shadow: 0 0 20px rgba(34, 211, 238, .8) !important;
+  font-size: 28px !important;
+}
+.ruta-speed small {
+  color: #fbbf24 !important;
+  font-weight: 700 !important;
+}
+
+/* --- Panel de navegación colorido --- */
+.ruta-panel {
+  background: linear-gradient(180deg, rgba(8, 14, 26, .96), rgba(5, 9, 18, .98)) !important;
+  border: 1px solid rgba(56, 225, 255, .3) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, .95), 0 0 30px -15px rgba(56, 225, 255, .4) !important;
+  backdrop-filter: blur(20px) !important;
+}
+.ruta-panel .ruta-paso {
+  background: linear-gradient(135deg, rgba(34, 211, 238, .08), rgba(109, 94, 252, .08)) !important;
+  border: 1px solid rgba(56, 225, 255, .2) !important;
+  border-radius: 12px !important;
+}
+.ruta-panel .ruta-paso:hover {
+  background: linear-gradient(135deg, rgba(34, 211, 238, .15), rgba(109, 94, 252, .15)) !important;
+  border-color: rgba(56, 225, 255, .4) !important;
+}
+
+/* --- ETA pill colorido --- */
+.ruta-eta {
+  background: linear-gradient(135deg, rgba(8, 14, 26, .95), rgba(15, 23, 42, .95)) !important;
+  border: 1px solid rgba(56, 225, 255, .35) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 28px -14px rgba(0, 0, 0, .9), 0 0 20px -10px rgba(56, 225, 255, .4) !important;
+  backdrop-filter: blur(16px) !important;
+}
+.ruta-eta b {
+  color: #22d3ee !important;
+  text-shadow: 0 0 16px rgba(34, 211, 238, .7) !important;
+}
+
+/* --- Botón de empezar navegación (grande y colorido) --- */
+.ruta-empezar, #rutaEmpezar {
+  background: linear-gradient(135deg, #22d3ee, #6d5efc) !important;
+  color: #03121c !important;
+  font-weight: 800 !important;
+  font-size: 15px !important;
+  letter-spacing: .05em !important;
+  text-transform: uppercase !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 14px 24px !important;
+  box-shadow: 0 16px 32px -12px rgba(34, 211, 238, .8), 0 0 40px -15px rgba(109, 94, 252, .7) !important;
+  transition: transform .15s ease, box-shadow .2s ease !important;
+}
+.ruta-empezar:hover, #rutaEmpezar:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 20px 40px -12px rgba(34, 211, 238, 1), 0 0 50px -15px rgba(109, 94, 252, .9) !important;
+}
+.ruta-empezar:active, #rutaEmpezar:active {
+  transform: scale(.97) !important;
+}
+
+/* --- Aviso/alerta colorido --- */
+.ruta-alert {
+  background: linear-gradient(135deg, rgba(251, 191, 36, .15), rgba(245, 158, 11, .15)) !important;
+  border: 1px solid rgba(251, 191, 36, .5) !important;
+  border-radius: 12px !important;
+  color: #fde68a !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 20px -10px rgba(251, 191, 36, .4) !important;
+}
+
+/* --- Modo conducción: HUD más grande y colorido --- */
+.ruta-shell.ruta-conduciendo .ruta-speed {
+  width: 96px !important;
+  height: 96px !important;
+}
+.ruta-shell.ruta-conduciendo .ruta-speed b {
+  font-size: 36px !important;
+}
+
+/* --- Mejora del mapa: bordes redondeados y sombra --- */
+.ruta-map {
+  border-radius: 18px !important;
+  box-shadow: 0 20px 60px -20px rgba(0, 0, 0, .9), 0 0 40px -20px rgba(56, 225, 255, .3) !important;
+  overflow: hidden !important;
+}
+
+/* --- Zoom buttons coloridos --- */
+.ruta-zoom button {
+  background: linear-gradient(135deg, rgba(34, 211, 238, .2), rgba(109, 94, 252, .2)) !important;
+  border: 1px solid rgba(56, 225, 255, .4) !important;
+  color: #7ee7ff !important;
+  font-weight: 700 !important;
+  font-size: 18px !important;
+  backdrop-filter: blur(12px) !important;
+}
+.ruta-zoom button:hover {
+  background: linear-gradient(135deg, rgba(34, 211, 238, .4), rgba(109, 94, 252, .4)) !important;
+  transform: scale(1.1) !important;
+}
+
+/* --- Modo día: ajustes de color --- */
+.ruta-shell[data-tema="dia"] .ruta-search {
+  background: rgba(255, 255, 255, .96) !important;
+  border-color: rgba(20, 35, 55, .18) !important;
+}
+.ruta-shell[data-tema="dia"] .ruta-search input {
+  color: #0e1a2b !important;
+}
+.ruta-shell[data-tema="dia"] .ruta-panel {
+  background: rgba(255, 255, 255, .97) !important;
+  border-color: rgba(20, 35, 55, .14) !important;
+}
+
+/* --- Botón de tráfico en vivo --- */
+.ruta-fab-trafico.activo {
+  background: linear-gradient(135deg, rgba(34, 197, 94, .35), rgba(234, 179, 8, .35)) !important;
+  border-color: rgba(34, 197, 94, .6) !important;
+  color: #86efac !important;
+  box-shadow: 0 0 20px rgba(34, 197, 94, .6) !important;
+}

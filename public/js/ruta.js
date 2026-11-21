@@ -30,6 +30,8 @@
   let halo = null;
   let destino = null;
   let capaAvisos = null;
+  let capaTrafico = null;
+  let traficoActivo = false;
   let capaRuta = null;
   let capaRutaGlow = null;
   let alternativas = [];
@@ -236,8 +238,54 @@
     }).setView([40.4168, -3.7038], 6);
     aplicarTema(temaInicial());
     capaAvisos = L.layerGroup().addTo(mapa);
+    capaTrafico = L.layerGroup().addTo(mapa);
     mapa.on('dragstart', () => { siguiendo = false; });
+    engancharTrafico();
     setTimeout(() => mapa.invalidateSize(), 250);
+  }
+
+  // ------------------------------------------------------------ tráfico en vivo
+  const COLOR_TRAFICO = { fluido: '#22c55e', lento: '#eab308', congestionado: '#f97316', parado: '#ef4444' };
+  async function actualizarTrafico() {
+    if (!traficoActivo || !mapa) return;
+    const c = mapa.getCenter();
+    const b = mapa.getBounds();
+    const bbox = `${b.getWest()},${b.getSouth()},${b.getEast()},${b.getNorth()}`;
+    try {
+      const r = await fetch(`/api/ruta/trafico?lat=${c.lat}&lon=${c.lng}&bbox=${encodeURIComponent(bbox)}`);
+      if (r.status === 204) {
+        avisar('Tráfico no disponible (sin clave API configurada).', 'info', 4000);
+        traficoActivo = false;
+        elTrafico?.setAttribute('aria-pressed', 'false');
+        elTrafico?.classList.remove('activo');
+        return;
+      }
+      const data = await r.json();
+      capaTrafico?.clearLayers();
+      const segs = data.segmentos || [];
+      for (const s of segs) {
+        const color = COLOR_TRAFICO[s.nivel] || '#94a3b8';
+        if (Array.isArray(s.coords) && s.coords.length > 1) {
+          L.polyline(s.coords, { color, weight: 5, opacity: .85, lineCap: 'round' }).addTo(capaTrafico);
+        } else if (Number.isFinite(s.lat) && Number.isFinite(s.lon)) {
+          L.circleMarker([s.lat, s.lon], { radius: 6, color, fillColor: color, fillOpacity: .9 }).addTo(capaTrafico);
+        }
+      }
+      if (segs.length) avisar(`Tráfico: ${segs.length} tramos · ${data.fuente || ''}`, 'info', 2500);
+    } catch (e) {
+      avisar('Error cargando tráfico.', 'warn', 3000);
+    }
+  }
+  // Refrescar tráfico al mover el mapa (con debounce)
+  let traficoTimer = 0;
+  // se engancha cuando el mapa existe
+  function engancharTrafico() {
+    if (!mapa) return;
+    mapa.on('moveend', () => {
+      if (!traficoActivo) return;
+      clearTimeout(traficoTimer);
+      traficoTimer = setTimeout(actualizarTrafico, 1200);
+    });
   }
 
   // ------------------------------------------------------------ rotación
@@ -1082,6 +1130,7 @@
   // pie. Usa la API del navegador si existe y, si no, una capa fija propia.
   const elShell = view.querySelector('.ruta-shell');
   const elFull = $('#rutaFull');
+  const elTrafico = $('#rutaTrafico');
   function pantallaCompletaActiva() {
     return Boolean(document.fullscreenElement || elShell?.classList.contains('ruta-completa'));
   }
@@ -1115,6 +1164,18 @@
     setTimeout(() => mapa?.invalidateSize(), 220);
   }
   elFull?.addEventListener('click', alternarPantallaCompleta);
+  elTrafico?.addEventListener('click', () => {
+    traficoActivo = !traficoActivo;
+    elTrafico.setAttribute('aria-pressed', String(traficoActivo));
+    elTrafico.classList.toggle('activo', traficoActivo);
+    if (!traficoActivo) {
+      capaTrafico?.clearLayers();
+      avisar('Tráfico desactivado.', 'info', 2000);
+    } else {
+      avisar('Cargando tráfico en vivo…', 'info', 2000);
+      actualizarTrafico();
+    }
+  });
   document.addEventListener('fullscreenchange', () => {
     const activa = Boolean(document.fullscreenElement);
     if (!activa && elShell?.classList.contains('ruta-completa') && !document.fullscreenElement) {
