@@ -2673,6 +2673,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   display: none;
 }
 .ruta-3d.activo { display: block; }
+.ruta-shell.ruta-3d-activo { height: 100vh; min-height: 100vh; }
 .ruta-shell.ruta-3d-activo .ruta-map { display: none; }
 .ruta-shell.ruta-3d-activo .ruta-3d { display: block; }
 
@@ -2717,6 +2718,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   pointer-events: none;
 }
 .ruta-ar-canvas.activo { display: block; }
+.ruta-shell.ruta-ar-activo { height: 100vh; min-height: 100vh; }
 .ruta-shell.ruta-ar-activo .ruta-map { display: none; }
 .ruta-shell.ruta-ar-activo .ruta-3d { display: none; }
 .ruta-shell.ruta-ar-activo .ruta-ar-video { display: block; }
