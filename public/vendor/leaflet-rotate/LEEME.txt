@@ -1,0 +1,6 @@
+leaflet-rotate 0.2.8
+https://github.com/Raruto/leaflet-rotate
+Licencia: GPL-3.0 (ver el repositorio original).
+Se sirve desde el propio servidor para que girar el mapa no dependa de otro CDN
+ni de la red. Se carga antes de crear el mapa porque parchea la conversión de
+coordenadas del ratón/tacto (si se cargara después, los clics caerían mal).

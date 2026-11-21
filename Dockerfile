@@ -1,7 +1,25 @@
-# Imagen de producción para Render (y cualquier host con Docker).
+# Etapa 1: pruebas obligatorias. Si alguna falla, la imagen no se construye y
+# el despliegue (Render, Oracle o cualquier Docker) se cancela antes de publicar.
+FROM node:22.23-slim AS test
+
+ENV NODE_ENV=test
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Chromium y sus librerías para la prueba móvil de la tienda.
+RUN npx playwright install --with-deps chromium
+
+COPY . .
+
+# Una prueba a la vez: así también cabe en servidores pequeños (Oracle 1 GB).
+RUN node --test --test-concurrency=1 tests/*.test.mjs
+
+# Etapa 2: imagen de producción para Render (y cualquier host con Docker).
 # Node 22.23 coincide con la versión usada en desarrollo y ya trae `node:sqlite`
 # estable, que es lo que usan el foro y los tutoriales.
-FROM node:22.23-slim
+FROM node:22.23-slim AS production
 
 ENV NODE_ENV=production
 WORKDIR /app

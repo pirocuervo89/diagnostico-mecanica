@@ -65,6 +65,15 @@
       }
       @media (max-width: 420px) { .push-talk { width: 88px; height: 88px; } }
 
+      /* Botón compacto del chat: el dictado real necesita un botón visible. */
+      .voz-mic { border-color: rgba(245, 165, 36, .45); }
+      .voz-mic .ic { width: 16px; height: 16px; }
+      .voz-mic.grabando {
+        border-color: #ef4444; color: #fecaca; background: rgba(239, 68, 68, .18);
+        animation: pushTalkPulse 1.2s ease-in-out infinite;
+      }
+      .voz-mic .push-talk-time { font-variant-numeric: tabular-nums; font-size: 11px; }
+
       .push-talk-bar {
         position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
         z-index: 9000; display: flex; align-items: center; gap: 10px;
@@ -288,6 +297,33 @@
     if (estado === 'pidiendo' || estado === 'enviando') return;
     bloqueado = true;
     empezar();
+  }
+
+  // El botón del micrófono se perdió del HTML (solo quedaba el estilo
+  // .voz-mic): se crea aquí, dentro de la barra de voz, para que el dictado
+  // real por MediaRecorder tenga por fin un botón que lo dispare.
+  function crearBoton() {
+    if (document.getElementById('vozMic')) return;
+    const barraVoz = document.querySelector('.voz-bar');
+    const form = $('chatForm');
+    if (!barraVoz && !form) { setTimeout(crearBoton, 300); return; }
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'vozMic';
+    btn.className = 'voz-chip voz-mic';
+    btn.setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-label', 'Hablar en vez de escribir');
+    btn.title = 'Mantén pulsado y habla; suelta para enviar';
+    btn.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-mic"></use></svg><span class="push-talk-text">Hablar</span><span class="push-talk-time" hidden>0:00</span>';
+    if (barraVoz) barraVoz.insertBefore(btn, barraVoz.firstChild);
+    else form.parentNode.insertBefore(btn, form);
+    pintar(false);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(crearBoton, 80));
+  } else {
+    setTimeout(crearBoton, 80);
   }
 
   // ------------------------------------------------------------ interacción

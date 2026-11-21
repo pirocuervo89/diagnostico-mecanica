@@ -252,7 +252,9 @@
       if (speakingBubble !== bubble) return; // se ha cancelado
       const utter = new SpeechSynthesisUtterance(trozos[i]);
       utter.lang = lang;
-      utter.voice = voice || null;
+      // Un motor con voces rotas no puede tumbar la conversación: si la voz
+      // elegida no vale, se sigue con la del sistema.
+      try { utter.voice = voice || null; } catch (_e) { /* voz no válida */ }
       // Bajar el tono a 0,58 convertía la voz de Google TTS en un dibujo
       // animado: forzado y difícil de entender. Casi natural, y el tono grave
       // solo se insinúa cuando de verdad hay una voz masculina.
@@ -261,7 +263,7 @@
       utter.volume = 1;
       utter.onend = () => decir(i + 1);
       utter.onerror = () => decir(i + 1);
-      synth.speak(utter);
+      try { synth.speak(utter); } catch (_e) { terminar(); }
     };
     decir(0);
   }
@@ -579,7 +581,7 @@
   // ------------------------------------------------- modo llamada ("Di Maya")
 
   const STORE_LLAMADA = 'dm_voz_llamada';
-  const SALUDO = 'Hola, soy Maya. ¿Cuál es tu problema?';
+  const SALUDO = 'Hola, soy Maya. ¿Qué quieres hacer?';
   let llamadaActiva = false;
   let wakeRec = null;
   let dictando = false;
@@ -670,6 +672,11 @@
   function hablarTexto(texto) {
     if (!canRead || !texto) return;
     stopSpeaking();
+    // Se marca «hablando» ya, antes de que el motor publique sus voces: el modo
+    // conversación consulta esta señal para no abrir el micrófono mientras
+    // suena el saludo (si no, Maya se oye a sí misma y se envía su propio texto).
+    hablandoSenal = true;
+    pintarSenal();
     // Una sola locución: el saludo no depende del troceo en frases. Si el motor
     // aún no ha publicado voces, se espera un poco antes de tirar del audio del
     // servidor (así se usa la voz del sistema cuando existe).
@@ -682,7 +689,7 @@
       const { voice, male } = pickSpanishVoice();
       const u = new SpeechSynthesisUtterance(texto);
       u.lang = lang;
-      u.voice = voice || null;
+      try { u.voice = voice || null; } catch (_e) { /* voz no válida */ }
       u.pitch = male ? 0.9 : 1;
       u.rate = 1.02;
       u.volume = 1;
@@ -699,7 +706,9 @@
       hablarTexto._t = setTimeout(cerrar, 20000);
       hablandoSenal = true;
       pintarSenal();
-      synth.speak(u);
+      // Si el motor falla al arrancar, se cierra el estado y el micrófono puede
+      // tomar el turno; nunca se queda la app esperando una voz que no llega.
+      try { synth.speak(u); } catch (_e) { cerrar(); }
     };
     decir(0);
   }
@@ -727,7 +736,7 @@
     // Si la app ya había escrito su bienvenida, se sustituye por la de Maya:
     // un solo saludo y con su nombre.
     const box = document.getElementById('chatBox');
-    const yaSaluda = /qu[eé] le pasa a tu coche|soy maya/i;
+    const yaSaluda = /qu[eé] le pasa a tu coche|qu[eé] quieres hacer|soy maya/i;
     const previa = box && yaSaluda.test(box.innerText || '')
       ? [...box.querySelectorAll('.bubble.assistant')].find(b => yaSaluda.test(b.innerText || ''))
       : null;
@@ -788,10 +797,17 @@
     setTimeout(() => { clearInterval(vigilante); reanudar(); }, 22000);
   }
 
-  async function abrirEscucha() {
+  async function abrirEscucha(directo = false) {
     if (!llamadaActiva || dictando || !canHear) return;
     const permitido = await ensureMicPermission();
     if (!permitido) { pararLlamada(); return; }
+    if (directo) {
+      // Maya acaba de preguntar: lo que conteste el usuario es la consulta, sin
+      // tener que volver a llamarla por su nombre delante del coche.
+      dictando = true;
+      const campo = document.getElementById('chatInput');
+      if (campo) { campo.value = ''; campo.placeholder = 'Te escucho…'; }
+    }
     try { wakeRec?.abort?.(); } catch (_e) {}
     wakeRec = new Recognition();
     wakeRec.lang = lang;
@@ -803,8 +819,17 @@
     // abierto: si el permiso está bloqueado no se puede decir que te escucha.
     // Si el micrófono arranca de verdad, el aviso de «bloqueado» que pudiera
     // haber quedado en pantalla ya no tiene sentido: se retira.
-    wakeRec.onstart = () => { escuchando = true; pintarSenal(); window.MicPermiso?.ocultar?.(); };
-    wakeRec.onaudiostart = () => { escuchando = true; pintarSenal(); window.MicPermiso?.ocultar?.(); };
+    // El aviso de «acepta el permiso» ya no tiene sentido cuando el micrófono
+    // está abierto: se retira en el acto para no dejar un cartel encima del chat.
+    const microAbierto = () => {
+      escuchando = true;
+      pintarSenal();
+      window.MicPermiso?.ocultar?.();
+      const aviso = document.getElementById('vozHint');
+      if (aviso) { clearTimeout(hint._t); aviso.hidden = true; }
+    };
+    wakeRec.onstart = microAbierto;
+    wakeRec.onaudiostart = microAbierto;
 
     wakeRec.onresult = event => {
       let trozo = '';
@@ -843,7 +868,15 @@
       escuchando = false;
       // Sin repintar: entre que se cierra y se reabre el micrófono el marco se
       // ponía gris y parpadeaba cada pocos segundos.
-      if (llamadaActiva && !dictando) setTimeout(() => abrirEscucha(), 500);
+      if (!llamadaActiva) return;
+      if (!dictando) { setTimeout(() => abrirEscucha(), 500); return; }
+      // Se abrió para conversar y el motor cerró el micro sin captar nada: se
+      // reabre para que el modo voz no se quede mudo esperando un toque.
+      const campo = document.getElementById('chatInput');
+      if (!campo || !campo.value.trim()) {
+        dictando = false;
+        setTimeout(() => abrirEscucha(), 500);
+      }
     };
     wakeRec.onerror = event => {
       if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(event.error)) {
@@ -854,8 +887,31 @@
     try { wakeRec.start(); } catch (_e) { /* ya estaba en marcha */ }
   }
 
-  async function activarLlamada() {
+  // Espera a que Maya termine de hablar (o de leer) antes de devolver el turno
+  // al micrófono. `hablandoSenal` cubre el TTS; el reloj de seguridad evita
+  // quedarse esperando si el motor no avisa nunca de que ha terminado.
+  function esperarFinVoz(alTerminar, maxMs = 30000) {
+    const inicio = Date.now();
+    const esperar = () => {
+      if (!llamadaActiva) return;
+      const hablando = hablandoSenal || Boolean(synth && (synth.speaking || synth.pending)) || Boolean(audioActual);
+      if (!hablando || Date.now() - inicio > maxMs) {
+        // Un respiro de medio segundo: el micro no debe capturar el final de la
+        // última palabra ni el eco de la habitación.
+        setTimeout(() => { if (llamadaActiva) alTerminar(); }, 550);
+        return;
+      }
+      setTimeout(esperar, 180);
+    };
+    setTimeout(esperar, 250);
+  }
+
+  async function activarLlamada(opciones = {}) {
+    const directo = opciones.directo === true;
     if (!canHear) { hint('Este navegador no permite escuchar. Escríbele a Maya.', 7000); return; }
+    // El mismo gesto puede llegar por dos caminos (barra inferior y portada):
+    // se queda con el primero y no se ponen dos micrófonos a competir.
+    if (llamadaActiva) { pintarSenal(); return; }
     llamadaActiva = true;
     store.set(STORE_LLAMADA, '1');
     autoRead = true;
@@ -870,9 +926,15 @@
     // Doble pulso suave: confirma que Maya ya escucha sin mirar la pantalla.
     vibrar([18, 80, 18]);
     ultimaVibracion = Date.now();
-    await abrirEscucha();
+    // Con el saludo aún sonando, el micrófono espera su turno: si se abre antes,
+    // Maya se oye a sí misma y manda su propia presentación como consulta.
+    if (hablandoSenal) {
+      esperarFinVoz(() => abrirEscucha(directo));
+    } else {
+      await abrirEscucha(directo);
+    }
     pintarSenal();
-    hint('Maya está escuchando. Llámala por su nombre.', 5000);
+    hint(directo ? 'Te escucho. Dime qué le pasa al coche.' : 'Maya está escuchando. Llámala por su nombre.', 5000);
   }
 
   function pararLlamada() {
@@ -885,15 +947,32 @@
     soltarPantallaEncendida();
     pintarSenal();
     setBotonLlamada(false);
+    stopSpeaking();
     hint('Maya deja de escuchar.', 2500);
+  }
+
+  // Al entrar en el chat, Maya saluda y abre el micrófono sola. El saludo va
+  // primero y el micro espera a que termine, para no oírse a sí misma.
+  function abrirChatVoz() {
+    const arrancar = () => {
+      if (document.querySelector('.view.active')?.id !== 'view-chat') return;
+      saludarMaya(true);
+      if (canHear) activarLlamada({ directo: true });
+    };
+    arrancar();
+    // La vista puede cambiar en otro listener del mismo clic: se reintenta una
+    // sola vez, y el guardia de `activarLlamada` evita duplicar el micrófono.
+    setTimeout(arrancar, 120);
   }
 
   function initLlamada() {
     añadirBotonLlamada();
-    // Saludo al entrar en el chat, tanto por menú como por la barra inferior.
-    document.querySelectorAll('[data-view="chat"]').forEach(b => {
-      b.addEventListener('click', () => saludarMaya(true));
-    });
+    // Saludo y escucha al entrar en el chat, tanto por la barra inferior como
+    // por el menú (que crea sus propios botones después): se escucha el clic en
+    // cualquier botón que lleve al chat, aunque se añada más tarde.
+    document.addEventListener('click', event => {
+      if (event.target instanceof Element && event.target.closest('[data-view="chat"]')) abrirChatVoz();
+    }, true);
     if (document.querySelector('.view.active')?.id === 'view-chat') {
       setTimeout(() => saludarMaya(true), 150);
     }
@@ -911,6 +990,12 @@
     buildBar();
     addMicButton();
     initLlamada();
+    // El micrófono pertenece al chat: al cambiar a GPS, tienda o garaje se
+    // cierra. Si no, seguía grabando en segundo plano (batería, privacidad y
+    // riesgo de mandar una conversación del taller como consulta).
+    document.addEventListener('viewchange', event => {
+      if (event.detail?.name !== 'chat' && llamadaActiva) pararLlamada();
+    });
     scanBubbles();
     const box = document.getElementById('chatBox');
     if (box) {
@@ -948,7 +1033,8 @@
   // Voz para el resto de la app (avisos de ruta, radares): usa el mismo motor
   // del sistema o la voz del servidor cuando el móvil no trae ninguna.
   window.MayaHablar = (texto = '') => hablarTexto(String(texto).slice(0, 300));
-  window.MayaEscuchar = () => activarLlamada();
+  // La portada pregunta y escucha la respuesta directamente (sin «Maya»).
+  window.MayaEscuchar = () => activarLlamada({ directo: true });
 
   // Sin dictado: si algo llama aquí, se abre el teclado del chat.
   window.VozHablar = () => {

@@ -42,7 +42,6 @@
   <link rel="stylesheet" href="/css/omega.css?v=20261119a">
   <link rel="stylesheet" href="/css/aurora.css?v=20261119a">
   <link rel="stylesheet" href="/css/halo.css?v=20261120b">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="/css/ruta.css?v=20261120k">
   <link rel="stylesheet" href="/css/movil-ligero.css?v=20261121a">
   <meta property="og:type" content="website">  <meta property="og:site_name" content="Diagnóstico y Mecánica">
@@ -69,6 +68,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 </head>
 <body>
+<script>
+(function () {
+  // En Android, si la app está instalada, se abre ella (va mucho mejor que la
+  // web en el móvil). Si no lo está, el navegador sigue en la web gracias al
+  // fallback. Solo una vez por pestaña para no crear un bucle, y nunca en
+  // local ni con ?noapp=1.
+  try {
+    if (location.protocol !== 'https:') return;
+    var host = location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1' || /\.local$/.test(host)) return;
+    if (/[?&]noapp=1/.test(location.search)) return;
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) return;
+    if (!/Android/i.test(navigator.userAgent)) return;
+    if (sessionStorage.getItem('dm_app_abierta')) return;
+    sessionStorage.setItem('dm_app_abierta', '1');
+    var destino = location.host + location.pathname + location.search + location.hash;
+    location.href = 'intent://' + destino +
+      '#Intent;scheme=https;package=com.diagnosticomecanica.app;S.browser_fallback_url=' +
+      encodeURIComponent(location.href) + ';end';
+  } catch (_e) { /* sin app o sin intent: se queda en la web */ }
+})();
+</script>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KFM5KW36"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -1906,7 +1927,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
       </div>
 
       <div id="chatBox" class="chat-box" role="log" aria-live="polite" aria-label="Conversación con el asistente técnico">
-        <div class="bubble assistant"><p>Hola, soy Maya. ¿Cuál es tu problema?</p><p>Cuéntamelo como se lo dirías a un mecánico de confianza: qué notas, cuándo pasa y desde cuándo. Si prefieres, pulsa el micrófono y habla.</p></div>
+        <div class="bubble assistant"><p>Hola, soy Maya. ¿Qué quieres hacer?</p><p>Puedo diagnosticar una avería, explicarte un código, buscarte una ruta o enseñarte recambios. Cuéntamelo como se lo dirías a un mecánico de confianza, o mantén pulsado el micrófono y habla.</p></div>
       </div>
       <button id="chatScrollBtn" class="chat-scroll-btn" type="button" aria-label="Ir al último mensaje" title="Ir al último mensaje" hidden>
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
@@ -2408,13 +2429,14 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <script src="/js/obd.js?v=20261105c"></script>
 <script src="/js/tutorials.js?v=20261026d"></script>
 
-<script src="/js/voz.js?v=20261120n"></script>
+<script src="/js/voz.js?v=20261121d"></script>
+<script src="/js/dictado.js?v=20261121a"></script>
 <script src="/js/micro-permiso.js?v=20261120b"></script>
 
 <script src="/js/visual-glow.js?v=20261116c"></script>
-<script src="/js/tienda.js?v=20261120b"></script>
+<script src="/js/tienda.js?v=20261121b"></script>
 <script src="/js/planes.js?v=20261113a"></script>
-<script src="/js/app.js?v=20261120o"></script>
+<script src="/js/app.js?v=20261121b"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>
@@ -2468,7 +2490,30 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
   });
 })();
 </script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+  // Leaflet (140 KB) solo se descarga al abrir el GPS. Antes llegaba en cada
+  // visita y en móvil retrasaba y calentaba la página sin necesidad.
+  (function () {
+    var cargando = false;
+    function cargarRuta() {
+      if (cargando || window.L) return;
+      cargando = true;
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(css);
+      var s = document.createElement('script');
+      s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      s.onload = function () { cargando = false; };
+      s.onerror = function () { cargando = false; };
+      document.body.appendChild(s);
+    }
+    document.addEventListener('viewchange', function (e) {
+      if (e.detail && e.detail.name === 'ruta') cargarRuta();
+    });
+    if ((location.hash || '').replace('#', '') === 'ruta') cargarRuta();
+  })();
+  </script>
   <script src="/js/ruta.js?v=20261120o"></script>
   <script src="/js/maya-incidente.js?v=20261120c"></script></body>
 </html>

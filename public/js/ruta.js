@@ -17,6 +17,7 @@
   const elMicro = $('#rutaMicro');
   const elInfo = $('#rutaInfo');
   const elEta = $('#rutaEta');
+  let elBrujula = null;
 
   let mapa = null;
   let capaTiles = null;
@@ -49,10 +50,18 @@
   let destinoCoord = null;
   let fueraRuta = 0;
   let ultimoRecalculo = 0;
+  let vozActiva = true;
+  let desvioActual = 0;
+  let rotacion = false;      // plugin de giro cargado
+  let rumboAuto = true;      // mapa orientado al rumbo del coche
+  let giro = 0;              // grados que lleva girado el mapa
+  let animacionGiro = 0;
 
   const CLAVE_NOCHE = 'dm_ruta_noche';
+  const CLAVE_VOZ = 'dm_ruta_voz';
   const CLAVE_OBD = 'dm_obd_ultimo';
   const CLAVE_POS = 'dm_ruta_ultima';
+  const CLAVE_RUMBO = 'dm_ruta_rumbo';
 
   // ------------------------------------------------------------ utilidades
   const metros = m => (m >= 1000 ? `${(m / 1000).toFixed(m >= 10000 ? 0 : 1)} km` : `${Math.round(m)} m`);
@@ -80,18 +89,20 @@
   function instruccion(s) {
     if (!s) return 'Continúa';
     const m = s.modifier || '';
+    const via = s.ref ? ` por la ${s.ref}` : '';
+    const salida = Number.isFinite(s.exit) ? ` (salida ${s.exit})` : '';
     const nombre = s.name ? ` en ${s.name}` : '';
-    if (s.type === 'depart') return `Sal${nombre}`;
+    if (s.type === 'depart') return `Sal${via || nombre}`;
     if (s.type === 'arrive') return 'Llegas a tu destino';
-    if (s.type === 'roundabout' || s.type === 'rotary') return `Toma la rotonda${nombre}`;
-    if (s.type === 'merge') return `Incorpórate${nombre}`;
-    if (s.type === 'fork') return `Coge el desvío ${m === 'left' ? 'izquierdo' : 'derecho'}${nombre}`;
+    if (s.type === 'roundabout' || s.type === 'rotary') return `Toma la rotonda${salida}${nombre}`;
+    if (s.type === 'merge') return `Incorpórate${via}${nombre}`;
+    if (s.type === 'fork') return `Coge el desvío ${m === 'left' ? 'izquierdo' : 'derecho'}${via}${nombre}`;
     if (s.type === 'end of road') return `Al final de la vía, ${m === 'left' ? 'izquierda' : 'derecha'}${nombre}`;
-    if (s.type === 'continue' || s.type === 'new name') return `Continúa${nombre}`;
+    if (s.type === 'continue' || s.type === 'new name') return `Continúa${via}${nombre}`;
     const giro = m === 'left' || m === 'slight left' || m === 'sharp left'
       ? 'a la izquierda'
       : m === 'right' || m === 'slight right' || m === 'sharp right' ? 'a la derecha' : 'recto';
-    return `Gira ${giro}${nombre}`;
+    return `Gira ${giro}${via}${nombre}`;
   }
 
   function flecha(s) {
@@ -124,7 +135,25 @@
   }
 
   function decir(texto) {
+    if (!vozActiva) return;
     try { window.MayaHablar?.(texto); } catch (_e) { /* opcional */ }
+  }
+
+  function pintarBotonVoz(activa) {
+    const boton = view.querySelector('#rutaVoz');
+    if (!boton) return;
+    boton.textContent = activa ? '🔊' : '🔇';
+    boton.setAttribute('aria-pressed', String(activa));
+    boton.title = activa ? 'Silenciar las indicaciones' : 'Activar las indicaciones por voz';
+    boton.setAttribute('aria-label', boton.title);
+  }
+
+  function alternarVoz() {
+    vozActiva = !vozActiva;
+    try { localStorage.setItem(CLAVE_VOZ, vozActiva ? '1' : '0'); } catch (_e) { /* nada */ }
+    pintarBotonVoz(vozActiva);
+    if (vozActiva) decir('Voz activada');
+    else avisar('Indicaciones silenciadas.', 'info', 3000);
   }
 
   function avisar(texto, tono = 'info', ms = 6000) {
@@ -138,7 +167,7 @@
 
   // ------------------------------------------------------------ mapa y tema
   function cuandoLeaflet(cb, intentos = 0) {
-    if (window.L) { cb(); return; }
+    if (window.L) { cargarRotacion().then(ok => { rotacion = ok; cb(); }); return; }
     if (intentos > 40) {
       elMapa.innerHTML = '<div class="ruta-sin-mapa"><b>No se pudo cargar el mapa</b><a href="https://www.google.com/maps" target="_blank" rel="noopener">Abrir en Google Maps</a></div>';
       return;
@@ -186,12 +215,108 @@
 
   function initMapa() {
     if (mapa || !window.L) return;
-    mapa = L.map(elMapa, { zoomControl: false, attributionControl: true, preferCanvas: true })
-      .setView([40.4168, -3.7038], 6);
+    mapa = L.map(elMapa, {
+      zoomControl: false,
+      attributionControl: true,
+      preferCanvas: true,
+      // Giro del mapa: con el plugin cargado, arrastrar y tocar sigue cayendo
+      // en el sitio correcto aunque el mapa esté girado. El rumbo arriba es
+      // lo que de verdad hace útil un navegador en el coche.
+      rotate: rotacion,
+      bearing: 0,
+      rotateControl: false,
+      touchRotate: false,
+      shiftKeyRotate: false
+    }).setView([40.4168, -3.7038], 6);
     aplicarTema(temaInicial());
     capaAvisos = L.layerGroup().addTo(mapa);
     mapa.on('dragstart', () => { siguiendo = false; });
     setTimeout(() => mapa.invalidateSize(), 250);
+  }
+
+  // ------------------------------------------------------------ rotación
+  // leaflet-rotate se sirve desde /vendor (no otro CDN) y se carga antes de
+  // crear el mapa: parchea la conversión ratón→coordenadas, que es justo lo
+  // que se rompe cuando giras un mapa con CSS.
+  function cargarRotacion() {
+    if (window.L?.Map?.prototype?.setBearing) return Promise.resolve(true);
+    if (cargarRotacion.promesa) return cargarRotacion.promesa;
+    cargarRotacion.promesa = new Promise(resolver => {
+      const s = document.createElement('script');
+      s.src = '/vendor/leaflet-rotate/leaflet-rotate.js';
+      s.async = true;
+      s.onload = () => resolver(Boolean(window.L?.Map?.prototype?.setBearing));
+      s.onerror = () => resolver(false);
+      document.head.appendChild(s);
+    });
+    return cargarRotacion.promesa;
+  }
+
+  function normalizarGrados(g) {
+    return ((g % 360) + 540) % 360 - 180;
+  }
+
+  // La aguja marca dónde queda el norte y las chinchetas se enderezan solas.
+  function pintarBrujula() {
+    if (!elBrujula) return;
+    elBrujula.style.setProperty('--ruta-aguja', `${giro.toFixed(1)}deg`);
+    elBrujula.classList.toggle('activa', rumboAuto);
+    elBrujula.setAttribute('aria-pressed', String(rumboAuto));
+    elBrujula.title = rumboAuto
+      ? 'Rumbo arriba · toca para poner el norte arriba'
+      : 'Norte arriba · toca para seguir tu rumbo';
+    elBrujula.setAttribute('aria-label', elBrujula.title);
+    view.querySelector('.ruta-shell')?.style.setProperty('--ruta-contra', `${(-giro).toFixed(1)}deg`);
+  }
+
+  function aplicarGiro(grados, opciones = {}) {
+    if (!rotacion || !mapa?.setBearing) return;
+    const objetivo = normalizarGrados(grados);
+    const desde = mapa.getBearing();
+    const delta = normalizarGrados(objetivo - desde);
+    giro = objetivo;
+    cancelAnimationFrame(animacionGiro);
+    if (opciones.inmediato || Math.abs(delta) < 1) {
+      mapa.setBearing(objetivo);
+      pintarBrujula();
+      return;
+    }
+    const inicio = performance.now();
+    const dur = Math.min(420, 140 + Math.abs(delta) * 2.6);
+    const paso = ahora => {
+      const t = Math.min(1, (ahora - inicio) / dur);
+      const suave = t < .5 ? 2 * t * t : 1 - ((-2 * t + 2) ** 2) / 2;
+      mapa.setBearing(desde + delta * suave);
+      pintarBrujula();
+      if (t < 1) animacionGiro = requestAnimationFrame(paso);
+      else mapa.setBearing(objetivo);
+    };
+    animacionGiro = requestAnimationFrame(paso);
+  }
+
+  function seguirRumbo(forzar = false) {
+    if (!rumboAuto || !rotacion || !mapa) return;
+    if (!navegando && !forzar) return;
+    if (!Number.isFinite(rumbo)) return;
+    if (Math.abs(normalizarGrados(-rumbo - mapa.getBearing())) < 3) return;
+    aplicarGiro(-rumbo);
+  }
+
+  function alternarRumbo() {
+    if (!rotacion) {
+      avisar('Este navegador no puede girar el mapa. Actualízalo para tener el rumbo arriba.', 'aviso', 6000);
+      return;
+    }
+    rumboAuto = !rumboAuto;
+    try { localStorage.setItem(CLAVE_RUMBO, rumboAuto ? '1' : '0'); } catch (_e) { /* sin almacenamiento */ }
+    pintarBrujula();
+    if (rumboAuto) {
+      decir('Mapa al rumbo');
+      aplicarGiro(-rumbo);
+    } else {
+      decir('Norte arriba');
+      aplicarGiro(0);
+    }
   }
 
   // ------------------------------------------------------------ marcadores
@@ -214,7 +339,30 @@
     return L.divIcon({ className: 'ruta-destino', html: '<span></span>', iconSize: [26, 26], iconAnchor: [13, 24] });
   }
 
-  const ICONO_AVISO = { radar: '🚨', camara: '📷', obra: '🚧', senal: '🚦', peligro: '⚠️' };
+  const ICONO_AVISO = {
+    radar: '🚨', camara: '📷', obra: '🚧', senal: '🚦', peligro: '⚠️',
+    accidente: '💥', retencion: '🚗', policia: '👮', vehiculo: '🛠️', objeto: '🪨', clima: '🌧️'
+  };
+
+  // Radio de aviso por tipo: un accidente se avisa antes que un semáforo.
+  const RADIO_AVISO = { senal: 180, objeto: 300, vehiculo: 400, obra: 420, peligro: 450, accidente: 700, policia: 650, retencion: 500, clima: 700 };
+
+  const TIPOS_REPORTE = [
+    ['accidente', '💥', 'Accidente'],
+    ['retencion', '🚗', 'Retención'],
+    ['obra', '🚧', 'Obras'],
+    ['policia', '👮', 'Control'],
+    ['peligro', '⚠️', 'Peligro'],
+    ['vehiculo', '🛠️', 'Avería']
+  ];
+
+  function hace(ms) {
+    const min = Math.max(0, Math.round(ms / 60000));
+    if (min < 1) return 'ahora mismo';
+    if (min < 60) return `hace ${min} min`;
+    const h = Math.floor(min / 60);
+    return `hace ${h} h`;
+  }
 
   function iconoAviso(a) {
     const etiqueta = a.maxspeed ? String(a.maxspeed).replace(/[^0-9]/g, '') : ICONO_AVISO[a.kind] || '⚠️';
@@ -286,10 +434,26 @@
       halo.setRadius(Math.min(accuracy || 25, 200));
     }
     girarCoche(yo.getElement(), rumbo);
+    // Rumbo arriba: el mapa gira con el coche. Solo con velocidad suficiente
+    // para que el temblor del GPS no maree el mapa parado en un semáforo.
+    if (rumboAuto && navegando && velocidad > 6) seguirRumbo();
 
-    if (siguiendo || navegando) mapa.setView([lat, lon], navegando ? 17 : 16, { animate: true });
-    if (navegando) seguirRuta(lat, lon);
+    if (navegando) {
+      seguirRuta(lat, lon);
+      // Zoom según velocidad: de cerca en ciudad, abierto en autovía, sin que
+      // el usuario tenga que tocar el mapa mientras conduce.
+      if (siguiendo) mapa.setView([lat, lon], zoomPorVelocidad(velocidad), { animate: true });
+    } else if (siguiendo) {
+      mapa.setView([lat, lon], 16, { animate: true });
+    }
     vigilarAvisos(lat, lon);
+  }
+
+  function zoomPorVelocidad(v) {
+    if (v < 25) return 18;
+    if (v < 60) return 17;
+    if (v < 100) return 16;
+    return 15;
   }
 
   function errorGps(err) {
@@ -487,14 +651,26 @@
 
   function alternarNavegacion() {
     navegando = !navegando;
+    elShell?.classList.toggle('ruta-conduciendo', navegando);
     if (navegando) {
       siguiendo = true;
       paso = 0;
+      // Rumbo arriba al conducir, salvo que lo hayas dejado en norte a mano.
+      try { rumboAuto = localStorage.getItem(CLAVE_RUMBO) !== '0'; } catch (_e) { rumboAuto = true; }
+      pintarBrujula();
+      // De noche el mapa oscuro se lee mejor en el coche, pero solo se cambia
+      // si el usuario no había elegido tema a mano.
+      try { if (localStorage.getItem(CLAVE_NOCHE) === null) aplicarTema(true); } catch (_e) { /* nada */ }
       avisar('Navegación iniciada. Te aviso de radares, obras y averías.', 'ok', 5000);
-      if (ultimaPos) mapa.setView([ultimaPos.lat, ultimaPos.lon], 17);
+      if (ultimaPos) mapa.setView([ultimaPos.lat, ultimaPos.lon], zoomPorVelocidad(velocidad));
+      seguirRumbo(true);
       decir('Navegación iniciada. Nos vamos.');
       revisarOBD(true);
     } else {
+      // Al parar se vuelve al norte: un mapa torcido sin ruta activa confunde.
+      rumboAuto = false;
+      aplicarGiro(0);
+      pintarBrujula();
       decir('Navegación detenida');
       avisar('Navegación detenida.', 'info', 3000);
     }
@@ -511,9 +687,10 @@
     return total;
   }
 
-  // Metros entre el coche y la línea de la ruta. Si se separa de forma
-  // sostenida, el usuario se ha desviado y hay que trazar otra.
-  function distanciaARuta(lat, lon) {
+  // Metros de cualquier punto a la línea de la ruta: sirve para saber si el
+  // coche se ha desviado y para no avisar de un accidente que no te pilla de
+  // paso (Waze avisa de lo que hay en tu camino, no del vecindario entero).
+  function distanciaPuntoARuta(lat, lon) {
     const pts = rutaActiva()?.geometry || [];
     if (pts.length < 2) return 0;
     const rad = Math.PI / 180;
@@ -531,6 +708,10 @@
       if (d < mejor) mejor = d;
     }
     return mejor;
+  }
+
+  function distanciaARuta(lat, lon) {
+    return distanciaPuntoARuta(lat, lon);
   }
 
   async function recalcular(lat, lon) {
@@ -561,6 +742,7 @@
     const s = ruta?.steps[paso];
     if (!s) return;
     const desvio = distanciaARuta(lat, lon);
+    desvioActual = desvio;
     if (navegando) {
       fueraRuta = desvio > 60 ? fueraRuta + 1 : 0;
       if (fueraRuta >= 2) { fueraRuta = 0; recalcular(lat, lon); }
@@ -605,11 +787,7 @@
         .map(a => ({ lat: a.lat, lon: a.lon, kmh: parseInt(String(a.maxspeed).match(/(\d+)/)?.[1] || '', 10) || 0 }))
         .filter(l => l.kmh > 0);
       capaAvisos.clearLayers();
-      avisos.filter(a => a.kind !== 'limite').forEach(a => {
-        L.marker([a.lat, a.lon], { icon: iconoAviso(a), title: `${a.kind}${a.maxspeed ? ` ${a.maxspeed}` : ''}` })
-          .bindPopup(`${a.label}${a.maxspeed ? ` · ${a.maxspeed}` : ''}${a.name ? ` · ${a.name}` : ''}`)
-          .addTo(capaAvisos);
-      });
+      avisos.filter(a => a.kind !== 'limite').forEach(pintarAviso);
       const visibles = avisos.filter(a => a.kind !== 'limite');
       if (elInfo) {
         elInfo.textContent = visibles.length
@@ -624,16 +802,22 @@
     const pendientes = avisos.filter(a => !avisados.has(a.id));
     for (const a of pendientes) {
       const d = distancia(lat, lon, a.lat, a.lon);
-      const radio = a.kind === 'senal' ? 180 : a.kind === 'radar' ? 700 : 450;
+      const radio = a.kind === 'radar' ? 700 : (RADIO_AVISO[a.kind] || 450);
       if (d > radio) continue;
+      // Con ruta activa solo se avisa de lo que está en el corredor de la ruta.
+      if (navegando && rutaActiva() && distanciaPuntoARuta(a.lat, a.lon) > 160) continue;
       avisados.add(a.id);
       const texto = a.kind === 'radar'
         ? `Radar a ${metros(d)}${a.maxspeed ? `, límite ${a.maxspeed}` : ''}`
         : `${a.label} a ${metros(d)}`;
       avisar(texto, a.kind === 'radar' ? 'radar' : 'aviso', 9000);
-      pitido(a.kind === 'radar' ? 980 : 700);
-      try { navigator.vibrate?.([60, 40, 60]); } catch (_e) {}
-      decir(texto);
+      // Sin navegación activa no se habla ni se pita: solo se deja el cartel,
+      // para no interrumpir al que está consultando el mapa parado.
+      if (navegando) {
+        pitido(a.kind === 'radar' ? 980 : 700);
+        try { navigator.vibrate?.([60, 40, 60]); } catch (_e) {}
+        decir(texto);
+      }
     }
   }
 
@@ -692,6 +876,149 @@
     reconocimiento.onend = () => { reconocimiento = null; };
     try { reconocimiento.start(); } catch (_e) { avisar('No se pudo abrir el micrófono.', 'aviso', 5000); }
   }
+
+  // ------------------------------------------------- avisos de la comunidad
+  function popupAviso(a) {
+    const comunidad = a.origen === 'comunidad';
+    const edad = a.creado ? hace(Date.now() - a.creado) : '';
+    return `<div class="ruta-popup">
+      <b>${a.label || 'Aviso'}${a.maxspeed ? ` · ${a.maxspeed}` : ''}</b>
+      ${a.name ? `<small>${a.name}</small>` : ''}
+      <small>${comunidad ? 'Aviso de usuario, sin verificar' : 'OpenStreetMap'}${edad ? ` · ${edad}` : ''}</small>
+      ${comunidad ? `<button type="button" class="ruta-confirmar" data-confirmar="${a.id}">Sigue ahí (${a.confirmaciones || 1})</button>` : ''}
+    </div>`;
+  }
+
+  function pintarAviso(a) {
+    if (!capaAvisos) return null;
+    return L.marker([a.lat, a.lon], { icon: iconoAviso(a), title: a.label || 'Aviso' })
+      .bindPopup(popupAviso(a))
+      .addTo(capaAvisos);
+  }
+
+  function montarReporte() {
+    const hud = view.querySelector('.ruta-hud');
+    if (!hud || hud.querySelector('#rutaReportar')) return;
+    const boton = document.createElement('button');
+    boton.id = 'rutaReportar';
+    boton.type = 'button';
+    boton.className = 'ruta-fab ruta-fab-reportar';
+    boton.textContent = '⚠';
+    boton.title = 'Reportar una incidencia';
+    boton.setAttribute('aria-label', 'Reportar una incidencia en la vía');
+    hud.appendChild(boton);
+
+    const hoja = document.createElement('div');
+    hoja.id = 'rutaReporte';
+    hoja.className = 'ruta-reporte';
+    hoja.hidden = true;
+    hoja.setAttribute('role', 'dialog');
+    hoja.setAttribute('aria-label', 'Reportar incidencia');
+    hoja.innerHTML = '<p>¿Qué hay en la vía?</p>' +
+      TIPOS_REPORTE.map(([kind, ico, txt]) =>
+        `<button type="button" data-reportar="${kind}"><span>${ico}</span>${txt}</button>`).join('') +
+      '<button type="button" class="cerrar" data-cerrar-reporte="1">Cancelar</button>';
+    hud.appendChild(hoja);
+
+    boton.addEventListener('click', () => { hoja.hidden = !hoja.hidden; });
+    hoja.addEventListener('click', ev => {
+      if (ev.target.closest('[data-cerrar-reporte]')) { hoja.hidden = true; return; }
+      const b = ev.target.closest('[data-reportar]');
+      if (b) reportar(b.dataset.reportar);
+    });
+  }
+
+  async function reportar(kind) {
+    const hoja = view.querySelector('#rutaReporte');
+    if (!ultimaPos) {
+      avisar('Esperando al GPS: sin tu posición no puedo situar el aviso.', 'aviso', 6000);
+      return;
+    }
+    try {
+      const r = await fetch('/api/ruta/avisos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind, lat: ultimaPos.lat, lon: ultimaPos.lon })
+      });
+      const datos = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(datos.error || 'No se pudo enviar el aviso');
+      avisos = [datos.aviso, ...avisos];
+      pintarAviso(datos.aviso);
+      if (hoja) hoja.hidden = true;
+      avisar('Aviso enviado. Gracias: ayuda a los que vienen detrás.', 'ok', 6000);
+      if (navegando) decir('Aviso enviado');
+    } catch (err) {
+      avisar(err.message || 'No se pudo enviar el aviso.', 'aviso', 6000);
+    }
+  }
+
+  view.addEventListener('click', async ev => {
+    const btn = ev.target.closest('[data-confirmar]');
+    if (!btn) return;
+    try {
+      const r = await fetch(`/api/ruta/avisos/${encodeURIComponent(btn.dataset.confirmar)}/confirmar`, { method: 'POST' });
+      if (!r.ok) throw new Error('inactivo');
+      const datos = await r.json();
+      btn.textContent = `Sigue ahí (${datos.aviso.confirmaciones})`;
+      btn.disabled = true;
+      avisar('Gracias: aviso confirmado.', 'ok', 4000);
+    } catch (_e) {
+      btn.textContent = 'Ya no está activo';
+      btn.disabled = true;
+    }
+  });
+
+  montarReporte();
+
+  // En pantalla completa, un botón pequeño para hablar con la IA sin salir
+  // de la navegación: el GPS sigue avisando por voz en segundo plano.
+  (function montarChat() {
+    const hud = view.querySelector('.ruta-hud');
+    if (!hud || hud.querySelector('#rutaChat')) return;
+    const boton = document.createElement('button');
+    boton.id = 'rutaChat';
+    boton.type = 'button';
+    boton.className = 'ruta-fab ruta-fab-chat';
+    boton.textContent = '💬';
+    boton.title = 'Hablar con la IA sin salir de la navegación';
+    boton.setAttribute('aria-label', boton.title);
+    boton.addEventListener('click', () => { window.showView?.('chat'); window.MayaEscuchar?.(); });
+    hud.appendChild(boton);
+  })();
+
+  // Botón de voz en el HUD, debajo del de reportar.
+  (function montarVoz() {
+    const hud = view.querySelector('.ruta-hud');
+    if (!hud || hud.querySelector('#rutaVoz')) return;
+    const boton = document.createElement('button');
+    boton.id = 'rutaVoz';
+    boton.type = 'button';
+    boton.className = 'ruta-fab ruta-fab-voz';
+    boton.addEventListener('click', alternarVoz);
+    hud.appendChild(boton);
+    try { vozActiva = localStorage.getItem(CLAVE_VOZ) !== '0'; } catch (_e) { vozActiva = true; }
+    pintarBotonVoz(vozActiva);
+  })();
+
+  // Brújula: gira el mapa al rumbo del coche o lo devuelve al norte.
+  (function montarBrujula() {
+    const hud = view.querySelector('.ruta-hud');
+    if (!hud) return;
+    elBrujula = hud.querySelector('#rutaBrujula');
+    if (!elBrujula) {
+      elBrujula = document.createElement('button');
+      elBrujula.id = 'rutaBrujula';
+      elBrujula.type = 'button';
+      elBrujula.className = 'ruta-fab ruta-fab-brujula';
+      elBrujula.innerHTML = '<span class="ruta-aguja"><svg viewBox="0 0 24 24" aria-hidden="true">'
+        + '<path d="M12 2.4 16.6 12.2 12 10.3 7.4 12.2Z" fill="#38e1ff"/>'
+        + '<path d="M12 21.6 7.4 11.8 12 13.7l4.6-1.9Z" fill="#7b8ea8"/></svg></span><small>N</small>';
+      elBrujula.addEventListener('click', alternarRumbo);
+      hud.appendChild(elBrujula);
+    }
+    try { rumboAuto = localStorage.getItem(CLAVE_RUMBO) !== '0'; } catch (_e) { rumboAuto = true; }
+    pintarBrujula();
+  })();
 
   elMicro?.addEventListener('click', dictarDestino);
   $('#rutaMas')?.addEventListener('click', () => mapa?.zoomIn());
@@ -812,6 +1139,38 @@
   window.Ruta = {
     ir: (lat, lon, nombre) => { window.showView?.('ruta'); setTimeout(() => fijarDestino(lat, lon, nombre), 700); },
     irA,
+    // Control de navegación por voz/IA: arranca o detiene sin tocar botones.
+    iniciarNavegacion: () => { if (!navegando) alternarNavegacion(); return navegando; },
+    detenerNavegacion: () => { if (navegando) alternarNavegacion(); return navegando; },
+    alternarNavegacion: () => { alternarNavegacion(); return navegando; },
+    reportar: (kind) => reportar(kind),
+    pantallaCompleta: () => alternarPantallaCompleta(),
+    // Para pruebas y para Maya: fuerza o consulta la voz sin tocar la UI.
+    voz: (activa) => { if (typeof activa === 'boolean' && activa !== vozActiva) alternarVoz(); return vozActiva; },
+    incidencias: () => avisos.filter(a => a.origen === 'comunidad'),
+    // Giro del mapa: sin argumento consulta; con grados lo fija a mano.
+    rumbo: (grados) => {
+      if (typeof grados === 'number' && rotacion) {
+        rumboAuto = false;
+        aplicarGiro(grados, { inmediato: true });
+        pintarBrujula();
+      }
+      return {
+        soportado: Boolean(rotacion),
+        auto: rumboAuto,
+        grados: mapa ? Number(mapa.getBearing().toFixed(1)) : 0
+      };
+    },
+    // Autochequeo: con el mapa girado, el centro de la pantalla tiene que
+    // seguir correspondiendo al centro geográfico del mapa.
+    // Referencia al mapa para pruebas y depuración.
+    mapa: () => mapa,
+    pruebaGiro: () => {
+      if (!mapa) return null;
+      const c = mapa.getCenter();
+      const p = mapa.containerPointToLatLng(mapa.getSize().divideBy(2));
+      return { errorMetros: Math.round(distancia(c.lat, c.lng, p.lat, p.lng)) };
+    },
     // Estado mínimo para que Maya sepa dónde está el coche y adónde va.
     // Sin datos de GPS no devuelve posición inventada.
     estado: () => ({

@@ -63,6 +63,52 @@ function ejecutarMaya(acciones) {
       const que = String(accion.que || '').trim();
       showView('ruta');
       setTimeout(() => window.Ruta?.irA?.(que), 700);
+    } else if (hacer === 'navegacion') {
+      // La IA puede arrancar o parar la navegación sin que el usuario toque el botón.
+      const acc = String(accion.accion || accion.que || '').toLowerCase();
+      showView('ruta');
+      setTimeout(() => {
+        if (/para|det[eé]n|stop/.test(acc)) window.Ruta?.detenerNavegacion?.();
+        else window.Ruta?.iniciarNavegacion?.();
+      }, 400);
+    } else if (hacer === 'reportar') {
+      const kind = String(accion.kind || accion.que || 'peligro').toLowerCase();
+      window.Ruta?.reportar?.(kind);
+    } else if (hacer === 'voz_gps') {
+      const activa = !/off|silencio|mute/.test(String(accion.accion || '').toLowerCase());
+      window.Ruta?.voz?.(activa);
+    } else if (hacer === 'pantalla_completa') {
+      window.Ruta?.pantallaCompleta?.();
+    } else if (hacer === 'ficha') {
+      // «Abre la ficha del producto X»: lleva a la tienda y abre la ficha.
+      const que = String(accion.que || '').trim();
+      showView('tienda');
+      setTimeout(async () => {
+        if (!window.Tienda?.buscar) return;
+        await window.Tienda.buscar(que, { scroll: true });
+        const card = [...document.querySelectorAll('#shopGrid .shop-card')]
+          .find(c => (c.querySelector('h3')?.textContent || '').toLowerCase().includes(que.toLowerCase()));
+        const id = card?.dataset?.id;
+        if (id) window.Tienda?.abrirFicha?.(id);
+        else card?.querySelector('[data-ficha]')?.click();
+      }, 700);
+    } else if (hacer === 'diagnostico') {
+      showView('diagnostico');
+      const que = String(accion.que || '').trim();
+      if (que) setTimeout(() => { try { openSymptomSearch(que); } catch (_e) {} }, 400);
+    } else if (hacer === 'tutoriales') {
+      // ya existe, pero ahora acepta búsqueda
+      showView('tutoriales');
+      const que = String(accion.que || '').trim();
+      if (que) setTimeout(() => window.openTutorialSearch?.({ q: que }), 400);
+    } else if (hacer === 'obd') {
+      showView('obd');
+      setTimeout(() => document.getElementById('obdConnect')?.click(), 500);
+    } else if (hacer === 'informe') {
+      showView('informe');
+    } else if (hacer === 'reportar_aviso') {
+      const kind = String(accion.kind || accion.que || 'peligro').toLowerCase();
+      window.Ruta?.reportar?.(kind);
     } else if (hacer === 'buscar') {
       // «Dame las bombillas H7 LED»: abre la tienda con la búsqueda hecha.
       const que = String(accion.que || '').trim();
@@ -961,7 +1007,7 @@ async function openUniversalResult(type, id, title = '') {
   }
   if (type === 'product') {
     showView('productos');
-    if (!productsCache.length) await loadProducts();
+    await loadProductsOnce();
     renderProducts('Todos');
     const cards = $$('#productGrid .product');
     const target = cards.find(card => (card.querySelector('h3')?.textContent || '').trim() === title);
@@ -1541,7 +1587,9 @@ const CATALOG_SUBGROUP_ORDER = {
   herramientas: ['Pistolas de Impacto', 'Llaves de filtro', 'Llaves de bujías', 'Gatos hidráulicos', 'Caballetes', 'Maletines Completos', 'Útiles de Motor', 'Medición', 'Compresores de aire']
 };
 
-const CATALOG_PAGE_SIZE = 3456;
+// Igual que la tienda: pintar 3.200 fichas de golpe congelaba el móvil. Se
+// muestran 60 y «Ver más piezas» añade otra tanda.
+const CATALOG_PAGE_SIZE = 60;
 const CATALOG_POPULAR = ['BMW Serie 3', 'VW Golf', 'Seat Ibiza', 'Renault Clio', 'Ford Focus', 'Peugeot 208'];
 const catalogState = { group: 'all', subgroup: '', car: '', query: '', sort: 'relevance', includeUniversal: false, visible: CATALOG_PAGE_SIZE };
 let catalogAll = [];
@@ -2032,6 +2080,23 @@ function catalogSetCar(value) {
   catalogRender();
 }
 
+let productsRequest = null;
+
+// El catálogo completo son 5 MB: no se pide al abrir la app, solo cuando se
+// entra en Productos (o cuando el chat necesita buscar una pieza). Varias
+// llamadas seguidas comparten la misma descarga.
+function loadProductsOnce() {
+  if (productsCache.length) return Promise.resolve(productsCache);
+  if (!productsRequest) {
+    productsRequest = loadProducts().finally(() => { productsRequest = null; });
+  }
+  return productsRequest;
+}
+
+document.addEventListener('viewchange', event => {
+  if (event.detail?.name === 'productos') loadProductsOnce().catch(() => {});
+});
+
 async function loadProducts() {
   const grid = $('#productGrid');
   if (!grid) return;
@@ -2389,9 +2454,62 @@ function renderChatExtras(res) {
   }
 }
 
+async function manejarComandoVoz(texto) {
+  const q = String(texto || '').trim();
+  if (!q) return false;
+  const n = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const vistas = {
+    gps: 'ruta', ruta: 'ruta', mapa: 'ruta',
+    obd: 'obd', diagnostico: 'diagnostico', dtc: 'dtc',
+    tienda: 'tienda', productos: 'productos', garage: 'garaje', garaje: 'garaje',
+    chat: 'chat', home: 'home', inicio: 'home', tutoriales: 'tutoriales',
+    tuning: 'tuning', foro: 'foro', planes: 'planes'
+  };
+  let m;
+  if ((m = n.match(/^(cambia(?:r)? (?:a|al)?|abre|ve a|ir a|mostrar?)\s+(.+)$/))) {
+    const clave = m[2].trim();
+    const vista = vistas[clave] || Object.keys(vistas).find(k => clave.includes(k));
+    if (vista) { const v = vistas[vista] || vista; showView(v); addBubble(`Abriendo ${v}.`, 'assistant'); return true; }
+  }
+  if (/^(inicia|arranca|empezar|vamos)( la)? navegacion$/.test(n) || n === 'vamos') {
+    showView('ruta'); setTimeout(() => window.Ruta?.iniciarNavegacion?.(), 400); addBubble('Navegación iniciada.', 'assistant'); return true;
+  }
+  if (/^(deten|para|stop)( la)? navegacion$/.test(n)) {
+    window.Ruta?.detenerNavegacion?.(); addBubble('Navegación detenida.', 'assistant'); return true;
+  }
+  if (/^silencia (la )?voz$|^mute$/.test(n)) { window.Ruta?.voz?.(false); addBubble('Voz silenciada.', 'assistant'); return true; }
+  if (/^(activa|enciende)( la)? voz$/.test(n)) { window.Ruta?.voz?.(true); addBubble('Voz activada.', 'assistant'); return true; }
+  if (/^pantalla completa$/.test(n)) { window.Ruta?.pantallaCompleta?.(); return true; }
+  if ((m = n.match(/^llevame a (.+)$/)) || (m = n.match(/^llévame a (.+)$/))) {
+    showView('ruta'); setTimeout(() => window.Ruta?.irA?.(m[1].trim()), 400); addBubble(`Buscando ${m[1].trim()}.`, 'assistant'); return true;
+  }
+  if ((m = n.match(/^(busca|buscar) (.+)$/))) {
+    const term = m[2].trim();
+    if (window.Tienda?.buscar) { showView('tienda'); setTimeout(() => window.Tienda.buscar(term, { scroll: true }), 400); addBubble(`Buscando ${term} en la tienda.`, 'assistant'); return true; }
+  }
+  if ((m = n.match(/^(ficha|abre ficha) (de |del )?(.+)$/))) {
+    const term = m[3].trim();
+    showView('tienda'); setTimeout(() => window.Tienda?.buscar?.(term, { scroll: true }), 400); addBubble(`Buscando la ficha de ${term}.`, 'assistant'); return true;
+  }
+  if (/^(conecta|conectar)( el)? obd$/.test(n) || /^obd$/.test(n)) {
+    showView('obd'); setTimeout(() => document.getElementById('obdConnect')?.click(), 500); addBubble('Abriendo conexión OBD.', 'assistant'); return true;
+  }
+  if (/^(diagnostico|diagnóstico)$/.test(n)) { showView('diagnostico'); addBubble('Abriendo diagnóstico.', 'assistant'); return true; }
+  if (/^(tutoriales|tutorial)$/.test(n)) { showView('tutoriales'); addBubble('Abriendo tutoriales.', 'assistant'); return true; }
+  if (/^(informe)$/.test(n)) { showView('informe'); addBubble('Abriendo informe.', 'assistant'); return true; }
+  if (/^reporta (accidente|obra|retencion|peligro|control|vehiculo)$/.test(n)) {
+    const kind = n.replace(/^reporta /, '');
+    const map = { accidente: 'accidente', obra: 'obra', retencion: 'retencion', peligro: 'peligro', control: 'policia', vehiculo: 'vehiculo' };
+    window.Ruta?.reportar?.(map[kind] || kind);
+    addBubble('Reportando incidencia.', 'assistant'); return true;
+  }
+  return false;
+}
+
 async function submitChat(text) {
   const query = String(text || '').trim();
   if (!query || chatBusy) return;
+  if (await manejarComandoVoz(query)) return;
   chatBusy = true;
   if (typeof gtag === 'function') gtagTrack('diagnosis_started');
   const chatSubmit = chatForm?.querySelector('button[type="submit"]');
@@ -4965,7 +5083,6 @@ document.addEventListener('DOMContentLoaded', () => {
   Promise.all([
     loadStats(),
     loadSymptoms(),
-    loadProducts(),
     loadComponents(),
     loadVehicles(),
     loadTuning(),

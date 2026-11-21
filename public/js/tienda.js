@@ -10,7 +10,9 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
-  const PAGE = 6000;
+  // Tandas cortas: 3.152 tarjetas y sus fotos de golpe bloqueaban el móvil
+  // unos 20 s. Con 60 se pinta al instante y «Ver más» añade otra tanda.
+  const PAGE = 60;
   const fold = text => String(text || '').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
@@ -185,7 +187,7 @@
 
   function tarjeta(p, i) {
     const imagen = p.image
-      ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="${i < 120 ? 'eager' : 'lazy'}" decoding="async" onerror="this.classList.add('rota')">`
+      ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="${i < 6 ? 'eager' : 'lazy'}" decoding="async" onerror="this.classList.add('rota')">`
       : '';    const precioTxt = /€/.test(p.price || '') ? p.price : (p.price ? `${p.price} €` : 'Ver precio');
     const enlace = p.affiliateUrl || '#';
     // Badge "Más vendido": determinista por id, sin tocar datos.
@@ -230,7 +232,8 @@
     grid.innerHTML = visible.map((p, idx) => tarjeta(p, idx)).join('');
     if (count) {
       const secLabel = state.section === 'todo' ? 'todos' : (SECCIONES.find(x => x.id === state.section)?.label || 'más recambios');
-      count.textContent = `${list.length.toLocaleString('es-ES')} producto${list.length === 1 ? '' : 's'} en ${secLabel}${state.query ? ` · «${state.query}»` : ''}`;
+      const mostrados = visible.length;
+      count.textContent = `${mostrados.toLocaleString('es-ES')} de ${list.length.toLocaleString('es-ES')} producto${list.length === 1 ? '' : 's'} en ${secLabel}${state.query ? ` · «${state.query}»` : ''}`;
     }
     if (more) more.hidden = list.length <= state.shown;
   }
@@ -430,6 +433,8 @@
 
   window.Tienda = {
     recargar: () => { state.loaded = false; state.loading = null; return cargar(); },
-    buscar: (que, opciones) => buscar(que, opciones)
+    buscar: (que, opciones) => buscar(que, opciones),
+    abrirFicha: (id) => abrirFicha(id)
   };
+  window.abrirFichaProducto = (id) => abrirFicha(id);
 })();

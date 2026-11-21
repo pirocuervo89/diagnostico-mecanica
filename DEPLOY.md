@@ -110,3 +110,9 @@ git push
 ```
 
 Render redespliega solo con cada `push` a `master`.
+
+El `Dockerfile` ejecuta toda la suite (`npm test`, incluida la prueba móvil de
+la tienda) antes de crear la imagen final. Si alguna prueba falla, Render y
+Oracle cancelan el despliegue y sigue publicada la versión anterior. Puedes
+comprobarlas antes de subir con `npm test` o solo la de tienda con
+`npm run test:movil`.

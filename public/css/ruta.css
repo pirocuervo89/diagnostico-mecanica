@@ -328,6 +328,27 @@
 .ruta-shell.ruta-completa .ruta-fab-noche { bottom: calc(254px + env(safe-area-inset-bottom, 0px)); }
 .ruta-shell.ruta-completa .ruta-fab-full { bottom: calc(302px + env(safe-area-inset-bottom, 0px)); }
 body.ruta-pantalla-completa { overflow: hidden; }
+
+/* En horizontal, el GPS ocupa todo y deja un rincón para hablar con la IA
+   sin perder la navegación ni las indicaciones. */
+@media (orientation: landscape) {
+  .ruta-shell.ruta-completa { height: 100vh; height: 100dvh; }
+  .ruta-shell.ruta-completa .ruta-ai-chip {
+    position: fixed;
+    right: 12px; bottom: 12px;
+    z-index: 9995;
+    width: min(320px, 42vw);
+    max-height: 38vh;
+    overflow: auto;
+    border-radius: 14px;
+    background: rgba(8, 12, 20, .88);
+    border: 1px solid rgba(56, 225, 255, .3);
+    backdrop-filter: blur(12px);
+    padding: 8px 10px;
+    color: #dff6ff;
+    font-size: 12px;
+  }
+}
 .ruta-mic {
   width: 38px;
   height: 38px;
@@ -661,3 +682,224 @@ body.viendo-ruta .pwa-install { display: none !important; }
   background: rgba(255, 255, 255, .97);
   border-color: rgba(20, 35, 55, .14);
 }
+
+/* ============================================================
+   AVISOS DE LA COMUNIDAD · reportar y confirmar
+   ============================================================ */
+
+/* Botón de reportar: a la izquierda, lejos del panel y del zoom. */
+.ruta-fab-reportar {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(8, 12, 20, .9);
+  border: 1px solid rgba(255, 190, 110, .5);
+  color: #ffd08a;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1100;
+  box-shadow: 0 10px 26px -12px rgba(0, 0, 0, .9);
+}
+.ruta-fab-reportar:active { transform: translateY(-50%) scale(.96); }
+.ruta-shell[data-tema="dia"] .ruta-fab-reportar { background: rgba(255, 255, 255, .95); color: #b45309; }
+
+/* Hoja de tipos: centrada, botones grandes para el coche. */
+.ruta-reporte {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(330px, calc(100% - 32px));
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(14, 20, 32, .97), rgba(8, 12, 20, .99));
+  border: 1px solid rgba(148, 172, 208, .24);
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, .95);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  z-index: 1200;
+}
+.ruta-reporte[hidden] { display: none; }
+.ruta-reporte p { grid-column: 1 / -1; margin: 2px 2px 6px; font-size: 13px; font-weight: 650; color: #cfe6ff; }
+.ruta-reporte button {
+  min-height: 54px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 172, 208, .22);
+  background: rgba(255, 255, 255, .04);
+  color: #e8f1ff;
+  font-size: 12px; font-weight: 650;
+  cursor: pointer;
+}
+.ruta-reporte button span { font-size: 20px; line-height: 1; }
+.ruta-reporte button:active { transform: scale(.98); }
+.ruta-reporte .cerrar {
+  grid-column: 1 / -1;
+  min-height: 38px;
+  flex-direction: row;
+  color: #9fb3cd;
+  background: transparent;
+}
+
+/* Ficha del aviso en el mapa */
+.ruta-popup { display: grid; gap: 3px; min-width: 150px; font-size: 12px; }
+.ruta-popup b { font-size: 13px; }
+.ruta-popup small { color: #5b6b80; }
+.ruta-confirmar {
+  margin-top: 7px;
+  min-height: 34px;
+  border: 0; border-radius: 9px;
+  background: #2fd8ff;
+  color: #04121c;
+  font-weight: 700; font-size: 12px;
+  cursor: pointer;
+}
+.ruta-confirmar[disabled] { opacity: .55; cursor: default; }
+
+/* Colores de las chinchetas de la comunidad */
+.ruta-aviso-accidente span { background: radial-gradient(circle at 35% 30%, #ff9a8a, #b91c1c); }
+.ruta-aviso-retencion span { background: radial-gradient(circle at 35% 30%, #ffd08a, #b45309); color: #2a1600; }
+.ruta-aviso-policia span { background: radial-gradient(circle at 35% 30%, #a5c8ff, #1d4ed8); }
+.ruta-aviso-vehiculo span { background: radial-gradient(circle at 35% 30%, #bfefff, #0e7490); }
+.ruta-aviso-objeto span { background: radial-gradient(circle at 35% 30%, #e6e6c8, #6b5b2a); }
+.ruta-aviso-clima span { background: radial-gradient(circle at 35% 30%, #9fd8ff, #0369a1); }
+
+/* ============================================================
+   MODO CONDUCCIÓN · pantalla limpia y botón de voz
+   ============================================================ */
+
+.ruta-fab-voz {
+  position: absolute;
+  left: 12px;
+  top: calc(50% + 36px);
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(8, 12, 20, .9);
+  border: 1px solid rgba(148, 172, 208, .35);
+  color: #bff0ff;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 1100;
+  box-shadow: 0 10px 26px -12px rgba(0, 0, 0, .9);
+}
+.ruta-shell[data-tema="dia"] .ruta-fab-voz { background: rgba(255, 255, 255, .95); color: #0e1a2b; }
+
+/* Conduciendo: fuera lo que distrae, panel más grande y legible. */
+.ruta-shell.ruta-conduciendo .ruta-search,
+.ruta-shell.ruta-conduciendo .ruta-results,
+.ruta-shell.ruta-conduciendo .ruta-zoom,
+.ruta-shell.ruta-conduciendo .ruta-pasos-preview,
+.ruta-shell.ruta-conduciendo .ruta-alternativas { display: none; }
+
+.ruta-shell.ruta-conduciendo .ruta-panel {
+  left: 10px; right: 10px; bottom: 10px;
+  padding: 15px 16px;
+  border-color: rgba(56, 225, 255, .32);
+}
+.ruta-shell.ruta-conduciendo .ruta-sig strong { font-size: 16px; }
+.ruta-shell.ruta-conduciendo .ruta-sig small { font-size: 10.5px; }
+.ruta-shell.ruta-conduciendo .ruta-resumen b { font-size: 22px; }
+.ruta-shell.ruta-conduciendo .ruta-empezar {
+  background: linear-gradient(120deg, #ff6b6b, #ff3d3d);
+  color: #fff;
+  box-shadow: 0 16px 34px -18px rgba(255, 61, 61, .95);
+}
+.ruta-shell.ruta-conduciendo .ruta-speed {
+  bottom: 224px;
+  transform: scale(1.16);
+  transform-origin: bottom right;
+}
+.ruta-shell.ruta-conduciendo .ruta-map { filter: saturate(1.06) contrast(1.04); }
+
+/* Ajuste de encuadre: en conducción nada tapa nada. */
+.ruta-fab-voz { top: calc(50% - 58px); }
+
+.ruta-shell.ruta-conduciendo .ruta-eta { display: none; }          /* el panel ya da km y minutos */
+.ruta-shell.ruta-conduciendo .ruta-speed {
+  top: 12px; right: 12px; bottom: auto;
+  transform: none;
+}
+.ruta-shell.ruta-conduciendo .ruta-alert { top: 12px; left: 12px; right: 90px; }
+.ruta-shell.ruta-conduciendo .ruta-fab-noche,
+.ruta-shell.ruta-conduciendo .ruta-fab-full { display: none; }    /* menos botones al conducir */
+
+/* ============================================================
+   BRÚJULA · mapa girado con el rumbo del coche
+   ============================================================ */
+
+.ruta-fab-brujula {
+  position: absolute;
+  left: 12px;
+  top: calc(50% - 116px);
+  right: auto;
+  bottom: auto;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(8, 12, 20, .9);
+  border: 1px solid rgba(56, 225, 255, .35);
+  color: #bff0ff;
+  cursor: pointer;
+  z-index: 1100;
+  box-shadow: 0 10px 26px -12px rgba(0, 0, 0, .9);
+}
+.ruta-fab-brujula .ruta-aguja {
+  display: block;
+  transform: rotate(var(--ruta-aguja, 0deg));
+  transition: transform .12s linear;
+}
+.ruta-fab-brujula .ruta-aguja svg { display: block; width: 22px; height: 22px; }
+.ruta-fab-brujula small {
+  position: absolute; bottom: 4px;
+  font-size: 8px; letter-spacing: .08em;
+  color: rgba(147, 164, 190, .95);
+}
+.ruta-fab-brujula.activa {
+  border-color: rgba(56, 225, 255, .85);
+  box-shadow: 0 0 0 2px rgba(56, 225, 255, .16), 0 10px 26px -12px rgba(0, 0, 0, .9);
+}
+.ruta-fab-brujula.activa small { color: #38e1ff; }
+.ruta-shell[data-tema="dia"] .ruta-fab-brujula { background: rgba(255, 255, 255, .95); color: #0e1a2b; }
+.ruta-shell[data-tema="dia"] .ruta-fab-brujula.activa { box-shadow: 0 0 0 2px rgba(20, 120, 180, .18), 0 10px 26px -12px rgba(0, 0, 0, .35); }
+
+/* Con el mapa girado, lo que se lee (chinchetas, ficha, atribución) se
+   contragira para seguir derecho. La variable la actualiza la brújula. */
+.ruta-shell { --ruta-contra: 0deg; }
+.ruta-aviso > span,
+.ruta-destino > span { transform: rotate(var(--ruta-contra, 0deg)); }
+.leaflet-popup-content-wrapper {
+  transform: rotate(var(--ruta-contra, 0deg));
+  transform-origin: bottom center;
+}
+.leaflet-control-attribution {
+  transform: rotate(var(--ruta-contra, 0deg));
+  transform-origin: bottom right;
+}
+
+/* La foto del coche no es una brújula: si gira con el mapa parece volcada.
+   Se contragira y la flecha del rumbo sigue apuntando a donde va el coche. */
+.ruta-coche { transform: rotate(var(--ruta-contra, 0deg)); }
+.ruta-fab-brujula small { left: 50%; transform: translateX(-50%); }
+
+/* Botón flotante para hablar con la IA sin salir de la navegación. */
+.ruta-fab-chat {
+  position: absolute;
+  left: 12px;
+  top: calc(50% + 94px);
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(8, 12, 20, .9);
+  border: 1px solid rgba(148, 172, 208, .35);
+  color: #bff0ff;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 1100;
+  box-shadow: 0 10px 26px -12px rgba(0, 0, 0, .9);
+}
+.ruta-shell[data-tema="dia"] .ruta-fab-chat { background: rgba(255, 255, 255, .95); color: #0e1a2b; }

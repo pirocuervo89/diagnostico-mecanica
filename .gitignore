@@ -74,3 +74,7 @@ data/videos-diarios.json
 .aider.input.history
 # Assets de tienda Android (binarios grandes)
 android/play-store/
+
+data/ruta.sqlite
+data/ruta.sqlite-wal
+data/ruta.sqlite-shm
