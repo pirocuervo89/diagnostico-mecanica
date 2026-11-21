@@ -1443,6 +1443,258 @@ body.viendo-ruta .pwa-install { display: none !important; }
   border-color: rgba(3, 105, 161, .3) !important;
 }
 
+/* ============================================================
+   GPS WAZE-STYLE · fullscreen, sin mensajes, señales coloridas
+   ============================================================ */
+
+/* --- Vista GPS: ocupa toda la pantalla sin header ni pie --- */
+.view-gps-fullscreen {
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+.view-gps-fullscreen .ruta-shell {
+  height: 100vh;
+  height: 100dvh;
+  border-radius: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+.view-gps-fullscreen .ruta-map {
+  height: 100% !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* --- Sin mensajes arriba: ocultar banner de alerta inicial --- */
+.view-gps-fullscreen .ruta-alert {
+  top: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  padding: 10px 14px !important;
+  background: rgba(8, 14, 26, .92) !important;
+  border: 1px solid rgba(56, 225, 255, .3) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+/* --- Buscador flotante estilo Waze --- */
+.view-gps-fullscreen .ruta-search {
+  top: 12px !important;
+  left: 12px !important;
+  right: 12px !important;
+  padding: 6px 6px 6px 14px !important;
+  border-radius: 16px !important;
+  background: rgba(6, 12, 24, .92) !important;
+  border: 1.5px solid rgba(56, 225, 255, .4) !important;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, .9), 0 0 20px -10px rgba(56, 225, 255, .5) !important;
+  backdrop-filter: blur(18px) !important;
+}
+.view-gps-fullscreen .ruta-search input {
+  min-height: 42px !important;
+  font-size: 15px !important;
+}
+.view-gps-fullscreen .ruta-search button {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
+}
+
+/* --- Panel de navegación estilo Waze: abajo, compacto --- */
+.view-gps-fullscreen .ruta-panel {
+  left: 8px !important;
+  right: 8px !important;
+  bottom: 8px !important;
+  padding: 12px 14px !important;
+  border-radius: 18px !important;
+  background: linear-gradient(180deg, rgba(8, 14, 26, .96), rgba(5, 9, 18, .99)) !important;
+  border: 1.5px solid rgba(56, 225, 255, .3) !important;
+  box-shadow: 0 16px 40px -16px rgba(0, 0, 0, .95) !important;
+  backdrop-filter: blur(20px) !important;
+}
+.view-gps-fullscreen .ruta-flecha {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 14px !important;
+  font-size: 26px !important;
+}
+.view-gps-fullscreen .ruta-sig strong {
+  font-size: 15px !important;
+  line-height: 1.25 !important;
+}
+.view-gps-fullscreen .ruta-datos b {
+  font-size: 18px !important;
+}
+.view-gps-fullscreen .ruta-empezar {
+  min-height: 46px !important;
+  font-size: 14px !important;
+  border-radius: 14px !important;
+}
+
+/* --- Velocímetro: esquina superior derecha, estilo Waze --- */
+.view-gps-fullscreen .ruta-speed {
+  top: 8px !important;
+  right: 8px !important;
+  bottom: auto !important;
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 50% !important;
+  border: 2.5px solid rgba(34, 211, 238, .7) !important;
+  box-shadow: 0 0 30px rgba(34, 211, 238, .5), 0 8px 20px -8px rgba(0, 0, 0, .9) !important;
+}
+.view-gps-fullscreen .ruta-speed b {
+  font-size: 26px !important;
+}
+.view-gps-fullscreen .ruta-speed span {
+  font-size: 8px !important;
+}
+
+/* --- Botones flotantes: lado derecho, estilo Waze --- */
+.view-gps-fullscreen .ruta-fab {
+  right: 8px !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 14px !important;
+  font-size: 18px !important;
+}
+.view-gps-fullscreen .ruta-zoom {
+  top: 90px !important;
+  right: 8px !important;
+  gap: 6px !important;
+}
+.view-gps-fullscreen .ruta-zoom button {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 12px !important;
+  font-size: 18px !important;
+}
+
+/* --- Señales de tráfico: colores vivos estilo Waze --- */
+.ruta-aviso {
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .9) !important;
+  backdrop-filter: blur(12px) !important;
+}
+.ruta-aviso span {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  border: 2.5px solid rgba(255, 255, 255, .9) !important;
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, .8) !important;
+}
+.ruta-aviso-radar span { background: radial-gradient(circle at 35% 30%, #ff6b6b, #dc2626) !important; }
+.ruta-aviso-camara span { background: radial-gradient(circle at 35% 30%, #a78bfa, #7c3aed) !important; }
+.ruta-aviso-obra span { background: radial-gradient(circle at 35% 30%, #fbbf24, #d97706) !important; color: #1a1a00 !important; }
+.ruta-aviso-senal span { background: radial-gradient(circle at 35% 30%, #34d399, #059669) !important; }
+.ruta-aviso-peligro span { background: radial-gradient(circle at 35% 30%, #fb923c, #ea580c) !important; }
+.ruta-aviso-accidente span { background: radial-gradient(circle at 35% 30%, #f87171, #b91c1c) !important; }
+.ruta-aviso-retencion span { background: radial-gradient(circle at 35% 30%, #fbbf24, #b45309) !important; color: #1a1a00 !important; }
+.ruta-aviso-policia span { background: radial-gradient(circle at 35% 30%, #60a5fa, #2563eb) !important; }
+.ruta-aviso-vehiculo span { background: radial-gradient(circle at 35% 30%, #22d3ee, #0891b2) !important; }
+.ruta-aviso-objeto span { background: radial-gradient(circle at 35% 30%, #a3e635, #65a30d) !important; }
+.ruta-aviso-clima span { background: radial-gradient(circle at 35% 30%, #38bdf8, #0284c7) !important; }
+
+/* --- Marcadores de tráfico: más visibles --- */
+.leaflet-marker-icon.ruta-coche {
+  filter: drop-shadow(0 0 12px rgba(34, 211, 238, .9)) !important;
+}
+
+/* --- Panel de reporte de incidencias estilo Waze --- */
+.ruta-reporte {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(360px, calc(100% - 24px)) !important;
+  padding: 16px !important;
+  border-radius: 20px !important;
+  background: linear-gradient(160deg, rgba(10, 16, 28, .98), rgba(5, 9, 18, .99)) !important;
+  border: 1.5px solid rgba(56, 225, 255, .35) !important;
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, .98), 0 0 40px -20px rgba(56, 225, 255, .5) !important;
+  backdrop-filter: blur(24px) !important;
+  z-index: 1300 !important;
+}
+.ruta-reporte p {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #cfe6ff !important;
+  margin-bottom: 10px !important;
+}
+.ruta-reporte button {
+  min-height: 60px !important;
+  border-radius: 14px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  background: rgba(255, 255, 255, .06) !important;
+  border: 1.5px solid rgba(148, 172, 208, .25) !important;
+  transition: transform .15s ease, background .2s ease !important;
+}
+.ruta-reporte button:hover {
+  background: rgba(56, 225, 255, .12) !important;
+  border-color: rgba(56, 225, 255, .4) !important;
+  transform: scale(1.03) !important;
+}
+.ruta-reporte button span {
+  font-size: 24px !important;
+  margin-bottom: 4px !important;
+}
+
+/* --- Modo día: ajustes Waze --- */
+.view-gps-fullscreen.ruta-dia .ruta-search,
+.ruta-shell[data-tema="dia"] .ruta-search {
+  background: rgba(255, 255, 255, .96) !important;
+  border-color: rgba(20, 35, 55, .2) !important;
+}
+.view-gps-fullscreen.ruta-dia .ruta-search input,
+.ruta-shell[data-tema="dia"] .ruta-search input {
+  color: #0e1a2b !important;
+}
+.view-gps-fullscreen.ruta-dia .ruta-panel,
+.ruta-shell[data-tema="dia"] .ruta-panel {
+  background: rgba(255, 255, 255, .97) !important;
+  border-color: rgba(20, 35, 55, .16) !important;
+}
+.view-gps-fullscreen.ruta-dia .ruta-speed,
+.ruta-shell[data-tema="dia"] .ruta-speed {
+  background: rgba(255, 255, 255, .97) !important;
+  border-color: rgba(20, 120, 180, .4) !important;
+}
+.view-gps-fullscreen.ruta-dia .ruta-speed b,
+.ruta-shell[data-tema="dia"] .ruta-speed b {
+  color: #0369a1 !important;
+  text-shadow: none !important;
+}
+.view-gps-fullscreen.ruta-dia .ruta-fab,
+.ruta-shell[data-tema="dia"] .ruta-fab {
+  background: rgba(255, 255, 255, .96) !important;
+  color: #0e1a2b !important;
+  border-color: rgba(20, 35, 55, .18) !important;
+}
+
+/* --- Responsive: móvil --- */
+@media (max-width: 700px) {
+  .view-gps-fullscreen .ruta-search input { font-size: 14px !important; }
+  .view-gps-fullscreen .ruta-banner-info strong { font-size: 14px !important; }
+  .view-gps-fullscreen .ruta-banner-flecha { width: 44px !important; height: 44px !important; font-size: 22px !important; }
+  .view-gps-fullscreen .ruta-speed { width: 64px !important; height: 64px !important; }
+  .view-gps-fullscreen .ruta-speed b { font-size: 22px !important; }
+  .view-gps-fullscreen .ruta-fab { width: 44px !important; height: 44px !important; }
+  .view-gps-fullscreen .ruta-zoom button { width: 36px !important; height: 36px !important; font-size: 16px !important; }
+  .view-gps-fullscreen .ruta-panel { padding: 10px 12px !important; }
+  .view-gps-fullscreen .ruta-sig strong { font-size: 13px !important; }
+  .view-gps-fullscreen .ruta-datos b { font-size: 16px !important; }
+  .view-gps-fullscreen .ruta-empezar { min-height: 42px !important; font-size: 13px !important; }
+}
+
 /* Botón flotante para hablar con la IA sin salir de la navegación. */
 .ruta-fab-chat {
   position: absolute;
