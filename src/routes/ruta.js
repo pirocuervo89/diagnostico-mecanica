@@ -163,15 +163,36 @@ router.get('/geocode', async (req, res) => {
   if (guardado) return res.json({ results: guardado, cached: true });
 
   try {
-    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=es&q=${encodeURIComponent(q)}`;
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=10&accept-language=es&countrycodes=es&addressdetails=1&q=${encodeURIComponent(q)}`;
     const datos = await pedirJson(url);
-    const results = (Array.isArray(datos) ? datos : []).map(item => ({
-      name: String(item.display_name || '').split(',').slice(0, 3).join(',').trim(),
-      full: item.display_name,
-      lat: Number(item.lat),
-      lon: Number(item.lon),
-      type: item.type || item.category || ''
-    })).filter(r => Number.isFinite(r.lat) && Number.isFinite(r.lon));
+    // Priorizar direcciones reales (calles, avenidas, plazas) sobre zonas residenciales.
+    const tipoPrioritario = ['house', 'street', 'road', 'avenue', 'plaza', 'building', 'residential', 'neighbourhood', 'suburb', 'city', 'town', 'village', 'hamlet'];
+    const results = (Array.isArray(datos) ? datos : [])
+      .map(item => {
+        const addr = item.address || {};
+        // Construir un nombre legible priorizando calle + número + ciudad.
+        const calle = addr.road || addr.street || addr.pedestrian || addr.path || addr.avenue || '';
+        const numero = addr.house_number || '';
+        const ciudad = addr.city || addr.town || addr.village || addr.municipality || addr.hamlet || '';
+        const cp = addr.postcode || '';
+        const nombre = [calle && numero ? `${calle}, ${numero}` : calle, ciudad, cp].filter(Boolean).join(', ').trim() || String(item.display_name || '').split(',').slice(0, 3).join(',').trim();
+        return {
+          name: nombre,
+          full: item.display_name,
+          lat: Number(item.lat),
+          lon: Number(item.lon),
+          type: item.type || item.category || '',
+          addr
+        };
+      })
+      .filter(r => Number.isFinite(r.lat) && Number.isFinite(r.lon))
+      // Quitar zonas residenciales genéricas si hay dirección más específica.
+      .sort((a, b) => {
+        const aRes = a.addr?.house_number || a.addr?.road ? 0 : 1;
+        const bRes = b.addr?.house_number || b.addr?.road ? 0 : 1;
+        return aRes - bRes;
+      })
+      .slice(0, 6);
 
     recordar(clave, 60 * 60 * 1000, results);
     res.json({ results });

@@ -2311,9 +2311,25 @@ body.viendo-ruta .pwa-install { display: none !important; }
   transform-origin: 50% 70% !important;
 }
 .ruta-shell.ruta-navegando .ruta-coche {
-  width: 64px !important;
-  height: 64px !important;
+  width: 88px !important;
+  height: 88px !important;
   z-index: 1200 !important;
+  border: 4px solid rgba(34, 211, 238, 1) !important;
+  box-shadow:
+    0 0 0 8px rgba(3, 10, 18, .9),
+    0 0 50px rgba(34, 211, 238, 1),
+    0 12px 24px rgba(0, 0, 0, .8) !important;
+}
+.ruta-shell.ruta-navegando .ruta-coche img {
+  transform: scale(1.8) !important;
+  filter: saturate(1.6) contrast(1.3) brightness(1.2) !important;
+}
+.ruta-shell.ruta-navegando .ruta-coche::before {
+  border-left: 12px solid transparent !important;
+  border-right: 12px solid transparent !important;
+  border-bottom: 24px solid #22d3ee !important;
+  top: -26px !important;
+  filter: drop-shadow(0 0 16px rgba(34, 211, 238, 1)) !important;
 }
 .ruta-shell.ruta-navegando .ruta-coche img {
   transform: scale(1.5) !important;

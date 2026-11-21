@@ -501,7 +501,7 @@
         // Modo primera persona: el coche queda en la parte inferior del mapa.
         // Se desplaza el centro hacia arriba para que la carretera quede delante.
         const px = mapa.latLngToContainerPoint([lat, lon]);
-        const offset = mapa.getSize().y * 0.32;
+        const offset = mapa.getSize().y * 0.40;
         const target = mapa.containerPointToLatLng([px.x, px.y + offset]);
         mapa.setView(target, z, { animate: true, duration: 0.5 });
       }
@@ -774,7 +774,7 @@
         mapa.setView([ultimaPos.lat, ultimaPos.lon], zoomPorVelocidad(velocidad), { animate: true, duration: 0.8 });
         // Desplazar el centro hacia arriba para que el coche quede abajo.
         const px = mapa.latLngToContainerPoint([ultimaPos.lat, ultimaPos.lon]);
-        const target = mapa.containerPointToLatLng([px.x, px.y + mapa.getSize().y * 0.3]);
+        const target = mapa.containerPointToLatLng([px.x, px.y + mapa.getSize().y * 0.4]);
         mapa.panTo(target, { animate: true, duration: 0.6 });
       }
       seguirRumbo(true);
@@ -1034,7 +1034,7 @@
     hoja.innerHTML = '<p>¿Qué hay en la vía?</p>' +
       TIPOS_REPORTE.map(([kind, ico, txt]) =>
         `<button type="button" data-reportar="${kind}"><span>${ico}</span>${txt}</button>`).join('') +
-      '<button type="button" class="cerrar" data-cerrar-reporte="1">Cancelar</button>';
+      '<button type="button" class="cerrar" data-cerrar-reporte="1">✕ Cerrar</button>';
     hud.appendChild(hoja);
 
     boton.addEventListener('click', () => { hoja.hidden = !hoja.hidden; });
@@ -1042,6 +1042,13 @@
       if (ev.target.closest('[data-cerrar-reporte]')) { hoja.hidden = true; return; }
       const b = ev.target.closest('[data-reportar]');
       if (b) reportar(b.dataset.reportar);
+    });
+    // Cerrar al tocar fuera del panel.
+    document.addEventListener('click', ev => {
+      if (hoja.hidden) return;
+      if (!hoja.contains(ev.target) && ev.target !== boton) {
+        hoja.hidden = true;
+      }
     });
   }
 
