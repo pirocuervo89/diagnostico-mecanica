@@ -47,6 +47,14 @@ const ANDROID_SHA256_FINGERPRINTS = ANDROID_ENV_FINGERPRINTS.length
   : (Array.isArray(androidConfig.sha256Fingerprints) ? androidConfig.sha256Fingerprints : []);
 
 app.disable('x-powered-by');
+
+// X-Request-Id: identifica cada petición para correlacionar logs.
+app.use((req, res, next) => {
+  const id = req.headers['x-request-id'] || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  req.requestId = id;
+  res.setHeader('X-Request-Id', id);
+  next();
+});
 app.use(compression());
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json({

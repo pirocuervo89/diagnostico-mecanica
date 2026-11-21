@@ -72,13 +72,16 @@ self.addEventListener('fetch', event => {
 
   if (url.pathname.startsWith('/css/') || url.pathname.startsWith('/js/') || url.pathname.startsWith('/img/') || url.pathname.startsWith('/fonts/') || url.pathname === '/favicon.svg') {
     event.respondWith(
-      caches.match(request).then(hit => hit || fetch(request).then(response => {
-        if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE).then(cache => cache.put(request, copy));
-        }
-        return response;
-      }).catch(() => caches.match('/offline.html')))
+      caches.open(CACHE).then(cache =>
+        cache.match(request).then(cached => {
+          const network = fetch(request).then(response => {
+            if (response.ok) cache.put(request, response.clone());
+            return response;
+          }).catch(() => cached || caches.match('/offline.html'));
+          // Stale-while-revalidate: sirve lo cacheado al instante y actualiza en segundo plano.
+          return cached || network;
+        })
+      )
     );
   }
 });

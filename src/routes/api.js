@@ -311,6 +311,7 @@ function driveRiskForUrgency(urgency) {
 const ARRANQUE = new Date().toISOString();
 
 router.get('/health', (_req, res) => {
+  const mem = process.memoryUsage();
   res.json({
     ok: true,
     service: 'diagnostico-mecanica',
@@ -318,7 +319,14 @@ router.get('/health', (_req, res) => {
     time: new Date().toISOString(),
     startedAt: ARRANQUE,
     uptime: process.uptime(),
-    commit: String(process.env.RENDER_GIT_COMMIT || '').slice(0, 7)
+    commit: String(process.env.RENDER_GIT_COMMIT || '').slice(0, 7),
+    memory: {
+      rss: Math.round(mem.rss / 1024 / 1024),
+      heapUsed: Math.round(mem.heapUsed / 1024 / 1024),
+      heapTotal: Math.round(mem.heapTotal / 1024 / 1024)
+    },
+    node: process.version,
+    env: process.env.NODE_ENV || 'development'
   });
 });
 
