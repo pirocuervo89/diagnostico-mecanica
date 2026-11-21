@@ -1384,19 +1384,23 @@
 
   async function iniciarAr() {
     if (!initAr()) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      avisar('Tu navegador no soporta cámara. Usa Chrome actualizado.', 'error', 8000);
+      return;
+    }
+    avisar('Activando cámara...', 'info', 2000);
     try {
-      // Solicitar cámara trasera
       streamAr = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: { facingMode: { ideal: 'environment' } },
         audio: false
       });
       videoAr.srcObject = streamAr;
-      await videoAr.play();
+      await videoAr.play().catch(() => {});
       vistaArActiva = true;
       document.getElementById('rutaArToggle')?.classList.add('activo');
       document.querySelector('.ruta-shell')?.classList.add('ruta-ar-activo');
-      canvasAr.hidden = false;
-      videoAr.hidden = false;
+      canvasAr.classList.add('activo');
+      videoAr.classList.add('activo');
       canvasAr.width = canvasAr.clientWidth || window.innerWidth;
       canvasAr.height = canvasAr.clientHeight || window.innerHeight;
       // Cargar modelo COCO-SSD (lazy, solo si está disponible)
@@ -1427,8 +1431,8 @@
     if (videoAr) videoAr.srcObject = null;
     document.getElementById('rutaArToggle')?.classList.remove('activo');
     document.querySelector('.ruta-shell')?.classList.remove('ruta-ar-activo');
-    if (canvasAr) canvasAr.hidden = true;
-    if (videoAr) videoAr.hidden = true;
+    if (canvasAr) canvasAr.classList.remove('activo');
+    if (videoAr) videoAr.classList.remove('activo');
   }
 
   function toggleAr() {
