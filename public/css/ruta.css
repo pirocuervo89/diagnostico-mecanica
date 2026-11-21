@@ -3087,3 +3087,51 @@ body.viendo-ruta .pwa-install { display: none !important; }
   color: #86efac !important;
   box-shadow: 0 0 20px rgba(34, 197, 94, .6) !important;
 }
+
+/* ============================================================
+   Navegación limpia: solo carretera, volante y avisos
+   ============================================================ */
+
+/* Al navegar, el panel de inicio desaparece en cualquier modo. */
+.ruta-shell.ruta-navegando .ruta-panel { display: none !important; }
+.ruta-shell.ruta-navegando .ruta-search,
+.ruta-shell.ruta-navegando .ruta-recientes,
+.ruta-shell.ruta-navegando .ruta-results,
+.ruta-shell.ruta-navegando .ruta-zoom { display: none !important; }
+
+/* En AR y 3D el HUD propio del lienzo manda: se ocultan los paneles HTML. */
+.ruta-shell.ruta-navegando.ruta-ar-activo .ruta-banner,
+.ruta-shell.ruta-navegando.ruta-ar-activo .ruta-eta,
+.ruta-shell.ruta-navegando.ruta-ar-activo .ruta-alert,
+.ruta-shell.ruta-navegando.ruta-ar-activo .ruta-speed,
+.ruta-shell.ruta-navegando.ruta-3d-activo .ruta-banner,
+.ruta-shell.ruta-navegando.ruta-3d-activo .ruta-eta,
+.ruta-shell.ruta-navegando.ruta-3d-activo .ruta-alert,
+.ruta-shell.ruta-navegando.ruta-3d-activo .ruta-speed { display: none !important; }
+
+/* Botón de detener navegación: abajo al centro, siempre a mano. */
+.ruta-fab-parar {
+  left: 50% !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: 22px !important;
+  transform: translateX(-50%) !important;
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 50% !important;
+  font-size: 24px !important;
+  background: linear-gradient(135deg, rgba(255, 77, 109, .95), rgba(220, 38, 38, .95)) !important;
+  border: 2px solid rgba(255, 120, 150, .9) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 30px -8px rgba(255, 77, 109, .9), 0 0 24px -6px rgba(255, 77, 109, .8) !important;
+  z-index: 1200 !important;
+  animation: latidoParar 2s ease-in-out infinite;
+}
+.ruta-fab-parar:hover { transform: translateX(-50%) scale(1.08) !important; }
+@keyframes latidoParar {
+  0%, 100% { box-shadow: 0 10px 30px -8px rgba(255, 77, 109, .9), 0 0 24px -6px rgba(255, 77, 109, .8); }
+  50% { box-shadow: 0 10px 30px -8px rgba(255, 77, 109, .9), 0 0 38px 2px rgba(255, 77, 109, .95); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ruta-fab-parar { animation: none; }
+}

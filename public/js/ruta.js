@@ -764,7 +764,17 @@
     navegando = !navegando;
     elShell?.classList.toggle('ruta-conduciendo', navegando);
     elShell?.classList.toggle('ruta-navegando', navegando);
+    const elParar = document.getElementById('rutaParar');
+    if (elParar) elParar.hidden = !navegando;
     if (navegando) {
+      // Al arrancar, el panel de inicio desaparece y todo pasa a pantalla
+      // completa: solo carretera, coche y avisos.
+      elPanel.hidden = true;
+      elShell?.classList.add('ruta-completa');
+      document.body.classList.add('ruta-pantalla-completa');
+      if (elShell?.requestFullscreen && !document.fullscreenElement) {
+        try { elShell.requestFullscreen({ navigationUI: 'hide' }).catch(() => {}); } catch (_e) { /* fallback: clase fija */ }
+      }
       siguiendo = true;
       paso = 0;
       // Rumbo arriba al conducir, salvo que lo hayas dejado en norte a mano.
@@ -792,9 +802,17 @@
       pintarBrujula();
       decir('Navegación detenida');
       avisar('Navegación detenida.', 'info', 3000);
+      // Se sale de pantalla completa y vuelve el panel de inicio.
+      elShell?.classList.remove('ruta-completa');
+      document.body.classList.remove('ruta-pantalla-completa');
+      if (document.fullscreenElement && document.exitFullscreen) {
+        try { document.exitFullscreen().catch(() => {}); } catch (_e) { /* nada */ }
+      }
     }
     pintarPanel();
     pintarBanner(rutaActiva(), paso);
+    // Durante la navegación el panel de inicio no se muestra.
+    if (rutaActiva()) elPanel.hidden = navegando;
   }
 
   function restante(lat, lon) {
@@ -1327,6 +1345,8 @@
 
   function iniciar3d() {
     if (!init3d()) return;
+    // Un solo modo de vista a la vez: si AR está abierto, se cierra.
+    if (typeof vistaArActiva !== 'undefined' && vistaArActiva && typeof detenerAr === 'function') detenerAr();
     vista3dActiva = true;
     carretera3d = generarCarretera3d();
     signos3d = generarSignos3d();
@@ -1384,6 +1404,8 @@
 
   async function iniciarAr() {
     if (!initAr()) return;
+    // Un solo modo de vista a la vez: si 3D está abierto, se cierra.
+    if (vista3dActiva) detener3d();
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       avisar('Tu navegador no soporta cámara. Usa Chrome actualizado.', 'error', 8000);
       return;
@@ -1401,8 +1423,7 @@
       document.querySelector('.ruta-shell')?.classList.add('ruta-ar-activo');
       canvasAr.classList.add('activo');
       videoAr.classList.add('activo');
-      canvasAr.width = canvasAr.clientWidth || window.innerWidth;
-      canvasAr.height = canvasAr.clientHeight || window.innerHeight;
+      ajustarTamanoAr();
       // Cargar modelo COCO-SSD (lazy, solo si está disponible)
       if (typeof cocoSsd !== 'undefined' && !modeloCoco) {
         cocoSsd.load().then(m => { modeloCoco = m; avisar('Detección de objetos activada.', 'ok', 3000); }).catch(e => console.warn('COCO-SSD no disponible:', e));
@@ -1441,6 +1462,8 @@
 
   function dibujarAr() {
     if (!ctxAr || !canvasAr || !videoAr) return;
+    // Mantener el canvas nítido y ajustado al tamaño real de la pantalla.
+    ajustarTamanoAr();
     const w = canvasAr.width, h = canvasAr.height;
     // Limpiar canvas (transparente para ver el video)
     ctxAr.clearRect(0, 0, w, h);
@@ -1490,110 +1513,306 @@
       }
     }
 
-    // Dibujar línea de ruta (azul) sobre la carretera
+    // Línea de ruta dinámica (color según la maniobra) pintada sobre la calzada.
     const ruta = rutaActiva();
+    const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
     if (ruta && ruta.geometry && ruta.geometry.length > 1) {
-      // Proyectar la ruta en la pantalla (perspectiva con curva)
-      ctxAr.strokeStyle = 'rgba(34, 211, 238, .85)';
-      ctxAr.lineWidth = 8;
-      ctxAr.shadowColor = '#22d3ee';
-      ctxAr.shadowBlur = 20;
-      ctxAr.lineCap = 'round';
-      ctxAr.beginPath();
-      const pts = ruta.geometry;
-      const numPts = Math.min(20, pts.length);
-      // Calcular curva lateral basada en la geometría de la ruta
-      let curvaAcum = 0;
-      for (let i = 0; i < numPts; i++) {
-        const z = i / numPts;
-        const scale = 1 - z * 0.55;
-        // Curva: desplazamiento lateral que aumenta con la distancia
-        if (i > 0 && i < pts.length - 1) {
-          const a = pts[i - 1], b = pts[i], c = pts[i + 1];
-          const dx1 = b[1] - a[1], dy1 = b[0] - a[0];
-          const dx2 = c[1] - b[1], dy2 = c[0] - b[0];
-          const cross = dx1 * dy2 - dy1 * dx2;
-          curvaAcum += cross * 0.5;
-        }
-        const x = w / 2 + curvaAcum * scale * 0.3;
-        const y = h * 0.45 + z * h * 0.45;
-        if (i === 0) ctxAr.moveTo(x, y);
-        else ctxAr.lineTo(x, y);
-      }
-      ctxAr.stroke();
-      ctxAr.shadowBlur = 0;
-
-      // Flechas sobre la ruta
-      ctxAr.fillStyle = 'rgba(34, 211, 238, .95)';
-      ctxAr.shadowColor = '#22d3ee';
-      ctxAr.shadowBlur = 10;
-      let ca = 0;
-      for (let i = 0; i < numPts; i += 3) {
-        const z = i / numPts;
-        const scale = 1 - z * 0.55;
-        if (i > 0 && i < pts.length - 1) {
-          const a = pts[i - 1], b = pts[i], c = pts[i + 1] || pts[i];
-          const dx1 = b[1] - a[1], dy1 = b[0] - a[0];
-          const dx2 = c[1] - b[1], dy2 = c[0] - b[0];
-          const cross = dx1 * dy2 - dy1 * dx2;
-          ca += cross * 0.5;
-        }
-        const x = w / 2 + ca * scale * 0.3;
-        const y = h * 0.45 + z * h * 0.45;
-        ctxAr.beginPath();
-        ctxAr.arc(x, y, 5 * scale, 0, Math.PI * 2);
-        ctxAr.fill();
-      }
-      ctxAr.shadowBlur = 0;
+      dibujarRutaAr(w, h, ruta, s);
     }
 
     // HUD: velocidad
-    ctxAr.fillStyle = 'rgba(10, 16, 30, .7)';
-    ctxAr.fillRect(10, 10, 90, 40);
-    ctxAr.fillStyle = '#22d3ee';
-    ctxAr.font = 'bold 20px sans-serif';
-    ctxAr.textAlign = 'left';
-    ctxAr.fillText(`${Math.round(velocidad)}`, 20, 36);
-    ctxAr.fillStyle = '#f0f8ff';
-    ctxAr.font = '10px sans-serif';
-    ctxAr.fillText('KM/H', 55, 36);
+    // Cabina del GT4: salpicadero, volante e indicadores.
+    dibujarCockpit(w, h, s, ruta);
 
-    // HUD: próxima maniobra
-    const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
-    if (s && s.name) {
-      ctxAr.fillStyle = 'rgba(10, 16, 30, .8)';
-      ctxAr.fillRect(10, h - 60, w - 20, 50);
-      ctxAr.strokeStyle = 'rgba(34, 211, 238, .5)';
-      ctxAr.lineWidth = 2;
-      ctxAr.strokeRect(10, h - 60, w - 20, 50);
-      ctxAr.fillStyle = '#22d3ee';
-      ctxAr.font = 'bold 20px sans-serif';
-      ctxAr.fillText(flechaPara(s), 25, h - 32);
-      ctxAr.fillStyle = '#f0f8ff';
-      ctxAr.font = 'bold 13px sans-serif';
-      ctxAr.fillText(s.name || 'Continúa', 60, h - 32);
-      ctxAr.fillStyle = 'rgba(255, 255, 255, .6)';
-      ctxAr.font = '10px sans-serif';
-      ctxAr.fillText(`En ${s.distance ? (s.distance > 1000 ? (s.distance/1000).toFixed(1)+' km' : s.distance+' m') : ''}`, 60, h - 15);
+    // Panel superior de maniobra.
+    dibujarPanelAr(w, h, s);
+  }
+
+  // ---- utilidades de dibujo AR ----
+  function hexRgba(hex, a) {
+    const t = String(hex).replace('#', '');
+    const r = parseInt(t.slice(0, 2), 16), g = parseInt(t.slice(2, 4), 16), b = parseInt(t.slice(4, 6), 16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+  function rrect(x, y, an, al, r) {
+    const rr = Math.min(r, an / 2, al / 2);
+    ctxAr.beginPath();
+    ctxAr.moveTo(x + rr, y);
+    ctxAr.arcTo(x + an, y, x + an, y + al, rr);
+    ctxAr.arcTo(x + an, y + al, x, y + al, rr);
+    ctxAr.arcTo(x, y + al, x, y, rr);
+    ctxAr.arcTo(x, y, x + an, y, rr);
+    ctxAr.closePath();
+  }
+  function colorManiobra(s) {
+    if (!s) return '#22d3ee';
+    const m = String(s.modifier || '');
+    if (m.includes('uturn') || m.includes('sharp')) return '#ef4444';
+    if (m.includes('left') || m.includes('right')) return '#fb923c';
+    if (m.includes('slight')) return '#fbbf24';
+    if (s.type === 'roundabout' || s.type === 'rotary') return '#a855f7';
+    if (s.type === 'exit' || s.type === 'off ramp') return '#f59e0b';
+    return '#22c55e';
+  }
+  function recortar(t, max) {
+    const c = String(t || '');
+    return c.length > max ? `${c.slice(0, max - 1)}…` : c;
+  }
+  function ajustarTamanoAr() {
+    if (!canvasAr) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const an = Math.round((canvasAr.clientWidth || window.innerWidth) * dpr);
+    const al = Math.round((canvasAr.clientHeight || window.innerHeight) * dpr);
+    if (an && al && (canvasAr.width !== an || canvasAr.height !== al)) {
+      canvasAr.width = an;
+      canvasAr.height = al;
+    }
+  }
+
+  // Calzada pintada en perspectiva con colores según la maniobra y flechas
+  // que avanzan hacia el horizonte (sensación de movimiento real).
+  function dibujarRutaAr(w, h, ruta, s) {
+    const pts = ruta.geometry;
+    const n = Math.min(26, pts.length);
+    if (n < 2) return;
+    const col = colorManiobra(s);
+    const baseY = h * 0.72;
+    const topY = h * 0.30;
+    const nearW = Math.min(w * 0.30, 240);
+    const farW = nearW * 0.12;
+    let curva = 0;
+    const coords = [];
+    for (let i = 0; i < n; i++) {
+      const z = i / (n - 1);
+      if (i > 0 && i < pts.length - 1) {
+        const a = pts[i - 1], b = pts[i], c = pts[i + 1];
+        const h1 = Math.atan2(b[1] - a[1], b[0] - a[0]);
+        const h2 = Math.atan2(c[1] - b[1], c[0] - b[0]);
+        let d = h2 - h1;
+        while (d > Math.PI) d -= Math.PI * 2;
+        while (d < -Math.PI) d += Math.PI * 2;
+        curva += d;
+      }
+      const off = Math.max(-0.42, Math.min(0.42, curva));
+      const x = w / 2 + off * z * z * w * 0.9;
+      const y = baseY + (topY - baseY) * z;
+      const half = (nearW + (farW - nearW) * z) / 2;
+      coords.push({ x, y, half, z });
     }
 
-    // Modo ADAS AR activo
-    ctxAr.fillStyle = 'rgba(255, 77, 109, .9)';
-    ctxAr.font = 'bold 11px sans-serif';
+    ctxAr.save();
+    // cinta de calzada
+    const g = ctxAr.createLinearGradient(0, baseY, 0, topY);
+    g.addColorStop(0, hexRgba(col, 0.55));
+    g.addColorStop(0.6, hexRgba(col, 0.30));
+    g.addColorStop(1, hexRgba(col, 0.05));
+    ctxAr.fillStyle = g;
+    ctxAr.beginPath();
+    coords.forEach((p, i) => (i ? ctxAr.lineTo(p.x - p.half, p.y) : ctxAr.moveTo(p.x - p.half, p.y)));
+    for (let i = coords.length - 1; i >= 0; i--) ctxAr.lineTo(coords[i].x + coords[i].half, coords[i].y);
+    ctxAr.closePath();
+    ctxAr.fill();
+
+    // bordes luminosos
+    ctxAr.lineWidth = 2.5;
+    ctxAr.strokeStyle = hexRgba(col, 0.95);
+    ctxAr.shadowColor = col;
+    ctxAr.shadowBlur = 16;
+    for (const side of [-1, 1]) {
+      ctxAr.beginPath();
+      coords.forEach((p, i) => (i ? ctxAr.lineTo(p.x + side * p.half, p.y) : ctxAr.moveTo(p.x + side * p.half, p.y)));
+      ctxAr.stroke();
+    }
+    ctxAr.shadowBlur = 0;
+
+    // eje discontinuo animado
+    ctxAr.lineWidth = Math.max(2, nearW * 0.03);
+    ctxAr.strokeStyle = 'rgba(255,255,255,0.8)';
+    ctxAr.setLineDash([14, 18]);
+    ctxAr.lineDashOffset = -(performance.now() / 25) % 32;
+    ctxAr.beginPath();
+    coords.forEach((p, i) => (i ? ctxAr.lineTo(p.x, p.y) : ctxAr.moveTo(p.x, p.y)));
+    ctxAr.stroke();
+    ctxAr.setLineDash([]);
+
+    // flechas que avanzan
+    const phase = (performance.now() / 1200) % 1;
+    for (let k = 0; k < 6; k++) {
+      const z = ((k / 6) + phase) % 1;
+      const idx = Math.min(coords.length - 1, Math.round(z * (coords.length - 1)));
+      const p = coords[idx];
+      const sz = Math.max(4, nearW * 0.16 * (1 - z * 0.85));
+      ctxAr.fillStyle = hexRgba(col, 0.9 * (1 - z * 0.7));
+      ctxAr.beginPath();
+      ctxAr.moveTo(p.x, p.y - sz);
+      ctxAr.lineTo(p.x - sz, p.y + sz * 0.6);
+      ctxAr.lineTo(p.x - sz * 0.5, p.y + sz * 0.6);
+      ctxAr.lineTo(p.x, p.y + sz * 0.1);
+      ctxAr.lineTo(p.x + sz * 0.5, p.y + sz * 0.6);
+      ctxAr.lineTo(p.x + sz, p.y + sz * 0.6);
+      ctxAr.closePath();
+      ctxAr.fill();
+    }
+    ctxAr.restore();
+  }
+
+  // Cabina: salpicadero curvo, volante GT4 y paneles digitales.
+  function dibujarCockpit(w, h, s, ruta) {
+    const dashH = h * 0.28;
+    const dashTop = h - dashH;
+    ctxAr.save();
+
+    // salpicadero
+    ctxAr.beginPath();
+    ctxAr.moveTo(0, h);
+    ctxAr.lineTo(0, dashTop + h * 0.06);
+    ctxAr.quadraticCurveTo(w * 0.5, dashTop - h * 0.06, w, dashTop + h * 0.06);
+    ctxAr.lineTo(w, h);
+    ctxAr.closePath();
+    const dg = ctxAr.createLinearGradient(0, dashTop, 0, h);
+    dg.addColorStop(0, 'rgba(16,22,32,0.93)');
+    dg.addColorStop(0.45, 'rgba(9,13,20,0.985)');
+    dg.addColorStop(1, '#04070d');
+    ctxAr.fillStyle = dg;
+    ctxAr.fill();
+
+    // filo superior luminoso
+    ctxAr.beginPath();
+    ctxAr.moveTo(0, dashTop + h * 0.06);
+    ctxAr.quadraticCurveTo(w * 0.5, dashTop - h * 0.06, w, dashTop + h * 0.06);
+    ctxAr.strokeStyle = 'rgba(56,225,255,0.28)';
+    ctxAr.lineWidth = 2;
+    ctxAr.stroke();
+
+    // volante GT4
+    const wheelR = Math.min(w * 0.46, h * 0.26);
+    const wcx = w / 2;
+    const wcy = h * 0.90;
+    ctxAr.lineWidth = wheelR * 0.13;
+    ctxAr.strokeStyle = '#0b0f15';
+    ctxAr.beginPath();
+    ctxAr.arc(wcx, wcy, wheelR, Math.PI * 1.02, Math.PI * 1.98);
+    ctxAr.stroke();
+    ctxAr.lineWidth = Math.max(1.5, wheelR * 0.02);
+    ctxAr.strokeStyle = 'rgba(56,225,255,0.35)';
+    ctxAr.beginPath();
+    ctxAr.arc(wcx, wcy, wheelR * 0.95, Math.PI * 1.06, Math.PI * 1.94);
+    ctxAr.stroke();
+    ctxAr.strokeStyle = '#11161f';
+    ctxAr.lineWidth = wheelR * 0.07;
+    for (const a of [Math.PI * 1.30, Math.PI * 1.70]) {
+      ctxAr.beginPath();
+      ctxAr.moveTo(wcx, wcy);
+      ctxAr.lineTo(wcx + Math.cos(a) * wheelR * 0.92, wcy + Math.sin(a) * wheelR * 0.92);
+      ctxAr.stroke();
+    }
+    ctxAr.fillStyle = '#0e141d';
+    ctxAr.beginPath();
+    ctxAr.arc(wcx, wcy, wheelR * 0.2, 0, Math.PI * 2);
+    ctxAr.fill();
+    ctxAr.fillStyle = '#38e1ff';
+    ctxAr.font = `bold ${Math.max(9, wheelR * 0.13)}px sans-serif`;
+    ctxAr.textAlign = 'center';
+    ctxAr.textBaseline = 'middle';
+    ctxAr.fillText('GT4', wcx, wcy);
+
+    // paneles digitales
+    const bh = Math.min(70, h * 0.09);
+    const bw = Math.min(150, w * 0.34);
+    dibujarPanelVelocidad(12, dashTop + 10, bw, bh);
+    dibujarPanelRuta(w - bw - 12, dashTop + 10, bw, bh, ruta);
+
+    ctxAr.restore();
+  }
+
+  function dibujarPanelVelocidad(x, y, bw, bh) {
+    rrect(x, y, bw, bh, 12);
+    ctxAr.fillStyle = 'rgba(5,9,15,0.85)';
+    ctxAr.fill();
+    ctxAr.strokeStyle = 'rgba(34,211,238,0.4)';
+    ctxAr.lineWidth = 1.5;
+    ctxAr.stroke();
+    ctxAr.fillStyle = '#22d3ee';
+    ctxAr.textAlign = 'left';
+    ctxAr.textBaseline = 'middle';
+    ctxAr.font = `bold ${bh * 0.52}px sans-serif`;
+    ctxAr.fillText(`${Math.round(velocidad)}`, x + 12, y + bh * 0.42);
+    ctxAr.fillStyle = 'rgba(200,220,240,0.7)';
+    ctxAr.font = `${bh * 0.18}px sans-serif`;
+    ctxAr.fillText('KM/H', x + 12, y + bh * 0.8);
+    const v = velocidad;
+    const marcha = v < 1 ? 'N' : v < 20 ? '1' : v < 40 ? '2' : v < 70 ? '3' : v < 100 ? '4' : '5';
+    ctxAr.fillStyle = 'rgba(56,225,255,0.95)';
     ctxAr.textAlign = 'right';
-    ctxAr.fillText('ADAS AR', w - 15, h - 15);
+    ctxAr.font = `bold ${bh * 0.5}px sans-serif`;
+    ctxAr.fillText(marcha, x + bw - 14, y + bh * 0.5);
+  }
+
+  function dibujarPanelRuta(x, y, bw, bh, ruta) {
+    rrect(x, y, bw, bh, 12);
+    ctxAr.fillStyle = 'rgba(5,9,15,0.85)';
+    ctxAr.fill();
+    ctxAr.strokeStyle = 'rgba(56,225,255,0.3)';
+    ctxAr.lineWidth = 1.5;
+    ctxAr.stroke();
+    const rest = ruta ? restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0) : 0;
+    const min = ruta ? Math.round((ruta.duration || 0) / 60) : 0;
+    const restTxt = rest >= 1000 ? `${(rest / 1000).toFixed(1)} km` : `${Math.round(rest)} m`;
+    ctxAr.fillStyle = '#f0f8ff';
+    ctxAr.textAlign = 'right';
+    ctxAr.textBaseline = 'middle';
+    ctxAr.font = `bold ${bh * 0.32}px sans-serif`;
+    ctxAr.fillText(restTxt, x + bw - 12, y + bh * 0.38);
+    ctxAr.fillStyle = 'rgba(200,220,240,0.65)';
+    ctxAr.font = `${bh * 0.2}px sans-serif`;
+    ctxAr.fillText(`${min} min`, x + bw - 12, y + bh * 0.74);
+  }
+
+  // Panel superior con la próxima maniobra, coloreado según su tipo.
+  function dibujarPanelAr(w, h, s) {
+    if (!s) return;
+    const px = 12, py = 12, pw = w - 24, ph = Math.min(74, h * 0.1);
+    rrect(px, py, pw, ph, 16);
+    ctxAr.fillStyle = 'rgba(6,10,16,0.84)';
+    ctxAr.fill();
+    ctxAr.strokeStyle = 'rgba(56,225,255,0.3)';
+    ctxAr.lineWidth = 1.5;
+    ctxAr.stroke();
+    const col = colorManiobra(s);
+    const ab = ph - 20;
+    rrect(px + 10, py + 10, ab, ab, 12);
+    ctxAr.fillStyle = hexRgba(col, 0.92);
+    ctxAr.fill();
+    ctxAr.fillStyle = '#04121c';
+    ctxAr.textAlign = 'center';
+    ctxAr.textBaseline = 'middle';
+    ctxAr.font = `bold ${ab * 0.6}px sans-serif`;
+    ctxAr.fillText(flechaPara(s), px + 10 + ab / 2, py + 10 + ab / 2 + 2);
+    const aSig = s && Number.isFinite(s.lat) && ultimaPos
+      ? distancia(ultimaPos.lat, ultimaPos.lon, s.lat, s.lon)
+      : (s.distance || 0);
+    ctxAr.textAlign = 'left';
+    ctxAr.fillStyle = '#f0f8ff';
+    ctxAr.font = `bold ${ph * 0.24}px sans-serif`;
+    ctxAr.fillText(recortar(s.name || 'Continúa', 24), px + 10 + ab + 14, py + ph * 0.44);
+    ctxAr.fillStyle = 'rgba(200,220,240,0.7)';
+    ctxAr.font = `${ph * 0.19}px sans-serif`;
+    ctxAr.fillText(`En ${aSig > 1000 ? `${(aSig / 1000).toFixed(1)} km` : `${Math.round(aSig)} m`}`, px + 10 + ab + 14, py + ph * 0.74);
   }
 
   // Conectar el botón AR
   document.getElementById('rutaArToggle')?.addEventListener('click', toggleAr);
+  // Botón para detener la navegación (el panel de inicio está oculto).
+  document.getElementById('rutaParar')?.addEventListener('click', () => {
+    if (navegando) alternarNavegacion();
+  });
 
-  // Iniciar 3D automáticamente al iniciar navegación
+  // Iniciar 3D automáticamente al iniciar navegación (salvo que ya esté AR).
   const _alternarNavOriginal = alternarNavegacion;
   alternarNavegacion = function() {
     _alternarNavOriginal();
     if (navegando) {
-      // Iniciar 3D automáticamente
-      setTimeout(() => { if (!vista3dActiva) iniciar3d(); }, 300);
+      if (!vista3dActiva && !vistaArActiva) setTimeout(() => { if (!vista3dActiva && !vistaArActiva) iniciar3d(); }, 300);
     } else {
       detener3d();
     }
