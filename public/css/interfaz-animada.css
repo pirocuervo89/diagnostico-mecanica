@@ -168,3 +168,33 @@ button:hover, .btn:hover {
 }
 EOF
 echo done
+/* --- Chat dios: avatar, typing, animaciones --- */
+.chat-agent .agent-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #38e1ff, #a855f7);
+  box-shadow: 0 0 18px rgba(56, 225, 255, .5);
+  color: #0b1020;
+}
+.chat-agent .agent-avatar .ic { width: 20px; height: 20px; }
+.chat-box .bubble { border-radius: 16px; padding: 12px 14px; }
+.chat-box .bubble.assistant {
+  background: linear-gradient(135deg, rgba(56,225,255,.08), rgba(168,85,247,.06));
+  border: 1px solid rgba(56,225,255,.18);
+}
+.chat-box .bubble.user {
+  background: linear-gradient(135deg, rgba(56,225,255,.18), rgba(56,225,255,.10));
+  border: 1px solid rgba(56,225,255,.3);
+}
+.chat-scroll-btn {
+  transition: transform .15s ease, opacity .15s ease;
+}
+.chat-scroll-btn:hover { transform: translateY(-2px); }
+.chat-suggestions .chip {
+  background: rgba(56,225,255,.06);
+  border: 1px solid rgba(56,225,255,.2);
+}
+.chat-suggestions .chip:hover {
+  background: rgba(56,225,255,.14);
+  border-color: rgba(56,225,255,.45);
+}

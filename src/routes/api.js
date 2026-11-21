@@ -2370,7 +2370,7 @@ router.post('/chat/ai', async (req, res) => {
     // mucho, así que no hay razón para esperar medio minuto a que termine. Si
     // el proveedor va lento, se queda el diagnóstico local que ya está en
     // pantalla en vez de dejar al usuario mirando los puntos suspensivos.
-    ai = await callAI(prompt, { temperature: 0.35, maxOutputTokens: 700, timeoutMs: 12000, deadlineMs: 13000 });
+    ai = await callAI(prompt, { temperature: 0.35, maxOutputTokens: 1200, timeoutMs: 20000, deadlineMs: 22000 });
   } catch (error) {
     console.warn('[CHAT AI] Error inesperado del proveedor:', error?.message || error);
     ai = { ok: false, reason: 'provider_error' };
@@ -2392,7 +2392,7 @@ router.post('/chat/ai', async (req, res) => {
   const aviso = avisoSeguridad(query);
   // Tope duro: el formato de tres bloques cabe de sobra en 150 palabras y, si
   // el modelo se enrolla, se corta en la última frase entera, no a media.
-  const topeChat = Math.min(plan.aiWords || MAX_AI_REPLY_WORDS, 150);
+  const topeChat = Math.min(plan.aiWords || MAX_AI_REPLY_WORDS, 260);
   return res.json({
     reply: aviso
       ? `${aviso}\n\n${limitReplyWords(reply, topeChat)}`
