@@ -914,6 +914,314 @@
     } catch (_e) { /* sin avisos se navega igual */ }
   }
 
+  // ============================================================
+  // GPS 3D · Vista de conducción inmersiva (pseudo-3D)
+  // ============================================================
+  let vista3dActiva = false;
+  let animacion3d = null;
+  let canvas3d = null;
+  let ctx3d = null;
+  let carretera3d = [];
+  let progreso3d = 0;
+  let signos3d = [];
+
+  function init3d() {
+    canvas3d = document.getElementById('ruta3d');
+    if (!canvas3d) return false;
+    ctx3d = canvas3d.getContext('2d');
+    canvas3d.width = canvas3d.clientWidth || window.innerWidth;
+    canvas3d.height = canvas3d.clientHeight || window.innerHeight;
+    return true;
+  }
+
+  function generarCarretera3d() {
+    const ruta = rutaActiva();
+    if (!ruta || !ruta.geometry) return [];
+    const pts = ruta.geometry;
+    const segs = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1];
+      const dx = b[1] - a[1], dy = b[0] - a[0];
+      const dist = Math.sqrt(dx * dx + dy * dy) * 111000;
+      const heading = Math.atan2(dx, dy) * 180 / Math.PI;
+      segs.push({ lat: a[0], lon: a[1], dist, heading, curva: 0 });
+    }
+    // Calcular curvas
+    for (let i = 1; i < segs.length - 1; i++) {
+      const dh = normalizarGrados(segs[i + 1].heading - segs[i].heading);
+      segs[i].curva = dh;
+    }
+    return segs;
+  }
+
+  function generarSignos3d() {
+    const ruta = rutaActiva();
+    if (!ruta || !ruta.steps) return [];
+    const signos = [];
+    let distAcum = 0;
+    for (const s of ruta.steps) {
+      if (s.distance > 0) distAcum += s.distance;
+      const txt = s.ref ? `${s.ref} · ${s.name || ''}`.trim() : (s.name || '');
+      if (txt) signos.push({ dist: distAcum, texto: txt, tipo: s.type, modifier: s.modifier, exit: s.exit });
+    }
+    return signos;
+  }
+
+  function dibujar3d() {
+    if (!ctx3d || !canvas3d) return;
+    const w = canvas3d.width, h = canvas3d.height;
+    const cx = w / 2;
+    const horizonte = h * 0.35;
+
+    // Limpiar
+    ctx3d.fillStyle = '#0a1220';
+    ctx3d.fillRect(0, 0, w, h);
+
+    // Cielo con gradiente
+    const grad = ctx3d.createLinearGradient(0, 0, 0, horizonte);
+    grad.addColorStop(0, '#0a1220');
+    grad.addColorStop(1, '#1a2a3f');
+    ctx3d.fillStyle = grad;
+    ctx3d.fillRect(0, 0, w, horizonte);
+
+    // Carretera: pseudo-3D con segmentos
+    const segs = carretera3d;
+    if (segs.length === 0) {
+      // Sin ruta: carretera recta genérica
+      dibujarCarreteraRecta(w, h, cx, horizonte);
+      dibujarCoche3d(w, h);
+      return;
+    }
+
+    // Calcular posición actual en la ruta
+    const ruta = rutaActiva();
+    const pos = ultimaPos;
+    let idxActual = 0;
+    if (pos) {
+      let mejor = Infinity;
+      for (let i = 0; i < segs.length; i++) {
+        const d = distancia(pos.lat, pos.lon, segs[i].lat, segs[i].lon);
+        if (d < mejor) { mejor = d; idxActual = i; }
+      }
+    }
+
+    // Dibujar segmentos de carretera con perspectiva
+    const numSegs = 40;
+    const segW = 200; // ancho de la carretera en el horizonte
+    const roadColor = '#2a3a50';
+    const laneColor = '#f0f8ff';
+
+    for (let i = 0; i < numSegs; i++) {
+      const idx = Math.min(idxActual + i, segs.length - 1);
+      const seg = segs[idx];
+      const z = i / numSegs; // 0 = cerca, 1 = lejos
+      const scale = 1 - z * 0.85;
+      const y = horizonte + (h - horizonte) * (1 - z);
+      const roadW = segW * scale * (1 + z * 0.5);
+      const curvaOffset = (seg.curva || 0) * z * 30;
+      const x = cx + curvaOffset;
+
+      // Dibujar segmento de carretera
+      ctx3d.fillStyle = roadColor;
+      ctx3d.fillRect(x - roadW / 2, y - 2, roadW, 4);
+
+      // Líneas de carril
+      if (i % 2 === 0) {
+        ctx3d.strokeStyle = laneColor;
+        ctx3d.lineWidth = 2 * scale;
+        ctx3d.setLineDash([8 * scale, 8 * scale]);
+        ctx3d.beginPath();
+        ctx3d.moveTo(x, y - 2);
+        ctx3d.lineTo(x, y + 2);
+        ctx3d.stroke();
+        ctx3d.setLineDash([]);
+      }
+
+      // Bordes de la carretera
+      ctx3d.strokeStyle = '#f0f8ff';
+      ctx3d.lineWidth = 3 * scale;
+      ctx3d.beginPath();
+      ctx3d.moveTo(x - roadW / 2, y);
+      ctx3d.lineTo(x + roadW / 2, y);
+      ctx3d.stroke();
+    }
+
+    // Dibujar carteles de autopista
+    dibujarSignos3d(w, h, cx, horizonte, idxActual, segs);
+
+    // Dibujar el coche (GT4)
+    dibujarCoche3d(w, h);
+
+    // HUD: velocidad y distancia
+    dibujarHud3d(w, h);
+  }
+
+  function dibujarCarreteraRecta(w, h, cx, horizonte) {
+    const numSegs = 40;
+    const segW = 200;
+    for (let i = 0; i < numSegs; i++) {
+      const z = i / numSegs;
+      const scale = 1 - z * 0.85;
+      const y = horizonte + (h - horizonte) * (1 - z);
+      const roadW = segW * scale * (1 + z * 0.5);
+      ctx3d.fillStyle = '#2a3a50';
+      ctx3d.fillRect(cx - roadW / 2, y - 2, roadW, 4);
+      if (i % 2 === 0) {
+        ctx3d.strokeStyle = '#f0f8ff';
+        ctx3d.lineWidth = 2 * scale;
+        ctx3d.setLineDash([8 * scale, 8 * scale]);
+        ctx3d.beginPath();
+        ctx3d.moveTo(cx, y - 2);
+        ctx3d.lineTo(cx, y + 2);
+        ctx3d.stroke();
+        ctx3d.setLineDash([]);
+      }
+      ctx3d.strokeStyle = '#f0f8ff';
+      ctx3d.lineWidth = 3 * scale;
+      ctx3d.beginPath();
+      ctx3d.moveTo(cx - roadW / 2, y);
+      ctx3d.lineTo(cx + roadW / 2, y);
+      ctx3d.stroke();
+    }
+  }
+
+  function dibujarSignos3d(w, h, cx, horizonte, idxActual, segs) {
+    const signos = signos3d;
+    if (signos.length === 0) return;
+    // Calcular distancia acumulada hasta el índice actual
+    let distAcum = 0;
+    for (let i = 0; i < idxActual && i < segs.length; i++) distAcum += segs[i].dist;
+    // Dibujar signos próximos
+    for (const s of signos) {
+      const distRestante = s.dist - distAcum;
+      if (distRestante < 0 || distRestante > 2000) continue;
+      const z = Math.min(1, distRestante / 2000);
+      const scale = 1 - z * 0.7;
+      const y = horizonte + (h - horizonte) * (1 - z) * 0.6;
+      const signW = 120 * scale;
+      const signH = 60 * scale;
+      const x = cx + (s.modifier === 'right' ? 80 : s.modifier === 'left' ? -80 : 0) * scale;
+      // Fondo del cartel
+      ctx3d.fillStyle = 'rgba(10, 16, 30, .9)';
+      ctx3d.fillRect(x - signW / 2, y - signH / 2, signW, signH);
+      ctx3d.strokeStyle = s.exit ? '#22d3ee' : '#f0f8ff';
+      ctx3d.lineWidth = 2 * scale;
+      ctx3d.strokeRect(x - signW / 2, y - signH / 2, signW, signH);
+      // Texto
+      ctx3d.fillStyle = '#f0f8ff';
+      ctx3d.font = `bold ${Math.round(12 * scale)}px sans-serif`;
+      ctx3d.textAlign = 'center';
+      ctx3d.textBaseline = 'middle';
+      const lineas = s.texto.split(' ').slice(0, 3).join(' ');
+      ctx3d.fillText(lineas, x, y);
+      if (s.exit) {
+        ctx3d.fillStyle = '#22d3ee';
+        ctx3d.font = `bold ${Math.round(10 * scale)}px sans-serif`;
+        ctx3d.fillText('TOMAR ESTA SALIDA', x, y + 14 * scale);
+      }
+    }
+  }
+
+  function dibujarCoche3d(w, h) {
+    const carW = 60, carH = 90;
+    const cx = w / 2, cy = h - 120;
+    // Sombra
+    ctx3d.fillStyle = 'rgba(0, 0, 0, .5)';
+    ctx3d.beginPath();
+    ctx3d.ellipse(cx, cy + carH / 2 + 5, carW / 2 + 5, 8, 0, 0, Math.PI * 2);
+    ctx3d.fill();
+    // Coche (GT4 simplificado)
+    ctx3d.fillStyle = '#eaf7ff';
+    ctx3d.beginPath();
+    ctx3d.roundRect(cx - carW / 2, cy - carH / 2, carW, carH, 8);
+    ctx3d.fill();
+    // Parabrisas
+    ctx3d.fillStyle = '#38e1ff';
+    ctx3d.fillRect(cx - carW / 2 + 8, cy - carH / 2 + 12, carW - 16, 20);
+    // Luces traseras
+    ctx3d.fillStyle = '#ff4d6d';
+    ctx3d.fillRect(cx - carW / 2 + 4, cy + carH / 2 - 8, 8, 4);
+    ctx3d.fillRect(cx + carW / 2 - 12, cy + carH / 2 - 8, 8, 4);
+    // Ruedas
+    ctx3d.fillStyle = '#0a1220';
+    ctx3d.fillRect(cx - carW / 2 - 4, cy - carH / 2 + 10, 6, 18);
+    ctx3d.fillRect(cx + carW / 2 - 2, cy - carH / 2 + 10, 6, 18);
+    ctx3d.fillRect(cx - carW / 2 - 4, cy + carH / 2 - 28, 6, 18);
+    ctx3d.fillRect(cx + carW / 2 - 2, cy + carH / 2 - 28, 6, 18);
+  }
+
+  function dibujarHud3d(w, h) {
+    // Velocidad
+    ctx3d.fillStyle = 'rgba(10, 16, 30, .8)';
+    ctx3d.fillRect(10, 10, 80, 40);
+    ctx3d.fillStyle = '#22d3ee';
+    ctx3d.font = 'bold 24px sans-serif';
+    ctx3d.textAlign = 'left';
+    ctx3d.fillText(`${Math.round(velocidad)}`, 20, 38);
+    ctx3d.fillStyle = '#f0f8ff';
+    ctx3d.font = '10px sans-serif';
+    ctx3d.fillText('KM/H', 55, 38);
+    // Distancia restante
+    const ruta = rutaActiva();
+    if (ruta) {
+      const rest = restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0);
+      ctx3d.fillStyle = 'rgba(10, 16, 30, .8)';
+      ctx3d.fillRect(w - 120, 10, 110, 40);
+      ctx3d.fillStyle = '#f0f8ff';
+      ctx3d.font = 'bold 14px sans-serif';
+      ctx3d.textAlign = 'right';
+      ctx3d.fillText(rest > 1000 ? `${(rest/1000).toFixed(1)} km` : `${rest} m`, w - 20, 28);
+      ctx3d.font = '10px sans-serif';
+      ctx3d.fillText(ruta.duration ? `${Math.round(ruta.duration/60)} min` : '', w - 20, 42);
+    }
+  }
+
+  function iniciar3d() {
+    if (!init3d()) return;
+    vista3dActiva = true;
+    carretera3d = generarCarretera3d();
+    signos3d = generarSignos3d();
+    document.getElementById('ruta3dToggle')?.classList.add('activo');
+    document.querySelector('.ruta-shell')?.classList.add('ruta-3d-activo');
+    canvas3d.hidden = false;
+    canvas3d.width = canvas3d.clientWidth || window.innerWidth;
+    canvas3d.height = canvas3d.clientHeight || window.innerHeight;
+    const loop = () => {
+      if (!vista3dActiva) return;
+      dibujar3d();
+      animacion3d = requestAnimationFrame(loop);
+    };
+    loop();
+  }
+
+  function detener3d() {
+    vista3dActiva = false;
+    if (animacion3d) cancelAnimationFrame(animacion3d);
+    animacion3d = null;
+    document.getElementById('ruta3dToggle')?.classList.remove('activo');
+    document.querySelector('.ruta-shell')?.classList.remove('ruta-3d-activo');
+    if (canvas3d) canvas3d.hidden = true;
+  }
+
+  function toggle3d() {
+    if (vista3dActiva) detener3d(); else iniciar3d();
+  }
+
+  // Conectar el botón
+  document.getElementById('ruta3dToggle')?.addEventListener('click', toggle3d);
+
+  // Iniciar 3D automáticamente al iniciar navegación
+  const _alternarNavOriginal = alternarNavegacion;
+  alternarNavegacion = function() {
+    _alternarNavOriginal();
+    if (navegando) {
+      // Iniciar 3D automáticamente
+      setTimeout(() => { if (!vista3dActiva) iniciar3d(); }, 300);
+    } else {
+      detener3d();
+    }
+  };
+
   function vigilarAvisos(lat, lon) {
     if (!capaAvisos) return;
     const pendientes = avisos.filter(a => !avisados.has(a.id));

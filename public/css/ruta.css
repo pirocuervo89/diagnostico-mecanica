@@ -2654,6 +2654,39 @@ body.viendo-ruta .pwa-install { display: none !important; }
   .view-gps-fullscreen .ruta-empezar { min-height: 48px !important; font-size: 15px !important; }
 }
 
+/* ============================================================
+   GPS 3D · Vista de conducción inmersiva (pseudo-3D)
+   ============================================================ */
+.ruta-3d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  background: linear-gradient(180deg, #0a1220 0%, #0e1a2b 40%, #1a2a3f 100%);
+  display: none;
+}
+.ruta-3d.activo { display: block; }
+.ruta-shell.ruta-3d-activo .ruta-map { display: none; }
+.ruta-shell.ruta-3d-activo .ruta-3d { display: block; }
+
+/* Botón para alternar entre mapa 2D y vista 3D */
+#ruta3dToggle {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 16px !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  background: linear-gradient(135deg, rgba(167, 139, 250, .6), rgba(139, 92, 246, .6)) !important;
+  border: 2px solid rgba(167, 139, 250, .8) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, .9), 0 0 20px -8px rgba(167, 139, 250, .7) !important;
+}
+#ruta3dToggle.activo {
+  background: linear-gradient(135deg, rgba(167, 139, 250, .9), rgba(139, 92, 246, .9)) !important;
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, .3), 0 8px 24px -8px rgba(0, 0, 0, .9), 0 0 28px -8px rgba(167, 139, 250, 1) !important;
+}
+
 /* Botón flotante para hablar con la IA sin salir de la navegación. */
 .ruta-fab-chat {
   position: absolute;
