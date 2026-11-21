@@ -1175,28 +1175,39 @@
       const distRestante = s.dist - distAcum;
       if (distRestante < 0 || distRestante > 2000) continue;
       const z = Math.min(1, distRestante / 2000);
-      const scale = 1 - z * 0.7;
-      const y = horizonte + (h - horizonte) * (1 - z) * 0.6;
-      const signW = 120 * scale;
-      const signH = 60 * scale;
-      const x = cx + (s.modifier === 'right' ? 80 : s.modifier === 'left' ? -80 : 0) * scale;
-      // Fondo del cartel
-      ctx3d.fillStyle = 'rgba(10, 16, 30, .9)';
+      const scale = 1 - z * 0.6;
+      const y = horizonte + (h - horizonte) * (1 - z) * 0.5;
+      const signW = 160 * scale;
+      const signH = 80 * scale;
+      const x = cx + (s.modifier === 'right' ? 100 : s.modifier === 'left' ? -100 : 0) * scale;
+      // Fondo del cartel (estilo autopista)
+      ctx3d.fillStyle = 'rgba(5, 10, 20, .95)';
       ctx3d.fillRect(x - signW / 2, y - signH / 2, signW, signH);
       ctx3d.strokeStyle = s.exit ? '#22d3ee' : '#f0f8ff';
-      ctx3d.lineWidth = 2 * scale;
+      ctx3d.lineWidth = 3 * scale;
       ctx3d.strokeRect(x - signW / 2, y - signH / 2, signW, signH);
-      // Texto
+      // Banda superior (azul autopista)
+      ctx3d.fillStyle = s.exit ? 'rgba(34, 211, 238, .3)' : 'rgba(56, 189, 248, .2)';
+      ctx3d.fillRect(x - signW / 2, y - signH / 2, signW, signH * 0.3);
+      // Texto principal
       ctx3d.fillStyle = '#f0f8ff';
-      ctx3d.font = `bold ${Math.round(12 * scale)}px sans-serif`;
+      ctx3d.font = `bold ${Math.round(14 * scale)}px sans-serif`;
       ctx3d.textAlign = 'center';
       ctx3d.textBaseline = 'middle';
-      const lineas = s.texto.split(' ').slice(0, 3).join(' ');
-      ctx3d.fillText(lineas, x, y);
+      const lineas = s.texto.split(' ').slice(0, 4).join(' ');
+      ctx3d.fillText(lineas, x, y - 5 * scale);
+      // Distancia
+      ctx3d.fillStyle = 'rgba(255, 255, 255, .7)';
+      ctx3d.font = `${Math.round(11 * scale)}px sans-serif`;
+      ctx3d.fillText(`${distRestante} m`, x, y + 15 * scale);
       if (s.exit) {
         ctx3d.fillStyle = '#22d3ee';
-        ctx3d.font = `bold ${Math.round(10 * scale)}px sans-serif`;
-        ctx3d.fillText('TOMAR ESTA SALIDA', x, y + 14 * scale);
+        ctx3d.font = `bold ${Math.round(12 * scale)}px sans-serif`;
+        ctx3d.fillText('▶ TOMAR ESTA SALIDA', x, y + 30 * scale);
+      } else {
+        ctx3d.fillStyle = 'rgba(255, 255, 255, .5)';
+        ctx3d.font = `${Math.round(10 * scale)}px sans-serif`;
+        ctx3d.fillText('NO TOMAR', x, y + 30 * scale);
       }
     }
   }
