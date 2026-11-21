@@ -491,6 +491,11 @@
     // Rumbo arriba: el mapa gira con el coche. Solo con velocidad suficiente
     // para que el temblor del GPS no maree el mapa parado en un semáforo.
     if (rumboAuto && navegando && velocidad > 6) seguirRumbo();
+    // Actualizar scroll de la carretera 3D con la posición real
+    if (navegando && vista3dActiva) {
+      scrollOffset3d += velocidad / 3.6 * 0.1; // m/s * factor
+      if (scrollOffset3d > 1) scrollOffset3d -= 1;
+    }
 
     if (navegando) {
       seguirRuta(lat, lon);
@@ -923,6 +928,7 @@
   let ctx3d = null;
   let carretera3d = [];
   let progreso3d = 0;
+  let scrollOffset3d = 0;
   let signos3d = [];
   let imagenCoche3d = null;
   // Cargar la imagen del coche GT4
