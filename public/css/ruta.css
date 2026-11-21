@@ -903,3 +903,100 @@ body.viendo-ruta .pwa-install { display: none !important; }
   box-shadow: 0 10px 26px -12px rgba(0, 0, 0, .9);
 }
 .ruta-shell[data-tema="dia"] .ruta-fab-chat { background: rgba(255, 255, 255, .95); color: #0e1a2b; }
+
+/* Banner de maniobra estilo navegador: flecha grande, distancia y calle. */
+.ruta-banner {
+  position: absolute;
+  top: 12px; left: 12px; right: 12px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(10, 16, 28, .96), rgba(5, 9, 16, .98));
+  border: 1px solid rgba(56, 225, 255, .35);
+  box-shadow: 0 18px 40px -20px rgba(0, 0, 0, .95), 0 0 30px -15px rgba(56, 225, 255, .6);
+  z-index: 950;
+  backdrop-filter: blur(14px);
+}
+.ruta-banner[hidden] { display: none; }
+.ruta-banner-flecha {
+  flex: 0 0 auto;
+  width: 52px; height: 52px;
+  display: grid; place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(140deg, #22d3ee, #6d5efc);
+  color: #03121c;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 14px 28px -16px rgba(34, 211, 238, .95);
+}
+.ruta-banner-info { flex: 1 1 auto; min-width: 0; }
+.ruta-banner-info small {
+  display: block;
+  font-size: 10px;
+  letter-spacing: .16em;
+  color: #7ee7ff;
+  text-transform: uppercase;
+}
+.ruta-banner-info strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #eaf6ff;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ruta-banner-eta {
+  flex: 0 0 auto;
+  text-align: right;
+  font-size: 12px;
+  color: #9ef2ff;
+  font-weight: 700;
+}
+.ruta-shell[data-tema="dia"] .ruta-banner {
+  background: rgba(255, 255, 255, .97);
+  border-color: rgba(20, 35, 55, .16);
+}
+.ruta-shell[data-tema="dia"] .ruta-banner-info strong { color: #0e1a2b; }
+.ruta-shell[data-tema="dia"] .ruta-banner-info small { color: #0369a1; }
+.ruta-shell.ruta-conduciendo .ruta-banner { top: 12px; }
+.ruta-shell.ruta-conduciendo .ruta-search { display: none; }
+
+/* Destinos recientes: chips rápidos bajo el buscador. */
+.ruta-recientes {
+  position: absolute;
+  top: 66px; left: 12px; right: 12px;
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(8, 12, 20, .88);
+  border: 1px solid rgba(148, 172, 208, .18);
+  backdrop-filter: blur(12px);
+  z-index: 920;
+}
+.ruta-recientes[hidden] { display: none; }
+.ruta-recientes-titulo {
+  width: 100%;
+  font-size: 9.5px; letter-spacing: .16em;
+  color: rgba(140, 226, 255, .8);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.ruta-reciente {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 172, 208, .22);
+  background: rgba(148, 172, 208, .08);
+  color: #dff6ff;
+  font: inherit; font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
+.ruta-reciente:hover { background: rgba(56, 225, 255, .14); }
+.ruta-shell[data-tema="dia"] .ruta-recientes { background: rgba(255, 255, 255, .96); }
+.ruta-shell[data-tema="dia"] .ruta-reciente { color: #0e1a2b; background: rgba(20, 35, 55, .06); }
+.ruta-shell.ruta-conduciendo .ruta-recientes { display: none; }

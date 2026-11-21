@@ -17,6 +17,11 @@
   const elMicro = $('#rutaMicro');
   const elInfo = $('#rutaInfo');
   const elEta = $('#rutaEta');
+  const elBanner = $('#rutaBanner');
+  const elBannerFlecha = view.querySelector('#rutaBannerFlecha') || view.querySelector('.ruta-banner-flecha');
+  const elBannerDist = $('#rutaBannerDist');
+  const elBannerTexto = $('#rutaBannerTexto');
+  const elBannerEta = $('#rutaBannerEta');
   let elBrujula = null;
 
   let mapa = null;
@@ -62,6 +67,7 @@
   const CLAVE_OBD = 'dm_obd_ultimo';
   const CLAVE_POS = 'dm_ruta_ultima';
   const CLAVE_RUMBO = 'dm_ruta_rumbo';
+  const CLAVE_RECIENTES = 'dm_ruta_recientes';
 
   // ------------------------------------------------------------ utilidades
   const metros = m => (m >= 1000 ? `${(m / 1000).toFixed(m >= 10000 ? 0 : 1)} km` : `${Math.round(m)} m`);
@@ -526,6 +532,33 @@
     }
   }
 
+  function leerRecientes() {
+    try { return JSON.parse(localStorage.getItem(CLAVE_RECIENTES) || '[]'); } catch (_e) { return []; }
+  }
+  function guardarReciente(nombre, lat, lon) {
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const lista = leerRecientes().filter(r => !(Math.abs(r.lat - lat) < 1e-4 && Math.abs(r.lon - lon) < 1e-4));
+    lista.unshift({ nombre: nombre || 'Destino', lat, lon, ts: Date.now() });
+    try { localStorage.setItem(CLAVE_RECIENTES, JSON.stringify(lista.slice(0, 6))); } catch (_e) { /* sin espacio */ }
+    pintarRecientes();
+  }
+  function pintarRecientes() {
+    const box = view.querySelector('#rutaRecientes');
+    if (!box) return;
+    const lista = leerRecientes();
+    if (!lista.length) { box.hidden = true; box.innerHTML = ''; return; }
+    box.hidden = false;
+    box.innerHTML = '<span class="ruta-recientes-titulo">Recientes</span>' +
+      lista.map(r => `<button type="button" class="ruta-reciente" data-lat="${r.lat}" data-lon="${r.lon}" data-nombre="${String(r.nombre).replace(/"/g, '&quot;')}">${r.nombre}</button>`).join('');
+    box.querySelectorAll('[data-lat]').forEach(b => {
+      b.addEventListener('click', () => {
+        elDestino.value = b.dataset.nombre;
+        fijarDestino(Number(b.dataset.lat), Number(b.dataset.lon), b.dataset.nombre);
+      });
+    });
+  }
+  pintarRecientes();
+
   elBuscar?.addEventListener('submit', e => { e.preventDefault(); buscar(elDestino.value); });
   elDestino?.addEventListener('input', () => {
     clearTimeout(temporizadorBusqueda);
@@ -545,6 +578,7 @@
     if (!mapa) return;
     nombreDestino = nombre || nombreDestino || 'Destino';
     destinoCoord = { lat, lon };
+    guardarReciente(nombre, lat, lon);
     fueraRuta = 0;
     if (destino) mapa.removeLayer(destino);
     destino = L.marker([lat, lon], { icon: iconoDestino() }).addTo(mapa);
@@ -600,6 +634,21 @@
     elEta.innerHTML = `<b>${minutos(segundos)}</b><span>${metros(ruta.distance)}</span><i>${horaDeLlegada(segundos)}</i>`;
   }
 
+  function pintarBanner(ruta, pasoActual) {
+    if (!elBanner) return;
+    if (!ruta || !navegando) { elBanner.hidden = true; return; }
+    const s = ruta.steps[pasoActual || 0] || ruta.steps[0];
+    if (!s) { elBanner.hidden = true; return; }
+    elBanner.hidden = false;
+    if (elBannerFlecha) elBannerFlecha.textContent = flecha(s);
+    const d = ultimaPos && Number.isFinite(s.lat)
+      ? distancia(ultimaPos.lat, ultimaPos.lon, s.lat, s.lon)
+      : (s.distance || 0);
+    if (elBannerDist) elBannerDist.textContent = `En ${metros(d)}`;
+    if (elBannerTexto) elBannerTexto.textContent = instruccion(s);
+    if (elBannerEta && ruta) elBannerEta.textContent = `${minutos(ruta.duration)} · ${metros(ruta.distance)}`;
+  }
+
   function pintarPanel() {
     const ruta = rutaActiva();
     if (!ruta || !elPanel) return;
@@ -635,6 +684,7 @@
         <button type="button" class="ruta-empezar" id="rutaEmpezar">${navegando ? '⏹ Detener navegación' : '▶ Iniciar navegación'}</button>
       </div>`;
     pintarEta(ruta, ruta.duration);
+    pintarBanner(ruta, paso);
 
     elPanel.querySelector('#rutaEmpezar')?.addEventListener('click', alternarNavegacion);
     elPanel.querySelectorAll('[data-ruta]').forEach(btn => {
@@ -675,6 +725,7 @@
       avisar('Navegación detenida.', 'info', 3000);
     }
     pintarPanel();
+    pintarBanner(rutaActiva(), paso);
   }
 
   function restante(lat, lon) {
@@ -754,6 +805,7 @@
       decir(instruccion(siguiente));
       if (siguiente.type === 'arrive') avisar('Has llegado a tu destino.', 'ok', 9000);
       pintarPanel();
+      pintarBanner(ruta, paso);
     }
     const quedan = restante(lat, lon);
     const resumen = elPanel.querySelector('.ruta-datos b');
@@ -767,6 +819,7 @@
         distanciaTurno.textContent = `EN ${metros(distancia(lat, lon, siguiente.lat, siguiente.lon))}`;
       }
     }
+    pintarBanner(ruta, paso);
   }
 
   // ------------------------------------------------------------ avisos (OSM)
