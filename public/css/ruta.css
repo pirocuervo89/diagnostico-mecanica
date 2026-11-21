@@ -1301,6 +1301,148 @@ body.viendo-ruta .pwa-install { display: none !important; }
   .ruta-empezar { min-height: 48px !important; font-size: 15px !important; }
 }
 
+/* ============================================================
+   GPS · BOTÓN DE PANTALLA COMPLETA Y BRÚJULA (ROTACIÓN)
+   ============================================================ */
+
+/* --- Botón de pantalla completa: grande y visible --- */
+#rutaFull {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 16px !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  background: linear-gradient(135deg, rgba(167, 139, 250, .35), rgba(139, 92, 246, .35)) !important;
+  border: 2px solid rgba(167, 139, 250, .6) !important;
+  color: #c4b5fd !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow:
+    0 12px 28px -12px rgba(0, 0, 0, .9),
+    0 0 24px -12px rgba(167, 139, 250, .7) !important;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease !important;
+  z-index: 1150 !important;
+}
+#rutaFull:hover {
+  transform: scale(1.1) !important;
+  box-shadow:
+    0 16px 32px -12px rgba(0, 0, 0, .9),
+    0 0 32px -10px rgba(167, 139, 250, .9) !important;
+}
+#rutaFull[aria-pressed="true"] {
+  background: linear-gradient(135deg, rgba(167, 139, 250, .6), rgba(139, 92, 246, .6)) !important;
+  box-shadow:
+    0 0 0 3px rgba(167, 139, 250, .25),
+    0 12px 28px -12px rgba(0, 0, 0, .9),
+    0 0 32px -10px rgba(167, 139, 250, 1) !important;
+}
+
+/* --- Botón de brújula/rotación: grande y visible --- */
+.ruta-fab-brujula {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, rgba(56, 189, 248, .35), rgba(14, 165, 233, .35)) !important;
+  border: 2px solid rgba(56, 189, 248, .6) !important;
+  color: #7dd3fc !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow:
+    0 12px 28px -12px rgba(0, 0, 0, .9),
+    0 0 24px -12px rgba(56, 189, 248, .7) !important;
+  transition: transform .15s ease, box-shadow .2s ease !important;
+  z-index: 1150 !important;
+  display: grid !important;
+  place-items: center !important;
+}
+.ruta-fab-brujula:hover {
+  transform: scale(1.1) !important;
+  box-shadow:
+    0 16px 32px -12px rgba(0, 0, 0, .9),
+    0 0 32px -10px rgba(56, 189, 248, .9) !important;
+}
+.ruta-fab-brujula.activa {
+  background: linear-gradient(135deg, rgba(56, 189, 248, .6), rgba(14, 165, 233, .6)) !important;
+  border-color: rgba(56, 189, 248, .9) !important;
+  box-shadow:
+    0 0 0 3px rgba(56, 189, 248, .25),
+    0 12px 28px -12px rgba(0, 0, 0, .9),
+    0 0 32px -10px rgba(56, 189, 248, 1) !important;
+}
+.ruta-fab-brujula .ruta-aguja {
+  width: 28px !important;
+  height: 28px !important;
+  transition: transform .15s linear !important;
+}
+.ruta-fab-brujula small {
+  position: absolute !important;
+  bottom: 6px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: .08em !important;
+  color: rgba(147, 164, 190, .95) !important;
+}
+.ruta-fab-brujula.activa small {
+  color: #38e1ff !important;
+}
+
+/* --- Panel de control de rotación --- */
+.ruta-rotacion-panel {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1140;
+}
+.ruta-rotacion-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  border: 2px solid rgba(56, 189, 248, .4);
+  background: linear-gradient(135deg, rgba(56, 189, 248, .2), rgba(14, 165, 233, .2));
+  color: #7dd3fc;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, .9);
+  transition: transform .15s ease, box-shadow .2s ease;
+  display: grid;
+  place-items: center;
+}
+.ruta-rotacion-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 24px -10px rgba(56, 189, 248, .8);
+}
+.ruta-rotacion-btn.activo {
+  background: linear-gradient(135deg, rgba(56, 189, 248, .5), rgba(14, 165, 233, .5));
+  border-color: rgba(56, 189, 248, .8);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, .2), 0 8px 20px -10px rgba(56, 189, 248, .9);
+}
+
+/* En modo pantalla completa, los botones se repositionan */
+.ruta-shell.ruta-completa #rutaFull,
+.ruta-shell.ruta-completa #rutaBrujula {
+  width: 64px !important;
+  height: 64px !important;
+  font-size: 28px !important;
+}
+
+/* Modo día */
+.ruta-shell[data-tema="dia"] #rutaFull {
+  background: rgba(255, 255, 255, .96) !important;
+  color: #7c3aed !important;
+  border-color: rgba(124, 58, 237, .3) !important;
+}
+.ruta-shell[data-tema="dia"] .ruta-fab-brujula {
+  background: rgba(255, 255, 255, .96) !important;
+  color: #0369a1 !important;
+  border-color: rgba(3, 105, 161, .3) !important;
+}
+
 /* Botón flotante para hablar con la IA sin salir de la navegación. */
 .ruta-fab-chat {
   position: absolute;

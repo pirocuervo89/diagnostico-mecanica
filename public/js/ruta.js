@@ -1121,6 +1121,37 @@
     pintarBrujula();
   })();
 
+  // Panel de rotación manual: girar el mapa 90° izquierda/derecha + reset.
+  (function montarRotacionManual() {
+    const hud = view.querySelector('.ruta-hud');
+    if (!hud) return;
+    const panel = document.createElement('div');
+    panel.className = 'ruta-rotacion-panel';
+    panel.innerHTML =
+      '<button class="ruta-rotacion-btn" id="rutaGirarIzq" title="Girar mapa 90° a la izquierda" aria-label="Girar 90° izquierda">↺</button>' +
+      '<button class="ruta-rotacion-btn" id="rutaGirarDer" title="Girar mapa 90° a la derecha" aria-label="Girar 90° derecha">↻</button>' +
+      '<button class="ruta-rotacion-btn" id="rutaResetGiro" title="Poner el norte arriba" aria-label="Resetear rotación">N</button>';
+    hud.appendChild(panel);
+    const izq = panel.querySelector('#rutaGirarIzq');
+    const der = panel.querySelector('#rutaGirarDer');
+    const reset = panel.querySelector('#rutaResetGiro');
+    izq?.addEventListener('click', () => {
+      if (!rotacion || !mapa?.setBearing) return;
+      aplicarGiro(giro + 90);
+      avisar('Mapa girado 90° a la izquierda', 'info', 1500);
+    });
+    der?.addEventListener('click', () => {
+      if (!rotacion || !mapa?.setBearing) return;
+      aplicarGiro(giro - 90);
+      avisar('Mapa girado 90° a la derecha', 'info', 1500);
+    });
+    reset?.addEventListener('click', () => {
+      if (!rotacion || !mapa?.setBearing) return;
+      aplicarGiro(0, { inmediato: true });
+      avisar('Norte arriba', 'info', 1500);
+    });
+  })();
+
   elMicro?.addEventListener('click', dictarDestino);
   $('#rutaMas')?.addEventListener('click', () => mapa?.zoomIn());
   $('#rutaMenos')?.addEventListener('click', () => mapa?.zoomOut());
