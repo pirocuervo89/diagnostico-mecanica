@@ -307,10 +307,10 @@
 .ruta-speed.exceso b { color: #ffb4b4; }
 
 /* botones nuevos del mapa */
-.ruta-fab-noche { bottom: 254px; font-size: 17px; line-height: 1; }
-.ruta-fab-full { bottom: 302px; font-size: 18px; line-height: 1; }
-.ruta-fab-3d { bottom: 350px; font-size: 18px; line-height: 1; }
-.ruta-fab-ar { bottom: 398px; font-size: 18px; line-height: 1; }
+.ruta-fab-noche { font-size: 17px; line-height: 1; }
+.ruta-fab-full { font-size: 18px; line-height: 1; }
+.ruta-fab-3d { font-size: 18px; line-height: 1; }
+.ruta-fab-ar { font-size: 18px; line-height: 1; }
 
 /* Pantalla completa: el mapa ocupa todo el móvil, como un navegador dedicado. */
 .ruta-shell.ruta-completa {
@@ -2240,19 +2240,23 @@ body.viendo-ruta .pwa-install { display: none !important; }
 
 /* --- Columna derecha de botones flotantes: ordenados y espaciados --- */
 .view-gps-fullscreen .ruta-fab-gps,
-.ruta-fab-gps { bottom: 200px !important; }
+.ruta-fab-gps { bottom: 60px !important; }
 .view-gps-fullscreen .ruta-fab-noche,
-.ruta-fab-noche { bottom: 160px !important; }
+.ruta-fab-noche { bottom: 124px !important; }
 .view-gps-fullscreen .ruta-fab-full,
-.ruta-fab-full { bottom: 100px !important; }
+.ruta-fab-full { bottom: 188px !important; }
 .view-gps-fullscreen .ruta-fab-trafico,
-.ruta-fab-trafico { bottom: 50px !important; }
+.ruta-fab-trafico { bottom: 252px !important; }
+.view-gps-fullscreen .ruta-fab-3d,
+.ruta-fab-3d { bottom: 316px !important; }
+.view-gps-fullscreen .ruta-fab-ar,
+.ruta-fab-ar { bottom: 380px !important; }
 .view-gps-fullscreen .ruta-fab-chat,
-.ruta-fab-chat { top: auto !important; bottom: 250px !important; }
+.ruta-fab-chat { top: auto !important; bottom: 444px !important; }
 .view-gps-fullscreen .ruta-fab-voz,
-.ruta-fab-voz { top: auto !important; bottom: 300px !important; }
+.ruta-fab-voz { top: auto !important; bottom: 508px !important; }
 .view-gps-fullscreen .ruta-fab-brujula,
-.ruta-fab-brujula { top: auto !important; bottom: 350px !important; }
+.ruta-fab-brujula { top: auto !important; bottom: 572px !important; }
 
 /* --- Panel de rotación: izquierda, centrado vertical --- */
 .view-gps-fullscreen .ruta-rotacion-panel,
