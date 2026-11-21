@@ -2240,7 +2240,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
 .view-gps-fullscreen .ruta-fab-gps,
 .ruta-fab-gps { bottom: 200px !important; }
 .view-gps-fullscreen .ruta-fab-noche,
-.ruta-fab-noche { bottom: 150px !important; }
+.ruta-fab-noche { bottom: 160px !important; }
 .view-gps-fullscreen .ruta-fab-full,
 .ruta-fab-full { bottom: 100px !important; }
 .view-gps-fullscreen .ruta-fab-trafico,
