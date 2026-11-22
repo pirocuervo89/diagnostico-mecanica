@@ -960,9 +960,31 @@
   let scrollOffset3d = 0;
   let signos3d = [];
   let imagenCoche3d = null;
+  let spriteCoche3d = null;
   // Cargar la imagen del coche GT4
   imagenCoche3d = new Image();
   imagenCoche3d.src = '/img/hero/golf-hero.webp';
+
+  // Recorta el coche de la foto y difumina los bordes para integrarlo en la
+  // escena (evita el rectángulo de fondo del estudio).
+  function prepararSpriteCoche3d() {
+    if (spriteCoche3d || !imagenCoche3d || !imagenCoche3d.complete || !imagenCoche3d.naturalWidth) return;
+    const W = imagenCoche3d.naturalWidth, H = imagenCoche3d.naturalHeight;
+    const sx = W * 0.05, sy = H * 0.16, sw = W * 0.93, sh = H * 0.82;
+    const c = document.createElement('canvas');
+    c.width = Math.round(sw);
+    c.height = Math.round(sh);
+    const g = c.getContext('2d');
+    g.drawImage(imagenCoche3d, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    g.globalCompositeOperation = 'destination-in';
+    const grad = g.createRadialGradient(c.width / 2, c.height * 0.58, Math.min(c.width, c.height) * 0.28, c.width / 2, c.height * 0.58, Math.max(c.width, c.height) * 0.6);
+    grad.addColorStop(0, 'rgba(0,0,0,1)');
+    grad.addColorStop(0.72, 'rgba(0,0,0,1)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, c.width, c.height);
+    spriteCoche3d = c;
+  }
 
   function init3d() {
     canvas3d = document.getElementById('ruta3d');
@@ -1006,7 +1028,7 @@
     return signos;
   }
 
-  function dibujar3d() {
+  function dibujar3dLegacy() {
     if (!ctx3d || !canvas3d) return;
     const w = canvas3d.width, h = canvas3d.height;
     const cx = w / 2;
@@ -1163,6 +1185,328 @@
     dibujarHud3d(w, h);
   }
 
+  // ============================================================
+  // Modo 3D exterior GT4 · escena de conducción (referencia 1)
+  // ============================================================
+  let ultimoFrame3d = 0;
+
+  function proyecto3d(z, idxActual, segs, w, h, horizonte, cx) {
+    const n = segs.length;
+    const idxBase = Math.max(0, Math.min(n - 1, idxActual));
+    const idx = Math.min(Math.max(0, n - 1), idxBase + Math.round(z * 35));
+    const h0 = segs[idxBase]?.heading || 0;
+    // Rumbo suavizado y limitado: evita que un giro lejano dispare la calzada
+    // fuera de pantalla y mantiene un ribbon continuo en curvas.
+    const dHraw = normalizarGrados((segs[idx]?.heading || h0) - h0);
+    const dH = Math.max(-24, Math.min(24, dHraw));
+    const x = cx + Math.tan(dH * Math.PI / 180) * (h - horizonte) * 0.55 * z;
+    const onda = Math.sin(idx * 0.045) * 0.016 + Math.sin(idx * 0.013 + 1.7) * 0.011;
+    const y = horizonte + (h - horizonte) * Math.pow(1 - z, 1.55) - onda * h * z * 2.2;
+    const ancho = Math.max(3, w * 0.92 * Math.pow(1 - z, 1.12));
+    const escala = Math.max(0.05, Math.pow(1 - z, 1.1));
+    return { x, y, ancho, escala, idx, dH };
+  }
+
+  function dibujarCielo3d(w, h, horizonte, t, idxActual) {
+    const cielo = ctx3d.createLinearGradient(0, 0, 0, horizonte);
+    cielo.addColorStop(0, '#03060d');
+    cielo.addColorStop(0.45, '#0a1a33');
+    cielo.addColorStop(0.8, '#12395e');
+    cielo.addColorStop(1, '#3d6f8f');
+    ctx3d.fillStyle = cielo;
+    ctx3d.fillRect(0, 0, w, horizonte);
+    ctx3d.fillStyle = 'rgba(220,240,255,.5)';
+    for (let i = 0; i < 26; i++) {
+      ctx3d.fillRect((i * 173 + 31) % w, (i * 67 + 13) % (horizonte * 0.62), (i % 3) + 1, (i % 3) + 1);
+    }
+    const solX = w * 0.74, solY = horizonte - h * 0.11;
+    const halo = ctx3d.createRadialGradient(solX, solY, 0, solX, solY, h * 0.26);
+    halo.addColorStop(0, 'rgba(255,196,92,.55)');
+    halo.addColorStop(0.35, 'rgba(255,150,60,.18)');
+    halo.addColorStop(1, 'rgba(255,120,40,0)');
+    ctx3d.fillStyle = halo;
+    ctx3d.fillRect(0, 0, w, horizonte + 40);
+    ctx3d.fillStyle = '#ffd28a';
+    ctx3d.beginPath();
+    ctx3d.arc(solX, solY, h * 0.045, 0, Math.PI * 2);
+    ctx3d.fill();
+    ctx3d.fillStyle = 'rgba(255,255,255,.06)';
+    for (let i = 0; i < 4; i++) {
+      const cx0 = ((i * 0.27 + 0.1) * w + t * 2.4 * (i + 1)) % (w + 120) - 60;
+      const cy0 = horizonte * (0.28 + i * 0.09);
+      ctx3d.beginPath();
+      ctx3d.ellipse(cx0, cy0, 60 + i * 18, 10 + i * 2, 0, 0, Math.PI * 2);
+      ctx3d.fill();
+    }
+    const par = (idxActual * 1.6) % w;
+    const capa = (color, base, amp, fase) => {
+      ctx3d.fillStyle = color;
+      ctx3d.beginPath();
+      ctx3d.moveTo(-10, horizonte);
+      for (let x = -10; x <= w + 10; x += 12) {
+        const y = base - (Math.sin((x + par) * 0.006 + fase) * amp + Math.sin((x + par) * 0.017 + fase * 2) * amp * 0.42 + amp * 0.5);
+        ctx3d.lineTo(x, Math.max(0, Math.min(horizonte, y)));
+      }
+      ctx3d.lineTo(w + 10, horizonte);
+      ctx3d.closePath();
+      ctx3d.fill();
+    };
+    capa('rgba(18,42,66,.9)', horizonte - h * 0.012, h * 0.075, 0.7);
+    capa('rgba(10,26,44,.95)', horizonte, h * 0.045, 2.1);
+  }
+
+  function dibujarSenalLimite3d(w, h, horizonte, idxActual, segs, cx) {
+    if (!ultimaPos) return;
+    const kmh = limiteActual(ultimaPos.lat, ultimaPos.lon);
+    if (!kmh) return;
+    const p = proyecto3d(0.34, idxActual, segs, w, h, horizonte, cx);
+    const r = Math.max(11, 24 * p.escala + 7);
+    const x = p.x + p.ancho * 0.52 + r * 0.9;
+    const y = p.y - r * 1.9;
+    ctx3d.save();
+    ctx3d.fillStyle = '#f8fafc';
+    ctx3d.beginPath(); ctx3d.arc(x, y, r, 0, Math.PI * 2); ctx3d.fill();
+    ctx3d.strokeStyle = '#dc2626';
+    ctx3d.lineWidth = Math.max(3, r * 0.18);
+    ctx3d.beginPath(); ctx3d.arc(x, y, r * 0.84, 0, Math.PI * 2); ctx3d.stroke();
+    ctx3d.fillStyle = '#0f172a';
+    ctx3d.font = `bold ${Math.round(r * 1.05)}px sans-serif`;
+    ctx3d.textAlign = 'center';
+    ctx3d.textBaseline = 'middle';
+    ctx3d.fillText(String(kmh), x, y + 1);
+    ctx3d.fillStyle = 'rgba(200,230,240,.7)';
+    ctx3d.font = `${Math.max(8, r * 0.34)}px sans-serif`;
+    ctx3d.fillText('mapa', x, y + r * 1.35);
+    ctx3d.restore();
+  }
+
+  function dibujarGantry3d(w, h, horizonte, idxActual, segs, cx) {
+    const r = rutaActiva();
+    const s = r?.steps?.[paso] || r?.steps?.[0];
+    if (!s?.name) return;
+    const p = proyecto3d(0.68, idxActual, segs, w, h, horizonte, cx);
+    const an = Math.min(w * 0.56, 150 * p.escala + 40);
+    const al = Math.max(16, 30 * p.escala + 10);
+    const x = p.x - an / 2;
+    const y = p.y - al - 26 * p.escala;
+    // Poste
+    ctx3d.fillStyle = 'rgba(120,140,160,.55)';
+    ctx3d.fillRect(p.x - 1.5 * p.escala, p.y - 26 * p.escala, 3 * p.escala, 26 * p.escala);
+    // Panel verde de autopista
+    ctx3d.fillStyle = 'rgba(8,52,40,.94)';
+    ctx3d.fillRect(x, y, an, al);
+    ctx3d.strokeStyle = 'rgba(230,245,255,.85)';
+    ctx3d.lineWidth = 1.5;
+    ctx3d.strokeRect(x, y, an, al);
+    ctx3d.fillStyle = '#eaf7ff';
+    ctx3d.textAlign = 'left';
+    ctx3d.textBaseline = 'middle';
+    ctx3d.font = `bold ${Math.max(9, al * 0.34)}px sans-serif`;
+    ctx3d.fillText((flechaPara(s) + ' ') + recortar(s.name, 16), x + 8, y + al * 0.5);
+    ctx3d.textAlign = 'right';
+    ctx3d.font = `bold ${Math.max(8, al * 0.28)}px sans-serif`;
+    ctx3d.fillText(`${s.distance ? Math.round(s.distance) + ' m' : ''}`, x + an - 8, y + al * 0.5);
+  }
+
+  function dibujar3d() {
+    if (!ctx3d || !canvas3d) return;
+    const w = canvas3d.width, h = canvas3d.height;
+    const cx = w / 2, horizonte = h * 0.34;
+    const ahora = performance.now();
+    const t = ahora / 1000;
+    ultimoFrame3d = ahora;
+
+    const ruta = rutaActiva();
+    if (ruta && ruta.geometry && carretera3d.length !== Math.max(0, ruta.geometry.length - 1)) {
+      carretera3d = generarCarretera3d();
+      signos3d = generarSignos3d();
+    }
+    const segs = carretera3d;
+    let idxActual = 0;
+    if (ultimaPos && segs.length) {
+      let mejor = Infinity;
+      for (let i = 0; i < segs.length; i++) {
+        const d = distancia(ultimaPos.lat, ultimaPos.lon, segs[i].lat, segs[i].lon);
+        if (d < mejor) { mejor = d; idxActual = i; }
+      }
+    }
+
+    dibujarCielo3d(w, h, horizonte, t, idxActual);
+    const suelo = ctx3d.createLinearGradient(0, horizonte, 0, h);
+    suelo.addColorStop(0, '#122a22');
+    suelo.addColorStop(0.45, '#0d1f19');
+    suelo.addColorStop(1, '#07110d');
+    ctx3d.fillStyle = suelo;
+    ctx3d.fillRect(0, horizonte, w, h - horizonte);
+
+    const N = 64;
+    const pts = [];
+    for (let i = 0; i <= N; i++) pts.push(proyecto3d(i / N, idxActual, segs, w, h, horizonte, cx));
+
+    // Vegetación y edificios lejanos.
+    for (let i = 2; i <= N - 2; i += 3) {
+      const p = pts[i];
+      if (p.escala < 0.08) continue;
+      const lado = i % 2 === 0 ? -1 : 1;
+      const bx = p.x + lado * (p.ancho * 0.5 + 26 * p.escala);
+      const by = p.y;
+      if (i % 9 === 0) {
+        const bw = 18 * p.escala, bh = (34 + (i % 5) * 12) * p.escala;
+        ctx3d.fillStyle = 'rgba(10,24,38,.9)';
+        ctx3d.fillRect(bx - bw / 2, by - bh, bw, bh);
+        ctx3d.fillStyle = 'rgba(120,220,255,.35)';
+        for (let wy = 0; wy < 3; wy++) {
+          if ((i + wy) % 3 === 0) ctx3d.fillRect(bx - bw * 0.25, by - bh + (wy + 0.6) * bh / 4, bw * 0.18, 3 * p.escala + 1);
+        }
+      } else {
+        const th = (46 + (i % 4) * 10) * p.escala;
+        const tw = th * 0.42;
+        ctx3d.fillStyle = '#3b2a1c';
+        ctx3d.fillRect(bx - 1.5 * p.escala, by - 4 * p.escala, 3 * p.escala, 4 * p.escala + 1);
+        ctx3d.fillStyle = '#0f3a2c';
+        ctx3d.beginPath();
+        ctx3d.moveTo(bx, by - th);
+        ctx3d.lineTo(bx + tw / 2, by);
+        ctx3d.lineTo(bx - tw / 2, by);
+        ctx3d.closePath();
+        ctx3d.fill();
+        ctx3d.fillStyle = '#1d5c44';
+        ctx3d.beginPath();
+        ctx3d.moveTo(bx, by - th * 0.72);
+        ctx3d.lineTo(bx + tw * 0.32, by - th * 0.18);
+        ctx3d.lineTo(bx - tw * 0.32, by - th * 0.18);
+        ctx3d.closePath();
+        ctx3d.fill();
+      }
+    }
+
+    // Asfalto.
+    for (let i = 1; i <= N; i++) {
+      const a = pts[i - 1], b = pts[i];
+      const grad = ctx3d.createLinearGradient(0, b.y, 0, a.y + 0.01);
+      grad.addColorStop(0, '#22384f');
+      grad.addColorStop(1, '#2f4762');
+      ctx3d.fillStyle = grad;
+      ctx3d.beginPath();
+      ctx3d.moveTo(a.x - a.ancho / 2, a.y);
+      ctx3d.lineTo(a.x + a.ancho / 2, a.y);
+      ctx3d.lineTo(b.x + b.ancho / 2, b.y);
+      ctx3d.lineTo(b.x - b.ancho / 2, b.y);
+      ctx3d.closePath();
+      ctx3d.fill();
+    }
+    // Arcén.
+    for (const lado of [-1, 1]) {
+      ctx3d.beginPath();
+      for (let i = 0; i <= N; i++) {
+        const p = pts[i];
+        const x = p.x + lado * (p.ancho / 2 + 8 * p.escala);
+        if (i === 0) ctx3d.moveTo(x, p.y); else ctx3d.lineTo(x, p.y);
+      }
+      for (let i = N; i >= 0; i--) {
+        const p = pts[i];
+        ctx3d.lineTo(p.x + lado * p.ancho / 2, p.y);
+      }
+      ctx3d.closePath();
+      ctx3d.fillStyle = 'rgba(70,90,80,.35)';
+      ctx3d.fill();
+    }
+    // Bordes luminosos.
+    for (const lado of [-1, 1]) {
+      ctx3d.beginPath();
+      for (let i = 0; i <= N; i++) {
+        const p = pts[i];
+        const x = p.x + lado * p.ancho / 2;
+        if (i === 0) ctx3d.moveTo(x, p.y); else ctx3d.lineTo(x, p.y);
+      }
+      ctx3d.strokeStyle = 'rgba(56,225,255,.75)';
+      ctx3d.shadowColor = '#38e1ff';
+      ctx3d.shadowBlur = 8;
+      ctx3d.lineWidth = 2.5;
+      ctx3d.stroke();
+      ctx3d.shadowBlur = 0;
+    }
+    // Línea central discontinua con sensación de avance.
+    const fase = Math.floor(t * 10);
+    for (let i = 1; i <= N; i++) {
+      if (((i + fase) % 6) > 2) continue;
+      const a = pts[i - 1], b = pts[i];
+      ctx3d.strokeStyle = 'rgba(240,248,255,.85)';
+      ctx3d.lineWidth = Math.max(1, 4 * b.escala);
+      ctx3d.beginPath();
+      ctx3d.moveTo(a.x, a.y);
+      ctx3d.lineTo(b.x, b.y);
+      ctx3d.stroke();
+    }
+    // Ruta azul luminosa.
+    ctx3d.save();
+    ctx3d.strokeStyle = 'rgba(56,140,255,.9)';
+    ctx3d.shadowColor = '#2f8cff';
+    ctx3d.shadowBlur = 14;
+    for (let i = 1; i <= N - 4; i++) {
+      const a = pts[i - 1], b = pts[i];
+      ctx3d.lineWidth = Math.max(2, 7 * b.escala);
+      ctx3d.beginPath();
+      ctx3d.moveTo(a.x, a.y);
+      ctx3d.lineTo(b.x, b.y);
+      ctx3d.stroke();
+    }
+    ctx3d.restore();
+    // Flechas de dirección sobre la carretera.
+    for (const z of [0.12, 0.3, 0.52]) {
+      const p = proyecto3d(z, idxActual, segs, w, h, horizonte, cx);
+      const tam = 26 * p.escala + 6;
+      const dir = Math.max(-0.9, Math.min(0.9, p.dH / 35));
+      ctx3d.save();
+      ctx3d.translate(p.x, p.y);
+      ctx3d.strokeStyle = 'rgba(140,220,255,.95)';
+      ctx3d.shadowColor = '#38e1ff';
+      ctx3d.shadowBlur = 12;
+      ctx3d.lineWidth = Math.max(2, 5 * p.escala);
+      ctx3d.beginPath();
+      ctx3d.moveTo(-tam, tam * 0.45);
+      ctx3d.lineTo(dir * tam * 0.45, -tam * 0.55);
+      ctx3d.lineTo(tam, tam * 0.45);
+      ctx3d.stroke();
+      ctx3d.restore();
+    }
+    // Guardarraíles.
+    for (const lado of [-1, 1]) {
+      let prev = null;
+      for (let i = 2; i <= N - 3; i += 4) {
+        const p = pts[i];
+        if (p.escala < 0.07) continue;
+        const x = p.x + lado * (p.ancho / 2 + 4 * p.escala);
+        if (prev) {
+          ctx3d.strokeStyle = 'rgba(170,200,220,.6)';
+          ctx3d.lineWidth = Math.max(1, 2.2 * p.escala);
+          ctx3d.beginPath();
+          ctx3d.moveTo(prev.x, prev.y - 10 * prev.s);
+          ctx3d.lineTo(x, p.y - 10 * p.escala);
+          ctx3d.stroke();
+        }
+        ctx3d.fillStyle = 'rgba(160,180,200,.55)';
+        ctx3d.fillRect(x - 1.5 * p.escala, p.y - 12 * p.escala, 3 * p.escala, 12 * p.escala);
+        prev = { x, y: p.y, s: p.escala };
+      }
+    }
+    // Paso elevado ocasional.
+    const paso = Math.floor(idxActual / 120);
+    const zPaso = 0.4 + (paso % 3) * 0.07;
+    const pp = proyecto3d(zPaso, idxActual, segs, w, h, horizonte, cx);
+    ctx3d.fillStyle = 'rgba(12,26,40,.95)';
+    ctx3d.fillRect(pp.x - pp.ancho * 0.62, pp.y - 26 * pp.escala, pp.ancho * 1.24, 12 * pp.escala);
+    ctx3d.fillStyle = 'rgba(90,120,145,.5)';
+    for (const lado of [-1, 1]) {
+      ctx3d.fillRect(pp.x + lado * pp.ancho * 0.6 - 2 * pp.escala, pp.y - 26 * pp.escala, 4 * pp.escala, 26 * pp.escala);
+    }
+
+    dibujarGantry3d(w, h, horizonte, idxActual, segs, cx);
+    dibujarSenalLimite3d(w, h, horizonte, idxActual, segs, cx);
+    dibujarCoche3d(w, h, t);
+    dibujarHud3d(w, h);
+  }
+
   function dibujarCarreteraRecta(w, h, cx, horizonte) {
     const numSegs = 50;
     const segW = 220;
@@ -1258,38 +1602,67 @@
     }
   }
 
-  function dibujarCoche3d(w, h) {
-    const carW = 90, carH = 120;
-    const cx = w / 2, cy = h - 150;
-    // Sombra
-    ctx3d.fillStyle = 'rgba(0, 0, 0, .6)';
+  function dibujarCoche3d(w, h, t = 0) {
+    prepararSpriteCoche3d();
+    const carW = Math.min(w * 0.40, 190);
+    const carH = carW * 1.10;
+    const cx = w / 2;
+    const cy = h - carH * 0.78 + Math.sin(t * 7) * Math.min(2.2, velocidad / 45);
+    // Estelas laterales a velocidad.
+    if (velocidad > 25) {
+      ctx3d.save();
+      ctx3d.strokeStyle = 'rgba(56,225,255,.2)';
+      ctx3d.lineWidth = 2;
+      for (let i = 0; i < 4; i++) {
+        const off = carW * (0.55 + i * 0.16);
+        const largo = Math.min(h * 0.18, 40 + velocidad * 1.2);
+        ctx3d.beginPath();
+        ctx3d.moveTo(cx - off, cy + carH * 0.3);
+        ctx3d.lineTo(cx - off - 6, cy + carH * 0.3 + largo);
+        ctx3d.stroke();
+        ctx3d.beginPath();
+        ctx3d.moveTo(cx + off, cy + carH * 0.3);
+        ctx3d.lineTo(cx + off + 6, cy + carH * 0.3 + largo);
+        ctx3d.stroke();
+      }
+      ctx3d.restore();
+    }
+    // Sombra.
+    ctx3d.fillStyle = 'rgba(0,0,0,.55)';
     ctx3d.beginPath();
-    ctx3d.ellipse(cx, cy + carH / 2 + 8, carW / 2 + 8, 10, 0, 0, Math.PI * 2);
+    ctx3d.ellipse(cx, cy + carH / 2 + 6, carW / 2 + 10, 12, 0, 0, Math.PI * 2);
     ctx3d.fill();
-    // Glow bajo el coche
+    // Halo bajo el coche.
     const glow = ctx3d.createRadialGradient(cx, cy + carH / 2, 0, cx, cy + carH / 2, carW);
-    glow.addColorStop(0, 'rgba(34, 211, 238, .4)');
-    glow.addColorStop(1, 'rgba(34, 211, 238, 0)');
+    glow.addColorStop(0, 'rgba(56,225,255,.38)');
+    glow.addColorStop(1, 'rgba(56,225,255,0)');
     ctx3d.fillStyle = glow;
     ctx3d.fillRect(cx - carW, cy - carH / 2, carW * 2, carH * 2);
-    // Coche (imagen real del GT4)
-    if (imagenCoche3d && imagenCoche3d.complete) {
+    // GT4 (misma imagen del proyecto, no se sustituye).
+    if (spriteCoche3d) {
+      ctx3d.drawImage(spriteCoche3d, cx - carW / 2, cy - carH / 2, carW, carH);
+    } else if (imagenCoche3d && imagenCoche3d.complete && imagenCoche3d.naturalWidth) {
+      ctx3d.save();
+      ctx3d.beginPath();
+      if (ctx3d.roundRect) ctx3d.roundRect(cx - carW / 2, cy - carH / 2, carW, carH, carW * 0.1);
+      else ctx3d.rect(cx - carW / 2, cy - carH / 2, carW, carH);
+      ctx3d.clip();
       ctx3d.drawImage(imagenCoche3d, cx - carW / 2, cy - carH / 2, carW, carH);
+      ctx3d.restore();
     } else {
-      // Fallback: coche dibujado
-      ctx3d.fillStyle = '#eaf7ff';
+      ctx3d.fillStyle = '#facc15';
       ctx3d.beginPath();
       ctx3d.roundRect(cx - carW / 2, cy - carH / 2, carW, carH, 12);
       ctx3d.fill();
-      ctx3d.fillStyle = '#38e1ff';
-      ctx3d.fillRect(cx - carW / 2 + 10, cy - carH / 2 + 15, carW - 20, 25);
+      ctx3d.fillStyle = '#0b1220';
+      ctx3d.fillRect(cx - carW / 2 + 10, cy - carH / 2 + 15, carW - 20, carH * 0.24);
     }
-    // Luces traseras (glow rojo)
-    ctx3d.fillStyle = 'rgba(255, 77, 109, .8)';
+    // Luces traseras.
+    ctx3d.fillStyle = 'rgba(255,77,109,.9)';
     ctx3d.shadowColor = '#ff4d6d';
-    ctx3d.shadowBlur = 15;
-    ctx3d.fillRect(cx - carW / 2 + 6, cy + carH / 2 - 12, 10, 5);
-    ctx3d.fillRect(cx + carW / 2 - 16, cy + carH / 2 - 12, 10, 5);
+    ctx3d.shadowBlur = 16;
+    ctx3d.fillRect(cx - carW * 0.36, cy + carH * 0.36, carW * 0.16, carH * 0.035);
+    ctx3d.fillRect(cx + carW * 0.2, cy + carH * 0.36, carW * 0.16, carH * 0.035);
     ctx3d.shadowBlur = 0;
   }
 
@@ -1307,6 +1680,35 @@
     ctx3d.fillStyle = '#f0f8ff';
     ctx3d.font = '10px sans-serif';
     ctx3d.fillText('KM/H', 60, 42);
+    // Etiqueta de modo.
+    ctx3d.fillStyle = 'rgba(10,16,30,.72)';
+    ctx3d.fillRect(w / 2 - 62, 10, 124, 24);
+    ctx3d.strokeStyle = 'rgba(56,225,255,.35)';
+    ctx3d.lineWidth = 1;
+    ctx3d.strokeRect(w / 2 - 62, 10, 124, 24);
+    ctx3d.fillStyle = '#7ee7ff';
+    ctx3d.font = 'bold 11px sans-serif';
+    ctx3d.textAlign = 'center';
+    ctx3d.textBaseline = 'middle';
+    ctx3d.fillText('3D EXTERIOR · GT4', w / 2, 22);
+    // Límite de la vía (dato de mapa).
+    const kmh = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
+    if (kmh) {
+      const r = 17, lx = w - 30, ly = 88;
+      ctx3d.fillStyle = '#f8fafc';
+      ctx3d.beginPath(); ctx3d.arc(lx, ly, r, 0, Math.PI * 2); ctx3d.fill();
+      ctx3d.strokeStyle = '#dc2626';
+      ctx3d.lineWidth = 4;
+      ctx3d.beginPath(); ctx3d.arc(lx, ly, r * 0.82, 0, Math.PI * 2); ctx3d.stroke();
+      ctx3d.fillStyle = '#0f172a';
+      ctx3d.font = 'bold 17px sans-serif';
+      ctx3d.textAlign = 'center';
+      ctx3d.textBaseline = 'middle';
+      ctx3d.fillText(String(kmh), lx, ly + 1);
+      ctx3d.fillStyle = 'rgba(200,230,240,.7)';
+      ctx3d.font = '9px sans-serif';
+      ctx3d.fillText('mapa', lx, ly + r + 8);
+    }
     // Distancia restante
     const ruta = rutaActiva();
     if (ruta) {
@@ -1318,7 +1720,7 @@
       ctx3d.fillStyle = '#f0f8ff';
       ctx3d.font = 'bold 16px sans-serif';
       ctx3d.textAlign = 'right';
-      ctx3d.fillText(rest > 1000 ? `${(rest/1000).toFixed(1)} km` : `${rest} m`, w - 20, 32);
+      ctx3d.fillText(rest > 1000 ? `${(rest / 1000).toFixed(1)} km` : `${Math.round(rest)} m`, w - 20, 32);
       ctx3d.font = '11px sans-serif';
       ctx3d.fillStyle = 'rgba(255, 255, 255, .7)';
       ctx3d.fillText(ruta.duration ? `${Math.round(ruta.duration/60)} min` : '', w - 20, 50);
