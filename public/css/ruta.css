@@ -2703,6 +2703,16 @@ body.viendo-ruta .pwa-install { display: none !important; }
 }
 .ruta-3d.activo { display: block; }
 .ruta-shell.ruta-3d-activo { height: 100%; min-height: 0; }
+.ruta-coche3d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 6;
+  display: none;
+  pointer-events: none;
+}
+.ruta-shell.ruta-3d-activo .ruta-coche3d { display: block; }
 .ruta-shell.ruta-3d-activo .ruta-map { display: none; }
 .ruta-shell.ruta-3d-activo .ruta-3d { display: block; }
 

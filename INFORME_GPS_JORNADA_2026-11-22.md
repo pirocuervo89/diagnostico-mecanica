@@ -121,3 +121,18 @@ Probado en el teléfono con Chrome 158 sobre el servidor local (`adb reverse`), 
 ## 10. Cuota de Freebuff
 
 No verificable desde el entorno de ejecución.
+
+## 9-quinquies. Ciclo 5 · Carretera y habitáculo GT4
+
+- **Ruta desde el GPS real**: al pedir un destino nada más abrir, el GPS aún no tenía fix y se calculaba desde el centro del mapa (rutas falsas de 190-351 km). Ahora espera hasta 9 s a una posición real; si no llega, avisa y no disfraza el resultado.
+- **Carretera 3D**: proyección con reparto no lineal de profundidad para que las curvas de ciudad no queden aplastadas contra el horizonte; calzada continua por trazos (los rellenos poligonales se cruzaban en curvas cerradas), arcén, líneas, huellas, guardarraíles, flechas y ruta comparten el mismo trazado.
+- **Primeros 32 m enderezados** bajo el coche para que el vehículo quede sobre su carril; a partir de ahí manda la geometría real de OSRM.
+- **Entorno**: silueta de ciudad con ventanas, árboles, farolas, pórtico de señal con dos postes y señal de límite acotada para que no tape el HUD.
+- **Coche**: se usa el GLB real `golf-r-75.glb` (no una foto), orientado de espaldas, escalado a la anchura del carril, con sombra, halo y encuadre bajo para no comerse el HUD. El lienzo WebGL se redimensiona con `ResizeObserver` (antes se quedaba a 450×225 y borroso).
+- **Habitáculo ADAS**: cámara de conductor más atrás y nivelada, salpicadero, cuadro digital con velocidad/marcha, volante GT4 más pequeño, consola central, pantalla de ruta, rejillas, embellecedor, botón de arranque, piso, mampara y pedales. Se retiran techo y espejo que tapaban el parabrisas en vertical.
+- **AR**: la cinta de ruta se reduce al 24 % del ancho y baja de opacidad; deja ver la cámara.
+- Pruebas: `npm test` 195/195. En el Redmi, vía CDP: ruta de 1,7 km, 3D activo, GLB cargado, lienzos 393×801 y sin errores de JavaScript. AR probado con vídeo sintético: vídeo listo, cabina montada y HUD alineado.
+
+### Limitación de esta prueba
+
+La pantalla del Redmi estaba bloqueada y MIUI no permite inyectar el botón de encendido por ADB. Por eso la cámara física no pudo arrancar (`NotReadableError`) y la prueba de AR se hizo con una señal de vídeo sintética. Falta la comprobación visual con cámara real y con el móvil desbloqueado.
