@@ -467,7 +467,7 @@
       const salto = distancia(ultimaPos.lat, ultimaPos.lon, lat, lon);
       const dtSalto = (ahora - (ultimaVez || ahora)) / 1000;
       const velMs = Number.isFinite(speed) && speed !== null ? speed : 0;
-      if (salto < 1.5 && velMs < 1.2 && dtSalto < 4) return;
+      if (yo && salto < 1.5 && velMs < 1.2 && dtSalto < 4) return;
     }
     if (ultimaPos) {
       if (Number.isFinite(heading) && heading !== null) rumbo = heading;
@@ -963,6 +963,7 @@
   let canvas3d = null;
   let ctx3d = null;
   let carretera3d = [];
+  let firmaRuta3d = '';
   let idx3dSuave = null;
   let progreso3d = 0;
   let scrollOffset3d = 0;
@@ -1325,9 +1326,13 @@
     ultimoFrame3d = ahora;
 
     const ruta = rutaActiva();
-    if (ruta && ruta.geometry && carretera3d.length !== Math.max(0, ruta.geometry.length - 1)) {
+    const geo = ruta?.geometry;
+    const firma = geo?.length ? `${geo.length}:${geo[0][0]}:${geo[0][1]}:${geo[geo.length - 1][0]}:${geo[geo.length - 1][1]}` : '';
+    if (firma !== firmaRuta3d) {
       carretera3d = generarCarretera3d();
       signos3d = generarSignos3d();
+      firmaRuta3d = firma;
+      idx3dSuave = null;
     }
     const segs = carretera3d;
     let idxActual = 0;
