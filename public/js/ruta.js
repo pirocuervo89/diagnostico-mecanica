@@ -1848,7 +1848,7 @@
     ctx3d.lineWidth = 1.5; ctx3d.stroke();
     ctx3d.save();
     ctx3d.translate(cxBru, cyBru);
-    ctx3d.rotate(((heading || 0) * Math.PI) / 180);
+    ctx3d.rotate(((rumbo || 0) * Math.PI) / 180);
     ctx3d.fillStyle = '#ef4444';
     ctx3d.beginPath(); ctx3d.moveTo(0, -22); ctx3d.lineTo(6, 0); ctx3d.lineTo(-6, 0); ctx3d.closePath(); ctx3d.fill();
     ctx3d.fillStyle = '#e2e8f0';
