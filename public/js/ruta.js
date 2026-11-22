@@ -2718,6 +2718,14 @@
       vistaArActiva = true;
       document.getElementById('rutaArToggle')?.classList.add('activo');
       document.querySelector('.ruta-shell')?.classList.add('ruta-ar-activo');
+      // Pantalla completa real: sin barra del navegador no hay franja que corte
+      // la cámara. Se pide dentro del gesto del botón AR.
+      const shellAr = document.querySelector('.ruta-shell');
+      if (shellAr?.requestFullscreen && !document.fullscreenElement) {
+        try { shellAr.requestFullscreen({ navigationUI: 'hide' }).catch(() => {}); } catch (_e) { /* fallback CSS */ }
+      }
+      shellAr?.classList.add('ruta-completa');
+      document.body.classList.add('ruta-pantalla-completa');
       // La cabina de la foto es 16:9: en horizontal se ve entera, como la referencia.
       try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch (_e) { /* se queda como esté */ }
       canvasAr.classList.add('activo');

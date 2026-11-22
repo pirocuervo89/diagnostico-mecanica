@@ -3181,18 +3181,20 @@ body.viendo-ruta .pwa-install { display: none !important; }
    deja ver la cámara real detrás del cristal. */
 .ruta-cabina-foto {
   position: absolute;
-  left: 0;
+  left: 50%;
   bottom: 0;
-  width: 100%;
-  height: 62vh;
-  /* Cabina reducida dentro de un marco de habitáculo: el volante queda bajo,
-     el espejo anclado al techo y la cámara solo asoma por el cristal. */
-  object-fit: cover;
+  width: auto;
+  height: 86%;
+  max-width: 100%;
+  /* Cabina nítida y más lejos, sin espejo ni marco: la cámara llena la
+     carretera alrededor y se ve limpia por el cristal. */
+  object-fit: contain;
   object-position: center bottom;
+  transform: translateX(-50%);
   z-index: 6;
   display: none;
   pointer-events: none;
-  filter: drop-shadow(0 -10px 24px rgba(0, 0, 0, .45));
+  image-rendering: auto;
 }
 .ruta-shell.ruta-ar-activo .ruta-cabina-foto.foto-lista { display: block; }
 /* Con la cabina fotorrealista puesta, sólo quedan cámara y stop: los botones
@@ -3202,7 +3204,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
 .ruta-shell.ruta-ar-activo.ruta-foto-activa #rutaCalibrar,
 .ruta-shell.ruta-ar-activo.ruta-foto-activa #rutaAnchoBtn { display: none !important; }
 @media (orientation: landscape) {
-  .ruta-cabina-foto { height: 100vh; height: 100dvh; }
+  .ruta-cabina-foto { height: 86vh; height: 86dvh; }
 }
 .ruta-shell.ruta-ar-activo .ruta-cabina-foto.foto-lista + .ruta-cabina3d { display: none !important; }
 

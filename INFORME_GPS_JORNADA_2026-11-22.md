@@ -178,3 +178,12 @@ Nota: la cámara del móvil estaba apuntando al techo durante la prueba, así qu
 - El marco tapa la cámara fuera del coche; el vídeo real solo se ve por el **parabrisas transparente**, ajustado al cristal, y el espejo queda colgado del techo en vez de flotar.
 - Se conserva el coche completo: espejo, cuadro, volante, botones, pantalla central, consola y palanca. No se recorta ninguna parte del habitáculo.
 - Probado en el Redmi en horizontal (847×299): AR activo, imagen `naturalWidth 2292`, cabina completa y cámara asomando por el cristal.
+
+## 10-duodecies. Sin espejo, sin franja y a pantalla completa
+
+- Se elimina de la foto el **espejo retrovisor completo** (cuerpo, soporte y reflejo) y la franja del techo que cortaba la parte superior; el cristal queda limpio.
+- Se usa la foto original **sin marco ni bandas**: `cabina-gt4-float.webp`, con bordes superior y laterales desvanecidos para que la cámara no se corte en seco.
+- La cabina se reduce al **86% de alto**, centrada abajo: el volante queda bajo, se ve la carretera por el cristal y alrededor, y se conservan cuadro, botones, pantalla, consola y palanca.
+- La imagen se guarda en WebP **sin pérdida** y se muestra a resolución nativa reducida, sin reescalados que la emborronen.
+- Al activar AR se pide **pantalla completa** dentro del gesto del botón, además del bloqueo horizontal, para quitar la barra del navegador que cortaba la cámara.
+- Probado en el Redmi en horizontal (847×299): AR activo, `fullscreenElement` verdadero, imagen `naturalWidth 1440`, sin espejo y sin franja. La cámara sigue apuntando al techo, así que falta validar la carretera real.
