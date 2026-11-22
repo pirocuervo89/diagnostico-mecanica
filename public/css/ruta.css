@@ -2741,9 +2741,9 @@ body.viendo-ruta .pwa-install { display: none !important; }
   inset: 0;
   width: 100%;
   height: 100%;
-  /* Encajar el fotograma completo 4:3: se gana campo horizontal real y las
-     bandas superior/inferior quedan detrás del HUD y de la cabina. */
-  object-fit: contain;
+  /* La cámara llena todo el parabrisas; la cabina fotorrealista se encarga
+     de tapar la parte inferior. */
+  object-fit: cover;
   z-index: 3;
   display: none;
   background: #000;
@@ -2760,6 +2760,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
 }
 .ruta-ar-canvas.activo { display: block; }
 .ruta-shell.ruta-ar-activo { height: 100%; min-height: 0; }
+.ruta-shell.ruta-completa.ruta-ar-activo { height: 100vh; height: 100dvh; }
 .ruta-shell.ruta-ar-activo .ruta-map { display: none; }
 .ruta-shell.ruta-ar-activo .ruta-3d { display: none; }
 .ruta-shell.ruta-ar-activo .ruta-ar-video { display: block; }
@@ -3177,7 +3178,34 @@ body.viendo-ruta .pwa-install { display: none !important; }
   .ruta-fab-parar { animation: none; }
 }
 
-/* Cabina 3D real (Three.js) sobre la cámara. */
+/* Cabina GT4 fotorrealista: la foto recortada con el parabrisas transparente
+   deja ver la cámara real detrás del cristal. */
+.ruta-cabina-foto {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 62vh;
+  object-fit: cover;
+  object-position: center bottom;
+  z-index: 6;
+  display: none;
+  pointer-events: none;
+  filter: drop-shadow(0 -10px 24px rgba(0, 0, 0, .45));
+}
+.ruta-shell.ruta-ar-activo .ruta-cabina-foto.foto-lista { display: block; }
+/* Con la cabina fotorrealista puesta, sólo quedan cámara y stop: los botones
+   tapaban el volante y la consola de la foto. */
+.ruta-shell.ruta-ar-activo.ruta-foto-activa #rutaChat,
+.ruta-shell.ruta-ar-activo.ruta-foto-activa #ruta3dToggle,
+.ruta-shell.ruta-ar-activo.ruta-foto-activa #rutaCalibrar,
+.ruta-shell.ruta-ar-activo.ruta-foto-activa #rutaAnchoBtn { display: none !important; }
+@media (orientation: landscape) {
+  .ruta-cabina-foto { height: 100vh; height: 100dvh; }
+}
+.ruta-shell.ruta-ar-activo .ruta-cabina-foto.foto-lista + .ruta-cabina3d { display: none !important; }
+
+/* Cabina 3D real (Three.js): respaldo si la foto no carga. */
 .ruta-cabina3d {
   position: absolute;
   inset: 0;

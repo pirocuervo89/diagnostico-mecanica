@@ -2142,6 +2142,22 @@
   let ultimoAnalisisAr = 0;
   let moduloCabina3d = null;
   let cabina3dLista = false;
+  let cabinaFotoLista = false;
+
+  // La foto GT4 ya trae el interior completo; solo hay que cargarla y dejar
+  // que su parabrisas transparente muestre la cámara. La 3D queda de respaldo.
+  function prepararCabinaFoto() {
+    const foto = document.getElementById('rutaCabinaFoto');
+    if (!foto) { montarCabina3d(); return; }
+    const lista = () => {
+      foto.classList.add('foto-lista');
+      document.querySelector('.ruta-shell')?.classList.add('ruta-foto-activa');
+      cabinaFotoLista = true;
+    };
+    if (foto.complete && foto.naturalWidth) { lista(); return; }
+    foto.addEventListener('load', lista, { once: true });
+    foto.addEventListener('error', () => { montarCabina3d(); }, { once: true });
+  }
 
   async function montarCabina3d() {
     if (cabina3dLista) return;
@@ -2702,10 +2718,12 @@
       vistaArActiva = true;
       document.getElementById('rutaArToggle')?.classList.add('activo');
       document.querySelector('.ruta-shell')?.classList.add('ruta-ar-activo');
+      // La cabina de la foto es 16:9: en horizontal se ve entera, como la referencia.
+      try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch (_e) { /* se queda como esté */ }
       canvasAr.classList.add('activo');
       videoAr.classList.add('activo');
       ajustarTamanoAr();
-      montarCabina3d();
+      prepararCabinaFoto();
       iniciarSensoresAr();
       initVision();
       // Arranque rápido: reiniciar búfer y analizar el primer fotograma ya.
@@ -2744,6 +2762,7 @@
     if (videoAr) videoAr.srcObject = null;
     document.getElementById('rutaArToggle')?.classList.remove('activo');
     document.querySelector('.ruta-shell')?.classList.remove('ruta-ar-activo');
+    try { screen.orientation?.unlock?.(); } catch (_e) { /* nada */ }
     if (canvasAr) canvasAr.classList.remove('activo');
     if (videoAr) videoAr.classList.remove('activo');
     if (moduloCabina3d) {
@@ -2867,7 +2886,9 @@
     // Cabina: 3D real si está disponible; si no, dibujo 2D de respaldo.
     const dist = ruta ? restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0) : 0;
     const eta = ruta ? Math.round((ruta.duration || 0) / 60) : 0;
-    if (cabina3dLista && moduloCabina3d) {
+    if (cabinaFotoLista) {
+      // La foto ya dibuja volante, cuadro y consola; no se pinta cabina encima.
+    } else if (cabina3dLista && moduloCabina3d) {
       const v = velocidad;
       const marcha = v < 1 ? 'N' : v < 20 ? '1' : v < 40 ? '2' : v < 70 ? '3' : v < 100 ? '4' : '5';
       moduloCabina3d.actualizar({

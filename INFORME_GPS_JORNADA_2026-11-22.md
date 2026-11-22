@@ -155,3 +155,12 @@ Nota: la cámara del móvil estaba apuntando al techo durante la prueba, así qu
 - La cinta AR se recorta al 50,5 % de la altura para terminar justo encima del cuadro.
 - Validado con Chromium + WebGL local a 480×753 y capturas: la cabina se monta sin errores, el cuadro y la consola quedan completos y la cinta no invade el cuadro. `npm test` 195/195 y `node --check` de `cabina3d.js`/`ruta.js`.
 - **Pendiente de verificación real**: el Redmi se bloqueó durante la prueba y no se pudo desbloquear por ADB (`INJECT_EVENTS` denegado). Falta abrir el móvil, activar ADAS AR y comprobar el encuadre con la cámara de la calle.
+
+## 10-septies. Ciclo 8 · Cabina fotorrealista desde la foto GT4
+
+- Se sustituye la cabina procedural por un **recorte con transparencia de la propia foto** `Cabina GT4 con navegación neón.png`: se conservan volante, cuadro, consola, salidas, puertas y espejo, y se hace transparente el parabrisas para que detrás se vea la cámara real.
+- El asset resultante es `public/img/cabina-gt4.webp` (1440×810, 154 KB) con alfa; la versión 3D queda solo como respaldo si la foto no carga.
+- Al entrar en AR se bloquea la orientación **horizontal** (si el navegador lo permite) porque la cabina de la foto es 16:9 y así se ve entera, como la referencia. Al salir se libera.
+- El vídeo de cámara pasa a `object-fit: cover`: en la prueba real el móvil entregó **1280×960** y la cámara llena todo el parabrisas, sin la tira vertical intermedia.
+- En modo foto se ocultan chat, 3D, calibrar y ancho para no tapar el volante; quedan cámara y stop.
+- **Probado en el Redmi** (Chrome 158, cámara real): la foto carga (`naturalWidth 1440`), el AR queda activo, la orientación pasa a landscape y el vídeo entrega 1280×960 con `cover`. La calle no se pudo comprobar porque el móvil estaba apuntando al techo/interior, pero el encuadre y la capa transparente funcionan.
