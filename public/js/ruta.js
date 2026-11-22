@@ -1028,6 +1028,46 @@
   let fondo3dListo = false;
   let zoomFondo3d = 1;
   let botones3d = [];
+  let stream3d = null;
+  let camara3dActiva = false;
+
+  function arrancarCamara3d() {
+    if (!navigator.mediaDevices?.getUserMedia) return;
+    (async () => {
+      try {
+        let s = null;
+        try {
+          s = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } },
+            audio: false
+          });
+        } catch (_e1) {
+          s = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        }
+        stream3d = s;
+        const v = document.getElementById('rutaArVideo');
+        if (v) {
+          videoAr = v;
+          v.srcObject = s;
+          await v.play().catch(() => {});
+        }
+        camara3dActiva = true;
+      } catch (e) {
+        camara3dActiva = false;
+        console.warn('Cámara 3D no disponible:', e);
+      }
+    })();
+  }
+
+  function detenerCamara3d() {
+    camara3dActiva = false;
+    if (stream3d) {
+      try { stream3d.getTracks().forEach(t => t.stop()); } catch (_e) { /* nada */ }
+      stream3d = null;
+    }
+    const v = document.getElementById('rutaArVideo');
+    if (v && v.srcObject) v.srcObject = null;
+  }
 
   function cargarFondo3d() {
     if (imagenFondo3d) return;
@@ -1742,7 +1782,25 @@
     const t = ahora / 1000;
     ultimoFrame3d = ahora;
     cargarFondo3d();
+    // 1) Escena base: la imagen de referencia (cockpit + carretera pintada).
     dibujarFondo3d(w, h, t);
+    // 2) La mitad superior se sustituye por la cámara en vivo: se borra la
+    //    carretera/árboles/señales pintadas y se pinta el video real.
+    const lineaHorizonte = h * 0.5;
+    const v = (typeof videoAr !== 'undefined' ? videoAr : null) || document.getElementById('rutaArVideo');
+    if (camara3dActiva && v && v.readyState >= 2 && v.videoWidth) {
+      ctx3d.save();
+      ctx3d.beginPath();
+      ctx3d.rect(0, 0, w, lineaHorizonte);
+      ctx3d.clip();
+      const vw = v.videoWidth, vh = v.videoHeight;
+      const escalaV = Math.max(w / vw, h / vh);
+      const dvw = vw * escalaV, dvh = vh * escalaV;
+      const dvx = (w - dvw) / 2;
+      const dvy = (h - dvh) / 2;
+      ctx3d.drawImage(v, dvx, dvy, dvw, dvh);
+      ctx3d.restore();
+    }
     dibujarHud3d(w, h);
   }
 
@@ -2011,6 +2069,7 @@
     if (typeof vistaArActiva !== 'undefined' && vistaArActiva && typeof detenerAr === 'function') detenerAr();
     vista3dActiva = true;
     cargarFondo3d();
+    arrancarCamara3d();
     document.getElementById('ruta3dToggle')?.classList.add('activo');
     document.querySelector('.ruta-shell')?.classList.add('ruta-3d-activo');
     // Ocultar el coche WebGL: la escena de referencia ya trae el habitáculo.
@@ -2042,6 +2101,7 @@
 
   function detener3d() {
     vista3dActiva = false;
+    detenerCamara3d();
     if (animacion3d) cancelAnimationFrame(animacion3d);
     animacion3d = null;
     document.getElementById('ruta3dToggle')?.classList.remove('activo');
