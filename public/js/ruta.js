@@ -1896,7 +1896,7 @@
       ctx3d.textAlign = 'center';
       ctx3d.textBaseline = 'middle';
       ctx3d.fillText(b, bx, by + (b === '+' ? -1 : 1));
-      botones3d.push({ x: bx, y: by, r: Math.max(9, pasoB / 2 - 1), accion: acciones[i] });
+      botones3d.push({ x: bx, y: by, r: Math.max(22, rB + 8), accion: acciones[i] });
       by += pasoB;
     }
 
@@ -1997,7 +1997,7 @@
     const x = (e.clientX - rect.left) * (canvas3d.width / rect.width);
     const y = (e.clientY - rect.top) * (canvas3d.height / rect.height);
     for (const b of botones3d) {
-      if (Math.hypot(x - b.x, y - b.y) <= b.r) {
+      if (Math.hypot(x - b.x, y - b.y) <= b.r + 8) {
         b.accion?.();
         return;
       }
