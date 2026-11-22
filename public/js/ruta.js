@@ -2146,7 +2146,7 @@
   async function montarCabina3d() {
     if (cabina3dLista) return;
     try {
-      moduloCabina3d = await import('/js/cabina3d.js?v=20261124l');
+      moduloCabina3d = await import('/js/cabina3d.js?v=20261126c');
       moduloCabina3d.montar(document.getElementById('rutaCabina3d'));
       cabina3dLista = true;
     } catch (e) {
@@ -2688,7 +2688,13 @@
     avisar('Activando cámara...', 'info', 2000);
     try {
       streamAr = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
+        // 4:3 con la máxima resolución razonable: entra más campo real que con
+        // el recorte 9:16 del visor y se ve más nítido en el móvil.
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 960 }
+        },
         audio: false
       });
       videoAr.srcObject = streamAr;

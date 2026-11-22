@@ -147,3 +147,11 @@ La pantalla del Redmi estaba bloqueada y MIUI no permite inyectar el botón de e
 - Comprobado en el Redmi con Chrome 158 por CDP y capturas `adb screencap`: 3D activo con coche cargado, AR con cámara real y botones recolocados. `npm test` 195/195.
 
 Nota: la cámara del móvil estaba apuntando al techo durante la prueba, así que la imagen es gris; lo validado es que el stream real arranca y que la composición 3D/ADAS se monta encima sin errores.
+
+## 9-septies. Ciclo 7 · Cabina GT4 de la referencia y más campo de cámara
+
+- Se tomó como referencia `Escritorio/Cabina GT4 con navegación neón.png` y se rehizo `cabina3d.js` entero para acercarse a ese interior: volante grueso de Alcantara con franja amarilla a las 12, costuras, dos mandos redondos con botones, pinza central GT4, salidas de aire redondas con aro cian, cuadro digital con arco de velocidad azul, consola central inclinada con pantalla de navegación, clima con mandos, palanca de cambios con pomo rojo y botón de arranque rojo.
+- **Más campo de visión**: la cámara 3D pasa de 64° a 78° y el objetivo baja; entran las dos salidas, el volante completo y parte de las puertas, y el parabrisas gana superficie. En la cámara real se pide 1280×960 (4:3) y el vídeo se muestra con `object-fit: contain`, de modo que entra el fotograma completo en horizontal en vez del recorte 9:16; las bandas superior/inferior quedan detrás del HUD y de la cabina.
+- La cinta AR se recorta al 50,5 % de la altura para terminar justo encima del cuadro.
+- Validado con Chromium + WebGL local a 480×753 y capturas: la cabina se monta sin errores, el cuadro y la consola quedan completos y la cinta no invade el cuadro. `npm test` 195/195 y `node --check` de `cabina3d.js`/`ruta.js`.
+- **Pendiente de verificación real**: el Redmi se bloqueó durante la prueba y no se pudo desbloquear por ADB (`INJECT_EVENTS` denegado). Falta abrir el móvil, activar ADAS AR y comprobar el encuadre con la cámara de la calle.

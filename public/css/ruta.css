@@ -2741,7 +2741,9 @@ body.viendo-ruta .pwa-install { display: none !important; }
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Encajar el fotograma completo 4:3: se gana campo horizontal real y las
+     bandas superior/inferior quedan detrás del HUD y de la cabina. */
+  object-fit: contain;
   z-index: 3;
   display: none;
   background: #000;
