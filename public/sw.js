@@ -1,4 +1,4 @@
-const CACHE = 'dm-app-v181';
+const CACHE = 'dm-app-v182';
 const CORE = [
   '/',
   '/index.html',
@@ -76,17 +76,18 @@ self.addEventListener('fetch', event => {
     // guarda por ruta, no por query: así una página con un ?v viejo recibe el
     // archivo nuevo de esta versión del service worker (p. ej. scan.js).
     const clave = new Request(`${url.origin}${url.pathname}`);
+    // Código y estilos: red primero. Así un cambio en JS/CSS se ve al recargar
+    // sin tener que esperar a una segunda visita ni limpiar caché a mano.
+    const esCodigo = url.pathname.startsWith('/js/') || url.pathname.startsWith('/css/');
     event.respondWith(
-      caches.open(CACHE).then(cache =>
-        cache.match(clave).then(cached => {
-          const network = fetch(request).then(response => {
-            if (response.ok) cache.put(clave, response.clone());
-            return response;
-          }).catch(() => cached || caches.match('/offline.html'));
-          // Stale-while-revalidate: sirve lo cacheado al instante y actualiza en segundo plano.
-          return cached || network;
-        })
-      )
+      caches.open(CACHE).then(cache => {
+        const red = fetch(request).then(response => {
+          if (response.ok) cache.put(clave, response.clone());
+          return response;
+        });
+        if (esCodigo) return red.catch(() => cache.match(clave).then(hit => hit || caches.match('/offline.html')));
+        return cache.match(clave).then(cached => cached || red.catch(() => caches.match('/offline.html')));
+      })
     );
   }
 });
