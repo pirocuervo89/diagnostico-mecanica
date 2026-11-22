@@ -459,9 +459,11 @@
     if (rumboEl) rumboEl.style.transform = `rotate(${grados}deg)`;
   }
 
-  function alMover(pos) {
+  function alMover(pos, esRespaldo = false) {
     const { latitude: lat, longitude: lon, accuracy, speed, heading } = pos.coords;
     const ahora = Date.now();
+    // Si llega un fix real, el aviso de «sin señal» deja de ser cierto.
+    if (!esRespaldo && elAviso && !elAviso.hidden && /^Sin señal GPS/.test(elAviso.textContent)) elAviso.hidden = true;
     // Filtro de jitter: a baja velocidad se ignoran microsaltos del GPS.
     if (ultimaPos) {
       const salto = distancia(ultimaPos.lat, ultimaPos.lon, lat, lon);
@@ -531,9 +533,20 @@
   }
 
   function errorGps(err) {
-    avisar(err && err.code === 1
-      ? 'Dale permiso de ubicación al navegador para ver dónde estás.'
-      : 'No se pudo leer el GPS. Sal al exterior y vuelve a intentarlo.', 'aviso', 8000);
+    // Si ya hay una posición, un error suelto del GPS (un túnel, el primer
+    // fix del arranque) no debe pedir permisos que ya están dados.
+    if (ultimaPos) return;
+    if (err && err.code === 1) {
+      navigator.permissions?.query?.({ name: 'geolocation' })
+        .then(p => {
+          avisar(p.state === 'granted'
+            ? 'GPS sin señal. Sal al exterior y espera unos segundos.'
+            : 'Dale permiso de ubicación al navegador para ver dónde estás.', 'aviso', 8000);
+        })
+        .catch(() => avisar('No se pudo leer el GPS. Sal al exterior y vuelve a intentarlo.', 'aviso', 8000));
+      return;
+    }
+    avisar('No se pudo leer el GPS. Sal al exterior y vuelve a intentarlo.', 'aviso', 8000);
   }
 
   function arrancarGps() {
@@ -553,7 +566,7 @@
         try {
           const guardada = JSON.parse(localStorage.getItem(CLAVE_POS) || 'null');
           if (guardada && Number.isFinite(guardada.lat) && Number.isFinite(guardada.lon)) {
-            alMover({ coords: { latitude: guardada.lat, longitude: guardada.lon, accuracy: null, speed: null, heading: null } });
+            alMover({ coords: { latitude: guardada.lat, longitude: guardada.lon, accuracy: null, speed: null, heading: null } }, true);
             avisar('Sin señal GPS: te muestro tu última posición conocida.', 'info', 7000);
           }
         } catch (_e) { /* nada guardado */ }
@@ -589,6 +602,10 @@
     const q = String(texto || '').trim();
     if (q.length < 3) return;
     elResultados.hidden = false;
+    // Los resultados mandan: ni recientes ni alertas deben quedar encima.
+    const recientes = view.querySelector('#rutaRecientes');
+    if (recientes) recientes.hidden = true;
+    if (elAviso) elAviso.hidden = true;
     elResultados.innerHTML = '<p class="ruta-vacio">Buscando…</p>';
     try {
       const r = await fetch(`/api/ruta/geocode?q=${encodeURIComponent(q)}`);
@@ -630,7 +647,7 @@
   elBuscar?.addEventListener('submit', e => { e.preventDefault(); buscar(elDestino.value); });
   elDestino?.addEventListener('input', () => {
     clearTimeout(temporizadorBusqueda);
-    if (elDestino.value.trim().length < 3) { elResultados.hidden = true; return; }
+    if (elDestino.value.trim().length < 3) { elResultados.hidden = true; pintarRecientes(); return; }
     temporizadorBusqueda = setTimeout(() => buscar(elDestino.value), 550);
   });
   elResultados?.addEventListener('click', e => {
@@ -647,6 +664,8 @@
     nombreDestino = nombre || nombreDestino || 'Destino';
     destinoCoord = { lat, lon };
     guardarReciente(nombre, lat, lon);
+    const recientes = view.querySelector('#rutaRecientes');
+    if (recientes) recientes.hidden = true;
     fueraRuta = 0;
     if (destino) mapa.removeLayer(destino);
     destino = L.marker([lat, lon], { icon: iconoDestino() }).addTo(mapa);
@@ -990,13 +1009,35 @@
     c.height = Math.round(sh);
     const g = c.getContext('2d');
     g.drawImage(imagenCoche3d, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    // La foto del GT4 es de estudio, con fondo azul. Un degradado radial no lo
+    // quitaba y el coche parecía un recorte pegado en la carretera. Se recorta
+    // con la silueta real (coordenadas normalizadas sobre la foto original) y
+    // se difumina el borde para integrarlo en la escena. El coche y la imagen
+    // siguen siendo los del proyecto: solo se elimina el fondo.
+    const PUNTOS = [
+      [0.104, 0.858], [0.110, 0.800], [0.120, 0.737], [0.200, 0.669],
+      [0.280, 0.601], [0.350, 0.527], [0.420, 0.463], [0.510, 0.438],
+      [0.584, 0.448], [0.640, 0.484], [0.690, 0.516], [0.688, 0.466],
+      [0.700, 0.416], [0.892, 0.423], [0.894, 0.463], [0.860, 0.509],
+      [0.848, 0.605], [0.848, 0.747], [0.820, 0.847], [0.784, 0.893],
+      [0.720, 0.897], [0.340, 0.897], [0.148, 0.886], [0.110, 0.868]
+    ];
+    const mascara = document.createElement('canvas');
+    mascara.width = c.width;
+    mascara.height = c.height;
+    const mg = mascara.getContext('2d');
+    mg.filter = 'blur(5px)';
+    mg.fillStyle = '#fff';
+    mg.beginPath();
+    PUNTOS.forEach(([x, y], i) => {
+      const px = (x * W - sx) / sw * c.width;
+      const py = (y * H - sy) / sh * c.height;
+      if (i) mg.lineTo(px, py); else mg.moveTo(px, py);
+    });
+    mg.closePath();
+    mg.fill();
     g.globalCompositeOperation = 'destination-in';
-    const grad = g.createRadialGradient(c.width / 2, c.height * 0.58, Math.min(c.width, c.height) * 0.28, c.width / 2, c.height * 0.58, Math.max(c.width, c.height) * 0.6);
-    grad.addColorStop(0, 'rgba(0,0,0,1)');
-    grad.addColorStop(0.72, 'rgba(0,0,0,1)');
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    g.fillStyle = grad;
-    g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(mascara, 0, 0);
     spriteCoche3d = c;
   }
 
@@ -1624,10 +1665,14 @@
 
   function dibujarCoche3d(w, h, t = 0) {
     prepararSpriteCoche3d();
-    const carW = Math.min(w * 0.40, 190);
-    const carH = carW * 1.10;
+    // Respetar la proporción del recorte: el coche es ancho y bajo, no un
+    // rectángulo alto. Se mantiene grande, como protagonista de la escena.
+    const carW = Math.min(w * 0.62, 300);
+    const carH = carW * (spriteCoche3d ? spriteCoche3d.height / spriteCoche3d.width : 0.52);
     const cx = w / 2;
-    const cy = h - carH * 0.78 + Math.sin(t * 7) * Math.min(2.2, velocidad / 45);
+    // Dejar libre el HUD inferior (aviso de maniobra y botón de parar) para que
+    // no tape las ruedas del coche.
+    const cy = h - 96 - carH / 2 + Math.sin(t * 7) * Math.min(2.2, velocidad / 45);
     // Estelas laterales a velocidad.
     if (velocidad > 25) {
       ctx3d.save();

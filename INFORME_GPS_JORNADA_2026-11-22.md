@@ -97,6 +97,27 @@ Trabajo realizado sobre `diagnostico-mecanica` (HADAS), sin cambiar de proyecto 
 - En 3D exterior solo quedan los controles de conducción: 3D, cámara, detener, voz y demo.
 - Verificado con capturas de ambos modos y 201/201 tests.
 
+## 9-quater. Ciclo 4 · Prueba real en Redmi 23053RN02Y
+
+Probado en el teléfono con Chrome 158 sobre el servidor local (`adb reverse`), no en un navegador de escritorio.
+
+- **GPS real**: fix de 14 m de precisión en Ciudad Real; el aviso de «sin señal» desaparece en cuanto llega un fix real.
+- **Cámara real**: la cámara trasera entrega 480×640 a 30 fps y el modo AR se activa con la cabina y las líneas.
+- **Buscador**: la lista de resultados quedaba debajo de «Recientes» y de la alerta de GPS; se ocultan ambos al buscar y los resultados pasan a la capa superior.
+- **Botón de iniciar tapado**: la barra inferior de la app y una cabecera fija se comían el pie del mapa. En la vista Ruta se ocultan cabecera y barra en móvil, y el panel queda por encima del área segura.
+- **Botón de parar invisible**: `display: grid` anulaba el atributo `hidden`, así que el botón de parar (oculto) interceptaba los toques del de iniciar. Se corrige con `[hidden] { display: none }` para todos los FAB.
+- **Lienzo 3D/AR cortado**: `100vh` era mayor que el alto visible del móvil. Ahora ocupan el 100 % de la vista y el coche deja libre el HUD inferior.
+- **Coche del 3D**: se recorta por la silueta real de la foto (sin el fondo azul de estudio), se respeta su proporción y se sube por encima del aviso de maniobra.
+- **Panel de ruta**: con el panel abierto se ocultan GPS y modo noche (vuelven al navegar) para no tapar la ETA ni «Iniciar navegación».
+- Probado en el dispositivo: buscar → elegir → iniciar → parar → 3D → AR → calibrar ancho (3,6 m) → calibrar AR → demo, sin errores de JavaScript.
+- `npm test`: 195/195 correctos.
+
+### Pendiente de prueba física
+
+- Detección de carriles y señales con la cámara apuntando a una carretera real (en la prueba la cámara miraba a una pared).
+- Precisión del GPS en movimiento y recalculo real al desviarse.
+- Visibilidad del HUD con sol directo y de noche.
+
 ## 10. Cuota de Freebuff
 
 No verificable desde el entorno de ejecución.

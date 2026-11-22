@@ -114,6 +114,11 @@
   padding: 6px;
 }
 .ruta-results[hidden] { display: none !important; }
+/* Un botón con display propio ignoraba [hidden] y seguía tragándose los toques
+   (el «parar» invisible tapaba «iniciar navegación»). */
+.ruta-fab[hidden], .ruta-inter[hidden] { display: none !important; }
+/* Los resultados de búsqueda se tocan por encima de recientes y alertas. */
+.ruta-results { z-index: 1300 !important; }
 .ruta-result {
   display: flex; align-items: center; gap: 10px;
   width: 100%;
@@ -494,6 +499,30 @@ body.ruta-pantalla-completa { overflow: hidden; }
 
 /* Con una ruta puesta, la burbuja de instalar no tapa el pie del mapa. */
 body.viendo-ruta .pwa-install { display: none !important; }
+
+/* En el móvil el GPS es una pantalla completa de verdad: ni cabecera ni barra
+   inferior de la app, que tapaban el botón de iniciar la navegación. */
+@media (max-width: 700px) {
+  body.viendo-ruta { padding-bottom: 0 !important; }
+  body.viendo-ruta .topbar,
+  body.viendo-ruta #tabbar,
+  body.viendo-ruta .site-footer { display: none !important; }
+  body.viendo-ruta #view-ruta.view-gps-fullscreen { height: 100vh; height: 100dvh; }
+  .view-gps-fullscreen .ruta-search {
+    top: calc(10px + env(safe-area-inset-top, 0px)) !important;
+  }
+  .view-gps-fullscreen .ruta-panel {
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .view-gps-fullscreen .ruta-fab-parar {
+    bottom: calc(22px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  /* Con el panel de ruta abierto, los dos botones que caen dentro se ocultan
+     para no tapar la ETA ni el botón de arrancar. Siguen disponibles al
+     navegar y cuando no hay ruta. */
+  .ruta-shell.ruta-con-ruta:not(.ruta-conduciendo) #rutaGps,
+  .ruta-shell.ruta-con-ruta:not(.ruta-conduciendo) #rutaNoche { display: none !important; }
+}
 .ruta-panel { scroll-margin-bottom: 96px; }
 
 /* CTA grande de la portada: «¿Dónde vamos?» */
@@ -2673,7 +2702,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   display: none;
 }
 .ruta-3d.activo { display: block; }
-.ruta-shell.ruta-3d-activo { height: 100vh; min-height: 100vh; }
+.ruta-shell.ruta-3d-activo { height: 100%; min-height: 0; }
 .ruta-shell.ruta-3d-activo .ruta-map { display: none; }
 .ruta-shell.ruta-3d-activo .ruta-3d { display: block; }
 
@@ -2718,7 +2747,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   pointer-events: none;
 }
 .ruta-ar-canvas.activo { display: block; }
-.ruta-shell.ruta-ar-activo { height: 100vh; min-height: 100vh; }
+.ruta-shell.ruta-ar-activo { height: 100%; min-height: 0; }
 .ruta-shell.ruta-ar-activo .ruta-map { display: none; }
 .ruta-shell.ruta-ar-activo .ruta-3d { display: none; }
 .ruta-shell.ruta-ar-activo .ruta-ar-video { display: block; }
