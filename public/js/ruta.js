@@ -1026,6 +1026,8 @@
   let spriteCoche3d = null;
   let imagenFondo3d = null;
   let fondo3dListo = false;
+  let zoomFondo3d = 1;
+  let botones3d = [];
 
   function cargarFondo3d() {
     if (imagenFondo3d) return;
@@ -1750,7 +1752,7 @@
     if (fondo3dListo && imagenFondo3d) {
       const iw = imagenFondo3d.naturalWidth, ih = imagenFondo3d.naturalHeight;
       // Cobertura completa sin deformar: se recorta lo justo por los lados.
-      const escala = Math.max(w / iw, h / ih);
+      const escala = Math.max(w / iw, h / ih) * zoomFondo3d;
       const dw = iw * escala, dh = ih * escala;
       // Micro-paralaje: da sensación de avance sin mover el punto de fuga.
       const avance = Math.min(1, Math.abs(velocidad) / 120);
@@ -1798,6 +1800,11 @@
       ctx3d.beginPath();
       ctx3d.moveTo(9, -6); ctx3d.lineTo(12, 2); ctx3d.lineTo(4, 2);
       ctx3d.stroke();
+    } else if (m.includes('straight') || m.includes('recto') || m === '') {
+      ctx3d.beginPath();
+      ctx3d.moveTo(0, 16); ctx3d.lineTo(0, -10);
+      ctx3d.moveTo(-8, -2); ctx3d.lineTo(0, -10); ctx3d.lineTo(8, -2);
+      ctx3d.stroke();
     } else {
       ctx3d.beginPath();
       ctx3d.moveTo(-8, 8); ctx3d.lineTo(8, 8);
@@ -1808,6 +1815,7 @@
   }
 
   function dibujarHud3d(w, h) {
+    botones3d = [];
     const ruta = rutaActiva();
     const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
     const rest = ruta ? restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0) : 0;
@@ -1864,7 +1872,16 @@
     const bx = w - 34;
     let by = Math.max(92, cyBru + 58);
     const botones = ['+', '−', '🎙', '⚙', '⛽', '⏱'];
-    for (const b of botones) {
+    const acciones = [
+      () => { zoomFondo3d = Math.min(1.65, zoomFondo3d + 0.12); },
+      () => { zoomFondo3d = Math.max(1, zoomFondo3d - 0.12); },
+      () => document.getElementById('rutaMicro')?.click(),
+      () => detener3d(),
+      () => buscar('gasolinera'),
+      () => document.getElementById('rutaNoche')?.click()
+    ];
+    for (let i = 0; i < botones.length; i++) {
+      const b = botones[i];
       ctx3d.fillStyle = 'rgba(10,13,18,.82)';
       ctx3d.beginPath(); ctx3d.arc(bx, by, 17, 0, Math.PI * 2); ctx3d.fill();
       ctx3d.strokeStyle = 'rgba(255,255,255,.12)'; ctx3d.lineWidth = 1; ctx3d.stroke();
@@ -1873,6 +1890,7 @@
       ctx3d.textAlign = 'center';
       ctx3d.textBaseline = 'middle';
       ctx3d.fillText(b, bx, by + (b === '+' ? -1 : 1));
+      botones3d.push({ x: bx, y: by, r: 20, accion: acciones[i] });
       by += 42;
     }
 
@@ -1924,6 +1942,10 @@
 
     // --- Botones inferiores derecha ---------------------------------------
     const byBtn = h - 52;
+    const accionesInferiores = [
+      () => document.getElementById('rutaGps')?.click(),
+      () => iniciarAr()
+    ];
     for (const [i, icono] of ['◎', '➜'].entries()) {
       const x = w - 30 - i * 50;
       ctx3d.fillStyle = i === 0 ? 'rgba(37,99,235,.92)' : 'rgba(10,13,18,.86)';
@@ -1933,6 +1955,7 @@
       ctx3d.font = `700 18px system-ui, sans-serif`;
       ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
       ctx3d.fillText(icono, x, byBtn + 1);
+      botones3d.push({ x, y: byBtn, r: 23, accion: accionesInferiores[i] });
     }
 
     // --- Avisos de estado --------------------------------------------------
@@ -2127,6 +2150,19 @@
     ctx3d.shadowBlur = 0;
   }
 
+  function alPulsar3d(e) {
+    if (!canvas3d) return;
+    const rect = canvas3d.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas3d.width / rect.width);
+    const y = (e.clientY - rect.top) * (canvas3d.height / rect.height);
+    for (const b of botones3d) {
+      if (Math.hypot(x - b.x, y - b.y) <= b.r + 8) {
+        b.accion?.();
+        return;
+      }
+    }
+  }
+
   function iniciar3d() {
     if (!init3d()) return;
     idx3dSuave = null;
@@ -2149,6 +2185,7 @@
     canvas3d.hidden = false;
     canvas3d.width = canvas3d.clientWidth || window.innerWidth;
     canvas3d.height = canvas3d.clientHeight || window.innerHeight;
+    canvas3d.onclick = alPulsar3d;
     // ~30 fps: suficiente para la escena y ahorra CPU/batería en móviles.
     const loop = (ts = 0) => {
       if (!vista3dActiva) return;

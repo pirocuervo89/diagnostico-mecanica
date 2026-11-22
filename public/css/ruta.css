@@ -3499,3 +3499,11 @@ body.viendo-ruta main {
   height: 52px !important;
   z-index: 1201 !important;
 }
+
+/* La vista 3D de referencia ya trae sus propios controles en el lienzo
+   (zoom, voz, ajustes, gasolinera, reloj, centrar y pasar a AR). Los botones
+   HTML tapaban el velocímetro y los botones inferiores de la imagen. */
+.ruta-shell.ruta-3d-activo #ruta3dToggle,
+.ruta-shell.ruta-3d-activo #rutaArToggle {
+  display: none !important;
+}
