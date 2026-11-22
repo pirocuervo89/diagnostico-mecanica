@@ -5140,11 +5140,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.dataset.perf = low ? 'low' : 'high';
   } catch (_) { document.documentElement.dataset.perf = 'high'; }
   // Carga diferida de imágenes: mejora el arranque y ahorra datos en móvil.
+  // Se aplica también a imágenes añadidas después (tienda, chat, tutoriales)
+  // mediante un observador, sin tocar cada plantilla por separado.
+  const lazyImg = (img) => {
+    if (!img || img.loading) return;
+    img.loading = 'lazy';
+    img.decoding = 'async';
+  };
   try {
-    document.querySelectorAll('img:not([loading])').forEach(img => {
-      img.loading = 'lazy';
-      img.decoding = 'async';
-    });
+    document.querySelectorAll('img:not([loading])').forEach(lazyImg);
+    if ('MutationObserver' in window) {
+      const mo = new MutationObserver(muts => {
+        muts.forEach(m => m.addedNodes.forEach(n => {
+          if (n.nodeType !== 1) return;
+          if (n.tagName === 'IMG') lazyImg(n);
+          n.querySelectorAll?.('img:not([loading])').forEach(lazyImg);
+        }));
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    }
   } catch (_) {}
   initPayments();
   initCatalog();
