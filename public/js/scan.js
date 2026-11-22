@@ -236,20 +236,52 @@
     }
   }
 
+  async function wakeServer() {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
+      await fetch('/api/health', { signal: controller.signal, cache: 'no-store' }).catch(() => {});
+      clearTimeout(timer);
+    } catch (_) {}
+  }
+
   async function analyze(payload, label = 'Analizando documento…') {
     if (busy) return;
     setBusy(true);
     setStatus(`${label} Esto puede tardar unos segundos si el archivo es una imagen o un PDF escaneado.`);
     try {
-      const response = await fetch('/api/vehicle/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || `Error HTTP ${response.status}`);
-      renderReview(data);
-      setStatus('Datos preparados. Confirma el vehículo para continuar.');
+      // El servidor gratuito puede estar dormido (cold start) y devolver 502.
+      // Despertamos y reintentamos con espera creciente.
+      await wakeServer();
+      let lastError = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (attempt > 0) {
+          setStatus(`El servidor está despertando… reintentando (${attempt + 1}/3).`);
+          await new Promise(r => setTimeout(r, attempt === 1 ? 2000 : 4000));
+        }
+        try {
+          const response = await fetch('/api/vehicle/scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            const err = new Error(data.error || `Error HTTP ${response.status}`);
+            err.status = response.status;
+            throw err;
+          }
+          renderReview(data);
+          setStatus('Datos preparados. Confirma el vehículo para continuar.');
+          lastError = null;
+          break;
+        } catch (error) {
+          lastError = error;
+          const status = error.status || (String(error.message || '').match(/HTTP (\d+)/)?.[1] | 0);
+          if (![502, 503, 504, 0].includes(status) || attempt === 2) throw error;
+        }
+      }
+      if (lastError) throw lastError;
     } catch (error) {
       review.hidden = true;
       currentResult = null;

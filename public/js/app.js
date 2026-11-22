@@ -168,6 +168,7 @@ async function api(url, options = {}) {
   }
   return res.json();
 }
+window.api = api;
 
 function esc(v = '') {
   return String(v).replace(/[&<>"']/g, c => ({

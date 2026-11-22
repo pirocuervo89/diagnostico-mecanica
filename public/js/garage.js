@@ -456,11 +456,24 @@
     box.insertAdjacentHTML('beforeend', '<div class="garage-scanning"><span class="garage-spinner"></span> Leyendo la ficha técnica en local… Puede tardar unos segundos.</div>');
     try {
       const original = await fileToDataUrl(file);
-      const result = await api('/api/vehicle/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dataBase64: original, mimeType: file.type, fileName: file.name })
-      });
+      try { await fetch('/api/health', { cache: 'no-store' }).catch(() => {}); } catch (_) {}
+      let result;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          if (attempt > 0) {
+            await new Promise(r => setTimeout(r, attempt === 1 ? 2000 : 4000));
+          }
+          result = await api('/api/vehicle/scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dataBase64: original, mimeType: file.type, fileName: file.name })
+          });
+          break;
+        } catch (err) {
+          const status = Number(String(err?.message || '').match(/HTTP (\d+)/)?.[1] || 0);
+          if (![502, 503, 504].includes(status) || attempt === 2) throw err;
+        }
+      }
       const extracted = result.extracted || {};
       const pick = key => {
         const item = extracted[key];
