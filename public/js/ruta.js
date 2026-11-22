@@ -1463,6 +1463,7 @@
   let ctxVision = null;
   let carrilInfo = null;
   let carrilSuave = null;
+  let bufferL = [], bufferR = [];
   let carrilBias = 0;
   let carrilBuenas = 0;
   let carrilMalas = 0;
@@ -1480,16 +1481,32 @@
     ctxVision = lienzoVision.getContext('2d', { willReadFrequently: true });
   }
 
-  function regresion(pts) {
+  // Ajuste cuadrático u = A·d² + B·d + C por mínimos cuadrados.
+  function regresionCuadratica(pts) {
     const n = pts.length;
-    if (n < 3) return null;
-    let sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
-    for (const [x, y] of pts) { sx += x; sy += y; sxx += x * x; sxy += x * y; syy += y * y; }
-    const den = n * syy - sy * sy;
-    if (!den) return null;
-    const m = (n * sxy - sx * sy) / den;
-    const c = (sx - m * sy) / n;
-    return { m, c };
+    if (n < 5) return null;
+    let S0 = n, S1 = 0, S2 = 0, S3 = 0, S4 = 0, T0 = 0, T1 = 0, T2 = 0;
+    for (const [u, d] of pts) {
+      const d2 = d * d;
+      S1 += d; S2 += d2; S3 += d2 * d; S4 += d2 * d2;
+      T0 += u; T1 += u * d; T2 += u * d2;
+    }
+    const M = [[S4, S3, S2, T2], [S3, S2, S1, T1], [S2, S1, S0, T0]];
+    for (let i = 0; i < 3; i++) {
+      let piv = i;
+      for (let r = i + 1; r < 3; r++) if (Math.abs(M[r][i]) > Math.abs(M[piv][i])) piv = r;
+      if (Math.abs(M[piv][i]) < 1e-9) return null;
+      [M[i], M[piv]] = [M[piv], M[i]];
+      const p = M[i][i];
+      for (let c = i; c < 4; c++) M[i][c] /= p;
+      for (let r = 0; r < 3; r++) {
+        if (r === i) continue;
+        const f = M[r][i];
+        if (!f) continue;
+        for (let c = i; c < 4; c++) M[r][c] -= f * M[i][c];
+      }
+    }
+    return { A: M[0][3], B: M[1][3], C: M[2][3] };
   }
 
   function analizarVision(ahora) {
@@ -1516,63 +1533,105 @@
       }
     }
 
-    // Carriles con corrección de perspectiva: cada punto se lleva a
-    // coordenadas normalizadas (u lateral, d profundidad) del trapecio de
-    // calzada. Así ambas líneas son comparables aunque en la imagen converjan.
+    // Carriles con corrección de perspectiva (trapecio normalizado u/d) y
+    // ajuste cuadrático: sigue curvas y tolera líneas discontinuas porque
+    // cada segmento claro se asigna a su lado con la predicción anterior.
     const ROI_Y0 = Math.round(VH * 0.55);
     const ROI_Y1 = Math.round(VH * 0.98);
     const Wtop = VW * 0.34;
     const Wbot = VW * 0.92;
-    const puntosL = [], puntosR = [];
-    let filas = 0;
     for (let y = ROI_Y0; y <= ROI_Y1; y += 2) {
-      filas++;
-      let lx = -1, rx = -1;
+      const d = (ROI_Y1 - y) / (ROI_Y1 - ROI_Y0); // 0 = cerca, 1 = lejos
+      const medio = (Wbot + (Wtop - Wbot) * d) / 2;
+      // Segmentos claros de la fila (las líneas discontinuas dejan huecos).
+      const runs = [];
+      let ini = -1;
       for (let x = 2; x < VW - 2; x++) {
         const i = (y * VW + x) * 4;
         const r = datos[i], g = datos[i + 1], b = datos[i + 2];
         const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
-        if (mx > 150 && (mx - mn) < 45) { if (lx < 0) lx = x; rx = x; }
+        if (mx > 150 && (mx - mn) < 45) { if (ini < 0) ini = x; }
+        else if (ini >= 0) {
+          const largo = x - ini;
+          if (largo >= 2 && largo <= VW * 0.12) runs.push((ini + x - 1) / 2);
+          ini = -1;
+        }
       }
-      if (lx < 0 || rx - lx < VW * 0.14 || rx - lx > VW * 0.96) continue;
-      const mi = (y * VW + Math.round((lx + rx) / 2)) * 4;
-      const mlum = 0.299 * datos[mi] + 0.587 * datos[mi + 1] + 0.114 * datos[mi + 2];
-      if (mlum >= 125) continue;
-      const d = (ROI_Y1 - y) / (ROI_Y1 - ROI_Y0); // 0 = cerca, 1 = lejos
-      const ancho = Wbot + (Wtop - Wbot) * d;
-      const uL = (lx - VW / 2) / (ancho / 2);
-      const uR = (rx - VW / 2) / (ancho / 2);
-      if (Math.abs(uL) < 1.8 && Math.abs(uR) < 1.8) {
-        puntosL.push([uL, d]);
-        puntosR.push([uR, d]);
+      if (ini >= 0) {
+        const largo = VW - 2 - ini;
+        if (largo >= 2 && largo <= VW * 0.12) runs.push((ini + VW - 3) / 2);
+      }
+      const us = runs.map(x => (x - VW / 2) / medio).filter(u => Math.abs(u) < 1.8).sort((a, b) => a - b);
+      if (us.length < 2) continue;
+      // Emparejar segmentos por ancho y centro esperados: funciona aunque el
+      // carril esté desplazado, en curva y con huecos de línea discontinua.
+      const refOffset = carrilSuave ? carrilSuave.offset : 0;
+      const refAncho = carrilSuave ? Math.abs(carrilSuave.cR - carrilSuave.cL) : 0.72;
+      let par = null;
+      for (let i = 0; i < us.length; i++) {
+        for (let j = i + 1; j < us.length; j++) {
+          const anchoPar = us[j] - us[i];
+          if (anchoPar < 0.6 || anchoPar > 1.9) continue;
+          const centroPar = (us[i] + us[j]) / 2;
+          const score = Math.abs(centroPar - refOffset) + Math.abs(anchoPar - refAncho) * 0.6;
+          if (!par || score < par.score) par = { a: us[i], b: us[j], score };
+        }
+      }
+      if (par) {
+        bufferL.push([par.a, d, ahora]);
+        bufferR.push([par.b, d, ahora]);
+      } else if (us.length === 1 && carrilSuave) {
+        // Con modelo previo, un único trazo se asigna a su lado esperado:
+        // así las discontinuas rellenan sus huecos a lo largo del tiempo.
+        const pL = carrilSuave.aL * d * d + carrilSuave.bL * d + carrilSuave.cL;
+        const pR = carrilSuave.aR * d * d + carrilSuave.bR * d + carrilSuave.cR;
+        const pc = (pL + pR) / 2;
+        const mitad = Math.max(0.3, Math.abs(pR - pL) / 2);
+        const z = (us[0] - pc) / mitad;
+        if (z <= -0.2 && z >= -2.2) bufferL.push([us[0], d, ahora]);
+        else if (z >= 0.2 && z <= 2.2) bufferR.push([us[0], d, ahora]);
       }
     }
 
-    const cobertura = filas ? puntosL.length / filas : 0;
+    // Búfer temporal: rellena los huecos de las líneas discontinuas.
+    const corte = ahora - 1400;
+    bufferL = bufferL.filter(p => p[2] >= corte);
+    bufferR = bufferR.filter(p => p[2] >= corte);
+    if (bufferL.length > 400) bufferL.splice(0, bufferL.length - 400);
+    if (bufferR.length > 400) bufferR.splice(0, bufferR.length - 400);
+    const puntosL = bufferL.map(p => [p[0], p[1]]);
+    const puntosR = bufferR.map(p => [p[0], p[1]]);
+    const span = pts => pts.length ? Math.max(...pts.map(p => p[1])) - Math.min(...pts.map(p => p[1])) : 0;
+    const calidad = (pts, f) => {
+      if (!f || pts.length < 5) return 0;
+      let err = 0;
+      for (const [u, d] of pts) err += Math.abs(u - (f.A * d * d + f.B * d + f.C));
+      return Math.min(1, Math.max(0, 1 - (err / pts.length) / 0.28));
+    };
+    const fL = regresionCuadratica(puntosL);
+    const fR = regresionCuadratica(puntosR);
     let detectado = false;
-    if (puntosL.length >= 4 && puntosR.length >= 4 && cobertura > 0.2) {
-      const fL = regresion(puntosL), fR = regresion(puntosR);
-      if (fL && fR && Math.abs(fL.m) < 3 && Math.abs(fR.m) < 3) {
-        const uL0 = fL.c, uR0 = fR.c; // d = 0, junto al coche
-        const anchoCarril = uR0 - uL0;
-        const errL = puntosL.reduce((s, [u, d]) => s + Math.abs(u - (fL.m * d + fL.c)), 0) / puntosL.length;
-        const errR = puntosR.reduce((s, [u, d]) => s + Math.abs(u - (fR.m * d + fR.c)), 0) / puntosR.length;
-        if (anchoCarril > 0.6 && anchoCarril < 2.6 && errL < 0.24 && errR < 0.24) {
-          const conf = Math.min(1, cobertura * 1.6) * Math.min(1, Math.max(0.1, 1 - (errL + errR) / 0.5));
-          const offset = (uL0 + uR0) / 2;
-          detectado = true;
-          const A = 0.28;
-          if (!carrilSuave) {
-            carrilSuave = { aL: fL.m, bL: fL.c, aR: fR.m, bR: fR.c, offset, conf, ts: ahora };
-          } else {
-            carrilSuave.aL += (fL.m - carrilSuave.aL) * A;
-            carrilSuave.bL += (fL.c - carrilSuave.bL) * A;
-            carrilSuave.aR += (fR.m - carrilSuave.aR) * A;
-            carrilSuave.bR += (fR.c - carrilSuave.bR) * A;
-            carrilSuave.offset += (offset - carrilSuave.offset) * A;
-            carrilSuave.conf += (conf - carrilSuave.conf) * A;
-            carrilSuave.ts = ahora;
-          }
+    if (fL && fR && span(puntosL) > 0.3 && span(puntosR) > 0.3 && Math.abs(fL.A) < 3 && Math.abs(fR.A) < 3) {
+      const w0 = fR.C - fL.C;
+      const w7 = (fR.A * 0.49 + fR.B * 0.7 + fR.C) - (fL.A * 0.49 + fL.B * 0.7 + fL.C);
+      const qL = calidad(puntosL, fL), qR = calidad(puntosR, fR);
+      if (w0 > 0.55 && w0 < 2.8 && Math.abs(w7 - w0) < 1.2 && qL > 0.35 && qR > 0.35) {
+        const conf = Math.min(1, (puntosL.length + puntosR.length) / 24) * ((qL + qR) / 2);
+        const offset = (fL.C + fR.C) / 2;
+        detectado = true;
+        const A = 0.22;
+        if (!carrilSuave) {
+          carrilSuave = { aL: fL.A, bL: fL.B, cL: fL.C, aR: fR.A, bR: fR.B, cR: fR.C, offset, conf, ts: ahora };
+        } else {
+          carrilSuave.aL += (fL.A - carrilSuave.aL) * A;
+          carrilSuave.bL += (fL.B - carrilSuave.bL) * A;
+          carrilSuave.cL += (fL.C - carrilSuave.cL) * A;
+          carrilSuave.aR += (fR.A - carrilSuave.aR) * A;
+          carrilSuave.bR += (fR.B - carrilSuave.bR) * A;
+          carrilSuave.cR += (fR.C - carrilSuave.cR) * A;
+          carrilSuave.offset += (offset - carrilSuave.offset) * A;
+          carrilSuave.conf += (conf - carrilSuave.conf) * A;
+          carrilSuave.ts = ahora;
         }
       }
     }
@@ -1613,10 +1672,10 @@
       const Wbot = VW * 0.92;
       const sesgo = carrilSuave.offset - carrilBias; // 0 = centrado tras calibrar
       const col = Math.abs(sesgo) > 0.42 ? '#ef4444' : Math.abs(sesgo) > 0.24 ? '#fbbf24' : '#22c55e';
-      const proyectar = (a, b, d) => {
+      const proyectar = (a, b, c, d) => {
         const y = ROI_Y1 - d * (ROI_Y1 - ROI_Y0);
         const ancho = Wbot + (Wtop - Wbot) * d;
-        const u = a * d + b;
+        const u = a * d * d + b * d + c;
         return [((VW / 2) + (u * ancho) / 2) * sx, y * sy];
       };
       ctxAr.save();
@@ -1624,10 +1683,10 @@
       ctxAr.strokeStyle = col;
       ctxAr.shadowColor = col;
       ctxAr.shadowBlur = 10;
-      for (const [a, b] of [[carrilSuave.aL, carrilSuave.bL], [carrilSuave.aR, carrilSuave.bR]]) {
+      for (const [a, b, c] of [[carrilSuave.aL, carrilSuave.bL, carrilSuave.cL], [carrilSuave.aR, carrilSuave.bR, carrilSuave.cR]]) {
         ctxAr.beginPath();
-        for (let k = 0; k <= 8; k++) {
-          const [px, py] = proyectar(a, b, k / 8);
+        for (let k = 0; k <= 12; k++) {
+          const [px, py] = proyectar(a, b, c, k / 12);
           if (k === 0) ctxAr.moveTo(px, py); else ctxAr.lineTo(px, py);
         }
         ctxAr.stroke();
@@ -1739,6 +1798,8 @@
     detenerSensoresAr();
     carrilInfo = null;
     carrilSuave = null;
+    bufferL = [];
+    bufferR = [];
     carrilBias = 0;
     carrilBuenas = 0;
     carrilMalas = 0;
