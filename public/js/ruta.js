@@ -1964,6 +1964,7 @@
       botones3d.push({ x, y: byBtn, r: Math.max(24, 23 * u), accion: accionesInferiores[i] });
     }
 
+    window.__dm3dBotones = botones3d;
     // --- Avisos de estado
     const sinGps = !ultimaPos || (ultimaVez && Date.now() - ultimaVez > 20000);
     if (sinGps && ruta) {
