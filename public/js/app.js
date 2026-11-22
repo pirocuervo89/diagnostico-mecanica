@@ -2,9 +2,9 @@
 const $ = s => document.querySelector(s);
 // Helper de tracking GA4 con respeto al consentimiento (RGPD)
 function gtagTrack(name, params) {
-  if (typeof gtag !== 'function') return;
+  if (typeof window.gtag !== 'function') return;
   if (window.dymConsent && !window.dymConsent.has('analytics')) return;
-  gtagTrack(name, params);
+  window.gtag('event', name, params || {});
 }
 const $$ = s => [...document.querySelectorAll(s)];
 
@@ -382,8 +382,10 @@ $$('[data-home-scanners]').forEach(btn => btn.addEventListener('click', () => {
 // Portada: subir la ficha técnica. Lleva al bloque de identificación y abre
 // el selector de archivo en el mismo toque, para que sea un solo gesto.
 $$('[data-home-ficha]').forEach(btn => btn.addEventListener('click', () => {
+  // Tiene que abrirse dentro del mismo toque. Si se retrasa con setTimeout,
+  // Android puede considerar que ya no hay gesto de usuario y no abre nada.
+  document.getElementById('scanFile')?.click();
   document.getElementById('diagnosisStart')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  setTimeout(() => document.getElementById('scanBrowse')?.click(), 320);
 }));
 
 $$('[data-home-light]').forEach(btn => btn.addEventListener('click', () => {
