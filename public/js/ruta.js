@@ -2000,10 +2000,12 @@
     window.__dm3dHit = { x, y, n: botones3d.length, b: botones3d.slice(0, 4) };
     for (const b of botones3d) {
       if (Math.hypot(x - b.x, y - b.y) <= b.r + 8) {
+        window.__dm3dAccionado = String(b.accion);
         b.accion?.();
         return;
       }
     }
+    window.__dm3dAccionado = 'ninguna';
   }
 
   function iniciar3d() {
