@@ -1335,3 +1335,16 @@ textarea { resize: vertical; min-height: 100px; }
 @media (max-width: 900px) {
   #view-foro:not([data-pane="list"]) .forum-side { display: none; }
 }
+
+/* ---------------------------------------------------------------
+   Accesibilidad y rendimiento: respetar la preferencia de reducir
+   movimiento y evitar animaciones pesadas en dispositivos modestos.
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -5128,6 +5128,9 @@ document.addEventListener('viewchange', e => {
 // INICIALIZACIÓN
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
+  // Despertar el servidor (Render puede estar dormido): evita el primer 502
+  // en cualquier vista, no solo en el garaje o el escáner de ficha.
+  try { fetch('/api/health', { cache: 'no-store' }).catch(() => {}); } catch (_) {}
   initPayments();
   initCatalog();
   initVehicleSelector();
