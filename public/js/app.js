@@ -207,6 +207,11 @@ function sourceCountLabel(n) {
 function icon(name, cls = '') {
   return `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${name}"></use></svg>`;
 }
+// Exponer utilidades compartidas para los módulos (garaje, testigos, etc.)
+window.esc = esc;
+window.icon = icon;
+window.fmtNum = fmtNum;
+window.formatMarkdown = formatMarkdown;
 
 function symptomIcon(name = '') {
   const n = String(name).toLowerCase();
