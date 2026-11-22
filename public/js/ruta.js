@@ -1444,6 +1444,21 @@
     arSensoresOk = false;
   }
 
+  // Fija el ancho real del carril actual en metros (referencia conocida).
+  function calibrarAncho(metros) {
+    const m = Number(metros);
+    if (!Number.isFinite(m) || m < 1.5 || m > 8) {
+      avisar('Indica un ancho entre 1,5 y 8 metros.', 'aviso', 3000);
+      return false;
+    }
+    anchoRealM = m;
+    if (carrilSuave && carrilSuave.ancho > 0.2) anchoRef = carrilSuave.ancho;
+    anchoCalibrado = true;
+    const anchoM = anchoRef > 0.2 && carrilSuave ? (carrilSuave.ancho * anchoRealM) / anchoRef : m;
+    avisar(`Ancho de carril calibrado a ${m.toFixed(1)} m (medido ${anchoM.toFixed(1)} m).`, 'ok', 4000);
+    return true;
+  }
+
   function calibrarAr() {
     arBaseAlpha = null;
     arBaseBeta = null;
@@ -1467,6 +1482,15 @@
   let bufferL = [], bufferR = [];
   let carrilBias = 0;
   let anchoRef = 0;
+  let anchoRealM = 3.5;      // referencia conocida (carril estándar)
+  let anchoCalibrado = false;
+  let ultimoAvisoCurva = 0;
+  let ultimoAvisoAncho = 0;
+  let ultimaVozCarril = 0;
+  let curvaDesde = 0;
+  let anchoDesde = 0;
+  let curvaAnunciada = false;
+  let anchoAnunciado = false;
   let carrilBuenas = 0;
   let carrilMalas = 0;
   let senalInfo = null;
@@ -1728,8 +1752,40 @@
         ctxAr.fillText('⚠ SALIDA DE CARRIL', w / 2, h * 0.30);
         if (Date.now() - ultimoAvisoCarril > 9000) {
           ultimoAvisoCarril = Date.now();
+          ultimaVozCarril = ultimoAvisoCarril;
           decir('Atención, te acercas al borde del carril.');
         }
+      }
+
+      // Avisos de curva cerrada y carril estrecho: histéresis de 0,8 s,
+      // cooldown de 15 s y turno de palabra compartido con el resto.
+      const agora = Date.now();
+      const confOk = carrilSuave.conf > 0.5;
+      const magCurv = Math.abs(carrilSuave.curv);
+      const anchoRel = anchoRef > 0.2 ? carrilSuave.ancho / anchoRef : 1;
+      const estrecho = confOk && anchoRel < 0.85;
+      if (confOk && magCurv > 0.4) {
+        if (!curvaDesde) curvaDesde = agora;
+      } else { curvaDesde = 0; curvaAnunciada = false; }
+      if (curvaDesde && !curvaAnunciada && agora - curvaDesde > 800 &&
+          agora - ultimoAvisoCurva > 15000 && agora - ultimaVozCarril > 3500) {
+        curvaAnunciada = true;
+        ultimoAvisoCurva = agora;
+        ultimaVozCarril = agora;
+        decir(`Atención, curva cerrada a la ${carrilSuave.curv > 0 ? 'derecha' : 'izquierda'}.`);
+      }
+      if (estrecho) {
+        if (!anchoDesde) anchoDesde = agora;
+      } else { anchoDesde = 0; anchoAnunciado = false; }
+      if (anchoDesde && !anchoAnunciado && agora - anchoDesde > 800 &&
+          agora - ultimoAvisoAncho > 15000 && agora - ultimaVozCarril > 3500) {
+        anchoAnunciado = true;
+        ultimoAvisoAncho = agora;
+        ultimaVozCarril = agora;
+        const anchoMaviso = anchoRef > 0.2 ? (carrilSuave.ancho * anchoRealM) / anchoRef : 0;
+        decir(anchoMaviso > 0
+          ? `Atención, carril estrecho, unos ${anchoMaviso.toFixed(1)} metros.`
+          : 'Atención, carril estrecho.');
       }
     }
 
@@ -1835,6 +1891,10 @@
     carrilBias = 0;
     carrilBuenas = 0;
     carrilMalas = 0;
+    curvaDesde = 0;
+    anchoDesde = 0;
+    curvaAnunciada = false;
+    anchoAnunciado = false;
     senalInfo = null;
     senalTexto = '';
   }
@@ -2242,8 +2302,9 @@
       const dirTxt = mag < 0.05 ? '⬆' : curv > 0 ? '↱' : '↰';
       const etiqueta = mag < 0.05 ? 'Recta' : mag < 0.18 ? 'Curva suave' : mag < 0.4 ? 'Curva' : 'Curva cerrada';
       const anchoRel = anchoRef > 0.2 ? carrilSuave.ancho / anchoRef : 1;
+      const anchoM = anchoRef > 0.2 ? (carrilSuave.ancho * anchoRealM) / anchoRef : 0;
       const txt1 = `${dirTxt} ${etiqueta}`;
-      const txt2 = `Ancho ${anchoRel.toFixed(2)}×`;
+      const txt2 = anchoM > 0 ? `${anchoCalibrado ? '' : '≈'}Ancho ${anchoM.toFixed(1)} m` : 'Ancho —';
       const ch = Math.max(26, ph * 0.42);
       const cw = Math.min(pw, Math.max(w * 0.5, 220));
       const cx = px + (pw - cw) / 2;
@@ -2846,12 +2907,16 @@
     cancelarDestino: () => { esperandoSi = false; pendienteDestino = null; return true; },
     demo: () => { alternarDemo(); return demoActiva; },
     calibrarAr: () => { calibrarAr(); return arSensoresOk; },
+    calibrarAncho: (m) => calibrarAncho(m),
+    anchoReal: () => anchoRealM,
     carril: () => carrilInfo ? {
       conf: Number(carrilInfo.conf.toFixed(2)),
       offset: Number(carrilInfo.offset.toFixed(2)),
       desvio: Number((carrilInfo.offset - carrilBias).toFixed(2)),
       ancho: Number((carrilSuave?.ancho || 0).toFixed(2)),
       anchoRel: anchoRef && carrilSuave ? Number((carrilSuave.ancho / anchoRef).toFixed(2)) : 1,
+      anchoM: anchoRef && carrilSuave ? Number(((carrilSuave.ancho * anchoRealM) / anchoRef).toFixed(1)) : 0,
+      anchoCalibrado,
       curv: Number((carrilSuave?.curv || 0).toFixed(2))
     } : null,
     // Para pruebas y para Maya: fuerza o consulta la voz sin tocar la UI.

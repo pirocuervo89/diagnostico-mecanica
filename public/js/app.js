@@ -2489,6 +2489,17 @@ async function manejarComandoVoz(texto) {
   if (/^(mapa 2d|mapa normal|vista mapa|mapa clasico)$/.test(n)) {
     showView('ruta'); setTimeout(() => window.Ruta?.modoMapa?.(), 400); addBubble('Mapa normal.', 'assistant'); return true;
   }
+  const mAncho = n.match(/(?:calibrar|ajustar)\s+(?:el\s+)?ancho(?:\s+(?:del\s+carril|a|de))?\s*(\d+(?:[.,]\d+)?)/)
+    || n.match(/(?:carril|calzada)\s+(?:mide|tiene)\s+(\d+(?:[.,]\d+)?)\s*(?:m|metros?)?/);
+  if (mAncho) {
+    const metros = parseFloat(mAncho[1].replace(',', '.'));
+    showView('ruta');
+    setTimeout(() => {
+      const ok = window.Ruta?.calibrarAncho?.(metros);
+      addBubble(ok ? `Ancho de carril calibrado a ${metros} m.` : 'No pude calibrar el ancho; indica entre 1,5 y 8 m.', 'assistant');
+    }, 400);
+    return true;
+  }
   if (/^(calibra|calibrar|calibrar ar|calibrar camara)$/.test(n)) {
     showView('ruta'); setTimeout(() => window.Ruta?.calibrarAr?.(), 400); addBubble('Calibrando AR.', 'assistant'); return true;
   }
