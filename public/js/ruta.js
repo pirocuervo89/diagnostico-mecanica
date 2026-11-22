@@ -1401,35 +1401,47 @@
     if (!segs.length) {
       // Sin ruta: una carretera de demostración con curvas suaves, sin fingir
       // que es la ruta del usuario.
+      const lat0 = Math.sin(0.4) * 4;
       for (let s = 1.8; s <= MAX; s *= 1.055) {
-        const lat = Math.sin(s * 0.017) * 6 + Math.sin(s * 0.0055 + 1.2) * 9;
-        out.push(proyectar(s, lat, Math.sin(s * 0.02) * 0.5));
+        // Curva de demostración suave: se ve el trazado, pero no acaba en
+        // una ese cerrada que parecía un cruce de cintas.
+        const lat = Math.sin(s * 0.010) * 3 + Math.sin(s * 0.0035 + 0.4) * 4 - lat0;
+        // Plano totalmente horizontal: sin elevación ficticia. La calzada y
+        // las líneas sólo cambian de altura por la perspectiva de la distancia.
+        out.push(proyectar(s, lat, 0));
       }
       return out;
     }
     const base = segs[Math.max(0, Math.min(segs.length - 1, idxBase))];
     const h0 = (base.heading || 0) * Math.PI / 180;
     const cosLat = Math.cos(base.lat * Math.PI / 180);
-    const add = (lat, lon, s) => {
+    // Sólo se pinta la carretera que queda POR DELANTE del coche. Si la ruta
+    // dobla más de 90° (un cambio de sentido), su tramo de vuelta se proyecta
+    // encima del de ida y parece que la calzada se bifurca. Cortamos en el
+    // vértice: la curva se ve, pero el trazado nunca se cruza a sí mismo.
+    let ultimoAvance = 1.8;
+    let cortar = false;
+    const add = (lat, lon) => {
       const dx = (lon - base.lon) * 111320 * cosLat;
       const dy = (lat - base.lat) * 110540;
-      // Coordenadas locales relativas al rumbo del coche: la calzada se abre
-      // en perspectiva desde el centro de la pantalla y las curvas se ven como
-      // curvas de verdad, no como un zigzag de segmentos.
+      const avance = dx * Math.sin(h0) + dy * Math.cos(h0);
       const lateral = dx * Math.cos(h0) - dy * Math.sin(h0);
-      const elev = Math.sin(s * 0.021) * 0.6 + Math.sin(s * 0.0068 + 0.8) * 0.4;
-      out.push(proyectar(s, lateral, elev));
+      if (avance < 1.8) return;
+      if (avance < ultimoAvance - 2) { cortar = true; return; }
+      if (avance < ultimoAvance + 0.45) return;
+      ultimoAvance = avance;
+      // La carretera es un plano: no se inventan subidas ni bajadas. Así las
+      // líneas no hacen picos y el eje queda recto sobre el asfalto.
+      out.push(proyectar(avance, lateral, 0));
     };
-    let acc = 1.8;
-    add(base.lat, base.lon, acc);
-    for (let i = idxBase; i < segs.length - 1 && acc < MAX; i++) {
+    out.push(proyectar(1.8, 0, 0));
+    for (let i = idxBase; i < segs.length - 1 && ultimoAvance < MAX && !cortar; i++) {
       const a = segs[i], b = segs[i + 1];
       const d = a.dist || 8;
       const pasos = Math.max(1, Math.min(14, Math.ceil(d / 3)));
-      for (let k = 1; k <= pasos && acc < MAX; k++) {
-        acc += d / pasos;
+      for (let k = 1; k <= pasos && ultimoAvance < MAX && !cortar; k++) {
         const t = k / pasos;
-        add(a.lat + (b.lat - a.lat) * t, a.lon + (b.lon - a.lon) * t, acc);
+        add(a.lat + (b.lat - a.lat) * t, a.lon + (b.lon - a.lon) * t);
       }
     }
     // Suavizado corto: quita los dientes de sierra de los puntos de OSRM.
@@ -1443,6 +1455,13 @@
     for (const p of out) {
       const k = Math.min(1, p.s / 32);
       p.x = cx + (p.x - cx) * k;
+    }
+    // Segundo suavizado del eje: elimina cualquier pico que quede entre dos
+    // muestras de la ruta sin aplanar las curvas reales.
+    for (let p = 0; p < 3; p++) {
+      for (let i = 1; i < out.length - 1; i++) {
+        out[i].x = (out[i - 1].x + out[i].x * 2 + out[i + 1].x) / 4;
+      }
     }
     return out;
   }
@@ -1466,34 +1485,32 @@
   function dibujarCalzada3d(w, h, horizonte) {
     const pts = trazado3d;
     if (pts.length < 3) return;
-    // Arcén y asfalto como trazos anchos siguiendo el trazado: con curvas
-    // cerradas los rellenos poligonales se cruzaban y dejaban huecos por los
-    // que se veía el fondo. Trazando de lejos a cerca la calzada es continua.
+    // Un único polígono continuo para el arcén y otro para el asfalto. Antes
+    // cada segmento se pintaba como un trazo ancho y en las curvas se
+    // solapaban formando cintas y picos.
     ctx3d.save();
-    ctx3d.lineCap = 'butt';
     ctx3d.lineJoin = 'round';
-    for (let i = pts.length - 1; i >= 1; i--) {
-      const a = pts[i - 1], b = pts[i];
-      ctx3d.strokeStyle = 'rgba(46,45,40,.95)';
-      ctx3d.lineWidth = b.ancho + 1.4 * b.escala;
+    const banda = (extra, color) => {
+      ctx3d.fillStyle = color;
       ctx3d.beginPath();
-      ctx3d.moveTo(a.x, a.y);
-      ctx3d.lineTo(b.x, b.y);
-      ctx3d.stroke();
-    }
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        const x = p.x - (p.ancho + extra * p.escala) / 2;
+        if (i) ctx3d.lineTo(x, p.y); else ctx3d.moveTo(x, p.y);
+      }
+      for (let i = pts.length - 1; i >= 0; i--) {
+        const p = pts[i];
+        ctx3d.lineTo(p.x + (p.ancho + extra * p.escala) / 2, p.y);
+      }
+      ctx3d.closePath();
+      ctx3d.fill();
+    };
+    banda(1.4, 'rgba(46,45,40,.95)');
     const asfalto = ctx3d.createLinearGradient(0, horizonte, 0, h);
     asfalto.addColorStop(0, '#3d526b');
     asfalto.addColorStop(0.45, '#2a3e56');
     asfalto.addColorStop(1, '#1a2a3d');
-    for (let i = pts.length - 1; i >= 1; i--) {
-      const a = pts[i - 1], b = pts[i];
-      ctx3d.strokeStyle = asfalto;
-      ctx3d.lineWidth = b.ancho;
-      ctx3d.beginPath();
-      ctx3d.moveTo(a.x, a.y);
-      ctx3d.lineTo(b.x, b.y);
-      ctx3d.stroke();
-    }
+    banda(0, asfalto);
     ctx3d.restore();
 
     // Huellas de neumático: dan sensación de calzada usada.
@@ -1509,115 +1526,82 @@
       }
     }
 
-    // Líneas blancas del borde.
-    for (const off of [-3.36, 3.36]) {
-      ctx3d.strokeStyle = 'rgba(235,246,255,.85)';
-      ctx3d.lineCap = 'round';
-      for (let i = 1; i < pts.length; i++) {
-        const a = pts[i - 1], b = pts[i];
-        ctx3d.lineWidth = Math.min(3.5, Math.max(1, 0.12 * b.escala));
-        ctx3d.beginPath();
-        ctx3d.moveTo(a.x + off * a.escala, a.y);
-        ctx3d.lineTo(b.x + off * b.escala, b.y);
-        ctx3d.stroke();
-      }
-    }
-
-    // Eje discontinuo.
-    ctx3d.strokeStyle = 'rgba(226,240,255,.72)';
-    ctx3d.lineCap = 'butt';
-    for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1], b = pts[i];
-      if (Math.floor(b.s / 6) % 2) continue;
-      ctx3d.lineWidth = Math.min(3.5, Math.max(1, 0.12 * b.escala));
-      ctx3d.beginPath();
-      ctx3d.moveTo(a.x, a.y);
-      ctx3d.lineTo(b.x, b.y);
-      ctx3d.stroke();
-    }
-
-    // Ruta azul luminosa sobre el asfalto.
+    // Líneas blancas del borde: un solo trazo continuo por lado. Antes se
+    // pintaba segmento a segmento y en las curvas aparecían picos y bolas.
     ctx3d.save();
+    ctx3d.strokeStyle = 'rgba(235,246,255,.88)';
     ctx3d.lineCap = 'round';
-    // Halo ancho y tenue + núcleo fino: se lee como guía luminosa sobre el
-    // asfalto, no como un haz que tapa la carretera.
-    ctx3d.strokeStyle = 'rgba(47,140,255,.24)';
+    ctx3d.lineJoin = 'round';
+    ctx3d.lineWidth = Math.min(3, Math.max(1, 0.10 * pts[Math.min(8, pts.length - 1)].escala));
+    for (const off of [-3.36, 3.36]) {
+      ctx3d.beginPath();
+      pts.forEach((p, i) => {
+        const x = p.x + off * p.escala;
+        if (i) ctx3d.lineTo(x, p.y); else ctx3d.moveTo(x, p.y);
+      });
+      ctx3d.stroke();
+    }
+
+    // Eje discontinuo: también un único trazado, con guiones regulares sobre
+    // el plano en vez de un pico por cada muestra.
+    ctx3d.strokeStyle = 'rgba(226,240,255,.76)';
+    ctx3d.lineCap = 'butt';
+    ctx3d.setLineDash([16, 14]);
+    ctx3d.beginPath();
+    pts.forEach((p, i) => (i ? ctx3d.lineTo(p.x, p.y) : ctx3d.moveTo(p.x, p.y)));
+    ctx3d.stroke();
+    ctx3d.setLineDash([]);
+
+    // Ruta azul luminosa sobre el asfalto: un solo trazado continuo.
+    ctx3d.strokeStyle = 'rgba(47,140,255,.28)';
     ctx3d.shadowColor = '#2f8cff';
-    ctx3d.shadowBlur = 6;
-    for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1], b = pts[i];
-      ctx3d.lineWidth = Math.min(6, Math.max(1.5, 0.16 * b.escala));
-      ctx3d.beginPath();
-      ctx3d.moveTo(a.x, a.y);
-      ctx3d.lineTo(b.x, b.y);
-      ctx3d.stroke();
-    }
+    ctx3d.shadowBlur = 8;
+    ctx3d.lineWidth = Math.min(6, Math.max(2, 0.16 * pts[Math.min(8, pts.length - 1)].escala));
+    ctx3d.beginPath();
+    pts.forEach((p, i) => (i ? ctx3d.lineTo(p.x, p.y) : ctx3d.moveTo(p.x, p.y)));
+    ctx3d.stroke();
     ctx3d.shadowBlur = 0;
-    ctx3d.strokeStyle = 'rgba(165,226,255,.82)';
-    for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1], b = pts[i];
-      ctx3d.lineWidth = Math.min(2.4, Math.max(1, 0.06 * b.escala));
-      ctx3d.beginPath();
-      ctx3d.moveTo(a.x, a.y);
-      ctx3d.lineTo(b.x, b.y);
-      ctx3d.stroke();
-    }
+    ctx3d.strokeStyle = 'rgba(165,226,255,.88)';
+    ctx3d.lineWidth = Math.min(2.4, Math.max(1, 0.06 * pts[Math.min(8, pts.length - 1)].escala));
+    ctx3d.beginPath();
+    pts.forEach((p, i) => (i ? ctx3d.lineTo(p.x, p.y) : ctx3d.moveTo(p.x, p.y)));
+    ctx3d.stroke();
     ctx3d.restore();
 
-    // Flechas grandes que siguen la curva de la calzada.
-    for (const z of [0.10, 0.22, 0.38, 0.58, 0.78]) {
-      const p = puntoTrazado3d(z);
-      const q = puntoTrazado3d(Math.min(1, z + 0.035));
-      if (!p || !q || p.escala < 3) continue;
-      const ang = Math.atan2(q.x - p.x, p.y - q.y);
-      const sz = Math.min(18, Math.max(4, p.escala * 0.55));
-      ctx3d.save();
-      ctx3d.translate(p.x, p.y);
-      ctx3d.rotate(ang);
-      ctx3d.fillStyle = 'rgba(120,215,255,.78)';
-      ctx3d.shadowColor = '#38e1ff';
-      ctx3d.shadowBlur = 7;
-      ctx3d.beginPath();
-      ctx3d.moveTo(0, -sz);
-      ctx3d.lineTo(sz * 0.72, 0);
-      ctx3d.lineTo(sz * 0.28, 0);
-      ctx3d.lineTo(sz * 0.28, sz * 0.9);
-      ctx3d.lineTo(-sz * 0.28, sz * 0.9);
-      ctx3d.lineTo(-sz * 0.28, 0);
-      ctx3d.lineTo(-sz * 0.72, 0);
-      ctx3d.closePath();
-      ctx3d.fill();
-      ctx3d.restore();
-    }
   }
 
   function dibujarGuardarrailes3d() {
     const pts = trazado3d;
+    ctx3d.save();
+    ctx3d.lineJoin = 'round';
+    ctx3d.lineCap = 'round';
     for (const lado of [-1, 1]) {
-      // Banda metálica continua.
+      // Barandilla como trazo continuo. El relleno anterior se cruzaba en las
+      // curvas y generaba los picos blancos que se veían a la derecha.
+      const rail = pts.map(p => ({
+        x: p.x + lado * 4.55 * p.escala,
+        y: p.y - 0.52 * p.escala
+      }));
+      ctx3d.strokeStyle = 'rgba(150,174,194,.62)';
+      // Grosor en píxeles, no multiplicado por la escala: antes la barandilla
+      // medía decenas de píxeles y tapaba media carretera.
+      ctx3d.lineWidth = Math.max(1, Math.min(3, 0.08 * (pts[0]?.escala || 1)));
       ctx3d.beginPath();
-      pts.forEach((p, i) => {
-        const x = p.x + lado * 4.55 * p.escala;
-        const y = p.y - 0.78 * p.escala;
-        if (i) ctx3d.lineTo(x, y); else ctx3d.moveTo(x, y);
-      });
-      for (let i = pts.length - 1; i >= 0; i--) {
-        const p = pts[i];
-        ctx3d.lineTo(p.x + lado * 4.55 * p.escala, p.y - 0.34 * p.escala);
-      }
-      ctx3d.closePath();
-      ctx3d.fillStyle = 'rgba(112,132,150,.5)';
-      ctx3d.fill();
-      ctx3d.strokeStyle = 'rgba(185,215,235,.55)';
-      ctx3d.lineWidth = 1;
+      rail.forEach((p, i) => (i ? ctx3d.lineTo(p.x, p.y) : ctx3d.moveTo(p.x, p.y)));
       ctx3d.stroke();
-      // Postes.
-      for (let i = 8; i < pts.length; i += 6) {
+      // Postes separados y verticales, sin formar dientes.
+      for (let i = 8; i < pts.length; i += 10) {
         const p = pts[i];
-        ctx3d.fillStyle = 'rgba(120,140,155,.55)';
-        ctx3d.fillRect(p.x + lado * 4.55 * p.escala - 0.7 * p.escala, p.y - 0.78 * p.escala, Math.max(1, 0.14 * p.escala), 0.78 * p.escala);
+        const x = p.x + lado * 4.55 * p.escala;
+        ctx3d.strokeStyle = 'rgba(110,130,148,.5)';
+        ctx3d.lineWidth = Math.max(1, 0.12 * p.escala);
+        ctx3d.beginPath();
+        ctx3d.moveTo(x, p.y);
+        ctx3d.lineTo(x, p.y - 0.78 * p.escala);
+        ctx3d.stroke();
       }
     }
+    ctx3d.restore();
   }
 
   function dibujarHorizonte3d(w, h, horizonte) {
@@ -1770,7 +1754,6 @@
     dibujarEntorno3d(w, h, horizonte, t, idxVista);
     dibujarCalzada3d(w, h, horizonte);
     dibujarGuardarrailes3d();
-    dibujarGantry3d(w, h, horizonte, idxVista, segs, cx);
     dibujarSenalLimite3d(w, h, horizonte, idxVista, segs, cx);
 
     // El GT4 3D (WebGL) se dibuja en su propio lienzo encima. Si aún no está
@@ -1882,7 +1865,9 @@
     prepararSpriteCoche3d();
     // Respetar la proporción del recorte: el coche es ancho y bajo, no un
     // rectángulo alto. Se mantiene grande, como protagonista de la escena.
-    const carW = Math.min(w * 0.62, 300);
+    // Coche claramente más pequeño que antes: deja ver el carril, la línea
+    // central y la carretera por delante en el modo 3D.
+    const carW = Math.min(w * 0.30, 190);
     const carH = carW * (spriteCoche3d ? spriteCoche3d.height / spriteCoche3d.width : 0.52);
     const cx = w / 2;
     // Dejar libre el HUD inferior (aviso de maniobra y botón de parar) para que
@@ -2009,10 +1994,10 @@
     }
     // Avisos de estado: no fingir posición ni ruta si faltan datos.
     const sinGps = !ultimaPos || (ultimaVez && Date.now() - ultimaVez > 20000);
-    if (sinGps) {
+    if (sinGps && ruta) {
       const txt = 'SIN SEÑAL GPS · posición no disponible';
       ctx3d.fillStyle = 'rgba(30,8,14,.9)';
-      const an = Math.min(w - 30, 280), x = (w - an) / 2, y = h * 0.46;
+      const an = Math.min(w - 30, 280), x = (w - an) / 2, y = h * 0.16;
       ctx3d.fillRect(x, y, an, 30);
       ctx3d.strokeStyle = 'rgba(255,77,109,.8)';
       ctx3d.lineWidth = 1.5;
@@ -2022,19 +2007,6 @@
       ctx3d.textAlign = 'center';
       ctx3d.textBaseline = 'middle';
       ctx3d.fillText(txt, w / 2, y + 15);
-    } else if (!ruta) {
-      const txt = 'SIN RUTA ACTIVA · modo 3D exterior';
-      ctx3d.fillStyle = 'rgba(6,10,18,.82)';
-      const an = Math.min(w - 30, 260), x = (w - an) / 2, y = h * 0.46;
-      ctx3d.fillRect(x, y, an, 28);
-      ctx3d.strokeStyle = 'rgba(56,225,255,.4)';
-      ctx3d.lineWidth = 1;
-      ctx3d.strokeRect(x, y, an, 28);
-      ctx3d.fillStyle = '#9fd8ea';
-      ctx3d.font = 'bold 11px sans-serif';
-      ctx3d.textAlign = 'center';
-      ctx3d.textBaseline = 'middle';
-      ctx3d.fillText(txt, w / 2, y + 14);
     } else if (recalculando) {
       const txt = '↻ RECALCULANDO RUTA…';
       ctx3d.fillStyle = 'rgba(20,16,4,.9)';
@@ -2087,7 +2059,7 @@
     // en 3D y se reutiliza al volver a entrar.
     const canvasCoche = document.getElementById('rutaCoche3d');
     if (!moduloCoche3d) {
-      import('/js/coche3d.js?v=20261124k').then(m => {
+      import('/js/coche3d.js?v=20261126x').then(m => {
         moduloCoche3d = m;
         m.montar(canvasCoche, () => { coche3dListo = true; });
         if (m.estaListo()) coche3dListo = true;
@@ -2143,9 +2115,39 @@
   let moduloCabina3d = null;
   let cabina3dLista = false;
   let cabinaFotoLista = false;
+  let arCristalImgY = 420;
 
   // La foto GT4 ya trae el interior completo; solo hay que cargarla y dejar
   // que su parabrisas transparente muestre la cámara. La 3D queda de respaldo.
+  function medirCristalFoto(foto) {
+    try {
+      const c = document.createElement('canvas');
+      c.width = foto.naturalWidth; c.height = foto.naturalHeight;
+      const g = c.getContext('2d');
+      g.drawImage(foto, 0, 0);
+      const x = Math.round(c.width * 0.5);
+      const data = g.getImageData(x, 0, 1, c.height).data;
+      let ultimoTransparente = 0;
+      for (let y = 0; y < c.height; y++) {
+        const alpha = data[y * 4 + 3];
+        if (alpha < 40) ultimoTransparente = y;
+        else if (y > ultimoTransparente + 30 && ultimoTransparente > 80) break;
+      }
+      if (ultimoTransparente > 80) arCristalImgY = ultimoTransparente;
+    } catch (_e) { /* se usa la altura de reserva */ }
+  }
+
+  // Altura real del borde inferior del cristal en píxeles del canvas AR.
+  function baseCristalAr(h) {
+    const foto = document.getElementById('rutaCabinaFoto');
+    if (!foto || !foto.naturalWidth || !foto.clientWidth) return h * 0.42;
+    const escalaCss = Math.max(foto.clientWidth / foto.naturalWidth, foto.clientHeight / foto.naturalHeight);
+    const offsetY = foto.clientHeight - foto.naturalHeight * escalaCss;
+    const yCss = offsetY + arCristalImgY * escalaCss;
+    const factor = h / (canvasAr?.clientHeight || h);
+    return Math.max(h * 0.30, Math.min(h * 0.48, yCss * factor));
+  }
+
   function prepararCabinaFoto() {
     const foto = document.getElementById('rutaCabinaFoto');
     if (!foto) { montarCabina3d(); return; }
@@ -2153,6 +2155,7 @@
       foto.classList.add('foto-lista');
       document.querySelector('.ruta-shell')?.classList.add('ruta-foto-activa');
       cabinaFotoLista = true;
+      medirCristalFoto(foto);
     };
     if (foto.complete && foto.naturalWidth) { lista(); return; }
     foto.addEventListener('load', lista, { once: true });
@@ -2830,7 +2833,12 @@
       }).catch(() => {});
     }
 
-    // Dibujar detecciones
+    // Dibujar detecciones sólo dentro del cristal: las cajas no deben caer
+    // sobre el volante, el cuadro ni la consola de la cabina.
+    ctxAr.save();
+    ctxAr.beginPath();
+    ctxAr.rect(0, 0, w, baseCristalAr(h));
+    ctxAr.clip();
     for (const d of deteccionesAr) {
       const [x, y, bw, bh] = d.bbox;
       const scaleX = w / (videoAr.videoWidth || w);
@@ -2865,6 +2873,7 @@
         }
       }
     }
+    ctxAr.restore();
 
     // Línea de ruta dinámica (color según la maniobra) pintada sobre la calzada.
     const ruta = rutaActiva();
@@ -2873,11 +2882,11 @@
     // así las líneas no se dibujan encima del volante ni de la consola.
     ctxAr.save();
     ctxAr.beginPath();
-    ctxAr.rect(0, 0, w, h * 0.505);
+    ctxAr.rect(0, 0, w, baseCristalAr(h));
     ctxAr.clip();
-    if (ruta && ruta.geometry && ruta.geometry.length > 1) {
-      dibujarRutaAr(w, h, ruta, s);
-    }
+    // La guía de ruta no se pinta como una cinta artificial sobre el cristal:
+    // se usan las líneas de carril detectadas en la propia cámara. El GPS se
+    // queda en el panel de maniobra y la velocidad.
 
     // Visión local: carriles y señales (cada ~300 ms).
     const ahoraVision = Date.now();
@@ -2986,51 +2995,29 @@
     const n = Math.min(26, pts.length);
     if (n < 2) return;
     const col = colorManiobra(s);
-    const baseY = h * 0.505;
-    const topY = h * 0.30;
-    const nearW = Math.min(w * 0.24, 190);
-    const farW = nearW * 0.12;
-    // Alineación aproximada con la orientación real del móvil.
-    const shiftX = arSensoresOk ? Math.max(-w * 0.34, Math.min(w * 0.34, -arHeadingRel * 2.4)) : 0;
-    const shiftY = arSensoresOk ? Math.max(-h * 0.12, Math.min(h * 0.12, arPitchRel * 1.6)) : 0;
-    let curva = 0;
+    const baseY = baseCristalAr(h);
+    const topY = baseY - h * 0.17;
+    const nearW = Math.min(w * 0.50, 420);
+    const farW = nearW * 0.07;
+    // Guía plana sobre la calzada: sin curvas inventadas, sin cambios de
+    // altura por los sensores y sin picos. Dos bordes rectos en perspectiva y
+    // un eje discontinuo, todo en el mismo plano que el morro del coche.
     const coords = [];
     for (let i = 0; i < n; i++) {
       const z = i / (n - 1);
-      if (i > 0 && i < pts.length - 1) {
-        const a = pts[i - 1], b = pts[i], c = pts[i + 1];
-        const h1 = Math.atan2(b[1] - a[1], b[0] - a[0]);
-        const h2 = Math.atan2(c[1] - b[1], c[0] - b[0]);
-        let d = h2 - h1;
-        while (d > Math.PI) d -= Math.PI * 2;
-        while (d < -Math.PI) d += Math.PI * 2;
-        curva += d;
-      }
-      const off = Math.max(-0.42, Math.min(0.42, curva));
-      const x = w / 2 + off * z * z * w * 0.9 + shiftX;
-      const y = baseY + (topY - baseY) * z + shiftY;
+      const x = w / 2;
+      const y = baseY + (topY - baseY) * z;
       const half = (nearW + (farW - nearW) * z) / 2;
       coords.push({ x, y, half, z });
     }
 
     ctxAr.save();
-    // cinta de calzada
-    const g = ctxAr.createLinearGradient(0, baseY, 0, topY);
-    g.addColorStop(0, hexRgba(col, 0.42));
-    g.addColorStop(0.6, hexRgba(col, 0.22));
-    g.addColorStop(1, hexRgba(col, 0.04));
-    ctxAr.fillStyle = g;
-    ctxAr.beginPath();
-    coords.forEach((p, i) => (i ? ctxAr.lineTo(p.x - p.half, p.y) : ctxAr.moveTo(p.x - p.half, p.y)));
-    for (let i = coords.length - 1; i >= 0; i--) ctxAr.lineTo(coords[i].x + coords[i].half, coords[i].y);
-    ctxAr.closePath();
-    ctxAr.fill();
-
-    // bordes luminosos
-    ctxAr.lineWidth = 2.5;
-    ctxAr.strokeStyle = hexRgba(col, 0.95);
+    // Solo bordes y eje: sin cinta rellena que parecía un triángulo pegado
+    // sobre el cristal. Las líneas siguen un plano recto en perspectiva.
+    ctxAr.lineWidth = Math.max(1.5, Math.min(3, w * 0.0035));
+    ctxAr.strokeStyle = hexRgba(col, 0.82);
     ctxAr.shadowColor = col;
-    ctxAr.shadowBlur = 10;
+    ctxAr.shadowBlur = 6;
     for (const side of [-1, 1]) {
       ctxAr.beginPath();
       coords.forEach((p, i) => (i ? ctxAr.lineTo(p.x + side * p.half, p.y) : ctxAr.moveTo(p.x + side * p.half, p.y)));
@@ -3039,8 +3026,8 @@
     ctxAr.shadowBlur = 0;
 
     // eje discontinuo animado
-    ctxAr.lineWidth = Math.max(2, nearW * 0.03);
-    ctxAr.strokeStyle = 'rgba(255,255,255,0.8)';
+    ctxAr.lineWidth = Math.max(1.5, Math.min(3, w * 0.004));
+    ctxAr.strokeStyle = 'rgba(255,255,255,0.72)';
     ctxAr.setLineDash([14, 18]);
     ctxAr.lineDashOffset = -(performance.now() / 25) % 32;
     ctxAr.beginPath();
@@ -3050,7 +3037,7 @@
 
     // flechas que avanzan
     const phase = (performance.now() / 1200) % 1;
-    for (let k = 0; k < 6; k++) {
+    for (let k = 0; k < 3; k++) {
       const z = ((k / 6) + phase) % 1;
       const idx = Math.min(coords.length - 1, Math.round(z * (coords.length - 1)));
       const p = coords[idx];

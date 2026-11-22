@@ -504,10 +504,10 @@ body.viendo-ruta .pwa-install { display: none !important; }
    inferior de la app, que tapaban el botón de iniciar la navegación. */
 @media (max-width: 700px) {
   body.viendo-ruta { padding-bottom: 0 !important; }
+  body.viendo-ruta #view-ruta.view-gps-fullscreen { height: 100vh; height: 100dvh; }
   body.viendo-ruta .topbar,
   body.viendo-ruta #tabbar,
   body.viendo-ruta .site-footer { display: none !important; }
-  body.viendo-ruta #view-ruta.view-gps-fullscreen { height: 100vh; height: 100dvh; }
   .view-gps-fullscreen .ruta-search {
     top: calc(10px + env(safe-area-inset-top, 0px)) !important;
   }
@@ -3177,21 +3177,18 @@ body.viendo-ruta .pwa-install { display: none !important; }
   .ruta-fab-parar { animation: none; }
 }
 
-/* Cabina GT4 fotorrealista: la foto recortada con el parabrisas transparente
-   deja ver la cámara real detrás del cristal. */
+/* Cabina GT4 fotorrealista: ocupa el marco completo de la pantalla y la
+   cámara sólo se ve por el parabrisas y las ventanillas. */
 .ruta-cabina-foto {
   position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: auto;
-  height: 86%;
-  max-width: 100%;
-  /* Cabina nítida y más lejos, sin espejo ni marco: la cámara llena la
-     carretera alrededor y se ve limpia por el cristal. */
-  object-fit: contain;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  /* A sangre: el marco del coche coincide con el marco de la pantalla. */
+  object-fit: cover;
   object-position: center bottom;
-  transform: translateX(-50%);
-  z-index: 6;
+  z-index: 4;
   display: none;
   pointer-events: none;
   image-rendering: auto;
@@ -3203,10 +3200,17 @@ body.viendo-ruta .pwa-install { display: none !important; }
 .ruta-shell.ruta-ar-activo.ruta-foto-activa #ruta3dToggle,
 .ruta-shell.ruta-ar-activo.ruta-foto-activa #rutaCalibrar,
 .ruta-shell.ruta-ar-activo.ruta-foto-activa #rutaAnchoBtn { display: none !important; }
-@media (orientation: landscape) {
-  .ruta-cabina-foto { height: 86vh; height: 86dvh; }
-}
 .ruta-shell.ruta-ar-activo .ruta-cabina-foto.foto-lista + .ruta-cabina3d { display: none !important; }
+
+/* AR limpio: la cámara y el HUD del canvas mandan; nada de buscador, botones
+   ni paneles HTML encima del coche. Sólo queda el botón de parar. */
+.ruta-shell.ruta-ar-activo .ruta-hud > :not(#rutaParar) { display: none !important; }
+.ruta-shell.ruta-ar-activo .ruta-ar-canvas { z-index: 5; }
+.ruta-shell.ruta-ar-activo .ruta-cabina-foto.foto-lista { z-index: 4; }
+
+/* 3D limpio: la escena llena la pantalla y no la tapa el buscador. */
+.ruta-shell.ruta-3d-activo .ruta-hud > :not(#rutaParar) { display: none !important; }
+
 
 /* Cabina 3D real (Three.js): respaldo si la foto no carga. */
 .ruta-cabina3d {
@@ -3428,4 +3432,68 @@ body.ruta-demo .ruta-shell::after {
   right: auto !important;
   bottom: 20px !important;
   transform: none !important;
+}
+
+/* La vista GPS es pantalla completa en cualquier orientación: en horizontal
+   el ancho supera los 700 px y la cabecera/tabbar seguían comiéndose el AR. */
+body.viendo-ruta .topbar,
+body.viendo-ruta #tabbar,
+body.viendo-ruta .site-footer { display: none !important; }
+body.viendo-ruta { padding-bottom: 0 !important; }
+
+/* El contenedor principal no debe dejar márgenes alrededor del GPS/AR/3D. */
+body.viendo-ruta main {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+/* El HUD tenía un degradado oscuro a pantalla completa por encima de la
+   cabina y de la cámara: en AR/3D se anula para que el cristal sea limpio. */
+.ruta-shell.ruta-ar-activo .ruta-hud,
+.ruta-shell.ruta-3d-activo .ruta-hud {
+  background: none !important;
+}
+
+/* En 3D queda una salida clara al AR sin llenar la pantalla de botones. */
+.ruta-shell.ruta-3d-activo #rutaDemo { display: none !important; }
+.ruta-shell.ruta-3d-activo .ruta-hud > #rutaArToggle {
+  display: grid !important;
+  position: absolute;
+  left: auto !important;
+  right: 12px !important;
+  top: auto !important;
+  bottom: 20px !important;
+  width: 52px !important;
+  height: 52px !important;
+  z-index: 1201 !important;
+}
+
+/* La demo no pinta nada en AR: solo cámara, cabina y avisos. */
+.ruta-shell.ruta-ar-activo #rutaDemo,
+.ruta-shell.ruta-ar-activo .ruta-fab-chat { display: none !important; }
+
+/* Salida de los modos inmersivos: un control discreto a cada lado. */
+.ruta-shell.ruta-3d-activo .ruta-hud > #ruta3dToggle {
+  display: grid !important;
+  position: absolute;
+  left: 12px !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: 20px !important;
+  width: 52px !important;
+  height: 52px !important;
+  z-index: 1201 !important;
+}
+.ruta-shell.ruta-ar-activo .ruta-hud > #rutaArToggle {
+  display: grid !important;
+  position: absolute;
+  right: 12px !important;
+  left: auto !important;
+  top: auto !important;
+  bottom: 20px !important;
+  width: 52px !important;
+  height: 52px !important;
+  z-index: 1201 !important;
 }

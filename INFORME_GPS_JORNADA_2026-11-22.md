@@ -187,3 +187,14 @@ Nota: la cámara del móvil estaba apuntando al techo durante la prueba, así qu
 - La imagen se guarda en WebP **sin pérdida** y se muestra a resolución nativa reducida, sin reescalados que la emborronen.
 - Al activar AR se pide **pantalla completa** dentro del gesto del botón, además del bloqueo horizontal, para quitar la barra del navegador que cortaba la cámara.
 - Probado en el Redmi en horizontal (847×299): AR activo, `fullscreenElement` verdadero, imagen `naturalWidth 1440`, sin espejo y sin franja. La cámara sigue apuntando al techo, así que falta validar la carretera real.
+
+## 10-terdecies. Ciclo 9 · Carretera plana, sin cruces y coche pequeño
+
+- Se elimina la elevación ficticia del trazado: la calzada y las líneas son un plano horizontal; la altura en pantalla es solo perspectiva.
+- El trazado 3D deja de recorrer toda la ruta. Solo se proyectan los puntos que **avanzan por delante del rumbo actual**; al llegar a un cambio de sentido se corta en el vértice. Así desaparecen las líneas dobles, los bucles y la sensación de bifurcación que salía cuando la ruta volvía sobre sí misma.
+- La calzada se pinta como **un único polígono continuo** (arcén, asfalto) y las líneas de borde y eje como trazos continuos; la barandilla deja de multiplicar su grosor por la escala.
+- Coche 3D reducido al **64 %** y cámara más atrás/con el objetivo bajo: la silueta queda pequeña y apoyada sobre el asfalto, dejando ver la línea y la carretera.
+- En AR se quita la cinta GPS artificial del cristal; solo quedan cámara, cabina, detecciones recortadas al cristal y avisos. La cabina sigue a sangre con `cover`, sin marco flotante.
+- Se añaden botones discretos para salir de 3D y de AR aunque no haya una ruta activa (antes se podía entrar y quedarse sin salida).
+- Verificado con `node --check` y `npm test` (**195/195**). Capturas de la ruta real en el Redmi: el coche queda sobre la calzada y el trazado ya no se cruza.
+- **Limitación**: la cámara física del Redmi sigue apuntando al techo/interior, así que la alineación con una calle real no se puede validar desde este entorno; lo comprobado es la composición, el encuadre y que no hay errores de ejecución.

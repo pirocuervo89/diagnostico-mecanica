@@ -70,8 +70,10 @@ export function montar(canvas, onListo) {
   camera = new THREE.PerspectiveCamera(32, 1, 0.1, 80);
   // Detrás y algo elevada: se ve el coche desde el exterior trasero, como en
   // la referencia, pero integrado en la carretera que dibuja el GPS.
-  camera.position.set(0, 2.05, 11);
-  camera.lookAt(0, 2.4, 0);
+  // Cámara más atrás: el coche ocupa menos pantalla y deja ver la línea y la
+  // carretera por delante.
+  camera.position.set(0, 2.6, 21.5);
+  camera.lookAt(0, 4.2, 0);
 
   scene.add(new THREE.HemisphereLight(0x9fc7ff, 0x0a0a12, 1.15));
   const key = new THREE.DirectionalLight(0xffffff, 3.2);
@@ -104,6 +106,7 @@ export function montar(canvas, onListo) {
     new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.52 })
   );
   sombra.rotation.x = -Math.PI / 2;
+  sombra.scale.setScalar(0.64);
   sombra.position.y = 0.002;
   sombra.receiveShadow = true;
   scene.add(sombra);
@@ -113,10 +116,14 @@ export function montar(canvas, onListo) {
     new THREE.MeshBasicMaterial({ color: 0x1f8fff, transparent: true, opacity: 0.13, depthWrite: false, blending: THREE.AdditiveBlending })
   );
   halo.rotation.x = -Math.PI / 2;
+  halo.scale.setScalar(0.64);
   halo.position.y = 0.004;
   scene.add(halo);
 
   grupo = new THREE.Group();
+  // El coche es el protagonista del garaje, pero en navegación debe ser una
+  // silueta pequeña que deje ver la carretera. Se reduce sin tocar el modelo.
+  grupo.scale.setScalar(0.64);
   scene.add(grupo);
 
   const draco = new DRACOLoader();
