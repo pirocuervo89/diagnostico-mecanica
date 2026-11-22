@@ -2480,6 +2480,22 @@ async function manejarComandoVoz(texto) {
   if (/^silencia (la )?voz$|^mute$/.test(n)) { window.Ruta?.voz?.(false); addBubble('Voz silenciada.', 'assistant'); return true; }
   if (/^(activa|enciende)( la)? voz$/.test(n)) { window.Ruta?.voz?.(true); addBubble('Voz activada.', 'assistant'); return true; }
   if (/^pantalla completa$/.test(n)) { window.Ruta?.pantallaCompleta?.(); return true; }
+  if (/^(modo )?(camara|ar|realidad aumentada)$/.test(n) || n === 'modo camara') {
+    showView('ruta'); setTimeout(() => window.Ruta?.modoAr?.(), 500); addBubble('Modo cámara AR.', 'assistant'); return true;
+  }
+  if (/^(modo )?(3d|mapa 3d|mapa tridimensional)$/.test(n)) {
+    showView('ruta'); setTimeout(() => window.Ruta?.modo3d?.(), 500); addBubble('Modo mapa 3D.', 'assistant'); return true;
+  }
+  if (/^(mapa 2d|mapa normal|vista mapa|mapa clasico)$/.test(n)) {
+    showView('ruta'); setTimeout(() => window.Ruta?.modoMapa?.(), 400); addBubble('Mapa normal.', 'assistant'); return true;
+  }
+  if (/^(modo )?(demo|demostracion)$/.test(n)) {
+    showView('ruta'); setTimeout(() => window.Ruta?.demo?.(), 500); addBubble('Modo demostración.', 'assistant'); return true;
+  }
+  if (/^(repite|repetir|otra vez)$/.test(n)) { window.Ruta?.repetir?.(); return true; }
+  if (/^(que falta|cuanto queda|como voy|estado de la ruta|resumen de la ruta)$/.test(n)) {
+    window.Ruta?.resumen?.(); return true;
+  }
   if ((m = n.match(/^llevame a (.+)$/)) || (m = n.match(/^llévame a (.+)$/))) {
     showView('ruta'); setTimeout(() => window.Ruta?.irA?.(m[1].trim()), 400); addBubble(`Buscando ${m[1].trim()}.`, 'assistant'); return true;
   }

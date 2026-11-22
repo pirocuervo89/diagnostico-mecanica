@@ -3135,3 +3135,55 @@ body.viendo-ruta .pwa-install { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .ruta-fab-parar { animation: none; }
 }
+
+/* Cabina 3D real (Three.js) sobre la cámara. */
+.ruta-cabina3d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  display: none;
+  pointer-events: none;
+}
+.ruta-shell.ruta-ar-activo .ruta-cabina3d { display: block; }
+.ruta-shell.ruta-ar-activo .ruta-ar-canvas { z-index: 5; }
+
+/* Modo demostración */
+.ruta-fab-demo {
+  left: 12px !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: 96px !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 14px !important;
+  font-size: 18px !important;
+}
+.ruta-fab-demo.activo {
+  background: linear-gradient(135deg, rgba(34,197,94,.9), rgba(234,179,8,.9)) !important;
+  color: #04121c !important;
+  box-shadow: 0 0 0 3px rgba(34,197,94,.3), 0 8px 24px -8px rgba(0,0,0,.9) !important;
+}
+body.ruta-demo .ruta-shell::after {
+  content: 'MODO DEMO · recorrido simulado';
+  position: absolute;
+  top: 6px; left: 50%; transform: translateX(-50%);
+  z-index: 1300;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(234,179,8,.92);
+  color: #1a1206;
+  font: 700 11px/1 system-ui, sans-serif;
+  letter-spacing: .02em;
+  pointer-events: none;
+}
+
+/* En AR navegando, menos botones: solo cámara, 3D, chat, demo y stop. */
+.ruta-shell.ruta-navegando.ruta-ar-activo #rutaNoche,
+.ruta-shell.ruta-navegando.ruta-ar-activo #rutaFull,
+.ruta-shell.ruta-navegando.ruta-ar-activo #rutaTrafico,
+.ruta-shell.ruta-navegando.ruta-ar-activo #rutaGps,
+.ruta-shell.ruta-navegando.ruta-ar-activo #rutaBrujula,
+.ruta-shell.ruta-navegando.ruta-ar-activo #rutaVoz,
+.ruta-shell.ruta-navegando.ruta-ar-activo #rutaReportar { display: none !important; }

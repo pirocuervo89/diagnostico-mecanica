@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="/css/omega.css?v=20261119a">
   <link rel="stylesheet" href="/css/aurora.css?v=20261119a">
   <link rel="stylesheet" href="/css/halo.css?v=20261120b">
-  <link rel="stylesheet" href="/css/ruta.css?v=20261122x">
+  <link rel="stylesheet" href="/css/ruta.css?v=20261122z">
   <link rel="stylesheet" href="/css/interfaz-animada.css?v=20261122c">
   <link rel="stylesheet" href="/css/movil-ligero.css?v=20261121a">
   <meta property="og:type" content="website">  <meta property="og:site_name" content="Diagnóstico y Mecánica">
@@ -1962,6 +1962,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
       <div id="rutaMap" class="ruta-map" role="application" aria-label="Mapa de navegación"></div>
       <canvas id="ruta3d" class="ruta-3d" aria-hidden="true" hidden></canvas>
       <video id="rutaArVideo" class="ruta-ar-video" autoplay playsinline muted></video>
+      <canvas id="rutaCabina3d" class="ruta-cabina3d" aria-hidden="true"></canvas>
       <canvas id="rutaArCanvas" class="ruta-ar-canvas" aria-hidden="true"></canvas>
       <div class="ruta-hud">
         <div id="rutaBanner" class="ruta-banner" hidden>
@@ -1993,6 +1994,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
         <button id="ruta3dToggle" class="ruta-fab ruta-fab-3d" type="button" aria-pressed="false" aria-label="Vista 3D de conducción" title="Vista 3D de conducción">🎮</button>
         <button id="rutaArToggle" class="ruta-fab ruta-fab-ar" type="button" aria-pressed="false" aria-label="ADAS AR (Realidad Aumentada)" title="ADAS AR (cámara + ruta)">📷</button>
         <button id="rutaParar" class="ruta-fab ruta-fab-parar" type="button" aria-label="Detener navegación" title="Detener navegación" hidden>⏹</button>
+        <button id="rutaDemo" class="ruta-fab ruta-fab-demo" type="button" aria-pressed="false" aria-label="Modo demostración" title="Modo demostración">▶️</button>
         <button id="rutaTrafico" class="ruta-fab ruta-fab-trafico" type="button" aria-pressed="false" aria-label="Tráfico en vivo" title="Tráfico en vivo (TomTom + HERE)">🚦</button>
         <div id="rutaVelocidad" class="ruta-speed" hidden><div><b>0</b><span>KM/H</span><small></small></div></div>
         <div id="rutaPanel" class="ruta-panel" hidden></div>
@@ -2440,7 +2442,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <script src="/js/visual-glow.js?v=20261116c"></script>
 <script src="/js/tienda.js?v=20261121c"></script>
 <script src="/js/planes.js?v=20261113a"></script>
-<script src="/js/app.js?v=20261121c"></script>
+<script src="/js/app.js?v=20261122b"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>
@@ -2518,7 +2520,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     if ((location.hash || '').replace('#', '') === 'ruta') cargarRuta();
   })();
   </script>
-  <script src="/js/ruta.js?v=20261120o"></script>
+  <script src="/js/ruta.js?v=20261122c"></script>
   <script src="/js/maya-incidente.js?v=20261120c"></script>
   <!-- TensorFlow.js + COCO-SSD (detección de objetos, gratuito, open source) -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js" defer></script>

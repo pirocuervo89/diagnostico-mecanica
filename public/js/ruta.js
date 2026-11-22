@@ -802,6 +802,7 @@
       pintarBrujula();
       decir('Navegación detenida');
       avisar('Navegación detenida.', 'info', 3000);
+      if (demoActiva) detenerDemo();
       // Se sale de pantalla completa y vuelve el panel de inicio.
       elShell?.classList.remove('ruta-completa');
       document.body.classList.remove('ruta-pantalla-completa');
@@ -1391,6 +1392,20 @@
   let modeloCoco = null;
   let deteccionesAr = [];
   let ultimoAnalisisAr = 0;
+  let moduloCabina3d = null;
+  let cabina3dLista = false;
+
+  async function montarCabina3d() {
+    if (cabina3dLista) return;
+    try {
+      moduloCabina3d = await import('/js/cabina3d.js');
+      moduloCabina3d.montar(document.getElementById('rutaCabina3d'));
+      cabina3dLista = true;
+    } catch (e) {
+      console.warn('Cabina 3D no disponible, se usa la 2D:', e);
+      moduloCabina3d = null;
+    }
+  }
 
   function initAr() {
     canvasAr = document.getElementById('rutaArCanvas');
@@ -1424,6 +1439,7 @@
       canvasAr.classList.add('activo');
       videoAr.classList.add('activo');
       ajustarTamanoAr();
+      montarCabina3d();
       // Cargar modelo COCO-SSD (lazy, solo si está disponible)
       if (typeof cocoSsd !== 'undefined' && !modeloCoco) {
         cocoSsd.load().then(m => { modeloCoco = m; avisar('Detección de objetos activada.', 'ok', 3000); }).catch(e => console.warn('COCO-SSD no disponible:', e));
@@ -1454,6 +1470,11 @@
     document.querySelector('.ruta-shell')?.classList.remove('ruta-ar-activo');
     if (canvasAr) canvasAr.classList.remove('activo');
     if (videoAr) videoAr.classList.remove('activo');
+    if (moduloCabina3d) {
+      try { moduloCabina3d.apagar(); } catch (_e) { /* nada */ }
+      moduloCabina3d = null;
+      cabina3dLista = false;
+    }
   }
 
   function toggleAr() {
@@ -1521,11 +1542,40 @@
     }
 
     // HUD: velocidad
-    // Cabina del GT4: salpicadero, volante e indicadores.
-    dibujarCockpit(w, h, s, ruta);
+    // Cabina: 3D real si está disponible; si no, dibujo 2D de respaldo.
+    const dist = ruta ? restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0) : 0;
+    const eta = ruta ? Math.round((ruta.duration || 0) / 60) : 0;
+    if (cabina3dLista && moduloCabina3d) {
+      const v = velocidad;
+      const marcha = v < 1 ? 'N' : v < 20 ? '1' : v < 40 ? '2' : v < 70 ? '3' : v < 100 ? '4' : '5';
+      moduloCabina3d.actualizar({ velocidad: v, marcha, distancia: dist, eta, color: colorManiobra(s) });
+    } else {
+      dibujarCockpit(w, h, s, ruta);
+    }
 
     // Panel superior de maniobra.
     dibujarPanelAr(w, h, s);
+
+    // Señal de límite de velocidad (dato cartográfico de OpenStreetMap).
+    dibujarSenalLimite(w, h, ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null);
+  }
+
+  function dibujarSenalLimite(w, h, kmh) {
+    const r = Math.min(28, w * 0.065);
+    const x = w - 12 - r;
+    const y = 12 + Math.min(74, h * 0.1) + 16 + r;
+    ctxAr.beginPath();
+    ctxAr.arc(x, y, r, 0, Math.PI * 2);
+    ctxAr.fillStyle = '#ffffff'; ctxAr.fill();
+    ctxAr.lineWidth = Math.max(4, r * 0.18);
+    ctxAr.strokeStyle = '#d81f2a'; ctxAr.stroke();
+    ctxAr.fillStyle = '#0a1018';
+    ctxAr.font = `bold ${r * 0.92}px sans-serif`;
+    ctxAr.textAlign = 'center'; ctxAr.textBaseline = 'middle';
+    ctxAr.fillText(kmh ? String(kmh) : '—', x, y + 1);
+    ctxAr.fillStyle = 'rgba(200,220,240,0.75)';
+    ctxAr.font = `${r * 0.34}px sans-serif`;
+    ctxAr.fillText('mapa', x, y + r + r * 0.55);
   }
 
   // ---- utilidades de dibujo AR ----
@@ -1794,10 +1844,21 @@
     ctxAr.textAlign = 'left';
     ctxAr.fillStyle = '#f0f8ff';
     ctxAr.font = `bold ${ph * 0.24}px sans-serif`;
-    ctxAr.fillText(recortar(s.name || 'Continúa', 24), px + 10 + ab + 14, py + ph * 0.44);
+    ctxAr.fillText(recortar(s.name || 'Continúa', 18), px + 10 + ab + 14, py + ph * 0.44);
     ctxAr.fillStyle = 'rgba(200,220,240,0.7)';
     ctxAr.font = `${ph * 0.19}px sans-serif`;
     ctxAr.fillText(`En ${aSig > 1000 ? `${(aSig / 1000).toFixed(1)} km` : `${Math.round(aSig)} m`}`, px + 10 + ab + 14, py + ph * 0.74);
+    ctxAr.textAlign = 'right';
+    ctxAr.fillStyle = '#eaf7ff';
+    ctxAr.font = `bold ${ph * 0.26}px sans-serif`;
+    ctxAr.fillText(`${Math.round(velocidad)} km/h`, px + pw - 14, py + ph * 0.42);
+    const rr = rutaActiva();
+    const restM = rr ? restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0) : 0;
+    const etaM = rr ? Math.round((rr.duration || 0) / 60) : 0;
+    const restTxt = restM >= 1000 ? `${(restM / 1000).toFixed(1)} km` : `${Math.round(restM)} m`;
+    ctxAr.fillStyle = 'rgba(200,220,240,0.65)';
+    ctxAr.font = `${ph * 0.17}px sans-serif`;
+    ctxAr.fillText(rr ? `${restTxt} · ${etaM} min` : 'Sin ruta', px + pw - 14, py + ph * 0.72);
   }
 
   // Conectar el botón AR
@@ -1817,6 +1878,66 @@
       detener3d();
     }
   };
+
+  // ------------------------------------------------------------ modo demo
+  // Recorrido simulado sobre la ruta real para enseñar el navegador sin
+  // circular. Se marca claramente como DEMO para no confundirlo con GPS.
+  let demoActiva = false;
+  let demoTimer = null;
+  let demoIdx = 0;
+
+  function alternarDemo() {
+    if (demoActiva) { detenerDemo(); return; }
+    const r = rutaActiva();
+    if (!r || !r.geometry || r.geometry.length < 2) {
+      avisar('Para la demo, calcula primero una ruta.', 'aviso', 5000);
+      return;
+    }
+    demoActiva = true;
+    demoIdx = 0;
+    document.getElementById('rutaDemo')?.classList.add('activo');
+    document.body.classList.add('ruta-demo');
+    if (!navegando) alternarNavegacion();
+    avisar('MODO DEMO: recorrido simulado, no es tu posición real.', 'aviso', 7000);
+    decir('Modo demostración. Recorrido simulado.');
+    demoTimer = setInterval(() => {
+      const rr = rutaActiva();
+      if (!rr || !rr.geometry || rr.geometry.length < 2) { detenerDemo(); return; }
+      demoIdx = (demoIdx + 2) % rr.geometry.length;
+      const [lat, lon] = rr.geometry[demoIdx];
+      velocidad = 38 + (demoIdx % 34);
+      ultimaPos = { lat, lon };
+      ultimaVez = Date.now();
+      if (!yo && mapa) {
+        yo = L.marker([lat, lon], { icon: iconoYo(), zIndexOffset: 500 }).addTo(mapa);
+        mapa.setView([lat, lon], 16);
+      } else if (yo) {
+        yo.setLatLng([lat, lon]);
+      }
+      if (mapa) {
+        const z = zoomPorVelocidad(velocidad);
+        const px = mapa.latLngToContainerPoint([lat, lon]);
+        const target = mapa.containerPointToLatLng([px.x, px.y + mapa.getSize().y * 0.4]);
+        mapa.setView(target, z, { animate: true, duration: 0.4 });
+      }
+      try { seguirRuta(lat, lon); } catch (_e) { /* nada */ }
+      if (vista3dActiva) {
+        scrollOffset3d += velocidad / 3.6 * 0.1;
+        if (scrollOffset3d > 1) scrollOffset3d -= 1;
+      }
+    }, 900);
+  }
+
+  function detenerDemo() {
+    demoActiva = false;
+    if (demoTimer) clearInterval(demoTimer);
+    demoTimer = null;
+    document.getElementById('rutaDemo')?.classList.remove('activo');
+    document.body.classList.remove('ruta-demo');
+    avisar('Modo demo detenido.', 'info', 3000);
+  }
+
+  document.getElementById('rutaDemo')?.addEventListener('click', alternarDemo);
 
   function vigilarAvisos(lat, lon) {
     if (!capaAvisos) return;
@@ -1876,6 +1997,58 @@
   }
 
   // ------------------------------------------------------------ voz
+  // Copiloto: destino dicho por voz -> se confirma antes de arrancar.
+  let pendienteDestino = null;
+  let esperandoSi = false;
+
+  async function prepararDestinoVoz(q) {
+    const consulta = String(q || '').trim();
+    if (consulta.length < 3) { avisar('¿A dónde quieres ir?', 'info', 5000); return; }
+    try {
+      const r = await fetch(`/api/ruta/geocode?q=${encodeURIComponent(consulta)}`);
+      const datos = await r.json();
+      const primero = datos?.results?.[0];
+      if (!primero) {
+        avisar('No encuentro ese sitio. ¿Puedes repetirlo?', 'aviso', 6000);
+        decir('No encuentro ese sitio. ¿Puedes repetirlo?');
+        return;
+      }
+      pendienteDestino = primero;
+      esperandoSi = true;
+      avisar(`He encontrado ${primero.name}. ¿Iniciamos la navegación?`, 'ok', 9000);
+      decir(`He encontrado ${primero.name}. ¿Iniciamos la navegación?`);
+    } catch (_e) {
+      avisar('No pude buscar el destino ahora mismo.', 'aviso', 5000);
+    }
+  }
+
+  async function iniciarPendiente() {
+    if (!pendienteDestino) return;
+    const d = pendienteDestino;
+    pendienteDestino = null;
+    await fijarDestino(d.lat, d.lon, d.name);
+    if (rutaActiva() && !navegando) alternarNavegacion();
+    decir('Vamos allá.');
+  }
+
+  function resumenRuta() {
+    const r = rutaActiva();
+    if (!r) { decir('No hay una ruta activa.'); return null; }
+    const resta = restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0);
+    const min = Math.round((r.duration || 0) / 60);
+    const s = r.steps?.[paso];
+    const texto = `Quedan ${resta > 1000 ? `${(resta / 1000).toFixed(1)} kilómetros` : `${Math.round(resta)} metros`} y unos ${min} minutos.${s ? ` ${instruccion(s)}.` : ''}`;
+    decir(texto);
+    avisar(texto, 'info', 7000);
+    return { resta, min };
+  }
+
+  function repetirInstruccion() {
+    const s = rutaActiva()?.steps?.[paso];
+    if (s) decir(instruccion(s));
+    return Boolean(s);
+  }
+
   function dictarDestino() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { avisar('Este navegador no permite dictar. Escribe el destino.', 'aviso', 6000); return; }
@@ -1885,13 +2058,49 @@
     reconocimiento.interimResults = false;
     reconocimiento.maxAlternatives = 1;
     avisar('Te escucho… di el destino o «nos vamos».', 'info', 7000);
-    reconocimiento.onresult = event => {
+    reconocimiento.onresult = async event => {
       const dicho = String(event.results?.[0]?.[0]?.transcript || '').trim();
       if (!dicho) return;
-      if (/nos vamos|vamos|arranca|inicia/i.test(dicho) && rutaActiva()) { alternarNavegacion(); return; }
-      const limpio = dicho.replace(/^(ll[eé]vame|llevar|ir|ve|vamos|ruta)\s+(a|hacia|para)?\s*/i, '').trim();
+      const t = dicho.toLowerCase();
+
+      // 1) Confirmación de destino pendiente.
+      if (esperandoSi) {
+        if (/(^|\b)(s[ií]|vale|dale|vamos|arranca|inicia|de acuerdo|ok|adelante)\b/i.test(t)) {
+          esperandoSi = false;
+          await iniciarPendiente();
+          return;
+        }
+        if (/(^|\b)(no|cancela|para|espera|d[eé]jalo)\b/i.test(t)) {
+          esperandoSi = false;
+          pendienteDestino = null;
+          avisar('Vale, no iniciamos la ruta.', 'info', 4000);
+          decir('Vale, no iniciamos la ruta.');
+          return;
+        }
+      }
+
+      // 2) Cambios de modo por voz.
+      if (/modo\s+(c[aá]mara|ar|realidad)/i.test(t)) { if (!vistaArActiva) iniciarAr(); return; }
+      if (/modo\s+(3d|tres d)|mapa\s+3d/i.test(t)) { if (!vista3dActiva) iniciar3d(); return; }
+      if (/mapa\s+(2d|normal|cl[aá]sico)|vista\s+mapa/i.test(t)) {
+        if (vistaArActiva) detenerAr();
+        if (vista3dActiva) detener3d();
+        decir('Mapa normal.');
+        return;
+      }
+
+      // 3) Repetir / resumen / detener.
+      if (/repite|repetir|otra vez/i.test(t)) { repetirInstruccion(); return; }
+      if (/qu[eé] falta|c[oó]mo voy|estado|c[oó]mo vamos|cu[aá]nto queda/i.test(t)) { resumenRuta(); return; }
+      if (/det[eé]n|para(r)?\s+(la\s+)?navegaci[oó]n|stop/i.test(t) && navegando) { alternarNavegacion(); return; }
+
+      // 4) Arrancar si ya hay ruta.
+      if (/nos vamos|vamos|arranca|inicia|salimos/i.test(t) && rutaActiva()) { alternarNavegacion(); return; }
+
+      // 5) Si no, se interpreta como destino y se pide confirmación.
+      const limpio = dicho.replace(/^(ll[eé]vame|llevar|ir|ve|vamos|ruta|quiero ir)\s+(a|hacia|para|al|a la)?\s*/i, '').trim();
       elDestino.value = limpio || dicho;
-      buscar(elDestino.value);
+      prepararDestinoVoz(limpio || dicho);
     };
     reconocimiento.onerror = () => avisar('No te he oído. Prueba otra vez.', 'aviso', 5000);
     reconocimiento.onend = () => { reconocimiento = null; };
@@ -2217,6 +2426,15 @@
     alternarNavegacion: () => { alternarNavegacion(); return navegando; },
     reportar: (kind) => reportar(kind),
     pantallaCompleta: () => alternarPantallaCompleta(),
+    // Modos y copiloto para MAYA.
+    modoAr: () => { if (!vistaArActiva) iniciarAr(); return vistaArActiva; },
+    modo3d: () => { if (!vista3dActiva) iniciar3d(); return vista3dActiva; },
+    modoMapa: () => { if (vistaArActiva) detenerAr(); if (vista3dActiva) detener3d(); return true; },
+    repetir: () => repetirInstruccion(),
+    resumen: () => resumenRuta(),
+    confirmarDestino: () => { esperandoSi = false; iniciarPendiente(); return true; },
+    cancelarDestino: () => { esperandoSi = false; pendienteDestino = null; return true; },
+    demo: () => { alternarDemo(); return demoActiva; },
     // Para pruebas y para Maya: fuerza o consulta la voz sin tocar la UI.
     voz: (activa) => { if (typeof activa === 'boolean' && activa !== vozActiva) alternarVoz(); return vozActiva; },
     incidencias: () => avisos.filter(a => a.origen === 'comunidad'),
