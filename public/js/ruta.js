@@ -863,6 +863,7 @@
   async function recalcular(lat, lon) {
     if (!destinoCoord || Date.now() - ultimoRecalculo < 15000) return;
     ultimoRecalculo = Date.now();
+    recalculando = true;
     avisar('Te has salido de la ruta. Busco otra…', 'info', 6000);
     decir('Recalculando ruta');
     try {
@@ -880,6 +881,8 @@
       cargarAvisos();
     } catch (_e) {
       avisar('No se pudo recalcular. Sigue la ruta marcada.', 'aviso', 6000);
+    } finally {
+      recalculando = false;
     }
   }
 
@@ -960,6 +963,8 @@
   // ============================================================
   let vista3dActiva = false;
   let animacion3d = null;
+  let ultimoPintado3d = 0;
+  let recalculando = false;
   let canvas3d = null;
   let ctx3d = null;
   let carretera3d = [];
@@ -1770,6 +1775,19 @@
       ctx3d.textAlign = 'center';
       ctx3d.textBaseline = 'middle';
       ctx3d.fillText(txt, w / 2, y + 14);
+    } else if (recalculando) {
+      const txt = '↻ RECALCULANDO RUTA…';
+      ctx3d.fillStyle = 'rgba(20,16,4,.9)';
+      const an = Math.min(w - 30, 250), x = (w - an) / 2, y = h * 0.46;
+      ctx3d.fillRect(x, y, an, 28);
+      ctx3d.strokeStyle = 'rgba(251,191,36,.65)';
+      ctx3d.lineWidth = 1;
+      ctx3d.strokeRect(x, y, an, 28);
+      ctx3d.fillStyle = '#fbbf24';
+      ctx3d.font = 'bold 11px sans-serif';
+      ctx3d.textAlign = 'center';
+      ctx3d.textBaseline = 'middle';
+      ctx3d.fillText(txt, w / 2, y + 14);
     }
     // Próxima maniobra (banner inferior)
     const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
@@ -1805,11 +1823,16 @@
     canvas3d.hidden = false;
     canvas3d.width = canvas3d.clientWidth || window.innerWidth;
     canvas3d.height = canvas3d.clientHeight || window.innerHeight;
-    const loop = () => {
+    // ~30 fps: suficiente para la escena y ahorra CPU/batería en móviles.
+    const loop = (ts = 0) => {
       if (!vista3dActiva) return;
-      dibujar3d();
+      if (!ultimoPintado3d || ts - ultimoPintado3d >= 33) {
+        ultimoPintado3d = ts;
+        dibujar3d();
+      }
       animacion3d = requestAnimationFrame(loop);
     };
+    ultimoPintado3d = 0;
     loop();
   }
 
@@ -1990,6 +2013,9 @@
   let carrilBuenas = 0;
   let carrilMalas = 0;
   let senalInfo = null;
+  let senalCandidata = null;
+  let senalCandidataDesde = 0;
+  let senalInfoHasta = 0;
   let ultimoAnalisisVision = 0;
   let arInicio = 0;
   let ultimoAvisoCarril = 0;
@@ -2184,14 +2210,31 @@
     if (!detectado && carrilSuave && ahora - carrilSuave.ts > 900) carrilSuave = null;
     carrilInfo = carrilSuave ? { ok: true, conf: carrilSuave.conf, offset: carrilSuave.offset } : null;
 
-    // Señal: caja roja aproximadamente cuadrada.
+    // Señal: caja roja aproximadamente cuadrada. Se exige estabilidad temporal
+    // (~0,7 s en la misma zona) para no marcar objetos rojos pasajeros.
     const anchoR = rMaxX - rMinX, altoR = rMaxY - rMinY;
+    let detectada = null;
     if (rojos > 90 && anchoR > 10 && altoR > 10) {
       const ratio = anchoR / altoR;
-      if (ratio > 0.6 && ratio < 1.7) senalInfo = { x: rMinX, y: rMinY, w: anchoR, h: altoR };
-      else senalInfo = null;
+      if (ratio > 0.6 && ratio < 1.7) detectada = { x: rMinX, y: rMinY, w: anchoR, h: altoR };
+    }
+    if (detectada) {
+      const cxD = detectada.x + detectada.w / 2;
+      const cyD = detectada.y + detectada.h / 2;
+      const mismaZona = senalCandidata
+        && Math.abs((senalCandidata.x + senalCandidata.w / 2) - cxD) < VW * 0.18
+        && Math.abs((senalCandidata.y + senalCandidata.h / 2) - cyD) < VH * 0.18;
+      if (!mismaZona) { senalCandidata = detectada; senalCandidataDesde = ahora; }
+      else senalCandidata = detectada;
+      if (senalCandidataDesde && ahora - senalCandidataDesde > 650) {
+        senalInfo = detectada;
+        senalInfoHasta = ahora + 1200;
+      }
     } else {
-      senalInfo = null;
+      senalCandidata = null;
+      senalCandidataDesde = 0;
+      if (ahora > senalInfoHasta) senalInfo = null;
+      if (!senalInfo && ahora - senalInfoHasta > 2500) senalTexto = '';
     }
 
     // Lectura opcional del número con la API de texto del navegador (si existe).
@@ -2342,7 +2385,7 @@
       ctxAr.font = `bold ${Math.max(9, w * 0.025)}px sans-serif`;
       ctxAr.textAlign = 'left';
       ctxAr.textBaseline = 'alphabetic';
-      ctxAr.fillText(senalTexto ? `Señal: ${senalTexto}` : 'Señal detectada', x, Math.max(12, y - 5));
+      ctxAr.fillText(senalTexto ? `Señal cámara: ${senalTexto} (OCR)` : 'Señal (cámara)', x, Math.max(12, y - 5));
     }
   }
 
@@ -2449,6 +2492,9 @@
     document.getElementById('rutaInterIzq')?.classList.remove('activo');
     document.getElementById('rutaInterDer')?.classList.remove('activo');
     senalInfo = null;
+    senalCandidata = null;
+    senalCandidataDesde = 0;
+    senalInfoHasta = 0;
     senalTexto = '';
   }
 
@@ -3518,6 +3564,7 @@
     calibrarAr: () => { calibrarAr(); return arSensoresOk; },
     calibrarAncho: (m) => calibrarAncho(m),
     anchoReal: () => anchoRealM,
+    senal: () => senalInfo ? { x: senalInfo.x, y: senalInfo.y, w: senalInfo.w, h: senalInfo.h } : null,
     intermitente: (lado) => { if (lado === undefined) return intermitente; fijarIntermitente(lado); return intermitente; },
     carril: () => carrilInfo ? {
       conf: Number(carrilInfo.conf.toFixed(2)),

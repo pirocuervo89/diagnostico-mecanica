@@ -80,6 +80,15 @@ Trabajo realizado sobre `diagnostico-mecanica` (HADAS), sin cambiar de proyecto 
 - Cambio de carril con intermitente real.
 - Visibilidad del HUD con sol directo y de noche.
 
+## 9-bis. Ciclo 2 (misma jornada)
+
+- **3D a ~30 fps**: se evita redibujar en cada fotograma de 60 Hz para ahorrar CPU y batería.
+- **Señales de cámara con estabilidad temporal**: una caja roja debe mantenerse ~0,65 s en la misma zona antes de mostrarse; desaparece a los 1,2 s y el OCR se etiqueta como “cámara (OCR)” para no confundirlo con el límite del mapa.
+- **Recalculando ruta**: indicador en el HUD 3D mientras se pide una ruta nueva.
+- **Recarga del 3D** cuando cambia la geometría de la ruta, aunque tenga el mismo número de puntos.
+- **Filtro de jitter** más seguro: solo se aplica cuando el marcador del mapa ya existe.
+- Pruebas: señal sintética confirmada y retirada correctamente; 201/201 tests.
+
 ## 10. Cuota de Freebuff
 
 No verificable desde el entorno de ejecución.
