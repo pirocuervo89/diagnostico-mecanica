@@ -1449,6 +1449,10 @@
     arBaseBeta = null;
     arHeadingRel = 0;
     arPitchRel = 0;
+    // La calibración también centra el carril: el desvío actual pasa a ser el cero.
+    carrilBias = carrilSuave ? carrilSuave.offset : 0;
+    carrilBuenas = 0;
+    carrilMalas = 0;
     document.getElementById('rutaCalibrar')?.classList.add('calibrado');
     avisar(arSensoresOk ? 'AR calibrada con la orientación del móvil.' : 'Este móvil no envía orientación; AR sin calibrar.', arSensoresOk ? 'ok' : 'aviso', 3000);
   }
@@ -1458,6 +1462,10 @@
   let lienzoVision = null;
   let ctxVision = null;
   let carrilInfo = null;
+  let carrilSuave = null;
+  let carrilBias = 0;
+  let carrilBuenas = 0;
+  let carrilMalas = 0;
   let senalInfo = null;
   let ultimoAnalisisVision = 0;
   let ultimoAvisoCarril = 0;
@@ -1491,8 +1499,6 @@
     let datos;
     try { datos = ctxVision.getImageData(0, 0, VW, VH).data; } catch (_e) { return; }
 
-    const y0 = Math.round(VH * 0.55);
-    const izq = [], der = [];
     let rojos = 0, rMinX = VW, rMaxX = 0, rMinY = VH, rMaxY = 0;
 
     for (let y = 0; y < VH; y++) {
@@ -1510,8 +1516,17 @@
       }
     }
 
-    // Carriles: por fila, marcas claras y poco saturadas con hueco oscuro en medio.
-    for (let y = y0; y < VH; y += 2) {
+    // Carriles con corrección de perspectiva: cada punto se lleva a
+    // coordenadas normalizadas (u lateral, d profundidad) del trapecio de
+    // calzada. Así ambas líneas son comparables aunque en la imagen converjan.
+    const ROI_Y0 = Math.round(VH * 0.55);
+    const ROI_Y1 = Math.round(VH * 0.98);
+    const Wtop = VW * 0.34;
+    const Wbot = VW * 0.92;
+    const puntosL = [], puntosR = [];
+    let filas = 0;
+    for (let y = ROI_Y0; y <= ROI_Y1; y += 2) {
+      filas++;
       let lx = -1, rx = -1;
       for (let x = 2; x < VW - 2; x++) {
         const i = (y * VW + x) * 4;
@@ -1519,33 +1534,51 @@
         const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
         if (mx > 150 && (mx - mn) < 45) { if (lx < 0) lx = x; rx = x; }
       }
-      if (lx < 0 || rx - lx < VW * 0.18 || rx - lx > VW * 0.95) continue;
+      if (lx < 0 || rx - lx < VW * 0.14 || rx - lx > VW * 0.96) continue;
       const mi = (y * VW + Math.round((lx + rx) / 2)) * 4;
       const mlum = 0.299 * datos[mi] + 0.587 * datos[mi + 1] + 0.114 * datos[mi + 2];
-      if (mlum < 125) { izq.push([lx, y]); der.push([rx, y]); }
+      if (mlum >= 125) continue;
+      const d = (ROI_Y1 - y) / (ROI_Y1 - ROI_Y0); // 0 = cerca, 1 = lejos
+      const ancho = Wbot + (Wtop - Wbot) * d;
+      const uL = (lx - VW / 2) / (ancho / 2);
+      const uR = (rx - VW / 2) / (ancho / 2);
+      if (Math.abs(uL) < 1.8 && Math.abs(uR) < 1.8) {
+        puntosL.push([uL, d]);
+        puntosR.push([uR, d]);
+      }
     }
 
-    const filas = Math.max(1, Math.floor((VH - y0) / 2));
-    const cobertura = izq.length / filas;
-    if (izq.length >= 4 && der.length >= 4 && cobertura > 0.22) {
-      const fi = regresion(izq), fd = regresion(der);
-      if (fi && fd) {
-        const xi = fi.m * VH + fi.c;
-        const xd = fd.m * VH + fd.c;
-        const centro = (xi + xd) / 2;
-        const ancho = xd - xi;
-        if (ancho > VW * 0.15) {
-          carrilInfo = {
-            ok: true,
-            conf: Math.min(1, cobertura * 1.4),
-            offset: (centro - VW / 2) / (VW / 2),
-            izq: fi, der: fd, xi, xd, y0
-          };
+    const cobertura = filas ? puntosL.length / filas : 0;
+    let detectado = false;
+    if (puntosL.length >= 4 && puntosR.length >= 4 && cobertura > 0.2) {
+      const fL = regresion(puntosL), fR = regresion(puntosR);
+      if (fL && fR && Math.abs(fL.m) < 3 && Math.abs(fR.m) < 3) {
+        const uL0 = fL.c, uR0 = fR.c; // d = 0, junto al coche
+        const anchoCarril = uR0 - uL0;
+        const errL = puntosL.reduce((s, [u, d]) => s + Math.abs(u - (fL.m * d + fL.c)), 0) / puntosL.length;
+        const errR = puntosR.reduce((s, [u, d]) => s + Math.abs(u - (fR.m * d + fR.c)), 0) / puntosR.length;
+        if (anchoCarril > 0.6 && anchoCarril < 2.6 && errL < 0.24 && errR < 0.24) {
+          const conf = Math.min(1, cobertura * 1.6) * Math.min(1, Math.max(0.1, 1 - (errL + errR) / 0.5));
+          const offset = (uL0 + uR0) / 2;
+          detectado = true;
+          const A = 0.28;
+          if (!carrilSuave) {
+            carrilSuave = { aL: fL.m, bL: fL.c, aR: fR.m, bR: fR.c, offset, conf, ts: ahora };
+          } else {
+            carrilSuave.aL += (fL.m - carrilSuave.aL) * A;
+            carrilSuave.bL += (fL.c - carrilSuave.bL) * A;
+            carrilSuave.aR += (fR.m - carrilSuave.aR) * A;
+            carrilSuave.bR += (fR.c - carrilSuave.bR) * A;
+            carrilSuave.offset += (offset - carrilSuave.offset) * A;
+            carrilSuave.conf += (conf - carrilSuave.conf) * A;
+            carrilSuave.ts = ahora;
+          }
         }
       }
-    } else {
-      carrilInfo = null;
     }
+    // Si se pierde la detección, se mantiene un instante y luego se apaga.
+    if (!detectado && carrilSuave && ahora - carrilSuave.ts > 900) carrilSuave = null;
+    carrilInfo = carrilSuave ? { ok: true, conf: carrilSuave.conf, offset: carrilSuave.offset } : null;
 
     // Señal: caja roja aproximadamente cuadrada.
     const anchoR = rMaxX - rMinX, altoR = rMaxY - rMinY;
@@ -1571,26 +1604,39 @@
   }
 
   function dibujarVision(w, h) {
-    // Carriles
-    if (carrilInfo && carrilInfo.ok) {
+    // Carriles suavizados, reproyectados desde la vista normalizada.
+    if (carrilSuave && carrilInfo && carrilInfo.ok) {
       const sx = w / VW, sy = h / VH;
-      const { izq, der, y0 } = carrilInfo;
-      const yA = y0, yB = VH;
-      const col = Math.abs(carrilInfo.offset) > 0.42 ? '#ef4444' : Math.abs(carrilInfo.offset) > 0.24 ? '#fbbf24' : '#22c55e';
+      const ROI_Y0 = Math.round(VH * 0.55);
+      const ROI_Y1 = Math.round(VH * 0.98);
+      const Wtop = VW * 0.34;
+      const Wbot = VW * 0.92;
+      const sesgo = carrilSuave.offset - carrilBias; // 0 = centrado tras calibrar
+      const col = Math.abs(sesgo) > 0.42 ? '#ef4444' : Math.abs(sesgo) > 0.24 ? '#fbbf24' : '#22c55e';
+      const proyectar = (a, b, d) => {
+        const y = ROI_Y1 - d * (ROI_Y1 - ROI_Y0);
+        const ancho = Wbot + (Wtop - Wbot) * d;
+        const u = a * d + b;
+        return [((VW / 2) + (u * ancho) / 2) * sx, y * sy];
+      };
       ctxAr.save();
       ctxAr.lineWidth = 3;
       ctxAr.strokeStyle = col;
       ctxAr.shadowColor = col;
       ctxAr.shadowBlur = 10;
-      for (const f of [izq, der]) {
+      for (const [a, b] of [[carrilSuave.aL, carrilSuave.bL], [carrilSuave.aR, carrilSuave.bR]]) {
         ctxAr.beginPath();
-        ctxAr.moveTo((f.m * yA + f.c) * sx, yA * sy);
-        ctxAr.lineTo((f.m * yB + f.c) * sx, yB * sy);
+        for (let k = 0; k <= 8; k++) {
+          const [px, py] = proyectar(a, b, k / 8);
+          if (k === 0) ctxAr.moveTo(px, py); else ctxAr.lineTo(px, py);
+        }
         ctxAr.stroke();
       }
       ctxAr.restore();
-      // Aviso de salida de carril (solo con confianza suficiente).
-      if (carrilInfo.conf > 0.45 && Math.abs(carrilInfo.offset) > 0.42) {
+      // Antirrebote: el aviso exige varios análisis seguidos con desvío.
+      const desviado = Math.abs(sesgo) > 0.42 && carrilSuave.conf > 0.5;
+      if (desviado) { carrilBuenas++; carrilMalas = 0; } else { carrilMalas++; if (carrilMalas > 2) carrilBuenas = 0; }
+      if (carrilBuenas >= 3) {
         ctxAr.fillStyle = 'rgba(239,68,68,.92)';
         ctxAr.font = `bold ${Math.max(11, w * 0.03)}px sans-serif`;
         ctxAr.textAlign = 'center';
@@ -1692,6 +1738,10 @@
     }
     detenerSensoresAr();
     carrilInfo = null;
+    carrilSuave = null;
+    carrilBias = 0;
+    carrilBuenas = 0;
+    carrilMalas = 0;
     senalInfo = null;
     senalTexto = '';
   }
@@ -2667,7 +2717,7 @@
     cancelarDestino: () => { esperandoSi = false; pendienteDestino = null; return true; },
     demo: () => { alternarDemo(); return demoActiva; },
     calibrarAr: () => { calibrarAr(); return arSensoresOk; },
-    carril: () => carrilInfo ? { conf: Number(carrilInfo.conf.toFixed(2)), offset: Number(carrilInfo.offset.toFixed(2)) } : null,
+    carril: () => carrilInfo ? { conf: Number(carrilInfo.conf.toFixed(2)), offset: Number(carrilInfo.offset.toFixed(2)), desvio: Number((carrilInfo.offset - carrilBias).toFixed(2)) } : null,
     // Para pruebas y para Maya: fuerza o consulta la voz sin tocar la UI.
     voz: (activa) => { if (typeof activa === 'boolean' && activa !== vozActiva) alternarVoz(); return vozActiva; },
     incidencias: () => avisos.filter(a => a.origen === 'comunidad'),
