@@ -3383,3 +3383,16 @@ body.ruta-demo .ruta-shell::after {
 .ruta-shell.ruta-ar-activo #rutaResetGiro {
   display: none !important;
 }
+
+/* En conducción 3D/AR el botón de demo se montaba encima del coche y del volante. */
+.ruta-shell.ruta-3d-activo .ruta-fab-demo,
+.ruta-shell.ruta-ar-activo .ruta-fab-demo { display: none; }
+
+/* Al conducir, el botón de detener tapaba el coche/volante: se aparta a la izquierda. */
+.ruta-shell.ruta-3d-activo .ruta-fab-parar,
+.ruta-shell.ruta-ar-activo .ruta-fab-parar {
+  left: 12px !important;
+  right: auto !important;
+  bottom: 20px !important;
+  transform: none !important;
+}

@@ -165,8 +165,8 @@ export function montar(canvas) {
   // Cámara desde los ojos del conductor: el capó y el cuadro quedan abajo y el
   // parabrisas libre arriba para la imagen real de la cámara.
   camera = new THREE.PerspectiveCamera(64, w / h, 0.03, 24);
-  camera.position.set(0, 1.28, 0.88);
-  camera.lookAt(0, 1.235, -1.7);
+  camera.position.set(0, 1.29, 0.88);
+  camera.lookAt(0, 1.21, -1.7);
 
   scene.add(new THREE.AmbientLight(0x2a3442, 1.1));
   scene.add(new THREE.HemisphereLight(0x4b6b8f, 0x05070a, 0.75));
@@ -192,16 +192,16 @@ export function montar(canvas) {
 
   // --- Salpicadero ---------------------------------------------------------
   const dash = new THREE.Mesh(new THREE.BoxGeometry(2.05, 0.17, 0.72), matTablero);
-  dash.position.set(0, 0.915, -1.08);
+  dash.position.set(0, 0.885, -1.08);
   dash.rotation.x = -0.07;
   scene.add(dash);
 
   const dashFrente = new THREE.Mesh(new THREE.BoxGeometry(2.02, 0.34, 0.10), matCueroSuave);
-  dashFrente.position.set(0, 0.77, -0.80);
+  dashFrente.position.set(0, 0.745, -0.80);
   scene.add(dashFrente);
 
   const dashBajo = new THREE.Mesh(new THREE.BoxGeometry(1.95, 0.22, 0.5), matCuero);
-  dashBajo.position.set(0, 0.56, -0.72);
+  dashBajo.position.set(0, 0.535, -0.72);
   scene.add(dashBajo);
 
   // Banda de luz ambiental del salpicadero (azul) y filete ámbar inferior.
@@ -214,25 +214,25 @@ export function montar(canvas) {
 
   // --- Capó del cuadro de instrumentos ------------------------------------
   const visera = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.035, 0.16), matCuero);
-  visera.position.set(0, 1.145, -0.84);
+  visera.position.set(0, 1.155, -0.82);
   visera.rotation.x = 0.12;
   scene.add(visera);
 
   const moldura = new THREE.Mesh(new THREE.BoxGeometry(1.72, 0.012, 0.014), matCromo);
-  moldura.position.set(0, 0.862, -0.975);
+  moldura.position.set(0, 0.832, -0.975);
   scene.add(moldura);
   const boton = new THREE.Mesh(new THREE.CylinderGeometry(0.021, 0.021, 0.01, 24), matAmbar);
   boton.rotation.x = Math.PI / 2;
-  boton.position.set(-0.24, 0.905, -0.905);
+  boton.position.set(-0.24, 0.875, -0.905);
   scene.add(boton);
 
   // --- Cuadro digital ------------------------------------------------------
-  const cuadro = crearPantalla(0.46, 0.17, 640, 240);
-  const bezel = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.215, 0.035), matNegroPiano);
-  bezel.position.set(0, 1.075, -0.822);
+  const cuadro = crearPantalla(0.50, 0.18, 640, 240);
+  const bezel = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.225, 0.035), matNegroPiano);
+  bezel.position.set(0, 1.11, -0.79);
   bezel.rotation.x = -0.12;
   scene.add(bezel);
-  cuadro.mesh.position.set(0, 1.075, -0.80);
+  cuadro.mesh.position.set(0, 1.11, -0.77);
   cuadro.mesh.rotation.x = -0.12;
   cuadro.mesh.name = 'cuadro';
   pantallas[pantallas.length - 1].tipo = 'velocidad';

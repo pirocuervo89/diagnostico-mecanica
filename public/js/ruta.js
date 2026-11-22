@@ -1378,7 +1378,7 @@
     const segs = carretera3d;
     const FOCAL = Math.max(300, w * 1.38);
     const CAM_H = 2.35;
-    const ANCHO_VIA = 9.5;
+    const ANCHO_VIA = 8.2;
     const MAX = 230;
     const out = [];
     const proyectar = (s, latM, elevM = 0) => {
@@ -1388,7 +1388,7 @@
       // desaparecen. Así el tramo cercano ocupa más pantalla y la curva se
       // ve, sin romper la continuidad del trazado.
       const depth = Math.pow(Math.max(0, 1 - s / MAX), 1.35);
-      const escala = Math.min(58, persp * (0.72 + 0.28 * depth));
+      const escala = Math.min(46, persp * (0.72 + 0.28 * depth));
       return {
         s,
         x: cx + latM * escala,
@@ -1487,7 +1487,7 @@
     asfalto.addColorStop(1, '#1a2a3d');
     for (let i = pts.length - 1; i >= 1; i--) {
       const a = pts[i - 1], b = pts[i];
-      ctx3d.strokeStyle = '#40566f';
+      ctx3d.strokeStyle = asfalto;
       ctx3d.lineWidth = b.ancho;
       ctx3d.beginPath();
       ctx3d.moveTo(a.x, a.y);
@@ -2052,21 +2052,23 @@
     // Próxima maniobra (banner inferior)
     const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
     if (s && s.name) {
+      // Arriba, bajo los paneles de velocidad: abajo tapaba el coche.
+      const by = 66;
       ctx3d.fillStyle = 'rgba(10, 16, 30, .9)';
-      ctx3d.fillRect(10, h - 70, w - 20, 60);
+      ctx3d.fillRect(10, by, w - 20, 44);
       ctx3d.strokeStyle = 'rgba(34, 211, 238, .5)';
       ctx3d.lineWidth = 2;
-      ctx3d.strokeRect(10, h - 70, w - 20, 60);
+      ctx3d.strokeRect(10, by, w - 20, 44);
       ctx3d.fillStyle = '#22d3ee';
-      ctx3d.font = 'bold 24px sans-serif';
+      ctx3d.font = 'bold 20px sans-serif';
       ctx3d.textAlign = 'left';
-      ctx3d.fillText(flechaPara(s), 25, h - 42);
+      ctx3d.fillText(flechaPara(s), 24, by + 22);
       ctx3d.fillStyle = '#f0f8ff';
-      ctx3d.font = 'bold 14px sans-serif';
-      ctx3d.fillText(s.name || 'Continúa', 60, h - 42);
+      ctx3d.font = 'bold 13px sans-serif';
+      ctx3d.fillText(s.name || 'Continúa', 54, by + 18);
       ctx3d.fillStyle = 'rgba(255, 255, 255, .6)';
-      ctx3d.font = '11px sans-serif';
-      ctx3d.fillText(`En ${s.distance ? (s.distance > 1000 ? (s.distance/1000).toFixed(1)+' km' : s.distance+' m') : ''}`, 60, h - 22);
+      ctx3d.font = '10px sans-serif';
+      ctx3d.fillText(`En ${s.distance ? (s.distance > 1000 ? (s.distance/1000).toFixed(1)+' km' : s.distance+' m') : ''}`, 54, by + 34);
     }
   }
 
@@ -2085,7 +2087,7 @@
     // en 3D y se reutiliza al volver a entrar.
     const canvasCoche = document.getElementById('rutaCoche3d');
     if (!moduloCoche3d) {
-      import('/js/coche3d.js?v=20261124h').then(m => {
+      import('/js/coche3d.js?v=20261124k').then(m => {
         moduloCoche3d = m;
         m.montar(canvasCoche, () => { coche3dListo = true; });
         if (m.estaListo()) coche3dListo = true;
@@ -2144,7 +2146,7 @@
   async function montarCabina3d() {
     if (cabina3dLista) return;
     try {
-      moduloCabina3d = await import('/js/cabina3d.js?v=20261124k');
+      moduloCabina3d = await import('/js/cabina3d.js?v=20261124l');
       moduloCabina3d.montar(document.getElementById('rutaCabina3d'));
       cabina3dLista = true;
     } catch (e) {
@@ -2838,7 +2840,7 @@
     // así las líneas no se dibujan encima del volante ni de la consola.
     ctxAr.save();
     ctxAr.beginPath();
-    ctxAr.rect(0, 0, w, h * 0.62);
+    ctxAr.rect(0, 0, w, h * 0.505);
     ctxAr.clip();
     if (ruta && ruta.geometry && ruta.geometry.length > 1) {
       dibujarRutaAr(w, h, ruta, s);
@@ -2949,7 +2951,7 @@
     const n = Math.min(26, pts.length);
     if (n < 2) return;
     const col = colorManiobra(s);
-    const baseY = h * 0.72;
+    const baseY = h * 0.505;
     const topY = h * 0.30;
     const nearW = Math.min(w * 0.24, 190);
     const farW = nearW * 0.12;

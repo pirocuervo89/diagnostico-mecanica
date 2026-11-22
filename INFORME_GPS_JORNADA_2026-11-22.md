@@ -136,3 +136,14 @@ No verificable desde el entorno de ejecución.
 ### Limitación de esta prueba
 
 La pantalla del Redmi estaba bloqueada y MIUI no permite inyectar el botón de encendido por ADB. Por eso la cámara física no pudo arrancar (`NotReadableError`) y la prueba de AR se hizo con una señal de vídeo sintética. Falta la comprobación visual con cámara real y con el móvil desbloqueado.
+
+## 9-sexies. Ciclo 6 · Prueba real en el Redmi y corrección de escala
+
+- El usuario desbloqueó el móvil y se pudo probar de verdad, sin cámara sintética.
+- **Fallo grave encontrado**: el GLB del Golf mide 167 × 57 × 79 unidades y se escalaba con `0.0115`, dejando el coche en **0,91 m de ancho**. Se normaliza por el ancho real (`1,55 / size.z`): ahora mide 1,55 m y se ve como un coche, no como una miniatura.
+- **Encuadre**: cámara trasera más baja y objetivo recalibrado; el aviso de maniobra pasa de la parte inferior (tapaba el coche) a la franja superior. El botón de detener se mueve a la izquierda y se oculta el botón de demostración durante 3D/AR para no tapar el vehículo.
+- **Calzada**: ancho reducido a 8,2 m y tope de escala a 46 para que el asfalto no invada toda la pantalla; el degradado de asfalto ahora se aplica de verdad (antes se creaba y no se usaba).
+- **ADAS real**: vídeo de cámara `480×640`, `readyState 4`, cabina 3D montada y sin errores. Se sube el cuadro, se agranda y se baja el salpicadero para que no corte los dígitos; la cinta de ruta se recorta al 50,5 % de la altura para que no se dibuje sobre el cuadro ni el volante.
+- Comprobado en el Redmi con Chrome 158 por CDP y capturas `adb screencap`: 3D activo con coche cargado, AR con cámara real y botones recolocados. `npm test` 195/195.
+
+Nota: la cámara del móvil estaba apuntando al techo durante la prueba, así que la imagen es gris; lo validado es que el stream real arranca y que la composición 3D/ADAS se monta encima sin errores.

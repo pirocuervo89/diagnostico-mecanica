@@ -70,8 +70,8 @@ export function montar(canvas, onListo) {
   camera = new THREE.PerspectiveCamera(32, 1, 0.1, 80);
   // Detrás y algo elevada: se ve el coche desde el exterior trasero, como en
   // la referencia, pero integrado en la carretera que dibuja el GPS.
-  camera.position.set(0, 2.1, 11);
-  camera.lookAt(0, 2.8, 0);
+  camera.position.set(0, 2.05, 11);
+  camera.lookAt(0, 2.4, 0);
 
   scene.add(new THREE.HemisphereLight(0x9fc7ff, 0x0a0a12, 1.15));
   const key = new THREE.DirectionalLight(0xffffff, 3.2);
@@ -127,7 +127,10 @@ export function montar(canvas, onListo) {
     modelo = gltf.scene;
     const caja = new THREE.Box3().setFromObject(modelo);
     const centro = caja.getCenter(new THREE.Vector3());
-    const escala = 0.0115;
+    const size = caja.getSize(new THREE.Vector3());
+    // El GLB viene en unidades de ~1 cm: 167 x 57 x 79. Se normaliza por el
+    // ancho real (79 unidades) para que el coche mida 1,82 m y no 0,91 m.
+    const escala = 1.55 / Math.max(1, size.z);
     modelo.scale.setScalar(escala);
     modelo.position.set(-centro.x * escala, -caja.min.y * escala, -centro.z * escala);
     modelo.traverse(o => {
