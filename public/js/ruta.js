@@ -2881,11 +2881,9 @@
 
     // Dibujar detecciones sólo dentro del cristal: las cajas no deben caer
     // sobre el volante, el cuadro ni la consola de la cabina.
-    ctxAr.save();
-    ctxAr.beginPath();
-    ctxAr.rect(0, 0, w, baseCristalAr(h));
-    ctxAr.clip();
-    for (const d of deteccionesAr) {
+    // Cámara limpia: no se dibujan cajas de detección sobre la imagen real.
+    // (La detección sigue activa para avisos de voz.)
+    if (false) for (const d of deteccionesAr) {
       const [x, y, bw, bh] = d.bbox;
       // Misma transformación que el vídeo en object-fit: cover.
       const caja = mapearVideoRect(x, y, bw, bh, w, h);
@@ -2947,7 +2945,7 @@
       ultimoAnalisisVision = ahoraVision;
       analizarVision(ahoraVision);
     }
-    dibujarVision(w, h);
+    // Cámara limpia: sin líneas de carril ni marcas artificiales sobre la imagen real.
     ctxAr.restore();
 
     // HUD: velocidad
