@@ -2750,16 +2750,21 @@
     }
     avisar('Activando cámara...', 'info', 2000);
     try {
-      streamAr = await navigator.mediaDevices.getUserMedia({
-        // 4:3 con la máxima resolución razonable: entra más campo real que con
-        // el recorte 9:16 del visor y se ve más nítido en el móvil.
+      let constraints = {
         video: {
           facingMode: { ideal: 'environment' },
           width: { ideal: 1280 },
           height: { ideal: 960 }
         },
         audio: false
-      });
+      };
+      try {
+        streamAr = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (e1) {
+        // Reintento sin preferencia de cámara ni resolución: algunos móviles
+        // rechazan la combinación exacta de constraints.
+        streamAr = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
       videoAr.srcObject = streamAr;
       await videoAr.play().catch(() => {});
       vistaArActiva = true;
@@ -2802,7 +2807,7 @@
       loop();
       avisar('ADAS AR activado. Cámara trasera en directo.', 'ok', 4000);
     } catch (e) {
-      avisar('No se pudo acceder a la cámara. Verifica los permisos.', 'error', 6000);
+      avisar(`No se pudo acceder a la cámara (${e.name}: ${e.message}).`, 'error', 8000);
       console.error('Error cámara AR:', e);
     }
   }
