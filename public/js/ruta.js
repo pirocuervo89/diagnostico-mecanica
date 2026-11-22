@@ -1407,6 +1407,218 @@
     }
   }
 
+  // --- Orientación del móvil: alineación espacial aproximada del AR ---
+  let arBaseAlpha = null;
+  let arBaseBeta = null;
+  let arHeadingRel = 0;
+  let arPitchRel = 0;
+  let arSensoresOk = false;
+  let arSensorFn = null;
+
+  function onOrientacion(e) {
+    if (e.alpha == null && e.beta == null) return;
+    arSensoresOk = true;
+    if (arBaseAlpha == null) { arBaseAlpha = e.alpha || 0; arBaseBeta = e.beta || 0; }
+    let da = (e.alpha || 0) - arBaseAlpha;
+    while (da > 180) da -= 360;
+    while (da < -180) da += 360;
+    arHeadingRel = da;
+    arPitchRel = (e.beta || 0) - arBaseBeta;
+  }
+
+  function iniciarSensoresAr() {
+    if (arSensorFn) return;
+    if (typeof DeviceOrientationEvent === 'undefined') return;
+    arSensorFn = onOrientacion;
+    const permiso = DeviceOrientationEvent.requestPermission;
+    if (typeof permiso === 'function') {
+      permiso().then(r => { if (r === 'granted') window.addEventListener('deviceorientation', arSensorFn, { passive: true }); })
+        .catch(() => {});
+    } else {
+      window.addEventListener('deviceorientation', arSensorFn, { passive: true });
+    }
+  }
+
+  function detenerSensoresAr() {
+    if (arSensorFn) { window.removeEventListener('deviceorientation', arSensorFn); arSensorFn = null; }
+    arSensoresOk = false;
+  }
+
+  function calibrarAr() {
+    arBaseAlpha = null;
+    arBaseBeta = null;
+    arHeadingRel = 0;
+    arPitchRel = 0;
+    document.getElementById('rutaCalibrar')?.classList.add('calibrado');
+    avisar(arSensoresOk ? 'AR calibrada con la orientación del móvil.' : 'Este móvil no envía orientación; AR sin calibrar.', arSensoresOk ? 'ok' : 'aviso', 3000);
+  }
+
+  // --- Visión artificial local: carriles y señales ---
+  const VW = 160, VH = 120;
+  let lienzoVision = null;
+  let ctxVision = null;
+  let carrilInfo = null;
+  let senalInfo = null;
+  let ultimoAnalisisVision = 0;
+  let ultimoAvisoCarril = 0;
+  let ultimoIntentoTexto = 0;
+  let senalTexto = '';
+
+  function initVision() {
+    if (lienzoVision) return;
+    lienzoVision = document.createElement('canvas');
+    lienzoVision.width = VW;
+    lienzoVision.height = VH;
+    ctxVision = lienzoVision.getContext('2d', { willReadFrequently: true });
+  }
+
+  function regresion(pts) {
+    const n = pts.length;
+    if (n < 3) return null;
+    let sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
+    for (const [x, y] of pts) { sx += x; sy += y; sxx += x * x; sxy += x * y; syy += y * y; }
+    const den = n * syy - sy * sy;
+    if (!den) return null;
+    const m = (n * sxy - sx * sy) / den;
+    const c = (sx - m * sy) / n;
+    return { m, c };
+  }
+
+  function analizarVision(ahora) {
+    initVision();
+    if (!ctxVision || !videoAr || videoAr.readyState < 2 || !videoAr.videoWidth) return;
+    ctxVision.drawImage(videoAr, 0, 0, VW, VH);
+    let datos;
+    try { datos = ctxVision.getImageData(0, 0, VW, VH).data; } catch (_e) { return; }
+
+    const y0 = Math.round(VH * 0.55);
+    const izq = [], der = [];
+    let rojos = 0, rMinX = VW, rMaxX = 0, rMinY = VH, rMaxY = 0;
+
+    for (let y = 0; y < VH; y++) {
+      for (let x = 0; x < VW; x++) {
+        const i = (y * VW + x) * 4;
+        const r = datos[i], g = datos[i + 1], b = datos[i + 2];
+        // Señal roja (círculo de límite/prohibición) en la mitad superior.
+        if (y < VH * 0.5 && r > 135 && r - g > 55 && r - b > 55) {
+          rojos++;
+          if (x < rMinX) rMinX = x;
+          if (x > rMaxX) rMaxX = x;
+          if (y < rMinY) rMinY = y;
+          if (y > rMaxY) rMaxY = y;
+        }
+      }
+    }
+
+    // Carriles: por fila, marcas claras y poco saturadas con hueco oscuro en medio.
+    for (let y = y0; y < VH; y += 2) {
+      let lx = -1, rx = -1;
+      for (let x = 2; x < VW - 2; x++) {
+        const i = (y * VW + x) * 4;
+        const r = datos[i], g = datos[i + 1], b = datos[i + 2];
+        const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+        if (mx > 150 && (mx - mn) < 45) { if (lx < 0) lx = x; rx = x; }
+      }
+      if (lx < 0 || rx - lx < VW * 0.18 || rx - lx > VW * 0.95) continue;
+      const mi = (y * VW + Math.round((lx + rx) / 2)) * 4;
+      const mlum = 0.299 * datos[mi] + 0.587 * datos[mi + 1] + 0.114 * datos[mi + 2];
+      if (mlum < 125) { izq.push([lx, y]); der.push([rx, y]); }
+    }
+
+    const filas = Math.max(1, Math.floor((VH - y0) / 2));
+    const cobertura = izq.length / filas;
+    if (izq.length >= 4 && der.length >= 4 && cobertura > 0.22) {
+      const fi = regresion(izq), fd = regresion(der);
+      if (fi && fd) {
+        const xi = fi.m * VH + fi.c;
+        const xd = fd.m * VH + fd.c;
+        const centro = (xi + xd) / 2;
+        const ancho = xd - xi;
+        if (ancho > VW * 0.15) {
+          carrilInfo = {
+            ok: true,
+            conf: Math.min(1, cobertura * 1.4),
+            offset: (centro - VW / 2) / (VW / 2),
+            izq: fi, der: fd, xi, xd, y0
+          };
+        }
+      }
+    } else {
+      carrilInfo = null;
+    }
+
+    // Señal: caja roja aproximadamente cuadrada.
+    const anchoR = rMaxX - rMinX, altoR = rMaxY - rMinY;
+    if (rojos > 90 && anchoR > 10 && altoR > 10) {
+      const ratio = anchoR / altoR;
+      if (ratio > 0.6 && ratio < 1.7) senalInfo = { x: rMinX, y: rMinY, w: anchoR, h: altoR };
+      else senalInfo = null;
+    } else {
+      senalInfo = null;
+    }
+
+    // Lectura opcional del número con la API de texto del navegador (si existe).
+    if (senalInfo && 'TextDetector' in window && ahora - ultimoIntentoTexto > 2500) {
+      ultimoIntentoTexto = ahora;
+      try {
+        const det = new window.TextDetector();
+        det.detect(videoAr).then(lista => {
+          const nums = (lista || []).map(t => (String(t.rawValue || '').match(/\b(10|20|30|40|50|60|70|80|90|100|110|120|130)\b/) || [])[0]).filter(Boolean);
+          if (nums.length) senalTexto = nums[0];
+        }).catch(() => {});
+      } catch (_e) { /* sin lector de texto */ }
+    }
+  }
+
+  function dibujarVision(w, h) {
+    // Carriles
+    if (carrilInfo && carrilInfo.ok) {
+      const sx = w / VW, sy = h / VH;
+      const { izq, der, y0 } = carrilInfo;
+      const yA = y0, yB = VH;
+      const col = Math.abs(carrilInfo.offset) > 0.42 ? '#ef4444' : Math.abs(carrilInfo.offset) > 0.24 ? '#fbbf24' : '#22c55e';
+      ctxAr.save();
+      ctxAr.lineWidth = 3;
+      ctxAr.strokeStyle = col;
+      ctxAr.shadowColor = col;
+      ctxAr.shadowBlur = 10;
+      for (const f of [izq, der]) {
+        ctxAr.beginPath();
+        ctxAr.moveTo((f.m * yA + f.c) * sx, yA * sy);
+        ctxAr.lineTo((f.m * yB + f.c) * sx, yB * sy);
+        ctxAr.stroke();
+      }
+      ctxAr.restore();
+      // Aviso de salida de carril (solo con confianza suficiente).
+      if (carrilInfo.conf > 0.45 && Math.abs(carrilInfo.offset) > 0.42) {
+        ctxAr.fillStyle = 'rgba(239,68,68,.92)';
+        ctxAr.font = `bold ${Math.max(11, w * 0.03)}px sans-serif`;
+        ctxAr.textAlign = 'center';
+        ctxAr.textBaseline = 'middle';
+        ctxAr.fillText('⚠ SALIDA DE CARRIL', w / 2, h * 0.30);
+        if (Date.now() - ultimoAvisoCarril > 9000) {
+          ultimoAvisoCarril = Date.now();
+          decir('Atención, te acercas al borde del carril.');
+        }
+      }
+    }
+
+    // Señal detectada
+    if (senalInfo) {
+      const sx = w / VW, sy = h / VH;
+      const x = senalInfo.x * sx, y = senalInfo.y * sy;
+      const an = senalInfo.w * sx, al = senalInfo.h * sy;
+      ctxAr.strokeStyle = 'rgba(255,77,109,.9)';
+      ctxAr.lineWidth = 2;
+      ctxAr.strokeRect(x, y, an, al);
+      ctxAr.fillStyle = 'rgba(255,77,109,.9)';
+      ctxAr.font = `bold ${Math.max(9, w * 0.025)}px sans-serif`;
+      ctxAr.textAlign = 'left';
+      ctxAr.textBaseline = 'alphabetic';
+      ctxAr.fillText(senalTexto ? `Señal: ${senalTexto}` : 'Señal detectada', x, Math.max(12, y - 5));
+    }
+  }
+
   function initAr() {
     canvasAr = document.getElementById('rutaArCanvas');
     videoAr = document.getElementById('rutaArVideo');
@@ -1440,6 +1652,9 @@
       videoAr.classList.add('activo');
       ajustarTamanoAr();
       montarCabina3d();
+      iniciarSensoresAr();
+      initVision();
+      document.getElementById('rutaCalibrar')?.classList.remove('calibrado');
       // Cargar modelo COCO-SSD (lazy, solo si está disponible)
       if (typeof cocoSsd !== 'undefined' && !modeloCoco) {
         cocoSsd.load().then(m => { modeloCoco = m; avisar('Detección de objetos activada.', 'ok', 3000); }).catch(e => console.warn('COCO-SSD no disponible:', e));
@@ -1475,6 +1690,10 @@
       moduloCabina3d = null;
       cabina3dLista = false;
     }
+    detenerSensoresAr();
+    carrilInfo = null;
+    senalInfo = null;
+    senalTexto = '';
   }
 
   function toggleAr() {
@@ -1540,6 +1759,14 @@
     if (ruta && ruta.geometry && ruta.geometry.length > 1) {
       dibujarRutaAr(w, h, ruta, s);
     }
+
+    // Visión local: carriles y señales (cada ~300 ms).
+    const ahoraVision = Date.now();
+    if (ahoraVision - ultimoAnalisisVision > 300) {
+      ultimoAnalisisVision = ahoraVision;
+      analizarVision(ahoraVision);
+    }
+    dibujarVision(w, h);
 
     // HUD: velocidad
     // Cabina: 3D real si está disponible; si no, dibujo 2D de respaldo.
@@ -1630,6 +1857,9 @@
     const topY = h * 0.30;
     const nearW = Math.min(w * 0.30, 240);
     const farW = nearW * 0.12;
+    // Alineación aproximada con la orientación real del móvil.
+    const shiftX = arSensoresOk ? Math.max(-w * 0.34, Math.min(w * 0.34, -arHeadingRel * 2.4)) : 0;
+    const shiftY = arSensoresOk ? Math.max(-h * 0.12, Math.min(h * 0.12, arPitchRel * 1.6)) : 0;
     let curva = 0;
     const coords = [];
     for (let i = 0; i < n; i++) {
@@ -1644,8 +1874,8 @@
         curva += d;
       }
       const off = Math.max(-0.42, Math.min(0.42, curva));
-      const x = w / 2 + off * z * z * w * 0.9;
-      const y = baseY + (topY - baseY) * z;
+      const x = w / 2 + off * z * z * w * 0.9 + shiftX;
+      const y = baseY + (topY - baseY) * z + shiftY;
       const half = (nearW + (farW - nearW) * z) / 2;
       coords.push({ x, y, half, z });
     }
@@ -1863,6 +2093,7 @@
 
   // Conectar el botón AR
   document.getElementById('rutaArToggle')?.addEventListener('click', toggleAr);
+  document.getElementById('rutaCalibrar')?.addEventListener('click', calibrarAr);
   // Botón para detener la navegación (el panel de inicio está oculto).
   document.getElementById('rutaParar')?.addEventListener('click', () => {
     if (navegando) alternarNavegacion();
@@ -2435,6 +2666,8 @@
     confirmarDestino: () => { esperandoSi = false; iniciarPendiente(); return true; },
     cancelarDestino: () => { esperandoSi = false; pendienteDestino = null; return true; },
     demo: () => { alternarDemo(); return demoActiva; },
+    calibrarAr: () => { calibrarAr(); return arSensoresOk; },
+    carril: () => carrilInfo ? { conf: Number(carrilInfo.conf.toFixed(2)), offset: Number(carrilInfo.offset.toFixed(2)) } : null,
     // Para pruebas y para Maya: fuerza o consulta la voz sin tocar la UI.
     voz: (activa) => { if (typeof activa === 'boolean' && activa !== vozActiva) alternarVoz(); return vozActiva; },
     incidencias: () => avisos.filter(a => a.origen === 'comunidad'),

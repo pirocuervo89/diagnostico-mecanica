@@ -2489,6 +2489,9 @@ async function manejarComandoVoz(texto) {
   if (/^(mapa 2d|mapa normal|vista mapa|mapa clasico)$/.test(n)) {
     showView('ruta'); setTimeout(() => window.Ruta?.modoMapa?.(), 400); addBubble('Mapa normal.', 'assistant'); return true;
   }
+  if (/^(calibra|calibrar|calibrar ar|calibrar camara)$/.test(n)) {
+    showView('ruta'); setTimeout(() => window.Ruta?.calibrarAr?.(), 400); addBubble('Calibrando AR.', 'assistant'); return true;
+  }
   if (/^(modo )?(demo|demostracion)$/.test(n)) {
     showView('ruta'); setTimeout(() => window.Ruta?.demo?.(), 500); addBubble('Modo demostración.', 'assistant'); return true;
   }
