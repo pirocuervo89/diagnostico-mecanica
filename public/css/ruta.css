@@ -2741,8 +2741,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   inset: 0;
   width: 100%;
   height: 100%;
-  /* La cámara llena todo el parabrisas; la cabina fotorrealista se encarga
-     de tapar la parte inferior. */
+  /* La cámara llena el fondo; la cabina completa se coloca encima. */
   object-fit: cover;
   z-index: 3;
   display: none;
@@ -3186,6 +3185,8 @@ body.viendo-ruta .pwa-install { display: none !important; }
   bottom: 0;
   width: 100%;
   height: 62vh;
+  /* Cabina reducida dentro de un marco de habitáculo: el volante queda bajo,
+     el espejo anclado al techo y la cámara solo asoma por el cristal. */
   object-fit: cover;
   object-position: center bottom;
   z-index: 6;

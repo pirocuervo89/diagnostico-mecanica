@@ -164,3 +164,17 @@ Nota: la cámara del móvil estaba apuntando al techo durante la prueba, así qu
 - El vídeo de cámara pasa a `object-fit: cover`: en la prueba real el móvil entregó **1280×960** y la cámara llena todo el parabrisas, sin la tira vertical intermedia.
 - En modo foto se ocultan chat, 3D, calibrar y ancho para no tapar el volante; quedan cámara y stop.
 - **Probado en el Redmi** (Chrome 158, cámara real): la foto carga (`naturalWidth 1440`), el AR queda activo, la orientación pasa a landscape y el vídeo entrega 1280×960 con `cover`. La calle no se pudo comprobar porque el móvil estaba apuntando al techo/interior, pero el encuadre y la capa transparente funcionan.
+
+## 10-decies. Ajuste panorámico · habitáculo completo
+
+- El recorte 16:9 se ampliaba para llenar el móvil en horizontal y se comía la parte superior (espejo retrovisor). Se genera `public/img/cabina-gt4-wide.webp` (2292×810, 174 KB): la foto original se mantiene **a altura completa** y se añaden laterales sintéticos oscuros y desenfocados, con sombra en las uniones, hasta la relación 2.83 del móvil.
+- Así se ven enteros el **espejo, el cuadro, el volante, los botones, la pantalla central, la consola y la palanca**, sin recorte vertical.
+- Probado en el Redmi en horizontal (847×299): imagen `naturalWidth 2292`, AR activo y cabina completa; la cámara sigue viéndose por el parabrisas transparente.
+- En pantalla completa (2.28) la imagen recorta solo los laterales sintéticos, nunca el habitáculo.
+
+## 10-undecies. Encuadre de conducción · volante bajo y cámara al cristal
+
+- Se corrige el exceso de protagonismo del volante: la cabina se reduce al **80%** y se ancla abajo dentro de un marco de habitáculo oscuro (`public/img/cabina-gt4-seat.webp`, 2292×810, 125 KB).
+- El marco tapa la cámara fuera del coche; el vídeo real solo se ve por el **parabrisas transparente**, ajustado al cristal, y el espejo queda colgado del techo en vez de flotar.
+- Se conserva el coche completo: espejo, cuadro, volante, botones, pantalla central, consola y palanca. No se recorta ninguna parte del habitáculo.
+- Probado en el Redmi en horizontal (847×299): AR activo, imagen `naturalWidth 2292`, cabina completa y cámara asomando por el cristal.
