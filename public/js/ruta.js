@@ -1491,6 +1491,12 @@
   let anchoDesde = 0;
   let curvaAnunciada = false;
   let anchoAnunciado = false;
+  let ultimoAvisoCambio = 0;
+  let ultimoAvisoIncorporacion = 0;
+  let desvioDesde = 0;
+  let incorporacionDesde = 0;
+  let cambioAnunciado = false;
+  let incorporacionAnunciada = false;
   let carrilBuenas = 0;
   let carrilMalas = 0;
   let senalInfo = null;
@@ -1787,6 +1793,31 @@
           ? `Atención, carril estrecho, unos ${anchoMaviso.toFixed(1)} metros.`
           : 'Atención, carril estrecho.');
       }
+
+      // Cambio de carril: el centro se desplaza ~medio carril y se mantiene.
+      if (confOk && Math.abs(sesgo) > 0.55) {
+        if (!desvioDesde) desvioDesde = agora;
+      } else if (Math.abs(sesgo) < 0.3) { desvioDesde = 0; cambioAnunciado = false; }
+      if (desvioDesde && !cambioAnunciado && agora - desvioDesde > 1200 &&
+          agora - ultimoAvisoCambio > 12000 && agora - ultimaVozCarril > 3500) {
+        cambioAnunciado = true;
+        ultimoAvisoCambio = agora;
+        ultimaVozCarril = agora;
+        decir(`Cambio de carril a la ${sesgo > 0 ? 'derecha' : 'izquierda'}.`);
+      }
+
+      // Incorporación: ensanchamiento sostenido (carril de aceleración/unión).
+      const incorpora = confOk && anchoRel > 1.28;
+      if (incorpora) {
+        if (!incorporacionDesde) incorporacionDesde = agora;
+      } else { incorporacionDesde = 0; incorporacionAnunciada = false; }
+      if (incorporacionDesde && !incorporacionAnunciada && agora - incorporacionDesde > 1000 &&
+          agora - ultimoAvisoIncorporacion > 20000 && agora - ultimaVozCarril > 3500) {
+        incorporacionAnunciada = true;
+        ultimoAvisoIncorporacion = agora;
+        ultimaVozCarril = agora;
+        decir('Posible incorporación: el carril se ensancha.');
+      }
     }
 
     // Señal detectada
@@ -1889,12 +1920,18 @@
     bufferL = [];
     bufferR = [];
     carrilBias = 0;
+    const panelAnchoDetener = document.getElementById('rutaAnchoPanel');
+    if (panelAnchoDetener) panelAnchoDetener.hidden = true;
     carrilBuenas = 0;
     carrilMalas = 0;
     curvaDesde = 0;
     anchoDesde = 0;
     curvaAnunciada = false;
     anchoAnunciado = false;
+    desvioDesde = 0;
+    incorporacionDesde = 0;
+    cambioAnunciado = false;
+    incorporacionAnunciada = false;
     senalInfo = null;
     senalTexto = '';
   }
@@ -2334,6 +2371,24 @@
   // Conectar el botón AR
   document.getElementById('rutaArToggle')?.addEventListener('click', toggleAr);
   document.getElementById('rutaCalibrar')?.addEventListener('click', calibrarAr);
+  // Panel visual para calibrar el ancho del carril sin usar la voz.
+  const panelAncho = document.getElementById('rutaAnchoPanel');
+  const inputAncho = document.getElementById('rutaAnchoInput');
+  document.getElementById('rutaAnchoBtn')?.addEventListener('click', () => {
+    if (!panelAncho || !inputAncho) return;
+    inputAncho.value = String(anchoRealM);
+    panelAncho.hidden = false;
+  });
+  document.getElementById('rutaAnchoCancel')?.addEventListener('click', () => {
+    if (panelAncho) panelAncho.hidden = true;
+  });
+  document.getElementById('rutaAnchoOk')?.addEventListener('click', () => {
+    const m = parseFloat(String(inputAncho?.value || '').replace(',', '.'));
+    if (calibrarAncho(m) && panelAncho) panelAncho.hidden = true;
+  });
+  panelAncho?.querySelectorAll('[data-ancho]').forEach(boton => {
+    boton.addEventListener('click', () => { if (inputAncho) inputAncho.value = boton.dataset.ancho; });
+  });
   // Botón para detener la navegación (el panel de inicio está oculto).
   document.getElementById('rutaParar')?.addEventListener('click', () => {
     if (navegando) alternarNavegacion();
