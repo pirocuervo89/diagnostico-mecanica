@@ -3324,3 +3324,23 @@ body.ruta-demo .ruta-shell::after {
   color: #1a1204 !important;
   box-shadow: 0 0 16px -4px rgba(251,191,36,.9);
 }
+
+/* Modo 3D exterior: solo los controles que se usan conduciendo. */
+.ruta-shell.ruta-3d-activo .ruta-fab { display: none !important; }
+.ruta-shell.ruta-3d-activo #ruta3dToggle,
+.ruta-shell.ruta-3d-activo #rutaArToggle,
+.ruta-shell.ruta-3d-activo #rutaParar:not([hidden]),
+.ruta-shell.ruta-3d-activo #rutaVoz,
+.ruta-shell.ruta-3d-activo #rutaDemo {
+  display: grid !important;
+}
+
+/* En 3D/AR no se usan los controles de giro del mapa: fuera de la vista. */
+.ruta-shell.ruta-3d-activo #rutaGirarIzq,
+.ruta-shell.ruta-3d-activo #rutaGirarDer,
+.ruta-shell.ruta-3d-activo #rutaResetGiro,
+.ruta-shell.ruta-ar-activo #rutaGirarIzq,
+.ruta-shell.ruta-ar-activo #rutaGirarDer,
+.ruta-shell.ruta-ar-activo #rutaResetGiro {
+  display: none !important;
+}

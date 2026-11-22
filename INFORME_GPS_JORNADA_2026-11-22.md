@@ -89,6 +89,14 @@ Trabajo realizado sobre `diagnostico-mecanica` (HADAS), sin cambiar de proyecto 
 - **Filtro de jitter** más seguro: solo se aplica cuando el marcador del mapa ya existe.
 - Pruebas: señal sintética confirmada y retirada correctamente; 201/201 tests.
 
+## 9-ter. Ciclo 3 (pulido visual)
+
+- Las líneas de carril, la ruta y las flechas AR se recortan al 62 % superior: ya no se dibujan sobre el volante, el salpicadero ni la consola.
+- Las líneas se ocultan por debajo de confianza 0,22, usan extremos redondeados y grosor proporcional a la pantalla.
+- En 3D y AR se ocultan los controles de giro del mapa (izquierda/derecha/norte), que no se usan en esos modos.
+- En 3D exterior solo quedan los controles de conducción: 3D, cámara, detener, voz y demo.
+- Verificado con capturas de ambos modos y 201/201 tests.
+
 ## 10. Cuota de Freebuff
 
 No verificable desde el entorno de ejecución.

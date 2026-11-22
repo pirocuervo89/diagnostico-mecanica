@@ -2252,7 +2252,7 @@
 
   function dibujarVision(w, h) {
     // Carriles suavizados, reproyectados desde la vista normalizada.
-    if (carrilSuave && carrilInfo && carrilInfo.ok) {
+    if (carrilSuave && carrilInfo && carrilInfo.ok && carrilSuave.conf > 0.22) {
       const sx = w / VW, sy = h / VH;
       const ROI_Y0 = Math.round(VH * 0.55);
       const ROI_Y1 = Math.round(VH * 0.98);
@@ -2268,7 +2268,9 @@
         return [((VW / 2) + (u * ancho) / 2) * sx, y * sy];
       };
       ctxAr.save();
-      ctxAr.lineWidth = 3;
+      ctxAr.lineWidth = Math.max(2.5, w * 0.008);
+      ctxAr.lineCap = 'round';
+      ctxAr.lineJoin = 'round';
       ctxAr.strokeStyle = col;
       ctxAr.shadowColor = col;
       ctxAr.shadowBlur = 10;
@@ -2558,6 +2560,12 @@
     // Línea de ruta dinámica (color según la maniobra) pintada sobre la calzada.
     const ruta = rutaActiva();
     const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
+    // Todo lo que va "sobre la carretera" se recorta antes del salpicadero:
+    // así las líneas no se dibujan encima del volante ni de la consola.
+    ctxAr.save();
+    ctxAr.beginPath();
+    ctxAr.rect(0, 0, w, h * 0.62);
+    ctxAr.clip();
     if (ruta && ruta.geometry && ruta.geometry.length > 1) {
       dibujarRutaAr(w, h, ruta, s);
     }
@@ -2571,6 +2579,7 @@
       analizarVision(ahoraVision);
     }
     dibujarVision(w, h);
+    ctxAr.restore();
 
     // HUD: velocidad
     // Cabina: 3D real si está disponible; si no, dibujo 2D de respaldo.
