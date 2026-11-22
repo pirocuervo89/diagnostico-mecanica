@@ -3507,3 +3507,8 @@ body.viendo-ruta main {
 .ruta-shell.ruta-3d-activo #rutaArToggle {
   display: none !important;
 }
+
+.ruta-shell.ruta-3d-activo .ruta-hud > #ruta3dToggle,
+.ruta-shell.ruta-3d-activo .ruta-hud > #rutaArToggle {
+  display: none !important;
+}
