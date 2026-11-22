@@ -3297,3 +3297,30 @@ body.ruta-demo .ruta-shell::after {
   border-color: transparent;
   color: #04121c;
 }
+
+/* Intermitente manual para confirmar cambios de carril. */
+.ruta-inter { display: none !important; }
+.ruta-shell.ruta-ar-activo .ruta-inter {
+  display: grid !important;
+  position: fixed !important;
+  top: 96px !important;
+  z-index: 24 !important;
+  width: 44px !important;
+  height: 44px !important;
+  place-items: center;
+  border-radius: 12px;
+  border: 1.5px solid rgba(56,225,255,.4);
+  background: rgba(6,10,18,.85);
+  color: #bfe9f7;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+.ruta-shell.ruta-ar-activo #rutaInterIzq { left: 12px !important; right: auto !important; }
+.ruta-shell.ruta-ar-activo #rutaInterDer { right: 12px !important; left: auto !important; }
+.ruta-inter.activo {
+  background: #f59e0b !important;
+  border-color: #fbbf24 !important;
+  color: #1a1204 !important;
+  box-shadow: 0 0 16px -4px rgba(251,191,36,.9);
+}

@@ -1459,6 +1459,20 @@
     return true;
   }
 
+  // Intermitente manual del usuario (no hay acceso al del coche).
+  function fijarIntermitente(lado) {
+    const valor = lado === 'izq' || lado === 'der' ? lado : null;
+    intermitenteAuto = false;
+    intermitente = intermitente === valor ? null : valor;
+    clearTimeout(intermitenteTimer);
+    if (intermitente) intermitenteTimer = setTimeout(() => fijarIntermitente(null), 20000);
+    const izq = document.getElementById('rutaInterIzq');
+    const der = document.getElementById('rutaInterDer');
+    if (izq) { izq.classList.toggle('activo', intermitente === 'izq'); izq.setAttribute('aria-pressed', String(intermitente === 'izq')); }
+    if (der) { der.classList.toggle('activo', intermitente === 'der'); der.setAttribute('aria-pressed', String(intermitente === 'der')); }
+    return intermitente;
+  }
+
   function calibrarAr() {
     arBaseAlpha = null;
     arBaseBeta = null;
@@ -1497,6 +1511,13 @@
   let incorporacionDesde = 0;
   let cambioAnunciado = false;
   let incorporacionAnunciada = false;
+  let intermitente = null;
+  let intermitenteAuto = false;
+  let intermitenteTimer = 0;
+  let desvioSigno = 0;
+  let hudCambioHasta = 0;
+  let hudCambioTexto = '';
+  let graciaCarrilHasta = 0;
   let carrilBuenas = 0;
   let carrilMalas = 0;
   let senalInfo = null;
@@ -1726,7 +1747,8 @@
       const Wtop = VW * 0.34;
       const Wbot = VW * 0.92;
       const sesgo = carrilSuave.offset - carrilBias; // 0 = centrado tras calibrar
-      const col = Math.abs(sesgo) > 0.42 ? '#ef4444' : Math.abs(sesgo) > 0.24 ? '#fbbf24' : '#22c55e';
+      const senalizado = intermitente && ((sesgo > 0 && intermitente === 'der') || (sesgo < 0 && intermitente === 'izq'));
+      const col = senalizado ? '#fbbf24' : Math.abs(sesgo) > 0.42 ? '#ef4444' : Math.abs(sesgo) > 0.24 ? '#fbbf24' : '#22c55e';
       const proyectar = (a, b, c, d) => {
         const y = ROI_Y1 - d * (ROI_Y1 - ROI_Y0);
         const ancho = Wbot + (Wtop - Wbot) * d;
@@ -1750,7 +1772,8 @@
       // Antirrebote: el aviso exige varios análisis seguidos con desvío.
       const desviado = Math.abs(sesgo) > 0.42 && carrilSuave.conf > 0.5;
       if (desviado) { carrilBuenas++; carrilMalas = 0; } else { carrilMalas++; if (carrilMalas > 2) carrilBuenas = 0; }
-      if (carrilBuenas >= 3) {
+      // Si el usuario señaliza ese lado, la salida es intencionada: no se avisa.
+      if (carrilBuenas >= 3 && !senalizado && Date.now() > graciaCarrilHasta) {
         ctxAr.fillStyle = 'rgba(239,68,68,.92)';
         ctxAr.font = `bold ${Math.max(11, w * 0.03)}px sans-serif`;
         ctxAr.textAlign = 'center';
@@ -1794,16 +1817,34 @@
           : 'Atención, carril estrecho.');
       }
 
-      // Cambio de carril: el centro se desplaza ~medio carril y se mantiene.
+      // Cambio de carril con histéresis: entra a 0,55, sale a 0,30 y exige
+      // que la dirección se mantenga; confirma si el intermitente coincide.
+      const ladoCambio = sesgo > 0 ? 'derecha' : 'izquierda';
+      const senalCoincide = intermitente && ((sesgo > 0 && intermitente === 'der') || (sesgo < 0 && intermitente === 'izq'));
       if (confOk && Math.abs(sesgo) > 0.55) {
-        if (!desvioDesde) desvioDesde = agora;
-      } else if (Math.abs(sesgo) < 0.3) { desvioDesde = 0; cambioAnunciado = false; }
+        const signo = sesgo > 0 ? 1 : -1;
+        if (!desvioDesde) { desvioDesde = agora; desvioSigno = signo; }
+        else if (signo !== desvioSigno) { desvioDesde = agora; desvioSigno = signo; }
+      } else if (Math.abs(sesgo) < 0.3) {
+        desvioDesde = 0;
+        desvioSigno = 0;
+        cambioAnunciado = false;
+        // Maniobra terminada: el intermitente puesto para confirmarla se apaga.
+        if (intermitenteAuto) fijarIntermitente(null);
+      }
       if (desvioDesde && !cambioAnunciado && agora - desvioDesde > 1200 &&
           agora - ultimoAvisoCambio > 12000 && agora - ultimaVozCarril > 3500) {
         cambioAnunciado = true;
         ultimoAvisoCambio = agora;
         ultimaVozCarril = agora;
-        decir(`Cambio de carril a la ${sesgo > 0 ? 'derecha' : 'izquierda'}.`);
+        hudCambioTexto = senalCoincide ? `✔ Cambio ${ladoCambio} confirmado` : `↔ Cambio de carril ${ladoCambio}`;
+        hudCambioHasta = agora + 3500;
+        decir(senalCoincide
+          ? `Cambio de carril a la ${ladoCambio} confirmado por el intermitente.`
+          : `Cambio de carril a la ${ladoCambio}.`);
+        // Se mantiene encendido hasta centrar el carril (ver histéresis) y
+        // se da un margen para no avisar de “salida” al volver al centro.
+        if (senalCoincide) { intermitenteAuto = true; graciaCarrilHasta = agora + 5000; }
       }
 
       // Incorporación: ensanchamiento sostenido (carril de aceleración/unión).
@@ -1928,10 +1969,16 @@
     anchoDesde = 0;
     curvaAnunciada = false;
     anchoAnunciado = false;
+    graciaCarrilHasta = 0;
     desvioDesde = 0;
     incorporacionDesde = 0;
     cambioAnunciado = false;
     incorporacionAnunciada = false;
+    clearTimeout(intermitenteTimer);
+    intermitente = null;
+    intermitenteAuto = false;
+    document.getElementById('rutaInterIzq')?.classList.remove('activo');
+    document.getElementById('rutaInterDer')?.classList.remove('activo');
     senalInfo = null;
     senalTexto = '';
   }
@@ -2365,6 +2412,42 @@
       ctxAr.moveTo(cx + cw / 2, cy + ch * 0.22);
       ctxAr.lineTo(cx + cw / 2, cy + ch * 0.78);
       ctxAr.stroke();
+
+      // Estado de maniobra: cambio de carril, incorporación o intermitente.
+      const ahoraHud = Date.now();
+      const sesgoHud = carrilSuave.offset - carrilBias;
+      const confHud = carrilSuave.conf > 0.5;
+      let estadoTxt = '', estadoCol = '#7ee7ff';
+      if (confHud && Math.abs(sesgoHud) > 0.5) {
+        estadoTxt = `↔ Cambio de carril ${sesgoHud > 0 ? 'derecha' : 'izquierda'}`;
+        estadoCol = '#fbbf24';
+      } else if (confHud && anchoRel > 1.22) {
+        estadoTxt = '⇥ Posible incorporación';
+        estadoCol = '#a5f3fc';
+      } else if (ahoraHud < hudCambioHasta && hudCambioTexto) {
+        estadoTxt = hudCambioTexto;
+        estadoCol = '#86efac';
+      } else if (intermitente) {
+        estadoTxt = intermitente === 'der' ? '↱ Intermitente derecho' : '↰ Intermitente izquierdo';
+        estadoCol = '#fbbf24';
+      }
+      if (estadoTxt) {
+        const ch2 = ch * 0.84;
+        const cw2 = Math.min(pw, Math.max(w * 0.44, 190));
+        const cx2 = px + (pw - cw2) / 2;
+        const cy2 = cy + ch + 6;
+        rrect(cx2, cy2, cw2, ch2, ch2 / 2);
+        ctxAr.fillStyle = 'rgba(6,10,16,0.78)';
+        ctxAr.fill();
+        ctxAr.strokeStyle = 'rgba(160,200,220,0.3)';
+        ctxAr.lineWidth = 1;
+        ctxAr.stroke();
+        ctxAr.textAlign = 'center';
+        ctxAr.textBaseline = 'middle';
+        ctxAr.font = `bold ${ch2 * 0.42}px sans-serif`;
+        ctxAr.fillStyle = estadoCol;
+        ctxAr.fillText(estadoTxt, cx2 + cw2 / 2, cy2 + ch2 / 2 + 1);
+      }
     }
   }
 
@@ -2389,6 +2472,8 @@
   panelAncho?.querySelectorAll('[data-ancho]').forEach(boton => {
     boton.addEventListener('click', () => { if (inputAncho) inputAncho.value = boton.dataset.ancho; });
   });
+  document.getElementById('rutaInterIzq')?.addEventListener('click', () => fijarIntermitente('izq'));
+  document.getElementById('rutaInterDer')?.addEventListener('click', () => fijarIntermitente('der'));
   // Botón para detener la navegación (el panel de inicio está oculto).
   document.getElementById('rutaParar')?.addEventListener('click', () => {
     if (navegando) alternarNavegacion();
@@ -2964,6 +3049,7 @@
     calibrarAr: () => { calibrarAr(); return arSensoresOk; },
     calibrarAncho: (m) => calibrarAncho(m),
     anchoReal: () => anchoRealM,
+    intermitente: (lado) => { if (lado === undefined) return intermitente; fijarIntermitente(lado); return intermitente; },
     carril: () => carrilInfo ? {
       conf: Number(carrilInfo.conf.toFixed(2)),
       offset: Number(carrilInfo.offset.toFixed(2)),
