@@ -1723,7 +1723,38 @@
       ctx3d.fillText(rest > 1000 ? `${(rest / 1000).toFixed(1)} km` : `${Math.round(rest)} m`, w - 20, 32);
       ctx3d.font = '11px sans-serif';
       ctx3d.fillStyle = 'rgba(255, 255, 255, .7)';
-      ctx3d.fillText(ruta.duration ? `${Math.round(ruta.duration/60)} min` : '', w - 20, 50);
+      const min = ruta.duration ? Math.round(ruta.duration / 60) : 0;
+      const llegada = ruta.duration ? new Date(Date.now() + ruta.duration * 1000).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '';
+      ctx3d.fillText(min ? `${min} min · ${llegada}` : '', w - 20, 50);
+    }
+    // Avisos de estado: no fingir posición ni ruta si faltan datos.
+    const sinGps = !ultimaPos || (ultimaVez && Date.now() - ultimaVez > 10000);
+    if (sinGps) {
+      const txt = 'SIN SEÑAL GPS · posición no disponible';
+      ctx3d.fillStyle = 'rgba(30,8,14,.9)';
+      const an = Math.min(w - 30, 280), x = (w - an) / 2, y = h * 0.46;
+      ctx3d.fillRect(x, y, an, 30);
+      ctx3d.strokeStyle = 'rgba(255,77,109,.8)';
+      ctx3d.lineWidth = 1.5;
+      ctx3d.strokeRect(x, y, an, 30);
+      ctx3d.fillStyle = '#ff8aa1';
+      ctx3d.font = 'bold 12px sans-serif';
+      ctx3d.textAlign = 'center';
+      ctx3d.textBaseline = 'middle';
+      ctx3d.fillText(txt, w / 2, y + 15);
+    } else if (!ruta) {
+      const txt = 'SIN RUTA ACTIVA · modo 3D exterior';
+      ctx3d.fillStyle = 'rgba(6,10,18,.82)';
+      const an = Math.min(w - 30, 260), x = (w - an) / 2, y = h * 0.46;
+      ctx3d.fillRect(x, y, an, 28);
+      ctx3d.strokeStyle = 'rgba(56,225,255,.4)';
+      ctx3d.lineWidth = 1;
+      ctx3d.strokeRect(x, y, an, 28);
+      ctx3d.fillStyle = '#9fd8ea';
+      ctx3d.font = 'bold 11px sans-serif';
+      ctx3d.textAlign = 'center';
+      ctx3d.textBaseline = 'middle';
+      ctx3d.fillText(txt, w / 2, y + 14);
     }
     // Próxima maniobra (banner inferior)
     const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
