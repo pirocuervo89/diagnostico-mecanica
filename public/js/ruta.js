@@ -462,6 +462,13 @@
   function alMover(pos) {
     const { latitude: lat, longitude: lon, accuracy, speed, heading } = pos.coords;
     const ahora = Date.now();
+    // Filtro de jitter: a baja velocidad se ignoran microsaltos del GPS.
+    if (ultimaPos) {
+      const salto = distancia(ultimaPos.lat, ultimaPos.lon, lat, lon);
+      const dtSalto = (ahora - (ultimaVez || ahora)) / 1000;
+      const velMs = Number.isFinite(speed) && speed !== null ? speed : 0;
+      if (salto < 1.5 && velMs < 1.2 && dtSalto < 4) return;
+    }
     if (ultimaPos) {
       if (Number.isFinite(heading) && heading !== null) rumbo = heading;
       else if (distancia(ultimaPos.lat, ultimaPos.lon, lat, lon) > 4) rumbo = rumboEntre(ultimaPos, { lat, lon });
@@ -956,6 +963,7 @@
   let canvas3d = null;
   let ctx3d = null;
   let carretera3d = [];
+  let idx3dSuave = null;
   let progreso3d = 0;
   let scrollOffset3d = 0;
   let signos3d = [];
@@ -1331,7 +1339,12 @@
       }
     }
 
-    dibujarCielo3d(w, h, horizonte, t, idxActual);
+    // Suaviza el avance de la cámara 3D para evitar saltos entre segmentos.
+    if (idx3dSuave == null) idx3dSuave = idxActual;
+    else idx3dSuave += (idxActual - idx3dSuave) * 0.14;
+    const idxVista = Math.max(0, Math.round(idx3dSuave));
+
+    dibujarCielo3d(w, h, horizonte, t, idxVista);
     const suelo = ctx3d.createLinearGradient(0, horizonte, 0, h);
     suelo.addColorStop(0, '#122a22');
     suelo.addColorStop(0.45, '#0d1f19');
@@ -1341,7 +1354,7 @@
 
     const N = 64;
     const pts = [];
-    for (let i = 0; i <= N; i++) pts.push(proyecto3d(i / N, idxActual, segs, w, h, horizonte, cx));
+    for (let i = 0; i <= N; i++) pts.push(proyecto3d(i / N, idxVista, segs, w, h, horizonte, cx));
 
     // Vegetación y edificios lejanos.
     for (let i = 2; i <= N - 2; i += 3) {
@@ -1380,13 +1393,10 @@
       }
     }
 
-    // Asfalto.
+    // Asfalto (color plano alterno: evita crear 64 degradados por fotograma).
     for (let i = 1; i <= N; i++) {
       const a = pts[i - 1], b = pts[i];
-      const grad = ctx3d.createLinearGradient(0, b.y, 0, a.y + 0.01);
-      grad.addColorStop(0, '#22384f');
-      grad.addColorStop(1, '#2f4762');
-      ctx3d.fillStyle = grad;
+      ctx3d.fillStyle = i % 4 < 2 ? '#22384f' : '#2c4460';
       ctx3d.beginPath();
       ctx3d.moveTo(a.x - a.ancho / 2, a.y);
       ctx3d.lineTo(a.x + a.ancho / 2, a.y);
@@ -1454,7 +1464,7 @@
     ctx3d.restore();
     // Flechas de dirección sobre la carretera.
     for (const z of [0.12, 0.3, 0.52]) {
-      const p = proyecto3d(z, idxActual, segs, w, h, horizonte, cx);
+      const p = proyecto3d(z, idxVista, segs, w, h, horizonte, cx);
       const tam = 26 * p.escala + 6;
       const dir = Math.max(-0.9, Math.min(0.9, p.dH / 35));
       ctx3d.save();
@@ -1491,9 +1501,9 @@
       }
     }
     // Paso elevado ocasional.
-    const paso = Math.floor(idxActual / 120);
+    const paso = Math.floor(idxVista / 120);
     const zPaso = 0.4 + (paso % 3) * 0.07;
-    const pp = proyecto3d(zPaso, idxActual, segs, w, h, horizonte, cx);
+    const pp = proyecto3d(zPaso, idxVista, segs, w, h, horizonte, cx);
     ctx3d.fillStyle = 'rgba(12,26,40,.95)';
     ctx3d.fillRect(pp.x - pp.ancho * 0.62, pp.y - 26 * pp.escala, pp.ancho * 1.24, 12 * pp.escala);
     ctx3d.fillStyle = 'rgba(90,120,145,.5)';
@@ -1501,8 +1511,8 @@
       ctx3d.fillRect(pp.x + lado * pp.ancho * 0.6 - 2 * pp.escala, pp.y - 26 * pp.escala, 4 * pp.escala, 26 * pp.escala);
     }
 
-    dibujarGantry3d(w, h, horizonte, idxActual, segs, cx);
-    dibujarSenalLimite3d(w, h, horizonte, idxActual, segs, cx);
+    dibujarGantry3d(w, h, horizonte, idxVista, segs, cx);
+    dibujarSenalLimite3d(w, h, horizonte, idxVista, segs, cx);
     dibujarCoche3d(w, h, t);
     dibujarHud3d(w, h);
   }
@@ -1728,7 +1738,7 @@
       ctx3d.fillText(min ? `${min} min · ${llegada}` : '', w - 20, 50);
     }
     // Avisos de estado: no fingir posición ni ruta si faltan datos.
-    const sinGps = !ultimaPos || (ultimaVez && Date.now() - ultimaVez > 10000);
+    const sinGps = !ultimaPos || (ultimaVez && Date.now() - ultimaVez > 20000);
     if (sinGps) {
       const txt = 'SIN SEÑAL GPS · posición no disponible';
       ctx3d.fillStyle = 'rgba(30,8,14,.9)';
@@ -1779,6 +1789,7 @@
 
   function iniciar3d() {
     if (!init3d()) return;
+    idx3dSuave = null;
     // Un solo modo de vista a la vez: si AR está abierto, se cierra.
     if (typeof vistaArActiva !== 'undefined' && vistaArActiva && typeof detenerAr === 'function') detenerAr();
     vista3dActiva = true;
@@ -1847,6 +1858,9 @@
   let arPitchRel = 0;
   let arSensoresOk = false;
   let arSensorFn = null;
+  let arPitchDesde = 0;
+  let arAvisoCalib = 0;
+  let arPitchAnunciado = false;
 
   function onOrientacion(e) {
     if (e.alpha == null && e.beta == null) return;
@@ -1857,6 +1871,19 @@
     while (da < -180) da += 360;
     arHeadingRel = da;
     arPitchRel = (e.beta || 0) - arBaseBeta;
+    // Si el soporte se inclina de forma sostenida, la calibración deja de ser válida.
+    const ahora = Date.now();
+    if (Math.abs(arPitchRel) > 22) {
+      if (!arPitchDesde) arPitchDesde = ahora;
+      if (!arPitchAnunciado && ahora - arPitchDesde > 1500 && ahora - arAvisoCalib > 30000) {
+        arPitchAnunciado = true;
+        arAvisoCalib = ahora;
+        avisar('El soporte se ha movido. Recalibra el AR con 🎯.', 'aviso', 6000);
+      }
+    } else if (Math.abs(arPitchRel) < 10) {
+      arPitchDesde = 0;
+      arPitchAnunciado = false;
+    }
   }
 
   function iniciarSensoresAr() {
@@ -1875,6 +1902,8 @@
   function detenerSensoresAr() {
     if (arSensorFn) { window.removeEventListener('deviceorientation', arSensorFn); arSensorFn = null; }
     arSensoresOk = false;
+    arPitchDesde = 0;
+    arPitchAnunciado = false;
   }
 
   // Fija el ancho real del carril actual en metros (referencia conocida).
@@ -1911,6 +1940,8 @@
     arBaseBeta = null;
     arHeadingRel = 0;
     arPitchRel = 0;
+    arPitchDesde = 0;
+    arPitchAnunciado = false;
     // La calibración también centra el carril: el desvío actual pasa a ser el cero.
     carrilBias = carrilSuave ? carrilSuave.offset : 0;
     if (carrilSuave && carrilSuave.ancho > 0.2) anchoRef = carrilSuave.ancho;
