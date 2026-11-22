@@ -3188,6 +3188,10 @@ body.viendo-ruta .pwa-install { display: none !important; }
   /* A sangre: el marco del coche coincide con el marco de la pantalla. */
   object-fit: cover;
   object-position: center bottom;
+  /* El habitáculo se aleja un poco para que se vea más cámara y el volante
+     no tape la imagen; el parabrisas sigue centrado en la parte superior. */
+  transform: scale(0.78);
+  transform-origin: center bottom;
   z-index: 4;
   display: none;
   pointer-events: none;

@@ -1589,9 +1589,10 @@
     for (const lado of [-1, 1]) {
       // Barandilla como trazo continuo. El relleno anterior se cruzaba en las
       // curvas y generaba los picos blancos que se veían a la derecha.
-      const rail = pts.map(p => ({
+      const      rail = pts.map(p => ({
         x: p.x + lado * 4.55 * p.escala,
-        y: p.y - 0.52 * p.escala
+        // Barandilla sobre el mismo plano de la calzada: sin subir ni bajar.
+        y: p.y
       }));
       ctx3d.strokeStyle = 'rgba(150,174,194,.62)';
       // Grosor en píxeles, no multiplicado por la escala: antes la barandilla
@@ -2153,7 +2154,10 @@
   function baseCristalAr(h) {
     const foto = document.getElementById('rutaCabinaFoto');
     if (!foto || !foto.naturalWidth || !foto.clientWidth) return h * 0.42;
-    const escalaCss = Math.max(foto.clientWidth / foto.naturalWidth, foto.clientHeight / foto.naturalHeight);
+    // La foto se escala al 0.78 en CSS (transform) para alejar el habitáculo;
+    // el cálculo del cristal debe seguir ese mismo factor o las líneas caen
+    // fuera del parabrisas.
+    const escalaCss = Math.max(foto.clientWidth / foto.naturalWidth, foto.clientHeight / foto.naturalHeight) * 0.78;
     const offsetY = foto.clientHeight - foto.naturalHeight * escalaCss;
     const yCss = offsetY + arCristalImgY * escalaCss;
     const factor = h / (canvasAr?.clientHeight || h);
