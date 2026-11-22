@@ -64,6 +64,7 @@
     setHidden('#garageApp', true);
     try {
       const status = await api('/api/garage/status');
+      if (!status.user) throw new Error('Sin sesión');
       state.user = status.user;
       setHidden('#garageApp', false);
       await loadVehicles();

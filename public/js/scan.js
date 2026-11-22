@@ -1,6 +1,14 @@
 (() => {
   const $ = selector => document.querySelector(selector);
   const MAX_BYTES = 12 * 1024 * 1024;
+  // Una foto de móvil puede pesar más de 12 MB antes de reducirla; no se
+  // rechaza por el tamaño original, solo por el resultado ya preparado.
+  const MAX_RAW_IMAGE_BYTES = 50 * 1024 * 1024;
+  const MAX_IMAGE_EDGE = 2000;
+  const IMAGE_BY_EXT = {
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp',
+    heic: 'image/heic', heif: 'image/heif', avif: 'image/avif', bmp: 'image/bmp', gif: 'image/gif'
+  };
   const drop = $('#scanDrop');
   const fileInput = $('#scanFile');
   const cameraInput = $('#scanCamera');
@@ -59,6 +67,78 @@
       reader.onerror = () => reject(new Error('No se pudo leer el archivo.'));
       reader.readAsDataURL(file);
     });
+  }
+
+  function detectFileType(file) {
+    const name = String(file?.name || '');
+    const ext = (name.split('.').pop() || '').toLowerCase();
+    let type = String(file?.type || '').toLowerCase();
+    if (!type || type === 'application/octet-stream') type = IMAGE_BY_EXT[ext] || type;
+    if (type === 'image/jpg') type = 'image/jpeg';
+    return {
+      type,
+      ext,
+      isPdf: type === 'application/pdf' || ext === 'pdf',
+      isImage: type.startsWith('image/') || Boolean(IMAGE_BY_EXT[ext])
+    };
+  }
+
+  async function decodeImage(file) {
+    if (typeof createImageBitmap === 'function') {
+      try {
+        const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+        return { source: bitmap, width: bitmap.width, height: bitmap.height, close: () => bitmap.close?.() };
+      } catch (_) { /* Safari/Android antiguos: se intenta con Image */ }
+    }
+    const url = URL.createObjectURL(file);
+    try {
+      const image = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(Object.assign(new Error('Esta foto no se puede leer en este navegador. Hazla de nuevo en JPG o súbela como PDF.'), { code: 'decode' }));
+        img.src = url;
+      });
+      return { source: image, width: image.naturalWidth, height: image.naturalHeight, close: () => {} };
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  function canvasToJpeg(canvas) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => {
+        if (blob) resolve(blob);
+        else reject(new Error('No se pudo preparar la foto. Prueba con otra imagen.'));
+      }, 'image/jpeg', 0.85);
+    });
+  }
+
+  // HEIC, fotos de 48 MP y archivos sin MIME se convierten aquí a un JPEG
+  // ligero. Así el OCR recibe siempre una imagen válida y manejable.
+  async function prepareImage(file) {
+    const decoded = await decodeImage(file);
+    try {
+      if (!decoded.width || !decoded.height) throw new Error('La foto está vacía o no tiene una imagen legible.');
+      const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(decoded.width, decoded.height));
+      const width = Math.max(1, Math.round(decoded.width * scale));
+      const height = Math.max(1, Math.round(decoded.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('No se pudo preparar la foto en este navegador.');
+      // Fondo blanco: evita que un PNG con transparencia se convierta en negro.
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, width, height);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(decoded.source, 0, 0, width, height);
+      const blob = await canvasToJpeg(canvas);
+      const base = String(file.name || 'ficha-tecnica').replace(/\.[^.]+$/, '') || 'ficha-tecnica';
+      return { blob, name: `${base}.jpg` };
+    } finally {
+      decoded.close();
+    }
   }
 
   function valueOf(item) {
@@ -183,25 +263,61 @@
 
   async function handleFile(file) {
     if (!file || busy) return;
-    if (!/^(image\/jpeg|image\/png|image\/webp|application\/pdf)$/i.test(file.type || '')) {
-      setStatus('Formato no admitido. Usa JPG, PNG, WebP o PDF.', 'error');
+    const info = detectFileType(file);
+
+    // PDF: se manda tal cual, con su límite real.
+    if (info.isPdf) {
+      if (file.size > MAX_BYTES) {
+        setStatus('El PDF supera el límite de 12 MB.', 'error');
+        return;
+      }
+      try {
+        const dataUrl = await readAsDataUrl(file);
+        await analyze({
+          dataBase64: dataUrl,
+          mimeType: 'application/pdf',
+          fileName: file.name || 'ficha-tecnica.pdf'
+        });
+      } catch (error) {
+        setStatus(error.message || 'No se pudo leer el PDF.', 'error');
+      }
       return;
     }
-    if (file.size > MAX_BYTES) {
-      setStatus('El archivo supera el límite de 12 MB.', 'error');
+
+    if (!info.isImage) {
+      setStatus('Formato no admitido. Usa una foto JPG, PNG, WebP, HEIC o un PDF.', 'error');
       return;
     }
+    if (file.size > MAX_RAW_IMAGE_BYTES) {
+      setStatus('La foto es demasiado grande (máximo 50 MB). Prueba con otra o hazla de nuevo.', 'error');
+      return;
+    }
+
+    // La imagen se reduce antes de enviarla. Así una foto de 48 MP o un HEIC
+    // que el navegador sepa abrir no rebota por el límite de 12 MB.
+    setBusy(true);
+    setStatus('Preparando la foto…');
     try {
-      const dataUrl = await readAsDataUrl(file);
+      const prepared = await prepareImage(file);
+      if (prepared.blob.size > MAX_BYTES) {
+        throw new Error('La foto sigue superando 12 MB después de reducirla. Prueba con otra imagen.');
+      }
+      const dataUrl = await readAsDataUrl(prepared.blob);
+      setBusy(false);
       await analyze({
         dataBase64: dataUrl,
-        mimeType: file.type,
-        fileName: file.name
-      });
+        mimeType: 'image/jpeg',
+        fileName: prepared.name
+      }, 'Leyendo la ficha técnica…');
     } catch (error) {
-      setStatus(error.message || 'No se pudo leer el archivo.', 'error');
+      setBusy(false);
+      setStatus(error.message || 'No se pudo preparar la foto. Prueba con otra imagen.', 'error');
     }
   }
+
+  // El selector abierto desde la cámara puede entregar HEIC o un tipo vacío;
+  // el filtro de archivos debe dejar pasar cualquier imagen y el PDF.
+  if (fileInput) fileInput.accept = 'image/*,application/pdf';
 
   drop.addEventListener('click', event => {
     if (busy || event.target.closest('button')) return;

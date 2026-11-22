@@ -475,10 +475,21 @@
       if (Number.isFinite(heading) && heading !== null) rumbo = heading;
       else if (distancia(ultimaPos.lat, ultimaPos.lon, lat, lon) > 4) rumbo = rumboEntre(ultimaPos, { lat, lon });
     }
-    if (Number.isFinite(speed) && speed !== null) velocidad = speed * 3.6;
+    // Suavizado: el GPS de móvil salta varios km/h entre fixes. Se acerca al
+    // valor nuevo sin copiarlo de golpe, pero reacciona rápido si el cambio
+    // es grande (frenada o incorporación a autovía).
+    let velocidadObjetivo = null;
+    if (Number.isFinite(speed) && speed !== null) velocidadObjetivo = Math.max(0, speed * 3.6);
     else if (ultimaPos && ultimaVez) {
       const dt = (ahora - ultimaVez) / 1000;
-      if (dt > .8) velocidad = distancia(ultimaPos.lat, ultimaPos.lon, lat, lon) / dt * 3.6;
+      if (dt > .8) velocidadObjetivo = Math.max(0, distancia(ultimaPos.lat, ultimaPos.lon, lat, lon) / dt * 3.6);
+    }
+    if (velocidadObjetivo !== null) {
+      const saltoVel = Math.abs(velocidadObjetivo - velocidad);
+      const factorVel = saltoVel > 25 ? 0.65 : 0.3;
+      velocidad += (velocidadObjetivo - velocidad) * factorVel;
+      if (velocidadObjetivo < 1 && velocidad < 1.5) velocidad = 0;
+      if (velocidad > 260) velocidad = 260;
     }
     ultimaPos = { lat, lon };
     ultimaVez = ahora;
@@ -2112,6 +2123,7 @@
   let modeloCoco = null;
   let deteccionesAr = [];
   let ultimoAnalisisAr = 0;
+  let ultimoAvisoProximidad = 0;
   let moduloCabina3d = null;
   let cabina3dLista = false;
   let cabinaFotoLista = false;
@@ -2374,19 +2386,18 @@
     let datos;
     try { datos = ctxVision.getImageData(0, 0, VW, VH).data; } catch (_e) { return; }
 
-    let rojos = 0, rMinX = VW, rMaxX = 0, rMinY = VH, rMaxY = 0;
-
+    // Máscara de rojos de la mitad superior. Se agrupan por componentes
+    // conexas para que dos señales o un piloto no se fundan en una caja
+    // gigante que luego no coincide con ninguna señal real.
+    const mascaraRoja = new Uint8Array(VW * VH);
+    let rojos = 0;
     for (let y = 0; y < VH; y++) {
       for (let x = 0; x < VW; x++) {
         const i = (y * VW + x) * 4;
         const r = datos[i], g = datos[i + 1], b = datos[i + 2];
-        // Señal roja (círculo de límite/prohibición) en la mitad superior.
-        if (y < VH * 0.5 && r > 135 && r - g > 55 && r - b > 55) {
+        if (y < VH * 0.55 && r > 135 && r - g > 55 && r - b > 55) {
+          mascaraRoja[y * VW + x] = 1;
           rojos++;
-          if (x < rMinX) rMinX = x;
-          if (x > rMaxX) rMaxX = x;
-          if (y < rMinY) rMinY = y;
-          if (y > rMaxY) rMaxY = y;
         }
       }
     }
@@ -2505,13 +2516,44 @@
     if (!detectado && carrilSuave && ahora - carrilSuave.ts > 900) carrilSuave = null;
     carrilInfo = carrilSuave ? { ok: true, conf: carrilSuave.conf, offset: carrilSuave.offset } : null;
 
-    // Señal: caja roja aproximadamente cuadrada. Se exige estabilidad temporal
-    // (~0,7 s en la misma zona) para no marcar objetos rojos pasajeros.
-    const anchoR = rMaxX - rMinX, altoR = rMaxY - rMinY;
+    // Señal: componente roja compacta, aproximadamente cuadrada. Se exige
+    // estabilidad temporal (~0,7 s en la misma zona) para no marcar objetos
+    // rojos pasajeros (pilotos, ropa, un coche rojo).
     let detectada = null;
-    if (rojos > 90 && anchoR > 10 && altoR > 10) {
-      const ratio = anchoR / altoR;
-      if (ratio > 0.6 && ratio < 1.7) detectada = { x: rMinX, y: rMinY, w: anchoR, h: altoR };
+    if (rojos > 40) {
+      const visto = new Uint8Array(VW * VH);
+      for (let y = 0; y < VH; y++) {
+        for (let x = 0; x < VW; x++) {
+          const idx = y * VW + x;
+          if (!mascaraRoja[idx] || visto[idx]) continue;
+          const pila = [idx];
+          visto[idx] = 1;
+          let area = 0, minX = x, maxX = x, minY = y, maxY = y;
+          while (pila.length) {
+            const p = pila.pop();
+            const py = Math.floor(p / VW), px = p - py * VW;
+            area++;
+            if (px < minX) minX = px;
+            if (px > maxX) maxX = px;
+            if (py < minY) minY = py;
+            if (py > maxY) maxY = py;
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+              const nx = px + dx, ny = py + dy;
+              if (nx < 0 || nx >= VW || ny < 0 || ny >= VH) continue;
+              const nIdx = ny * VW + nx;
+              if (mascaraRoja[nIdx] && !visto[nIdx]) { visto[nIdx] = 1; pila.push(nIdx); }
+            }
+          }
+          const ancho = maxX - minX + 1, alto = maxY - minY + 1;
+          const relleno = area / (ancho * alto);
+          const ratio = ancho / alto;
+          if (area < 45 || ancho < 8 || alto < 8 || ratio < 0.55 || ratio > 1.8 || relleno < 0.18) continue;
+          const score = area * relleno;
+          if (!detectada || score > detectada.score) {
+            detectada = { x: minX, y: minY, w: ancho, h: alto, score };
+          }
+        }
+      }
     }
     if (detectada) {
       const cxD = detectada.x + detectada.w / 2;
@@ -2548,7 +2590,6 @@
   function dibujarVision(w, h) {
     // Carriles suavizados, reproyectados desde la vista normalizada.
     if (carrilSuave && carrilInfo && carrilInfo.ok && carrilSuave.conf > 0.22) {
-      const sx = w / VW, sy = h / VH;
       const ROI_Y0 = Math.round(VH * 0.55);
       const ROI_Y1 = Math.round(VH * 0.98);
       const Wtop = VW * 0.34;
@@ -2560,7 +2601,7 @@
         const y = ROI_Y1 - d * (ROI_Y1 - ROI_Y0);
         const ancho = Wbot + (Wtop - Wbot) * d;
         const u = a * d * d + b * d + c;
-        return [((VW / 2) + (u * ancho) / 2) * sx, y * sy];
+        return mapearVisionPunto((VW / 2) + (u * ancho) / 2, y, w, h);
       };
       ctxAr.save();
       ctxAr.lineWidth = Math.max(2.5, w * 0.008);
@@ -2672,9 +2713,8 @@
 
     // Señal detectada
     if (senalInfo) {
-      const sx = w / VW, sy = h / VH;
-      const x = senalInfo.x * sx, y = senalInfo.y * sy;
-      const an = senalInfo.w * sx, al = senalInfo.h * sy;
+      const caja = mapearVisionRect(senalInfo.x, senalInfo.y, senalInfo.w, senalInfo.h, w, h);
+      const x = caja.x, y = caja.y, an = caja.w, al = caja.h;
       ctxAr.strokeStyle = 'rgba(255,77,109,.9)';
       ctxAr.lineWidth = 2;
       ctxAr.strokeRect(x, y, an, al);
@@ -2742,6 +2782,7 @@
       bufferL = [];
       bufferR = [];
       carrilSuave = null;
+      deteccionesAr = [];
       ultimoAnalisisVision = 0;
       analizarVision(arInicio);
       document.getElementById('rutaCalibrar')?.classList.remove('calibrado');
@@ -2764,6 +2805,7 @@
 
   function detenerAr() {
     vistaArActiva = false;
+    deteccionesAr = [];
     if (animacionAr) cancelAnimationFrame(animacionAr);
     animacionAr = null;
     if (streamAr) {
@@ -2829,7 +2871,7 @@
     if (modeloCoco && videoAr.readyState >= 2 && ahora - ultimoAnalisisAr > 500) {
       ultimoAnalisisAr = ahora;
       modeloCoco.detect(videoAr).then(preds => {
-        deteccionesAr = preds.filter(p => p.score > 0.5);
+        deteccionesAr = estabilizarDetecciones(preds, ahora);
       }).catch(() => {});
     }
 
@@ -2841,34 +2883,39 @@
     ctxAr.clip();
     for (const d of deteccionesAr) {
       const [x, y, bw, bh] = d.bbox;
-      const scaleX = w / (videoAr.videoWidth || w);
-      const scaleY = h / (videoAr.videoHeight || h);
-      const rx = x * scaleX, ry = y * scaleY, rw = bw * scaleX, rh = bh * scaleY;
+      // Misma transformación que el vídeo en object-fit: cover.
+      const caja = mapearVideoRect(x, y, bw, bh, w, h);
+      const rx = caja.x, ry = caja.y, rw = caja.w, rh = caja.h;
       // Caja de detección
       ctxAr.strokeStyle = d.class === 'car' || d.class === 'truck' || d.class === 'bus' ? '#ff4d6d' : '#38e1ff';
       ctxAr.lineWidth = 2;
       ctxAr.strokeRect(rx, ry, rw, rh);
       // Etiqueta
       ctxAr.fillStyle = d.class === 'car' || d.class === 'truck' || d.class === 'bus' ? 'rgba(255, 77, 109, .8)' : 'rgba(56, 225, 255, .8)';
-      ctxAr.fillRect(rx, ry - 18, rw, 18);
+      ctxAr.fillRect(rx, ry - 18, Math.max(42, rw), 18);
       ctxAr.fillStyle = '#fff';
       ctxAr.font = 'bold 11px sans-serif';
       ctxAr.textAlign = 'left';
       ctxAr.fillText(`${d.class} ${Math.round(d.score * 100)}%`, rx + 4, ry - 5);
-      // Distancia estimada (aproximada, basada en tamaño del bounding box)
+      // Distancia orientativa por anchura aparente, no por altura bruta.
       if (d.class === 'car' || d.class === 'truck' || d.class === 'bus' || d.class === 'motorcycle') {
-        const distEst = Math.round(2000 / (rh || 1));
-        if (distEst < 200) {
+        const distEst = distanciaCocheEstimada(d.class, rw, w);
+        if (distEst) {
           ctxAr.fillStyle = distEst < 30 ? '#ff4d6d' : distEst < 60 ? '#fbbf24' : 'rgba(255, 255, 255, .7)';
           ctxAr.font = 'bold 10px sans-serif';
           ctxAr.fillText(`~${distEst}m`, rx + 4, ry + rh + 14);
           if (distEst < 30) {
-            // Aviso de proximidad
+            // Aviso de proximidad, con turno de voz para no solaparse con carril.
             ctxAr.fillStyle = 'rgba(255, 77, 109, .9)';
             ctxAr.font = 'bold 12px sans-serif';
             ctxAr.textAlign = 'center';
-            ctxAr.fillText('⚠ PROXIMIDAD', rx + rw / 2, ry - 25);
+            ctxAr.fillText('⚠ PROXIMIDAD', rx + rw / 2, Math.max(12, ry - 25));
             ctxAr.textAlign = 'left';
+            if (ahora - ultimoAvisoProximidad > 5000) {
+              ultimoAvisoProximidad = ahora;
+              ultimaVozCarril = ahora;
+              decir('Coche muy cerca delante.');
+            }
           }
         }
       }
@@ -2986,6 +3033,97 @@
       canvasAr.width = an;
       canvasAr.height = al;
     }
+  }
+
+  // El vídeo usa object-fit: cover. Sin esta conversión, una cámara 4:3 en
+  // una pantalla vertical se estira y las cajas/líneas caen desplazadas.
+  // Se trabaja en coordenadas del vídeo fuente y se recorta igual que el
+  // navegador antes de pasar al canvas interno (que ya lleva el DPR).
+  function mapearVideoPunto(x, y, cw, ch) {
+    const vw = videoAr?.videoWidth || VW;
+    const vh = videoAr?.videoHeight || VH;
+    const escala = Math.max(cw / vw, ch / vh);
+    const offsetX = (cw - vw * escala) / 2;
+    const offsetY = (ch - vh * escala) / 2;
+    return [offsetX + x * escala, offsetY + y * escala];
+  }
+
+  function mapearVideoRect(x, y, rw, rh, cw, ch) {
+    const [px, py] = mapearVideoPunto(x, y, cw, ch);
+    const [px2, py2] = mapearVideoPunto(x + rw, y + rh, cw, ch);
+    return { x: px, y: py, w: Math.max(0, px2 - px), h: Math.max(0, py2 - py) };
+  }
+
+  // Las detecciones de visión se calculan sobre VW×VH, que es el vídeo entero
+  // estirado a 4:3; se devuelven a píxeles del vídeo fuente antes de mapear.
+  function mapearVisionPunto(px, py, cw, ch) {
+    const vw = videoAr?.videoWidth || VW;
+    const vh = videoAr?.videoHeight || VH;
+    return mapearVideoPunto((px / VW) * vw, (py / VH) * vh, cw, ch);
+  }
+
+  function mapearVisionRect(x, y, rw, rh, cw, ch) {
+    const [px, py] = mapearVisionPunto(x, y, cw, ch);
+    const [px2, py2] = mapearVisionPunto(x + rw, y + rh, cw, ch);
+    return { x: px, y: py, w: Math.max(0, px2 - px), h: Math.max(0, py2 - py) };
+  }
+
+  // Distancia orientativa por anchura aparente. La focal se estima con un FOV
+  // horizontal de ~60° y cada clase tiene una anchura media real distinta.
+  // No sustituye a un radar: sirve para ordenar avisos, no para frenar solo.
+  function distanciaCocheEstimada(clase, anchoPx, anchoCanvas) {
+    if (!anchoPx || !anchoCanvas) return null;
+    const anchoReal = clase === 'truck' || clase === 'bus' ? 2.45
+      : clase === 'motorcycle' || clase === 'bicycle' ? 0.8
+      : clase === 'person' ? 0.6 : 1.8;
+    const focal = anchoCanvas * 0.9;
+    return Math.max(2, Math.min(200, Math.round((focal * anchoReal) / anchoPx)));
+  }
+
+  function iouCajas(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b)) return 0;
+    const x1 = Math.max(a[0], b[0]);
+    const y1 = Math.max(a[1], b[1]);
+    const x2 = Math.min(a[0] + a[2], b[0] + b[2]);
+    const y2 = Math.min(a[1] + a[3], b[1] + b[3]);
+    const inter = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+    const areaA = Math.max(0, a[2]) * Math.max(0, a[3]);
+    const areaB = Math.max(0, b[2]) * Math.max(0, b[3]);
+    return inter / Math.max(1, areaA + areaB - inter);
+  }
+
+  // COCO-SSD analiza cada 500 ms y las cajas saltan. Se empareja cada coche
+  // con su caja anterior, se suaviza la posición y se conserva ~0,7 s si un
+  // fotograma no lo detecta. Así el recuadro sigue al vehículo sin temblar.
+  function estabilizarDetecciones(preds, ahora) {
+    const nuevas = (preds || []).filter(p => p && p.score > 0.5 && Array.isArray(p.bbox));
+    const previas = deteccionesAr || [];
+    const usadas = new Set();
+    const salida = [];
+    for (const pred of nuevas) {
+      let mejor = -1;
+      let mejorIoU = 0;
+      previas.forEach((prev, i) => {
+        if (usadas.has(i) || prev.class !== pred.class) return;
+        const solape = iouCajas(prev.bbox, pred.bbox);
+        if (solape > mejorIoU) { mejorIoU = solape; mejor = i; }
+      });
+      const caja = pred.bbox.slice();
+      let score = Number(pred.score) || 0;
+      if (mejor >= 0 && mejorIoU > 0.12) {
+        const prev = previas[mejor];
+        usadas.add(mejor);
+        for (let k = 0; k < 4; k++) caja[k] = prev.bbox[k] + (caja[k] - prev.bbox[k]) * 0.55;
+        score = (prev.score || score) * 0.25 + score * 0.75;
+      }
+      salida.push({ ...pred, bbox: caja, score, lastSeen: ahora });
+    }
+    // Mantener un instante las cajas que no aparecen en este fotograma.
+    previas.forEach((prev, i) => {
+      if (usadas.has(i) || salida.some(p => p.class === prev.class && iouCajas(p.bbox, prev.bbox) > 0.12)) return;
+      if (ahora - (prev.lastSeen || 0) < 700) salida.push({ ...prev, score: (prev.score || 0) * 0.9, lastSeen: prev.lastSeen || ahora });
+    });
+    return salida.slice(0, 12);
   }
 
   // Calzada pintada en perspectiva con colores según la maniobra y flechas

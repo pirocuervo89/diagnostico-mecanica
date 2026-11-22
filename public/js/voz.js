@@ -597,24 +597,75 @@
   // móvil en el soporte, apagarse significa perder micrófono y voz aunque el
   // usuario haya pedido manos libres. Se libera al colgar y al ocultar la app.
   let wakeLock = null;
+  let videoRespaldo = null;
+  let avisoWake = false;
   let ultimaVibracion = 0;
+  // Vistas en las que el móvil está haciendo algo activo y no debe apagarse.
+  // El chat solo se mantiene encendido durante una llamada de voz; si no,
+  // gastaría batería con la pantalla fija. Al salir se libera el wake lock.
+  const VISTAS_PANTALLA = new Set(['ruta', 'testigos', 'garaje', 'obd', 'diagnostico']);
+  let vistaPantalla = 'home';
 
   function vibrar(patron) {
     // Solo Android/Chrome vibra; en iPhone y escritorio no hace nada.
     try { navigator.vibrate?.(patron); } catch (_e) { /* sin vibración */ }
   }
 
+  // Respaldo para navegadores sin Wake Lock (o cuando el permiso falla): un
+  // vídeo mudo de 1 píxel en bucle mantiene despierta la pantalla en muchos
+  // Android. No es tan fiable como la API, pero evita quedarse a oscuras en
+  // mitad de una prueba; se libera al salir igual que el wake lock real.
+  function iniciarVideoRespaldo() {
+    if (videoRespaldo) return;
+    try {
+      const v = document.createElement('video');
+      v.muted = true;
+      v.loop = true;
+      v.playsInline = true;
+      v.setAttribute('aria-hidden', 'true');
+      v.style.cssText = 'position:fixed;left:-10px;bottom:-10px;width:1px;height:1px;opacity:0;pointer-events:none;';
+      v.src = '/video/wake-loop.webm';
+      document.body.appendChild(v);
+      videoRespaldo = v;
+      v.play().catch(() => {});
+    } catch (_e) { videoRespaldo = null; }
+    if (!avisoWake) {
+      avisoWake = true;
+      hint('Este navegador no permite mantener la pantalla encendida; uso un vídeo de respaldo. Si aun así se apaga, activa «Mantener pantalla encendida» en Ajustes de desarrollo.', 9000);
+    }
+  }
+
+  function pararVideoRespaldo() {
+    if (!videoRespaldo) return;
+    try { videoRespaldo.pause(); } catch (_e) {}
+    try { videoRespaldo.remove(); } catch (_e) {}
+    videoRespaldo = null;
+  }
+
   async function pedirPantallaEncendida() {
-    if (wakeLock || !navigator.wakeLock?.request) return;
+    if (wakeLock) return;
+    if (!navigator.wakeLock?.request) { iniciarVideoRespaldo(); return; }
     try {
       wakeLock = await navigator.wakeLock.request('screen');
       wakeLock.addEventListener?.('release', () => { wakeLock = null; });
-    } catch (_e) { wakeLock = null; }
+      pararVideoRespaldo();
+    } catch (_e) {
+      wakeLock = null;
+      iniciarVideoRespaldo();
+    }
   }
 
   function soltarPantallaEncendida() {
     try { wakeLock?.release?.(); } catch (_e) { /* ya liberado */ }
     wakeLock = null;
+    pararVideoRespaldo();
+  }
+
+  function mantenerPantalla(vista = vistaPantalla) {
+    vistaPantalla = String(vista || '').replace(/^view-/, '');
+    const activa = llamadaActiva || (vistaPantalla !== 'chat' && VISTAS_PANTALLA.has(vistaPantalla));
+    if (activa) pedirPantallaEncendida();
+    else if (!llamadaActiva) soltarPantallaEncendida();
   }
 
   // Señal de estado: se ve de reojo sin dejar de mirar al coche. El marco
@@ -789,7 +840,10 @@
     let hablo = false;
     const vigilante = setInterval(() => {
       if (!llamadaActiva) { clearInterval(vigilante); return; }
-      if (synth && (synth.speaking || synth.pending)) { hablo = true; return; }
+      // Incluye el audio TTS del servidor: en Android sin voces instaladas
+      // `synth` puede estar callado mientras el MP3 sigue sonando. Si solo se
+      // mira synth, el micrófono se reabre y Maya se oye a sí misma.
+      if (hablandoSenal || audioActual || (synth && (synth.speaking || synth.pending))) { hablo = true; return; }
       if (hablo) { clearInterval(vigilante); setTimeout(reanudar, 120); return; }
       // Sin voz instalada nunca llega a hablar: no se deja al usuario colgado.
       if (Date.now() - inicioEspera > 6000) { clearInterval(vigilante); reanudar(); }
@@ -944,7 +998,7 @@
     try { wakeRec?.abort?.(); } catch (_e) {}
     wakeRec = null;
     escuchando = false;
-    soltarPantallaEncendida();
+    mantenerPantalla(vistaPantalla);
     pintarSenal();
     setBotonLlamada(false);
     stopSpeaking();
@@ -994,7 +1048,9 @@
     // cierra. Si no, seguía grabando en segundo plano (batería, privacidad y
     // riesgo de mandar una conversación del taller como consulta).
     document.addEventListener('viewchange', event => {
-      if (event.detail?.name !== 'chat' && llamadaActiva) pararLlamada();
+      const vista = event.detail?.name || 'home';
+      if (vista !== 'chat' && llamadaActiva) pararLlamada();
+      mantenerPantalla(vista);
     });
     scanBubbles();
     const box = document.getElementById('chatBox');
@@ -1020,11 +1076,14 @@
     // Al volver a la app (o al desbloquear el móvil) se recupera la pantalla
     // encendida; el navegador la suelta sola cuando la pestaña se oculta.
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && llamadaActiva) {
-        pedirPantallaEncendida();
-        pintarSenal();
+      if (document.visibilityState === 'hidden') {
+        soltarPantallaEncendida();
+        return;
       }
+      mantenerPantalla(vistaPantalla);
+      if (llamadaActiva) pintarSenal();
     });
+    mantenerPantalla(document.querySelector('.view.active')?.id || 'home');
   }
 
   // Desde cualquier punto de la app: saludar y ponerse a escuchar. La portada

@@ -72,15 +72,19 @@ function writeLimit(req, res, next) {
   next();
 }
 
-router.use(requireUser);
-
+// Estado público: la vista de garaje lo consulta siempre para decidir entre
+// «entra» y «tu garaje». Sin sesión devuelve 200 con user:null; así no se pinta
+// un 401 rojo en la consola del móvil ni se confunde con un fallo de la app.
 router.get('/status', route((req, res) => {
+  if (!req.user) return res.json({ ok: false, user: null });
   res.json({
     ok: true,
     user: { id: Number(req.user.id), displayName: req.user.display_name },
     ...garageStats(Number(req.user.id))
   });
 }));
+
+router.use(requireUser);
 
 router.get('/vehicles', route((req, res) => {
   const userId = Number(req.user.id);

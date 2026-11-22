@@ -1,4 +1,4 @@
-const CACHE = 'dm-app-v164';
+const CACHE = 'dm-app-v173';
 const CORE = [
   '/',
   '/index.html',
@@ -33,7 +33,8 @@ const CORE = [
   '/img/app/icon-192.png',
   '/img/app/icon-512.png',
   '/img/app/icon-maskable-512.png',
-  '/img/app/apple-touch-icon.png'
+  '/img/app/apple-touch-icon.png',
+  '/video/wake-loop.webm'
 ];
 
 self.addEventListener('install', event => {
@@ -71,11 +72,15 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.startsWith('/css/') || url.pathname.startsWith('/js/') || url.pathname.startsWith('/img/') || url.pathname.startsWith('/fonts/') || url.pathname === '/favicon.svg') {
+    // La versión «?v=...» solo existe para romper cachés antiguas. La caché se
+    // guarda por ruta, no por query: así una página con un ?v viejo recibe el
+    // archivo nuevo de esta versión del service worker (p. ej. scan.js).
+    const clave = new Request(`${url.origin}${url.pathname}`);
     event.respondWith(
       caches.open(CACHE).then(cache =>
-        cache.match(request).then(cached => {
+        cache.match(clave).then(cached => {
           const network = fetch(request).then(response => {
-            if (response.ok) cache.put(request, response.clone());
+            if (response.ok) cache.put(clave, response.clone());
             return response;
           }).catch(() => cached || caches.match('/offline.html'));
           // Stale-while-revalidate: sirve lo cacheado al instante y actualiza en segundo plano.

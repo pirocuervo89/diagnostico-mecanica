@@ -93,9 +93,13 @@ after(() => {
   rmSync(TMP, { recursive: true, force: true });
 });
 
-test('garaje: exige sesión para cualquier operación', async () => {
+test('garaje: exige sesión para las operaciones privadas y el estado es público', async () => {
+  // /status se consulta siempre para decidir entre «entra» y «tu garaje»;
+  // devolver 401 llenaba la consola del móvil sin aportar nada. No expone datos.
   const status = await call('/api/garage/status');
-  assert.equal(status.status, 401);
+  assert.equal(status.status, 200);
+  assert.equal(status.body.ok, false);
+  assert.equal(status.body.user, null);
   const vehicles = await call('/api/garage/vehicles');
   assert.equal(vehicles.status, 401);
   const detail = await call('/api/garage/vehicles/1');

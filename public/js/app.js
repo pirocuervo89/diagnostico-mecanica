@@ -14,14 +14,15 @@ const $$ = s => [...document.querySelectorAll(s)];
 // cosa, se ignora. Nunca se ejecuta código que venga del servidor.
 // ---------------------------------------------------------------
 const VISTAS_MAYA = new Set([
-  'home', 'inicio', 'chat', 'garaje', 'obd', 'dtc', 'testigos', 'productos',
-  'tutoriales', 'tuning', 'vehiculos', 'diagnostico', 'ruta', 'tienda',
-  'planes', 'foro', 'informe', 'sala'
+  'home', 'inicio', 'chat', 'garaje', 'obd', 'dtc', 'testigos', 'luz',
+  'productos', 'tutoriales', 'tuning', 'vehiculos', 'diagnostico', 'ruta',
+  'tienda', 'planes', 'foro', 'informe', 'sala', 'compra', 'contacto',
+  'fiabilidad', 'neumaticos'
 ]);
 
 function ejecutarMaya(acciones) {
   if (!Array.isArray(acciones) || !acciones.length) return;
-  for (const accion of acciones.slice(0, 2)) {
+  for (const accion of acciones.slice(0, 3)) {
     const hacer = String((accion && accion.hacer) || '').toLowerCase();
     if (hacer === 'abrir') {
       const donde = String(accion.donde || '').toLowerCase();
@@ -56,8 +57,6 @@ function ejecutarMaya(acciones) {
       }, 500);
     } else if (hacer === 'productos') {
       showView('productos');
-    } else if (hacer === 'tutoriales') {
-      showView('tutoriales');
     } else if (hacer === 'ruta') {
       // «Llévame a...»: la IA abre el GPS y busca el destino sola.
       const que = String(accion.que || '').trim();
@@ -79,6 +78,8 @@ function ejecutarMaya(acciones) {
       window.Ruta?.voz?.(activa);
     } else if (hacer === 'pantalla_completa') {
       window.Ruta?.pantallaCompleta?.();
+    } else if (hacer === 'probar') {
+      window.Maya?.probar?.();
     } else if (hacer === 'ficha') {
       // «Abre la ficha del producto X»: lleva a la tienda y abre la ficha.
       const que = String(accion.que || '').trim();
@@ -133,7 +134,30 @@ function ejecutarMaya(acciones) {
     }
   }
 }
-window.Maya = { ejecutar: ejecutarMaya, ver: showView };
+// Autoprueba de vistas: Maya puede recorrer la app y decir qué falta. No pulsa
+// pagos ni borra nada; solo comprueba que cada vista existe y tiene contenido.
+function probarMaya() {
+  const vistas = [...VISTAS_MAYA].filter(v => v !== 'inicio');
+  const faltan = [];
+  const vacias = [];
+  for (const vista of vistas) {
+    const el = document.getElementById(`view-${vista}`);
+    if (!el) { faltan.push(vista); continue; }
+    if (!(el.innerText || '').trim()) vacias.push(vista);
+  }
+  const resumen = faltan.length || vacias.length
+    ? `Autoprueba: ${vistas.length - faltan.length - vacias.length}/${vistas.length} vistas correctas.${faltan.length ? ` Faltan: ${faltan.join(', ')}.` : ''}${vacias.length ? ` Vacías: ${vacias.join(', ')}.` : ''}`
+    : `Autoprueba: las ${vistas.length} vistas cargan y tienen contenido.`;
+  showView('chat');
+  if (typeof addBubble === 'function') addBubble(resumen, 'assistant');
+  return { ok: !faltan.length && !vacias.length, total: vistas.length, faltan, vacias };
+}
+
+window.Maya = { ejecutar: ejecutarMaya, ver: showView, probar: probarMaya };
+// El escáner de la ficha y otros módulos usan estas funciones desde window.
+// Sin estas dos líneas, «Continuar» no aplicaba el vehículo ni cambiaba de vista.
+window.showView = showView;
+window.setVehicleState = setVehicleState;
 
 // Utilidad segura para llamadas API
 async function api(url, options = {}) {
