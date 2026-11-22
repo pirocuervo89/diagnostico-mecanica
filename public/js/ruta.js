@@ -2157,7 +2157,7 @@
     // La foto se escala al 0.78 en CSS (transform) para alejar el habitáculo;
     // el cálculo del cristal debe seguir ese mismo factor o las líneas caen
     // fuera del parabrisas.
-    const escalaCss = Math.max(foto.clientWidth / foto.naturalWidth, foto.clientHeight / foto.naturalHeight) * 0.78;
+    const escalaCss = Math.max(foto.clientWidth / foto.naturalWidth, foto.clientHeight / foto.naturalHeight);
     const offsetY = foto.clientHeight - foto.naturalHeight * escalaCss;
     const yCss = offsetY + arCristalImgY * escalaCss;
     const factor = h / (canvasAr?.clientHeight || h);
