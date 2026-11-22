@@ -2161,7 +2161,7 @@
     const offsetY = foto.clientHeight - foto.naturalHeight * escalaCss;
     const yCss = offsetY + arCristalImgY * escalaCss;
     const factor = h / (canvasAr?.clientHeight || h);
-    return Math.max(h * 0.30, Math.min(h * 0.48, yCss * factor));
+    return Math.max(h * 0.24, Math.min(h * 0.48, yCss * factor));
   }
 
   function prepararCabinaFoto() {
