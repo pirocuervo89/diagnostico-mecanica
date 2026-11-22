@@ -5131,6 +5131,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Despertar el servidor (Render puede estar dormido): evita el primer 502
   // en cualquier vista, no solo en el garaje o el escáner de ficha.
   try { fetch('/api/health', { cache: 'no-store' }).catch(() => {}); } catch (_) {}
+  // Detección de capacidad del dispositivo: los efectos pesados se desactivan
+  // en móviles modestos para mantener fluidez (60 fps) y ahorrar batería.
+  try {
+    const low = (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
+      (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.documentElement.dataset.perf = low ? 'low' : 'high';
+  } catch (_) { document.documentElement.dataset.perf = 'high'; }
+  // Carga diferida de imágenes: mejora el arranque y ahorra datos en móvil.
+  try {
+    document.querySelectorAll('img:not([loading])').forEach(img => {
+      img.loading = 'lazy';
+      img.decoding = 'async';
+    });
+  } catch (_) {}
   initPayments();
   initCatalog();
   initVehicleSelector();
