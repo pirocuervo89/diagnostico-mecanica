@@ -1024,6 +1024,15 @@
   let signos3d = [];
   let imagenCoche3d = null;
   let spriteCoche3d = null;
+  let imagenFondo3d = null;
+  let fondo3dListo = false;
+
+  function cargarFondo3d() {
+    if (imagenFondo3d) return;
+    imagenFondo3d = new Image();
+    imagenFondo3d.onload = () => { fondo3dListo = true; };
+    imagenFondo3d.src = '/img/gps-3d-gemini.webp?v=20261126c1';
+  }
   // Cargar la imagen del coche GT4
   imagenCoche3d = new Image();
   imagenCoche3d.src = '/img/hero/golf-hero.webp';
@@ -1720,62 +1729,237 @@
 
   function dibujar3d() {
     if (!ctx3d || !canvas3d) return;
+    const cw = canvas3d.clientWidth || window.innerWidth;
+    const ch = canvas3d.clientHeight || window.innerHeight;
+    if (canvas3d.width !== cw || canvas3d.height !== ch) {
+      canvas3d.width = cw;
+      canvas3d.height = ch;
+    }
     const w = canvas3d.width, h = canvas3d.height;
-    const cx = w / 2, horizonte = h * 0.34;
     const ahora = performance.now();
     const t = ahora / 1000;
     ultimoFrame3d = ahora;
-
-    const ruta = rutaActiva();
-    const geo = ruta?.geometry;
-    const firma = geo?.length ? `${geo.length}:${geo[0][0]}:${geo[0][1]}:${geo[geo.length - 1][0]}:${geo[geo.length - 1][1]}` : '';
-    if (firma !== firmaRuta3d) {
-      carretera3d = generarCarretera3d();
-      signos3d = generarSignos3d();
-      firmaRuta3d = firma;
-      idx3dSuave = null;
-    }
-    const segs = carretera3d;
-    let idxActual = 0;
-    if (ultimaPos && segs.length) {
-      let mejor = Infinity;
-      for (let i = 0; i < segs.length; i++) {
-        const d = distancia(ultimaPos.lat, ultimaPos.lon, segs[i].lat, segs[i].lon);
-        if (d < mejor) { mejor = d; idxActual = i; }
-      }
-    }
-
-    // Suaviza el avance de la cámara 3D para evitar saltos entre segmentos.
-    if (idx3dSuave == null) idx3dSuave = idxActual;
-    else idx3dSuave += (idxActual - idx3dSuave) * 0.14;
-    const idxVista = Math.max(0, Math.round(idx3dSuave));
-
-    // Un único trazado por fotograma: carretera, flechas, señales y entorno
-    // comparten exactamente la misma perspectiva.
-    trazado3d = construirTrazado3d(idxVista, w, h, horizonte, cx);
-
-    dibujarCielo3d(w, h, horizonte, t, idxVista);
-    const suelo = ctx3d.createLinearGradient(0, horizonte, 0, h);
-    suelo.addColorStop(0, '#13251f');
-    suelo.addColorStop(0.45, '#0c1b16');
-    suelo.addColorStop(1, '#060e0b');
-    ctx3d.fillStyle = suelo;
-    ctx3d.fillRect(0, horizonte, w, h - horizonte);
-
-    dibujarHorizonte3d(w, h, horizonte);
-    dibujarEntorno3d(w, h, horizonte, t, idxVista);
-    dibujarCalzada3d(w, h, horizonte);
-    dibujarGuardarrailes3d();
-    dibujarSenalLimite3d(w, h, horizonte, idxVista, segs, cx);
-
-    // El GT4 3D (WebGL) se dibuja en su propio lienzo encima. Si aún no está
-    // cargado, se usa el recorte de la foto como respaldo.
-    if (moduloCoche3d) {
-      const a = puntoTrazado3d(0.16), b = puntoTrazado3d(0.34);
-      moduloCoche3d.actualizar({ giro: a && b ? b.x - a.x : 0, velocidad });
-    }
-    if (!coche3dListo) dibujarCoche3d(w, h, t);
+    cargarFondo3d();
+    dibujarFondo3d(w, h, t);
     dibujarHud3d(w, h);
+  }
+
+  // La vista 3D usa la imagen de referencia del Gemini como escena real de
+  // conducción. El HUD se redibuja encima para que los datos sean reales.
+  function dibujarFondo3d(w, h, t) {
+    if (fondo3dListo && imagenFondo3d) {
+      const iw = imagenFondo3d.naturalWidth, ih = imagenFondo3d.naturalHeight;
+      // Cobertura completa sin deformar: se recorta lo justo por los lados.
+      const escala = Math.max(w / iw, h / ih);
+      const dw = iw * escala, dh = ih * escala;
+      // Micro-paralaje: da sensación de avance sin mover el punto de fuga.
+      const avance = Math.min(1, Math.abs(velocidad) / 120);
+      const dx = (w - dw) / 2 + Math.sin(t * 0.55) * (1.2 + avance * 1.8);
+      const dy = (h - dh) / 2 + Math.cos(t * 0.43) * (0.8 + avance * 1.2);
+      ctx3d.drawImage(imagenFondo3d, dx, dy, dw, dh);
+    } else {
+      const g = ctx3d.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, '#0b1620');
+      g.addColorStop(1, '#1b2a1f');
+      ctx3d.fillStyle = g;
+      ctx3d.fillRect(0, 0, w, h);
+    }
+  }
+
+  function panel3d(x, y, ancho, alto, radio = 14, alpha = 0.86) {
+    ctx3d.fillStyle = `rgba(10, 13, 18, ${alpha})`;
+    ctx3d.beginPath();
+    if (ctx3d.roundRect) ctx3d.roundRect(x, y, ancho, alto, radio);
+    else ctx3d.rect(x, y, ancho, alto);
+    ctx3d.fill();
+    ctx3d.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx3d.lineWidth = 1;
+    ctx3d.stroke();
+  }
+
+  function dibujarIconoGiro3d(x, y, tipo, color = '#f8fafc') {
+    ctx3d.save();
+    ctx3d.translate(x, y);
+    ctx3d.strokeStyle = color;
+    ctx3d.fillStyle = color;
+    ctx3d.lineWidth = 5;
+    ctx3d.lineCap = 'round';
+    ctx3d.lineJoin = 'round';
+    const m = (tipo || '').toLowerCase();
+    if (m.includes('left') || m.includes('izq')) {
+      ctx3d.beginPath();
+      ctx3d.moveTo(8, 18); ctx3d.lineTo(8, 8); ctx3d.lineTo(-8, 8);
+      ctx3d.moveTo(-2, 0); ctx3d.lineTo(-10, 8); ctx3d.lineTo(-2, 16);
+      ctx3d.stroke();
+    } else if (m.includes('round') || m.includes('rotonda')) {
+      ctx3d.beginPath();
+      ctx3d.arc(0, 2, 11, Math.PI * 0.15, Math.PI * 1.55);
+      ctx3d.stroke();
+      ctx3d.beginPath();
+      ctx3d.moveTo(9, -6); ctx3d.lineTo(12, 2); ctx3d.lineTo(4, 2);
+      ctx3d.stroke();
+    } else {
+      ctx3d.beginPath();
+      ctx3d.moveTo(-8, 8); ctx3d.lineTo(8, 8);
+      ctx3d.moveTo(1, 1); ctx3d.lineTo(9, 8); ctx3d.lineTo(1, 15);
+      ctx3d.stroke();
+    }
+    ctx3d.restore();
+  }
+
+  function dibujarHud3d(w, h) {
+    const ruta = rutaActiva();
+    const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
+    const rest = ruta ? restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0) : 0;
+    const min = ruta?.duration ? Math.round(ruta.duration / 60) : 0;
+    const llegada = ruta?.duration ? new Date(Date.now() + ruta.duration * 1000).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+    const kmh = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
+    const calle = s?.name || ruta?.name || 'Calle o carretera';
+
+    // --- Tarjeta de próximo giro (arriba izquierda) -----------------------
+    const anchoGiro = Math.min(w * 0.42, 330);
+    panel3d(10, 10, anchoGiro, 92, 16, 0.90);
+    ctx3d.fillStyle = 'rgba(255,255,255,.06)';
+    ctx3d.beginPath();
+    if (ctx3d.roundRect) ctx3d.roundRect(10, 10, anchoGiro, 92, 16);
+    else ctx3d.rect(10, 10, anchoGiro, 92);
+    ctx3d.fill();
+    dibujarIconoGiro3d(38, 42, s?.maneuver || s?.modifier || '', '#f8fafc');
+    ctx3d.textAlign = 'left';
+    ctx3d.textBaseline = 'middle';
+    ctx3d.fillStyle = '#f8fafc';
+    ctx3d.font = `800 ${Math.max(13, Math.min(19, w * 0.022))}px system-ui, sans-serif`;
+    const titulo = s?.instruction || (s ? `Gira a la ${s.modifier === 'left' ? 'izquierda' : 'derecha'}` : 'Continúa recto');
+    ctx3d.fillText(titulo.slice(0, 28), 64, 38);
+    ctx3d.fillStyle = '#cbd5e1';
+    ctx3d.font = `600 ${Math.max(11, Math.min(14, w * 0.016))}px system-ui, sans-serif`;
+    const dist = s?.distance ? (s.distance > 1000 ? `${(s.distance/1000).toFixed(1)} km` : `${Math.round(s.distance)} m`) : (rest > 1000 ? `${(rest/1000).toFixed(1)} km` : `${Math.round(rest)} m`);
+    ctx3d.fillText(`en ${dist}`, 64, 60);
+    ctx3d.fillStyle = 'rgba(148,163,184,.9)';
+    ctx3d.font = `500 ${Math.max(9, Math.min(12, w * 0.013))}px system-ui, sans-serif`;
+    ctx3d.fillText(calle.slice(0, 30), 64, 80);
+
+    // --- Brújula (arriba derecha) -----------------------------------------
+    const cxBru = Math.min(w - 48, w * 0.92);
+    const cyBru = 42;
+    ctx3d.fillStyle = 'rgba(10,13,18,.86)';
+    ctx3d.beginPath(); ctx3d.arc(cxBru, cyBru, 34, 0, Math.PI * 2); ctx3d.fill();
+    ctx3d.strokeStyle = 'rgba(255,255,255,.14)';
+    ctx3d.lineWidth = 1.5; ctx3d.stroke();
+    ctx3d.save();
+    ctx3d.translate(cxBru, cyBru);
+    ctx3d.rotate(((heading || 0) * Math.PI) / 180);
+    ctx3d.fillStyle = '#ef4444';
+    ctx3d.beginPath(); ctx3d.moveTo(0, -22); ctx3d.lineTo(6, 0); ctx3d.lineTo(-6, 0); ctx3d.closePath(); ctx3d.fill();
+    ctx3d.fillStyle = '#e2e8f0';
+    ctx3d.beginPath(); ctx3d.moveTo(0, 22); ctx3d.lineTo(6, 0); ctx3d.lineTo(-6, 0); ctx3d.closePath(); ctx3d.fill();
+    ctx3d.restore();
+    ctx3d.fillStyle = '#f8fafc';
+    ctx3d.font = `800 ${Math.max(10, w * 0.013)}px system-ui, sans-serif`;
+    ctx3d.textAlign = 'center';
+    ctx3d.textBaseline = 'middle';
+    ctx3d.fillText('N', cxBru, cyBru - 24);
+
+    // --- Botonera lateral derecha -----------------------------------------
+    const bx = w - 34;
+    let by = Math.max(92, cyBru + 58);
+    const botones = ['+', '−', '🎙', '⚙', '⛽', '⏱'];
+    for (const b of botones) {
+      ctx3d.fillStyle = 'rgba(10,13,18,.82)';
+      ctx3d.beginPath(); ctx3d.arc(bx, by, 17, 0, Math.PI * 2); ctx3d.fill();
+      ctx3d.strokeStyle = 'rgba(255,255,255,.12)'; ctx3d.lineWidth = 1; ctx3d.stroke();
+      ctx3d.fillStyle = '#e2e8f0';
+      ctx3d.font = `700 ${b.length > 1 ? 13 : 20}px system-ui, sans-serif`;
+      ctx3d.textAlign = 'center';
+      ctx3d.textBaseline = 'middle';
+      ctx3d.fillText(b, bx, by + (b === '+' ? -1 : 1));
+      by += 42;
+    }
+
+    // --- Velocidad y límite (abajo izquierda) -----------------------------
+    const vx = 14, vy = h - 96, vw = Math.min(w * 0.26, 170), vh = 80;
+    panel3d(vx, vy, vw, vh, 16, 0.86);
+    ctx3d.textAlign = 'left';
+    ctx3d.textBaseline = 'alphabetic';
+    ctx3d.fillStyle = '#f8fafc';
+    ctx3d.font = `900 ${Math.round(vh * 0.55)}px system-ui, sans-serif`;
+    ctx3d.fillText(String(Math.round(velocidad)), vx + 14, vy + vh * 0.66);
+    ctx3d.fillStyle = '#94a3b8';
+    ctx3d.font = `700 ${Math.round(vh * 0.15)}px system-ui, sans-serif`;
+    ctx3d.fillText('km/h', vx + 14, vy + vh * 0.88);
+    if (kmh) {
+      const lx = vx + vw - 34, ly = vy + vh / 2;
+      ctx3d.fillStyle = '#f8fafc';
+      ctx3d.beginPath(); ctx3d.arc(lx, ly, 25, 0, Math.PI * 2); ctx3d.fill();
+      ctx3d.strokeStyle = '#dc2626'; ctx3d.lineWidth = 5;
+      ctx3d.beginPath(); ctx3d.arc(lx, ly, 20, 0, Math.PI * 2); ctx3d.stroke();
+      ctx3d.fillStyle = '#0f172a';
+      ctx3d.font = `900 18px system-ui, sans-serif`;
+      ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
+      ctx3d.fillText(String(kmh), lx, ly + 1);
+    }
+
+    // --- Tarjeta ETA (abajo centro) ---------------------------------------
+    const ew = Math.min(w * 0.48, 430), eh = 74, ex = (w - ew) / 2, ey = h - 90;
+    panel3d(ex, ey, ew, eh, 18, 0.88);
+    ctx3d.textAlign = 'left';
+    ctx3d.textBaseline = 'middle';
+    ctx3d.fillStyle = '#94a3b8';
+    ctx3d.font = `700 ${Math.max(9, w * 0.012)}px system-ui, sans-serif`;
+    ctx3d.fillText('ETA', ex + 16, ey + 15);
+    ctx3d.fillStyle = '#f8fafc';
+    ctx3d.font = `800 ${Math.max(13, w * 0.017)}px system-ui, sans-serif`;
+    ctx3d.fillText(llegada, ex + 50, ey + 15);
+    ctx3d.fillStyle = '#22d3ee';
+    ctx3d.font = `800 ${Math.max(13, w * 0.017)}px system-ui, sans-serif`;
+    ctx3d.fillText(rest > 1000 ? `${(rest/1000).toFixed(1)} km` : `${Math.round(rest)} m`, ex + ew * 0.50, ey + 15);
+    ctx3d.fillStyle = '#e2e8f0';
+    ctx3d.fillText(min ? `${min} min` : '-- min', ex + ew * 0.72, ey + 15);
+    ctx3d.fillStyle = '#f8fafc';
+    ctx3d.font = `700 ${Math.max(11, w * 0.014)}px system-ui, sans-serif`;
+    ctx3d.fillText(calle.slice(0, 34), ex + ew / 2, ey + 47);
+    ctx3d.strokeStyle = 'rgba(34,211,238,.55)';
+    ctx3d.lineWidth = 2;
+    ctx3d.beginPath(); ctx3d.moveTo(ex + 14, ey + eh - 1); ctx3d.lineTo(ex + ew - 14, ey + eh - 1); ctx3d.stroke();
+
+    // --- Botones inferiores derecha ---------------------------------------
+    const byBtn = h - 52;
+    for (const [i, icono] of ['◎', '➜'].entries()) {
+      const x = w - 30 - i * 50;
+      ctx3d.fillStyle = i === 0 ? 'rgba(37,99,235,.92)' : 'rgba(10,13,18,.86)';
+      ctx3d.beginPath(); ctx3d.arc(x, byBtn, 20, 0, Math.PI * 2); ctx3d.fill();
+      ctx3d.strokeStyle = 'rgba(255,255,255,.16)'; ctx3d.lineWidth = 1; ctx3d.stroke();
+      ctx3d.fillStyle = '#f8fafc';
+      ctx3d.font = `700 18px system-ui, sans-serif`;
+      ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
+      ctx3d.fillText(icono, x, byBtn + 1);
+    }
+
+    // --- Avisos de estado --------------------------------------------------
+    const sinGps = !ultimaPos || (ultimaVez && Date.now() - ultimaVez > 20000);
+    if (sinGps && ruta) {
+      const txt = 'SIN SEÑAL GPS · posición no disponible';
+      ctx3d.fillStyle = 'rgba(30,8,14,.9)';
+      const an = Math.min(w - 30, 300), x = (w - an) / 2, y = h * 0.16;
+      ctx3d.beginPath();
+      if (ctx3d.roundRect) ctx3d.roundRect(x, y, an, 30, 10); else ctx3d.rect(x, y, an, 30);
+      ctx3d.fill();
+      ctx3d.fillStyle = '#ff8aa1';
+      ctx3d.font = `700 12px system-ui, sans-serif`;
+      ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
+      ctx3d.fillText(txt, w / 2, y + 15);
+    } else if (recalculando) {
+      const txt = '↻ RECALCULANDO RUTA…';
+      ctx3d.fillStyle = 'rgba(20,16,4,.9)';
+      const an = Math.min(w - 30, 260), x = (w - an) / 2, y = h * 0.46;
+      ctx3d.beginPath();
+      if (ctx3d.roundRect) ctx3d.roundRect(x, y, an, 28, 10); else ctx3d.rect(x, y, an, 28);
+      ctx3d.fill();
+      ctx3d.fillStyle = '#fbbf24';
+      ctx3d.font = `700 11px system-ui, sans-serif`;
+      ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
+      ctx3d.fillText(txt, w / 2, y + 14);
+    }
   }
 
   function dibujarCarreteraRecta(w, h, cx, horizonte) {
@@ -1943,143 +2127,26 @@
     ctx3d.shadowBlur = 0;
   }
 
-  function dibujarHud3d(w, h) {
-    // Velocidad
-    ctx3d.fillStyle = 'rgba(10, 16, 30, .85)';
-    ctx3d.fillRect(10, 10, 90, 50);
-    ctx3d.strokeStyle = 'rgba(34, 211, 238, .4)';
-    ctx3d.lineWidth = 1;
-    ctx3d.strokeRect(10, 10, 90, 50);
-    ctx3d.fillStyle = '#22d3ee';
-    ctx3d.font = 'bold 28px sans-serif';
-    ctx3d.textAlign = 'left';
-    ctx3d.fillText(`${Math.round(velocidad)}`, 20, 42);
-    ctx3d.fillStyle = '#f0f8ff';
-    ctx3d.font = '10px sans-serif';
-    ctx3d.fillText('KM/H', 60, 42);
-    // Etiqueta de modo.
-    ctx3d.fillStyle = 'rgba(10,16,30,.72)';
-    ctx3d.fillRect(w / 2 - 62, 10, 124, 24);
-    ctx3d.strokeStyle = 'rgba(56,225,255,.35)';
-    ctx3d.lineWidth = 1;
-    ctx3d.strokeRect(w / 2 - 62, 10, 124, 24);
-    ctx3d.fillStyle = '#7ee7ff';
-    ctx3d.font = 'bold 11px sans-serif';
-    ctx3d.textAlign = 'center';
-    ctx3d.textBaseline = 'middle';
-    ctx3d.fillText('3D EXTERIOR · GT4', w / 2, 22);
-    // Límite de la vía (dato de mapa).
-    const kmh = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
-    if (kmh) {
-      const r = 17, lx = w - 30, ly = 88;
-      ctx3d.fillStyle = '#f8fafc';
-      ctx3d.beginPath(); ctx3d.arc(lx, ly, r, 0, Math.PI * 2); ctx3d.fill();
-      ctx3d.strokeStyle = '#dc2626';
-      ctx3d.lineWidth = 4;
-      ctx3d.beginPath(); ctx3d.arc(lx, ly, r * 0.82, 0, Math.PI * 2); ctx3d.stroke();
-      ctx3d.fillStyle = '#0f172a';
-      ctx3d.font = 'bold 17px sans-serif';
-      ctx3d.textAlign = 'center';
-      ctx3d.textBaseline = 'middle';
-      ctx3d.fillText(String(kmh), lx, ly + 1);
-      ctx3d.fillStyle = 'rgba(200,230,240,.7)';
-      ctx3d.font = '9px sans-serif';
-      ctx3d.fillText('mapa', lx, ly + r + 8);
-    }
-    // Distancia restante
-    const ruta = rutaActiva();
-    if (ruta) {
-      const rest = restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0);
-      ctx3d.fillStyle = 'rgba(10, 16, 30, .85)';
-      ctx3d.fillRect(w - 130, 10, 120, 50);
-      ctx3d.strokeStyle = 'rgba(34, 211, 238, .4)';
-      ctx3d.strokeRect(w - 130, 10, 120, 50);
-      ctx3d.fillStyle = '#f0f8ff';
-      ctx3d.font = 'bold 16px sans-serif';
-      ctx3d.textAlign = 'right';
-      ctx3d.fillText(rest > 1000 ? `${(rest / 1000).toFixed(1)} km` : `${Math.round(rest)} m`, w - 20, 32);
-      ctx3d.font = '11px sans-serif';
-      ctx3d.fillStyle = 'rgba(255, 255, 255, .7)';
-      const min = ruta.duration ? Math.round(ruta.duration / 60) : 0;
-      const llegada = ruta.duration ? new Date(Date.now() + ruta.duration * 1000).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '';
-      ctx3d.fillText(min ? `${min} min · ${llegada}` : '', w - 20, 50);
-    }
-    // Avisos de estado: no fingir posición ni ruta si faltan datos.
-    const sinGps = !ultimaPos || (ultimaVez && Date.now() - ultimaVez > 20000);
-    if (sinGps && ruta) {
-      const txt = 'SIN SEÑAL GPS · posición no disponible';
-      ctx3d.fillStyle = 'rgba(30,8,14,.9)';
-      const an = Math.min(w - 30, 280), x = (w - an) / 2, y = h * 0.16;
-      ctx3d.fillRect(x, y, an, 30);
-      ctx3d.strokeStyle = 'rgba(255,77,109,.8)';
-      ctx3d.lineWidth = 1.5;
-      ctx3d.strokeRect(x, y, an, 30);
-      ctx3d.fillStyle = '#ff8aa1';
-      ctx3d.font = 'bold 12px sans-serif';
-      ctx3d.textAlign = 'center';
-      ctx3d.textBaseline = 'middle';
-      ctx3d.fillText(txt, w / 2, y + 15);
-    } else if (recalculando) {
-      const txt = '↻ RECALCULANDO RUTA…';
-      ctx3d.fillStyle = 'rgba(20,16,4,.9)';
-      const an = Math.min(w - 30, 250), x = (w - an) / 2, y = h * 0.46;
-      ctx3d.fillRect(x, y, an, 28);
-      ctx3d.strokeStyle = 'rgba(251,191,36,.65)';
-      ctx3d.lineWidth = 1;
-      ctx3d.strokeRect(x, y, an, 28);
-      ctx3d.fillStyle = '#fbbf24';
-      ctx3d.font = 'bold 11px sans-serif';
-      ctx3d.textAlign = 'center';
-      ctx3d.textBaseline = 'middle';
-      ctx3d.fillText(txt, w / 2, y + 14);
-    }
-    // Próxima maniobra (banner inferior)
-    const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
-    if (s && s.name) {
-      // Arriba, bajo los paneles de velocidad: abajo tapaba el coche.
-      const by = 66;
-      ctx3d.fillStyle = 'rgba(10, 16, 30, .9)';
-      ctx3d.fillRect(10, by, w - 20, 44);
-      ctx3d.strokeStyle = 'rgba(34, 211, 238, .5)';
-      ctx3d.lineWidth = 2;
-      ctx3d.strokeRect(10, by, w - 20, 44);
-      ctx3d.fillStyle = '#22d3ee';
-      ctx3d.font = 'bold 20px sans-serif';
-      ctx3d.textAlign = 'left';
-      ctx3d.fillText(flechaPara(s), 24, by + 22);
-      ctx3d.fillStyle = '#f0f8ff';
-      ctx3d.font = 'bold 13px sans-serif';
-      ctx3d.fillText(s.name || 'Continúa', 54, by + 18);
-      ctx3d.fillStyle = 'rgba(255, 255, 255, .6)';
-      ctx3d.font = '10px sans-serif';
-      ctx3d.fillText(`En ${s.distance ? (s.distance > 1000 ? (s.distance/1000).toFixed(1)+' km' : s.distance+' m') : ''}`, 54, by + 34);
-    }
-  }
-
   function iniciar3d() {
     if (!init3d()) return;
     idx3dSuave = null;
     // Un solo modo de vista a la vez: si AR está abierto, se cierra.
     if (typeof vistaArActiva !== 'undefined' && vistaArActiva && typeof detenerAr === 'function') detenerAr();
     vista3dActiva = true;
-    carretera3d = generarCarretera3d();
-    signos3d = generarSignos3d();
+    cargarFondo3d();
     document.getElementById('ruta3dToggle')?.classList.add('activo');
     document.querySelector('.ruta-shell')?.classList.add('ruta-3d-activo');
-    canvas3d.hidden = false;
-    // Coche 3D real (mismo Golf R 75 de la portada). Se carga solo al entrar
-    // en 3D y se reutiliza al volver a entrar.
+    // Ocultar el coche WebGL: la escena de referencia ya trae el habitáculo.
     const canvasCoche = document.getElementById('rutaCoche3d');
-    if (!moduloCoche3d) {
-      import('/js/coche3d.js?v=20261126x').then(m => {
-        moduloCoche3d = m;
-        m.montar(canvasCoche, () => { coche3dListo = true; });
-        if (m.estaListo()) coche3dListo = true;
-      }).catch(() => { /* se queda el recorte de la foto */ });
-    } else {
-      moduloCoche3d.activar(true);
-      coche3dListo = moduloCoche3d.estaListo();
+    if (canvasCoche) canvasCoche.style.display = 'none';
+    moduloCoche3d?.activar?.(false);
+    // La imagen de referencia es 16:9: en horizontal se ve completa.
+    const shell3d = document.querySelector('.ruta-shell');
+    if (shell3d?.requestFullscreen && !document.fullscreenElement) {
+      try { shell3d.requestFullscreen({ navigationUI: 'hide' }).catch(() => {}); } catch (_e) { /* fallback CSS */ }
     }
+    try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch (_e) { /* se queda como esté */ }
+    canvas3d.hidden = false;
     canvas3d.width = canvas3d.clientWidth || window.innerWidth;
     canvas3d.height = canvas3d.clientHeight || window.innerHeight;
     // ~30 fps: suficiente para la escena y ahorra CPU/batería en móviles.
@@ -2102,7 +2169,10 @@
     document.getElementById('ruta3dToggle')?.classList.remove('activo');
     document.querySelector('.ruta-shell')?.classList.remove('ruta-3d-activo');
     if (canvas3d) canvas3d.hidden = true;
-    moduloCoche3d?.activar(false);
+    const canvasCoche = document.getElementById('rutaCoche3d');
+    if (canvasCoche) canvasCoche.style.display = '';
+    moduloCoche3d?.activar?.(false);
+    try { screen.orientation?.unlock?.(); } catch (_e) { /* nada */ }
   }
 
   function toggle3d() {
