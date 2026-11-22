@@ -1997,6 +1997,7 @@
     const rect = canvas3d.getBoundingClientRect();
     const x = (e.clientX - rect.left) * (canvas3d.width / rect.width);
     const y = (e.clientY - rect.top) * (canvas3d.height / rect.height);
+    window.__dm3dHit = { x, y, n: botones3d.length, b: botones3d.slice(0, 4) };
     for (const b of botones3d) {
       if (Math.hypot(x - b.x, y - b.y) <= b.r + 8) {
         b.accion?.();
