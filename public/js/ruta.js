@@ -1451,6 +1451,7 @@
     arPitchRel = 0;
     // La calibración también centra el carril: el desvío actual pasa a ser el cero.
     carrilBias = carrilSuave ? carrilSuave.offset : 0;
+    if (carrilSuave && carrilSuave.ancho > 0.2) anchoRef = carrilSuave.ancho;
     carrilBuenas = 0;
     carrilMalas = 0;
     document.getElementById('rutaCalibrar')?.classList.add('calibrado');
@@ -1465,10 +1466,12 @@
   let carrilSuave = null;
   let bufferL = [], bufferR = [];
   let carrilBias = 0;
+  let anchoRef = 0;
   let carrilBuenas = 0;
   let carrilMalas = 0;
   let senalInfo = null;
   let ultimoAnalisisVision = 0;
+  let arInicio = 0;
   let ultimoAvisoCarril = 0;
   let ultimoIntentoTexto = 0;
   let senalTexto = '';
@@ -1507,6 +1510,20 @@
       }
     }
     return { A: M[0][3], B: M[1][3], C: M[2][3] };
+  }
+
+  // Respaldo lineal u = B·d + C: permite enganchar antes con pocos puntos
+  // (rectas y arranque de cámara) hasta que haya datos para la parábola.
+  function regresionLineal(pts) {
+    const n = pts.length;
+    if (n < 4) return null;
+    let Sd = 0, Sd2 = 0, Su = 0, Sud = 0;
+    for (const [u, d] of pts) { Sd += d; Sd2 += d * d; Su += u; Sud += u * d; }
+    const den = n * Sd2 - Sd * Sd;
+    if (!den) return null;
+    const B = (n * Sud - Sd * Su) / den;
+    const C = (Su - B * Sd) / n;
+    return { A: 0, B, C };
   }
 
   function analizarVision(ahora) {
@@ -1567,11 +1584,15 @@
       // carril esté desplazado, en curva y con huecos de línea discontinua.
       const refOffset = carrilSuave ? carrilSuave.offset : 0;
       const refAncho = carrilSuave ? Math.abs(carrilSuave.cR - carrilSuave.cL) : 0.72;
+      // Rango de ancho relativo al carril conocido: permite detectar
+      // estrechamientos sin aceptar parejas de ruido.
+      const minPar = carrilSuave ? Math.max(0.35, refAncho * 0.55) : 0.5;
+      const maxPar = carrilSuave ? Math.min(3, refAncho * 1.7) : 1.9;
       let par = null;
       for (let i = 0; i < us.length; i++) {
         for (let j = i + 1; j < us.length; j++) {
           const anchoPar = us[j] - us[i];
-          if (anchoPar < 0.6 || anchoPar > 1.9) continue;
+          if (anchoPar < minPar || anchoPar > maxPar) continue;
           const centroPar = (us[i] + us[j]) / 2;
           const score = Math.abs(centroPar - refOffset) + Math.abs(anchoPar - refAncho) * 0.6;
           if (!par || score < par.score) par = { a: us[i], b: us[j], score };
@@ -1608,20 +1629,22 @@
       for (const [u, d] of pts) err += Math.abs(u - (f.A * d * d + f.B * d + f.C));
       return Math.min(1, Math.max(0, 1 - (err / pts.length) / 0.28));
     };
-    const fL = regresionCuadratica(puntosL);
-    const fR = regresionCuadratica(puntosR);
+    const fL = regresionCuadratica(puntosL) || regresionLineal(puntosL);
+    const fR = regresionCuadratica(puntosR) || regresionLineal(puntosR);
     let detectado = false;
-    if (fL && fR && span(puntosL) > 0.3 && span(puntosR) > 0.3 && Math.abs(fL.A) < 3 && Math.abs(fR.A) < 3) {
+    if (fL && fR && span(puntosL) > 0.22 && span(puntosR) > 0.22 && Math.abs(fL.A) < 3 && Math.abs(fR.A) < 3) {
       const w0 = fR.C - fL.C;
       const w7 = (fR.A * 0.49 + fR.B * 0.7 + fR.C) - (fL.A * 0.49 + fL.B * 0.7 + fL.C);
       const qL = calidad(puntosL, fL), qR = calidad(puntosR, fR);
-      if (w0 > 0.55 && w0 < 2.8 && Math.abs(w7 - w0) < 1.2 && qL > 0.35 && qR > 0.35) {
+      if (w0 > 0.4 && w0 < 2.8 && Math.abs(w7 - w0) < 1.2 && qL > 0.35 && qR > 0.35) {
         const conf = Math.min(1, (puntosL.length + puntosR.length) / 24) * ((qL + qR) / 2);
         const offset = (fL.C + fR.C) / 2;
+        const curvatura = (fL.A + fR.A) / 2;
         detectado = true;
         const A = 0.22;
         if (!carrilSuave) {
-          carrilSuave = { aL: fL.A, bL: fL.B, cL: fL.C, aR: fR.A, bR: fR.B, cR: fR.C, offset, conf, ts: ahora };
+          carrilSuave = { aL: fL.A, bL: fL.B, cL: fL.C, aR: fR.A, bR: fR.B, cR: fR.C, offset, conf, ancho: w0, curv: curvatura, ts: ahora };
+          if (!anchoRef) anchoRef = w0;
         } else {
           carrilSuave.aL += (fL.A - carrilSuave.aL) * A;
           carrilSuave.bL += (fL.B - carrilSuave.bL) * A;
@@ -1631,6 +1654,8 @@
           carrilSuave.cR += (fR.C - carrilSuave.cR) * A;
           carrilSuave.offset += (offset - carrilSuave.offset) * A;
           carrilSuave.conf += (conf - carrilSuave.conf) * A;
+          carrilSuave.ancho += (w0 - carrilSuave.ancho) * A;
+          carrilSuave.curv += (curvatura - carrilSuave.curv) * A;
           carrilSuave.ts = ahora;
         }
       }
@@ -1759,6 +1784,13 @@
       montarCabina3d();
       iniciarSensoresAr();
       initVision();
+      // Arranque rápido: reiniciar búfer y analizar el primer fotograma ya.
+      arInicio = Date.now();
+      bufferL = [];
+      bufferR = [];
+      carrilSuave = null;
+      ultimoAnalisisVision = 0;
+      analizarVision(arInicio);
       document.getElementById('rutaCalibrar')?.classList.remove('calibrado');
       // Cargar modelo COCO-SSD (lazy, solo si está disponible)
       if (typeof cocoSsd !== 'undefined' && !modeloCoco) {
@@ -1873,7 +1905,9 @@
 
     // Visión local: carriles y señales (cada ~300 ms).
     const ahoraVision = Date.now();
-    if (ahoraVision - ultimoAnalisisVision > 300) {
+    // Durante los primeros segundos se analiza más a menudo para enganchar antes.
+    const intervaloVision = (ahoraVision - arInicio) < 3000 ? 200 : 300;
+    if (ahoraVision - ultimoAnalisisVision > intervaloVision) {
       ultimoAnalisisVision = ahoraVision;
       analizarVision(ahoraVision);
     }
@@ -2200,6 +2234,40 @@
     ctxAr.fillStyle = 'rgba(200,220,240,0.65)';
     ctxAr.font = `${ph * 0.17}px sans-serif`;
     ctxAr.fillText(rr ? `${restTxt} · ${etaM} min` : 'Sin ruta', px + pw - 14, py + ph * 0.72);
+
+    // Indicador de curvatura y ancho de carril (solo con detección fiable).
+    if (carrilSuave && carrilInfo && carrilSuave.conf > 0.25) {
+      const curv = carrilSuave.curv;
+      const mag = Math.abs(curv);
+      const dirTxt = mag < 0.05 ? '⬆' : curv > 0 ? '↱' : '↰';
+      const etiqueta = mag < 0.05 ? 'Recta' : mag < 0.18 ? 'Curva suave' : mag < 0.4 ? 'Curva' : 'Curva cerrada';
+      const anchoRel = anchoRef > 0.2 ? carrilSuave.ancho / anchoRef : 1;
+      const txt1 = `${dirTxt} ${etiqueta}`;
+      const txt2 = `Ancho ${anchoRel.toFixed(2)}×`;
+      const ch = Math.max(26, ph * 0.42);
+      const cw = Math.min(pw, Math.max(w * 0.5, 220));
+      const cx = px + (pw - cw) / 2;
+      const cy = py + ph + 8;
+      rrect(cx, cy, cw, ch, ch / 2);
+      ctxAr.fillStyle = 'rgba(6,10,16,0.72)';
+      ctxAr.fill();
+      const alerta = mag > 0.4 || anchoRel < 0.85 || anchoRel > 1.25;
+      ctxAr.strokeStyle = alerta ? 'rgba(251,191,36,0.75)' : 'rgba(56,225,255,0.35)';
+      ctxAr.lineWidth = 1.2;
+      ctxAr.stroke();
+      ctxAr.textAlign = 'center';
+      ctxAr.textBaseline = 'middle';
+      ctxAr.font = `bold ${ch * 0.42}px sans-serif`;
+      ctxAr.fillStyle = alerta ? '#fbbf24' : '#7ee7ff';
+      ctxAr.fillText(txt1, cx + cw * 0.28, cy + ch / 2 + 1);
+      ctxAr.fillText(txt2, cx + cw * 0.72, cy + ch / 2 + 1);
+      ctxAr.strokeStyle = 'rgba(160,190,220,0.25)';
+      ctxAr.lineWidth = 1;
+      ctxAr.beginPath();
+      ctxAr.moveTo(cx + cw / 2, cy + ch * 0.22);
+      ctxAr.lineTo(cx + cw / 2, cy + ch * 0.78);
+      ctxAr.stroke();
+    }
   }
 
   // Conectar el botón AR
@@ -2778,7 +2846,14 @@
     cancelarDestino: () => { esperandoSi = false; pendienteDestino = null; return true; },
     demo: () => { alternarDemo(); return demoActiva; },
     calibrarAr: () => { calibrarAr(); return arSensoresOk; },
-    carril: () => carrilInfo ? { conf: Number(carrilInfo.conf.toFixed(2)), offset: Number(carrilInfo.offset.toFixed(2)), desvio: Number((carrilInfo.offset - carrilBias).toFixed(2)) } : null,
+    carril: () => carrilInfo ? {
+      conf: Number(carrilInfo.conf.toFixed(2)),
+      offset: Number(carrilInfo.offset.toFixed(2)),
+      desvio: Number((carrilInfo.offset - carrilBias).toFixed(2)),
+      ancho: Number((carrilSuave?.ancho || 0).toFixed(2)),
+      anchoRel: anchoRef && carrilSuave ? Number((carrilSuave.ancho / anchoRef).toFixed(2)) : 1,
+      curv: Number((carrilSuave?.curv || 0).toFixed(2))
+    } : null,
     // Para pruebas y para Maya: fuerza o consulta la voz sin tocar la UI.
     voz: (activa) => { if (typeof activa === 'boolean' && activa !== vozActiva) alternarVoz(); return vozActiva; },
     incidencias: () => avisos.filter(a => a.origen === 'comunidad'),
