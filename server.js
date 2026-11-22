@@ -155,8 +155,8 @@ app.use((err, req, res, _next) => {
   if (err.type === 'entity.too.large') {
     return res.status(413).json({ error: 'El cuerpo de la petición es demasiado grande' });
   }
-  console.error('[ERROR]', err);
-  res.status(500).json({ error: 'Error interno del servidor' });
+  console.error(`[ERROR][${req.requestId || '-'}]`, err?.stack || err);
+  res.status(500).json({ error: 'Error interno del servidor', request_id: req.requestId || null });
 });
 
 app.listen(PORT, HOST, () => {
