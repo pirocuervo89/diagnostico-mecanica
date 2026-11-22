@@ -1779,9 +1779,10 @@
     ctx3d.stroke();
   }
 
-  function dibujarIconoGiro3d(x, y, tipo, color = '#f8fafc') {
+  function dibujarIconoGiro3d(x, y, tipo, color = '#f8fafc', escala = 1) {
     ctx3d.save();
     ctx3d.translate(x, y);
+    ctx3d.scale(escala, escala);
     ctx3d.strokeStyle = color;
     ctx3d.fillStyle = color;
     ctx3d.lineWidth = 5;
@@ -1816,6 +1817,7 @@
 
   function dibujarHud3d(w, h) {
     botones3d = [];
+    const u = Math.max(0.50, h / 768);
     const ruta = rutaActiva();
     const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
     const rest = ruta ? restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0) : 0;
@@ -1824,53 +1826,57 @@
     const kmh = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
     const calle = s?.name || ruta?.name || 'Calle o carretera';
 
-    // --- Tarjeta de próximo giro (arriba izquierda) -----------------------
-    const anchoGiro = Math.min(w * 0.42, 330);
-    panel3d(10, 10, anchoGiro, 92, 16, 0.90);
+    // --- Tarjeta de próximo giro (arriba izquierda, escala de la referencia)
+    const cw = Math.min(w * 0.42, 330 * u);
+    const ch = 92 * u;
+    panel3d(10 * u, 10 * u, cw, ch, 16 * u, 0.90);
     ctx3d.fillStyle = 'rgba(255,255,255,.06)';
     ctx3d.beginPath();
-    if (ctx3d.roundRect) ctx3d.roundRect(10, 10, anchoGiro, 92, 16);
-    else ctx3d.rect(10, 10, anchoGiro, 92);
+    if (ctx3d.roundRect) ctx3d.roundRect(10 * u, 10 * u, cw, ch, 16 * u);
+    else ctx3d.rect(10 * u, 10 * u, cw, ch);
     ctx3d.fill();
-    dibujarIconoGiro3d(38, 42, s?.maneuver || s?.modifier || '', '#f8fafc');
+    dibujarIconoGiro3d(38 * u, 42 * u, s?.maneuver || s?.modifier || '', '#f8fafc', u);
     ctx3d.textAlign = 'left';
     ctx3d.textBaseline = 'middle';
     ctx3d.fillStyle = '#f8fafc';
-    ctx3d.font = `800 ${Math.max(13, Math.min(19, w * 0.022))}px system-ui, sans-serif`;
+    ctx3d.font = `800 ${19 * u}px system-ui, sans-serif`;
     const titulo = s?.instruction || (s ? `Gira a la ${s.modifier === 'left' ? 'izquierda' : 'derecha'}` : 'Continúa recto');
-    ctx3d.fillText(titulo.slice(0, 28), 64, 38);
+    ctx3d.fillText(titulo.slice(0, 28), 64 * u, 38 * u);
     ctx3d.fillStyle = '#cbd5e1';
-    ctx3d.font = `600 ${Math.max(11, Math.min(14, w * 0.016))}px system-ui, sans-serif`;
+    ctx3d.font = `600 ${14 * u}px system-ui, sans-serif`;
     const dist = s?.distance ? (s.distance > 1000 ? `${(s.distance/1000).toFixed(1)} km` : `${Math.round(s.distance)} m`) : (rest > 1000 ? `${(rest/1000).toFixed(1)} km` : `${Math.round(rest)} m`);
-    ctx3d.fillText(`en ${dist}`, 64, 60);
+    ctx3d.fillText(`en ${dist}`, 64 * u, 60 * u);
     ctx3d.fillStyle = 'rgba(148,163,184,.9)';
-    ctx3d.font = `500 ${Math.max(9, Math.min(12, w * 0.013))}px system-ui, sans-serif`;
-    ctx3d.fillText(calle.slice(0, 30), 64, 80);
+    ctx3d.font = `500 ${12 * u}px system-ui, sans-serif`;
+    ctx3d.fillText(calle.slice(0, 30), 64 * u, 80 * u);
 
-    // --- Brújula (arriba derecha) -----------------------------------------
-    const cxBru = Math.min(w - 48, w * 0.92);
-    const cyBru = 42;
+    // --- Brújula (arriba derecha)
+    const cxBru = w - 48 * u;
+    const cyBru = 42 * u;
+    const rBru = 34 * u;
     ctx3d.fillStyle = 'rgba(10,13,18,.86)';
-    ctx3d.beginPath(); ctx3d.arc(cxBru, cyBru, 34, 0, Math.PI * 2); ctx3d.fill();
+    ctx3d.beginPath(); ctx3d.arc(cxBru, cyBru, rBru, 0, Math.PI * 2); ctx3d.fill();
     ctx3d.strokeStyle = 'rgba(255,255,255,.14)';
-    ctx3d.lineWidth = 1.5; ctx3d.stroke();
+    ctx3d.lineWidth = 1.5 * u; ctx3d.stroke();
     ctx3d.save();
     ctx3d.translate(cxBru, cyBru);
     ctx3d.rotate(((rumbo || 0) * Math.PI) / 180);
     ctx3d.fillStyle = '#ef4444';
-    ctx3d.beginPath(); ctx3d.moveTo(0, -22); ctx3d.lineTo(6, 0); ctx3d.lineTo(-6, 0); ctx3d.closePath(); ctx3d.fill();
+    ctx3d.beginPath(); ctx3d.moveTo(0, -22 * u); ctx3d.lineTo(6 * u, 0); ctx3d.lineTo(-6 * u, 0); ctx3d.closePath(); ctx3d.fill();
     ctx3d.fillStyle = '#e2e8f0';
-    ctx3d.beginPath(); ctx3d.moveTo(0, 22); ctx3d.lineTo(6, 0); ctx3d.lineTo(-6, 0); ctx3d.closePath(); ctx3d.fill();
+    ctx3d.beginPath(); ctx3d.moveTo(0, 22 * u); ctx3d.lineTo(6 * u, 0); ctx3d.lineTo(-6 * u, 0); ctx3d.closePath(); ctx3d.fill();
     ctx3d.restore();
     ctx3d.fillStyle = '#f8fafc';
-    ctx3d.font = `800 ${Math.max(10, w * 0.013)}px system-ui, sans-serif`;
+    ctx3d.font = `800 ${13 * u}px system-ui, sans-serif`;
     ctx3d.textAlign = 'center';
     ctx3d.textBaseline = 'middle';
-    ctx3d.fillText('N', cxBru, cyBru - 24);
+    ctx3d.fillText('N', cxBru, cyBru - 24 * u);
 
-    // --- Botonera lateral derecha -----------------------------------------
-    const bx = w - 34;
-    let by = Math.max(92, cyBru + 58);
+    // --- Botonera lateral derecha
+    const bx = w - 34 * u;
+    let by = Math.max(74 * u, cyBru + 52 * u);
+    const pasoB = 42 * u;
+    const rB = 17 * u;
     const botones = ['+', '−', '🎙', '⚙', '⛽', '⏱'];
     const acciones = [
       () => { zoomFondo3d = Math.min(1.65, zoomFondo3d + 0.12); },
@@ -1883,271 +1889,106 @@
     for (let i = 0; i < botones.length; i++) {
       const b = botones[i];
       ctx3d.fillStyle = 'rgba(10,13,18,.82)';
-      ctx3d.beginPath(); ctx3d.arc(bx, by, 17, 0, Math.PI * 2); ctx3d.fill();
+      ctx3d.beginPath(); ctx3d.arc(bx, by, rB, 0, Math.PI * 2); ctx3d.fill();
       ctx3d.strokeStyle = 'rgba(255,255,255,.12)'; ctx3d.lineWidth = 1; ctx3d.stroke();
       ctx3d.fillStyle = '#e2e8f0';
-      ctx3d.font = `700 ${b.length > 1 ? 13 : 20}px system-ui, sans-serif`;
+      ctx3d.font = `700 ${(b.length > 1 ? 13 : 20) * u}px system-ui, sans-serif`;
       ctx3d.textAlign = 'center';
       ctx3d.textBaseline = 'middle';
       ctx3d.fillText(b, bx, by + (b === '+' ? -1 : 1));
-      botones3d.push({ x: bx, y: by, r: 20, accion: acciones[i] });
-      by += 42;
+      botones3d.push({ x: bx, y: by, r: Math.max(22, rB + 8), accion: acciones[i] });
+      by += pasoB;
     }
 
-    // --- Velocidad y límite (abajo izquierda) -----------------------------
-    const vx = 14, vy = h - 96, vw = Math.min(w * 0.26, 170), vh = 80;
-    panel3d(vx, vy, vw, vh, 16, 0.86);
+    // --- Velocidad y límite (abajo izquierda)
+    const vx = 14 * u, vy = h - 96 * u, vw = Math.min(w * 0.26, 170 * u), vh = 80 * u;
+    panel3d(vx, vy, vw, vh, 16 * u, 0.86);
     ctx3d.textAlign = 'left';
     ctx3d.textBaseline = 'alphabetic';
     ctx3d.fillStyle = '#f8fafc';
     ctx3d.font = `900 ${Math.round(vh * 0.55)}px system-ui, sans-serif`;
-    ctx3d.fillText(String(Math.round(velocidad)), vx + 14, vy + vh * 0.66);
+    ctx3d.fillText(String(Math.round(velocidad)), vx + 14 * u, vy + vh * 0.66);
     ctx3d.fillStyle = '#94a3b8';
     ctx3d.font = `700 ${Math.round(vh * 0.15)}px system-ui, sans-serif`;
-    ctx3d.fillText('km/h', vx + 14, vy + vh * 0.88);
+    ctx3d.fillText('km/h', vx + 14 * u, vy + vh * 0.88);
     if (kmh) {
-      const lx = vx + vw - 34, ly = vy + vh / 2;
+      const lx = vx + vw - 34 * u, ly = vy + vh / 2;
       ctx3d.fillStyle = '#f8fafc';
-      ctx3d.beginPath(); ctx3d.arc(lx, ly, 25, 0, Math.PI * 2); ctx3d.fill();
-      ctx3d.strokeStyle = '#dc2626'; ctx3d.lineWidth = 5;
-      ctx3d.beginPath(); ctx3d.arc(lx, ly, 20, 0, Math.PI * 2); ctx3d.stroke();
+      ctx3d.beginPath(); ctx3d.arc(lx, ly, 25 * u, 0, Math.PI * 2); ctx3d.fill();
+      ctx3d.strokeStyle = '#dc2626'; ctx3d.lineWidth = 5 * u;
+      ctx3d.beginPath(); ctx3d.arc(lx, ly, 20 * u, 0, Math.PI * 2); ctx3d.stroke();
       ctx3d.fillStyle = '#0f172a';
-      ctx3d.font = `900 18px system-ui, sans-serif`;
+      ctx3d.font = `900 ${18 * u}px system-ui, sans-serif`;
       ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
       ctx3d.fillText(String(kmh), lx, ly + 1);
     }
 
-    // --- Tarjeta ETA (abajo centro) ---------------------------------------
-    const ew = Math.min(w * 0.48, 430), eh = 74, ex = (w - ew) / 2, ey = h - 90;
-    panel3d(ex, ey, ew, eh, 18, 0.88);
+    // --- Tarjeta ETA (abajo centro)
+    const ew = Math.min(w * 0.48, 430 * u), eh = 74 * u, ex = (w - ew) / 2, ey = h - 90 * u;
+    panel3d(ex, ey, ew, eh, 18 * u, 0.88);
     ctx3d.textAlign = 'left';
     ctx3d.textBaseline = 'middle';
     ctx3d.fillStyle = '#94a3b8';
-    ctx3d.font = `700 ${Math.max(9, w * 0.012)}px system-ui, sans-serif`;
-    ctx3d.fillText('ETA', ex + 16, ey + 15);
+    ctx3d.font = `700 ${12 * u}px system-ui, sans-serif`;
+    ctx3d.fillText('ETA', ex + 16 * u, ey + 15 * u);
     ctx3d.fillStyle = '#f8fafc';
-    ctx3d.font = `800 ${Math.max(13, w * 0.017)}px system-ui, sans-serif`;
-    ctx3d.fillText(llegada, ex + 50, ey + 15);
+    ctx3d.font = `800 ${17 * u}px system-ui, sans-serif`;
+    ctx3d.fillText(llegada, ex + 50 * u, ey + 15 * u);
     ctx3d.fillStyle = '#22d3ee';
-    ctx3d.font = `800 ${Math.max(13, w * 0.017)}px system-ui, sans-serif`;
-    ctx3d.fillText(rest > 1000 ? `${(rest/1000).toFixed(1)} km` : `${Math.round(rest)} m`, ex + ew * 0.50, ey + 15);
+    ctx3d.font = `800 ${17 * u}px system-ui, sans-serif`;
+    ctx3d.fillText(rest > 1000 ? `${(rest/1000).toFixed(1)} km` : `${Math.round(rest)} m`, ex + ew * 0.50, ey + 15 * u);
     ctx3d.fillStyle = '#e2e8f0';
-    ctx3d.fillText(min ? `${min} min` : '-- min', ex + ew * 0.72, ey + 15);
+    ctx3d.fillText(min ? `${min} min` : '-- min', ex + ew * 0.72, ey + 15 * u);
     ctx3d.fillStyle = '#f8fafc';
-    ctx3d.font = `700 ${Math.max(11, w * 0.014)}px system-ui, sans-serif`;
-    ctx3d.fillText(calle.slice(0, 34), ex + ew / 2, ey + 47);
+    ctx3d.font = `700 ${14 * u}px system-ui, sans-serif`;
+    ctx3d.fillText(calle.slice(0, 34), ex + ew / 2, ey + 47 * u);
     ctx3d.strokeStyle = 'rgba(34,211,238,.55)';
-    ctx3d.lineWidth = 2;
-    ctx3d.beginPath(); ctx3d.moveTo(ex + 14, ey + eh - 1); ctx3d.lineTo(ex + ew - 14, ey + eh - 1); ctx3d.stroke();
+    ctx3d.lineWidth = 2 * u;
+    ctx3d.beginPath(); ctx3d.moveTo(ex + 14 * u, ey + eh - 1); ctx3d.lineTo(ex + ew - 14 * u, ey + eh - 1); ctx3d.stroke();
 
-    // --- Botones inferiores derecha ---------------------------------------
-    const byBtn = h - 52;
+    // --- Botones inferiores derecha
+    const byBtn = h - 52 * u;
     const accionesInferiores = [
       () => document.getElementById('rutaGps')?.click(),
       () => iniciarAr()
     ];
     for (const [i, icono] of ['◎', '➜'].entries()) {
-      const x = w - 30 - i * 50;
+      const x = w - 30 * u - i * 50 * u;
       ctx3d.fillStyle = i === 0 ? 'rgba(37,99,235,.92)' : 'rgba(10,13,18,.86)';
-      ctx3d.beginPath(); ctx3d.arc(x, byBtn, 20, 0, Math.PI * 2); ctx3d.fill();
+      ctx3d.beginPath(); ctx3d.arc(x, byBtn, 20 * u, 0, Math.PI * 2); ctx3d.fill();
       ctx3d.strokeStyle = 'rgba(255,255,255,.16)'; ctx3d.lineWidth = 1; ctx3d.stroke();
       ctx3d.fillStyle = '#f8fafc';
-      ctx3d.font = `700 18px system-ui, sans-serif`;
+      ctx3d.font = `700 ${18 * u}px system-ui, sans-serif`;
       ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
       ctx3d.fillText(icono, x, byBtn + 1);
-      botones3d.push({ x, y: byBtn, r: 23, accion: accionesInferiores[i] });
+      botones3d.push({ x, y: byBtn, r: Math.max(24, 23 * u), accion: accionesInferiores[i] });
     }
 
-    // --- Avisos de estado --------------------------------------------------
+    // --- Avisos de estado
     const sinGps = !ultimaPos || (ultimaVez && Date.now() - ultimaVez > 20000);
     if (sinGps && ruta) {
       const txt = 'SIN SEÑAL GPS · posición no disponible';
       ctx3d.fillStyle = 'rgba(30,8,14,.9)';
-      const an = Math.min(w - 30, 300), x = (w - an) / 2, y = h * 0.16;
+      const an = Math.min(w - 30, 300 * u), x = (w - an) / 2, y = h * 0.16;
       ctx3d.beginPath();
-      if (ctx3d.roundRect) ctx3d.roundRect(x, y, an, 30, 10); else ctx3d.rect(x, y, an, 30);
+      if (ctx3d.roundRect) ctx3d.roundRect(x, y, an, 30 * u, 10 * u); else ctx3d.rect(x, y, an, 30 * u);
       ctx3d.fill();
       ctx3d.fillStyle = '#ff8aa1';
-      ctx3d.font = `700 12px system-ui, sans-serif`;
+      ctx3d.font = `700 ${12 * u}px system-ui, sans-serif`;
       ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
-      ctx3d.fillText(txt, w / 2, y + 15);
+      ctx3d.fillText(txt, w / 2, y + 15 * u);
     } else if (recalculando) {
       const txt = '↻ RECALCULANDO RUTA…';
       ctx3d.fillStyle = 'rgba(20,16,4,.9)';
-      const an = Math.min(w - 30, 260), x = (w - an) / 2, y = h * 0.46;
+      const an = Math.min(w - 30, 260 * u), x = (w - an) / 2, y = h * 0.46;
       ctx3d.beginPath();
-      if (ctx3d.roundRect) ctx3d.roundRect(x, y, an, 28, 10); else ctx3d.rect(x, y, an, 28);
+      if (ctx3d.roundRect) ctx3d.roundRect(x, y, an, 28 * u, 10 * u); else ctx3d.rect(x, y, an, 28 * u);
       ctx3d.fill();
       ctx3d.fillStyle = '#fbbf24';
-      ctx3d.font = `700 11px system-ui, sans-serif`;
+      ctx3d.font = `700 ${11 * u}px system-ui, sans-serif`;
       ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
-      ctx3d.fillText(txt, w / 2, y + 14);
+      ctx3d.fillText(txt, w / 2, y + 14 * u);
     }
-  }
-
-  function dibujarCarreteraRecta(w, h, cx, horizonte) {
-    const numSegs = 50;
-    const segW = 220;
-    for (let i = 0; i < numSegs; i++) {
-      const z = i / numSegs;
-      const scale = 1 - z * 0.82;
-      const y = horizonte + (h - horizonte) * (1 - z);
-      const roadW = segW * scale * (1 + z * 0.3);
-      const zPrev = (i - 1) / numSegs;
-      const scalePrev = 1 - zPrev * 0.82;
-      const yPrev = horizonte + (h - horizonte) * (1 - zPrev);
-      const roadWPrev = segW * scalePrev * (1 + zPrev * 0.3);
-      ctx3d.fillStyle = z < 0.5 ? '#2a3a50' : '#1e2d42';
-      ctx3d.beginPath();
-      ctx3d.moveTo(cx - roadWPrev / 2, yPrev);
-      ctx3d.lineTo(cx + roadWPrev / 2, yPrev);
-      ctx3d.lineTo(cx + roadW / 2, y);
-      ctx3d.lineTo(cx - roadW / 2, y);
-      ctx3d.closePath();
-      ctx3d.fill();
-      if (i % 3 === 0) {
-        ctx3d.strokeStyle = '#f0f8ff';
-        ctx3d.lineWidth = 2 * scale;
-        ctx3d.setLineDash([10 * scale, 10 * scale]);
-        ctx3d.globalAlpha = 0.7;
-        ctx3d.beginPath();
-        ctx3d.moveTo(cx, yPrev);
-        ctx3d.lineTo(cx, y);
-        ctx3d.stroke();
-        ctx3d.setLineDash([]);
-        ctx3d.globalAlpha = 1;
-      }
-      ctx3d.strokeStyle = '#38e1ff';
-      ctx3d.lineWidth = 2 * scale;
-      ctx3d.globalAlpha = 0.6;
-      ctx3d.beginPath();
-      ctx3d.moveTo(cx - roadWPrev / 2, yPrev);
-      ctx3d.lineTo(cx - roadW / 2, y);
-      ctx3d.stroke();
-      ctx3d.beginPath();
-      ctx3d.moveTo(cx + roadWPrev / 2, yPrev);
-      ctx3d.lineTo(cx + roadW / 2, y);
-      ctx3d.stroke();
-      ctx3d.globalAlpha = 1;
-    }
-  }
-
-  function dibujarSignos3d(w, h, cx, horizonte, idxActual, segs) {
-    const signos = signos3d;
-    if (signos.length === 0) return;
-    // Calcular distancia acumulada hasta el índice actual
-    let distAcum = 0;
-    for (let i = 0; i < idxActual && i < segs.length; i++) distAcum += segs[i].dist;
-    // Dibujar signos próximos
-    for (const s of signos) {
-      const distRestante = s.dist - distAcum;
-      if (distRestante < 0 || distRestante > 2000) continue;
-      const z = Math.min(1, distRestante / 2000);
-      const scale = 1 - z * 0.6;
-      const y = horizonte + (h - horizonte) * (1 - z) * 0.5;
-      const signW = 160 * scale;
-      const signH = 80 * scale;
-      const x = cx + (s.modifier === 'right' ? 100 : s.modifier === 'left' ? -100 : 0) * scale;
-      // Fondo del cartel (estilo autopista)
-      ctx3d.fillStyle = 'rgba(5, 10, 20, .95)';
-      ctx3d.fillRect(x - signW / 2, y - signH / 2, signW, signH);
-      ctx3d.strokeStyle = s.exit ? '#22d3ee' : '#f0f8ff';
-      ctx3d.lineWidth = 3 * scale;
-      ctx3d.strokeRect(x - signW / 2, y - signH / 2, signW, signH);
-      // Banda superior (azul autopista)
-      ctx3d.fillStyle = s.exit ? 'rgba(34, 211, 238, .3)' : 'rgba(56, 189, 248, .2)';
-      ctx3d.fillRect(x - signW / 2, y - signH / 2, signW, signH * 0.3);
-      // Texto principal
-      ctx3d.fillStyle = '#f0f8ff';
-      ctx3d.font = `bold ${Math.round(14 * scale)}px sans-serif`;
-      ctx3d.textAlign = 'center';
-      ctx3d.textBaseline = 'middle';
-      const lineas = s.texto.split(' ').slice(0, 4).join(' ');
-      ctx3d.fillText(lineas, x, y - 5 * scale);
-      // Distancia
-      ctx3d.fillStyle = 'rgba(255, 255, 255, .7)';
-      ctx3d.font = `${Math.round(11 * scale)}px sans-serif`;
-      ctx3d.fillText(`${distRestante} m`, x, y + 15 * scale);
-      if (s.exit) {
-        ctx3d.fillStyle = '#22d3ee';
-        ctx3d.font = `bold ${Math.round(12 * scale)}px sans-serif`;
-        ctx3d.fillText('▶ TOMAR ESTA SALIDA', x, y + 30 * scale);
-      } else {
-        ctx3d.fillStyle = 'rgba(255, 255, 255, .5)';
-        ctx3d.font = `${Math.round(10 * scale)}px sans-serif`;
-        ctx3d.fillText('NO TOMAR', x, y + 30 * scale);
-      }
-    }
-  }
-
-  function dibujarCoche3d(w, h, t = 0) {
-    prepararSpriteCoche3d();
-    // Respetar la proporción del recorte: el coche es ancho y bajo, no un
-    // rectángulo alto. Se mantiene grande, como protagonista de la escena.
-    // Coche claramente más pequeño que antes: deja ver el carril, la línea
-    // central y la carretera por delante en el modo 3D.
-    const carW = Math.min(w * 0.30, 190);
-    const carH = carW * (spriteCoche3d ? spriteCoche3d.height / spriteCoche3d.width : 0.52);
-    const cx = w / 2;
-    // Dejar libre el HUD inferior (aviso de maniobra y botón de parar) para que
-    // no tape las ruedas del coche.
-    const cy = h - 96 - carH / 2 + Math.sin(t * 7) * Math.min(2.2, velocidad / 45);
-    // Estelas laterales a velocidad.
-    if (velocidad > 25) {
-      ctx3d.save();
-      ctx3d.strokeStyle = 'rgba(56,225,255,.2)';
-      ctx3d.lineWidth = 2;
-      for (let i = 0; i < 4; i++) {
-        const off = carW * (0.55 + i * 0.16);
-        const largo = Math.min(h * 0.18, 40 + velocidad * 1.2);
-        ctx3d.beginPath();
-        ctx3d.moveTo(cx - off, cy + carH * 0.3);
-        ctx3d.lineTo(cx - off - 6, cy + carH * 0.3 + largo);
-        ctx3d.stroke();
-        ctx3d.beginPath();
-        ctx3d.moveTo(cx + off, cy + carH * 0.3);
-        ctx3d.lineTo(cx + off + 6, cy + carH * 0.3 + largo);
-        ctx3d.stroke();
-      }
-      ctx3d.restore();
-    }
-    // Sombra.
-    ctx3d.fillStyle = 'rgba(0,0,0,.55)';
-    ctx3d.beginPath();
-    ctx3d.ellipse(cx, cy + carH / 2 + 6, carW / 2 + 10, 12, 0, 0, Math.PI * 2);
-    ctx3d.fill();
-    // Halo bajo el coche.
-    const glow = ctx3d.createRadialGradient(cx, cy + carH / 2, 0, cx, cy + carH / 2, carW);
-    glow.addColorStop(0, 'rgba(56,225,255,.38)');
-    glow.addColorStop(1, 'rgba(56,225,255,0)');
-    ctx3d.fillStyle = glow;
-    ctx3d.fillRect(cx - carW, cy - carH / 2, carW * 2, carH * 2);
-    // GT4 (misma imagen del proyecto, no se sustituye).
-    if (spriteCoche3d) {
-      ctx3d.drawImage(spriteCoche3d, cx - carW / 2, cy - carH / 2, carW, carH);
-    } else if (imagenCoche3d && imagenCoche3d.complete && imagenCoche3d.naturalWidth) {
-      ctx3d.save();
-      ctx3d.beginPath();
-      if (ctx3d.roundRect) ctx3d.roundRect(cx - carW / 2, cy - carH / 2, carW, carH, carW * 0.1);
-      else ctx3d.rect(cx - carW / 2, cy - carH / 2, carW, carH);
-      ctx3d.clip();
-      ctx3d.drawImage(imagenCoche3d, cx - carW / 2, cy - carH / 2, carW, carH);
-      ctx3d.restore();
-    } else {
-      ctx3d.fillStyle = '#facc15';
-      ctx3d.beginPath();
-      ctx3d.roundRect(cx - carW / 2, cy - carH / 2, carW, carH, 12);
-      ctx3d.fill();
-      ctx3d.fillStyle = '#0b1220';
-      ctx3d.fillRect(cx - carW / 2 + 10, cy - carH / 2 + 15, carW - 20, carH * 0.24);
-    }
-    // Luces traseras.
-    ctx3d.fillStyle = 'rgba(255,77,109,.9)';
-    ctx3d.shadowColor = '#ff4d6d';
-    ctx3d.shadowBlur = 16;
-    ctx3d.fillRect(cx - carW * 0.36, cy + carH * 0.36, carW * 0.16, carH * 0.035);
-    ctx3d.fillRect(cx + carW * 0.2, cy + carH * 0.36, carW * 0.16, carH * 0.035);
-    ctx3d.shadowBlur = 0;
   }
 
   function alPulsar3d(e) {
