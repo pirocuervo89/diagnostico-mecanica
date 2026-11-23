@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#08090b">
   <link rel="preload" href="/fonts/fonts.css" as="style">
-  <link rel="preload" href="/css/app.css?v=20261030a" as="style">
+  <link rel="preload" href="/css/app.css?v=20261124a1" as="style">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,9 +20,9 @@
   <meta name="stripe-payment-link" content="https://buy.stripe.com/eVqeVf0nGdCQ4bcfvI9oc00">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/fonts/fonts.css">
-  <link rel="stylesheet" href="/css/app.css?v=20261030a">
+  <link rel="stylesheet" href="/css/app.css?v=20261124a1">
   <link rel="stylesheet" href="/css/vision.css?v=20261105c">
-  <link rel="stylesheet" href="/css/tutorials.css?v=20261030a">
+  <link rel="stylesheet" href="/css/tutorials.css?v=20261124a1">
   <link rel="stylesheet" href="/css/reforma.css?v=20261120a">
   <link rel="stylesheet" href="/css/legal.css?v=20261110a">
   <link rel="stylesheet" href="/css/futurista.css?v=20261115e">
@@ -715,14 +715,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span>3) Abre un síntoma para ver causas probables.</span>
       <span>4) Sigue las comprobaciones paso a paso.</span>
       <span>5) Consulta la tienda para la pieza necesaria.</span>
+    </div>      <div class="diag-tabs" role="tablist" aria-label="Modo de diagnóstico">
+      <button id="diagTabSymptoms" class="diag-tab active" data-diag-tab="symptoms" type="button" role="tab" aria-selected="true" aria-controls="diagSymptoms" tabindex="0">Síntomas</button>
+      <button id="diagTabSolutions" class="diag-tab" data-diag-tab="solutions" type="button" role="tab" aria-selected="false" aria-controls="diagSolutions" tabindex="-1">Soluciones por sistema</button>
     </div>
 
-    <div class="diag-tabs" role="tablist" aria-label="Modo de diagnóstico">
-      <button class="diag-tab active" data-diag-tab="symptoms" type="button" role="tab" aria-selected="true">Síntomas</button>
-      <button class="diag-tab" data-diag-tab="solutions" type="button" role="tab" aria-selected="false">Soluciones por sistema</button>
-    </div>
-
-    <div id="diagSymptoms" class="diag-pane">
+    <div id="diagSymptoms" class="diag-pane" role="tabpanel" aria-labelledby="diagTabSymptoms" tabindex="0">
       <div class="search-shell">
         <svg class="ic"><use href="#i-search"></use></svg>
         <input id="symptomSearch" placeholder="Filtrar síntoma: humo, tirones, freno, temperatura, vibración..." autocomplete="off" aria-label="Filtrar síntomas">
@@ -738,7 +736,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="symptomGrid" class="symptom-grid"></div>
     </div>
 
-    <div id="diagSolutions" class="diag-pane hidden">
+    <div id="diagSolutions" class="diag-pane hidden" role="tabpanel" aria-labelledby="diagTabSolutions" tabindex="0">
       <div class="search-shell">
         <svg class="ic"><use href="#i-search"></use></svg>
         <input id="solutionSearch" placeholder="Filtrar por sistema, avería o comprobación: turbo, EGR, frenos..." autocomplete="off" aria-label="Filtrar soluciones por sistema">
@@ -1046,7 +1044,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     <header class="page-head tut-page-head">
       <div>
         <span class="eyebrow"><i></i> ESCUELA DE TALLER · CONOCIMIENTO VERIFICADO</span>
-        <h1>Biblioteca de tutoriales</h1>
+        <h2>Biblioteca de tutoriales</h2>
         <p class="lead">Aprende la operación exacta antes de tocar el vehículo. Busca por avería, sistema, motor, DTC o marca y reproduce el vídeo dentro de la plataforma.</p>
       </div>
       <div class="tut-head-stats" aria-label="Resumen de la biblioteca">
@@ -1213,12 +1211,12 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
         <button id="tutCloseLibrary" class="icon-btn" type="button" aria-label="Cerrar biblioteca"><svg class="ic"><use href="#i-close"></use></svg></button>
       </div>
       <div class="tut-lib-tabs" role="tablist" aria-label="Secciones de la biblioteca">
-        <button class="active" data-tut-libtab="favorites" type="button" role="tab" aria-selected="true"><svg class="ic"><use href="#i-bookmark"></use></svg> Favoritos <span id="tutFavCount">0</span></button>
-        <button data-tut-libtab="history" type="button" role="tab" aria-selected="false"><svg class="ic"><use href="#i-eye"></use></svg> Historial <span id="tutHistCount">0</span></button>
-        <button data-tut-libtab="playlists" type="button" role="tab" aria-selected="false"><svg class="ic"><use href="#i-list"></use></svg> Listas <span id="tutPlaylistCount">0</span></button>
+        <button id="tutLibTabFavorites" class="active" data-tut-libtab="favorites" type="button" role="tab" aria-selected="true" aria-controls="tutLibContent" tabindex="0"><svg class="ic"><use href="#i-bookmark"></use></svg> Favoritos <span id="tutFavCount">0</span></button>
+        <button id="tutLibTabHistory" data-tut-libtab="history" type="button" role="tab" aria-selected="false" aria-controls="tutLibContent" tabindex="-1"><svg class="ic"><use href="#i-eye"></use></svg> Historial <span id="tutHistCount">0</span></button>
+        <button id="tutLibTabPlaylists" data-tut-libtab="playlists" type="button" role="tab" aria-selected="false" aria-controls="tutLibContent" tabindex="-1"><svg class="ic"><use href="#i-list"></use></svg> Listas <span id="tutPlaylistCount">0</span></button>
       </div>
       <div id="tutLibNotice" class="tut-lib-notice hidden"></div>
-      <div id="tutLibContent" class="tut-lib-content"></div>
+      <div id="tutLibContent" class="tut-lib-content" role="tabpanel" aria-labelledby="tutLibTabFavorites" tabindex="0"></div>
     </section>
 
     <section id="tutAdmin" class="tut-admin-panel panel hidden" aria-label="Moderación de tutoriales">
@@ -2176,7 +2174,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     <div class="page-head">
       <div>
         <span class="eyebrow"><i></i> COMUNIDAD TÉCNICA · CASOS REALES</span>
-        <h1>Foro de Mecánicos</h1>
+        <h2>Foro de Mecánicos</h2>
         <p class="lead">Casos de avería, mediciones y soluciones verificadas. El conocimiento queda guardado y la IA lo usa como referencia al diagnosticar.</p>
       </div>
       <div class="forum-head-actions">
@@ -2197,22 +2195,22 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
       <div id="forumAuthSignedOut">
         <div class="forum-auth-copy">
           <span class="cap-ico"><svg class="ic"><use href="#i-lock"></use></svg></span>
-          <div><h3>Participa con tu cuenta local</h3><p class="muted">Sin correo ni servicios externos. La primera cuenta creada administra la moderación de esta instalación.</p></div>
+          <div><h3>Participa con tu cuenta local</h3><p class="muted">Sin correo ni servicios externos. La primera cuenta creada administra la moderación de esta instalación.</p><p class="persistencia-aviso">En el plan gratuito de Render el disco es efímero: las cuentas y los casos pueden perderse al reiniciar si no hay copia en Supabase.</p></div>
         </div>
         <div class="forum-auth-tabs" role="tablist" aria-label="Acceso al foro">
-          <button id="forumTabLogin" class="active" type="button" role="tab" aria-selected="true">Entrar</button>
-          <button id="forumTabRegister" type="button" role="tab" aria-selected="false">Crear cuenta</button>
+          <button id="forumTabLogin" class="active" type="button" role="tab" aria-selected="true" aria-controls="forumLoginForm" tabindex="0">Entrar</button>
+          <button id="forumTabRegister" type="button" role="tab" aria-selected="false" aria-controls="forumRegisterForm" tabindex="-1">Crear cuenta</button>
         </div>
-        <form id="forumLoginForm" class="forum-auth-form">
-          <input id="forumLoginUser" placeholder="Usuario" autocomplete="username" maxlength="24" required>
-          <input id="forumLoginPass" type="password" placeholder="Contraseña" autocomplete="current-password" maxlength="200" required>
+        <form id="forumLoginForm" class="forum-auth-form" role="tabpanel" aria-labelledby="forumTabLogin">
+          <input id="forumLoginUser" placeholder="Usuario" aria-label="Usuario" autocomplete="username" maxlength="24" required>
+          <input id="forumLoginPass" type="password" placeholder="Contraseña" aria-label="Contraseña" autocomplete="current-password" maxlength="200" required>
           <input class="hp-field" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <button class="btn primary" type="submit">Entrar</button>
         </form>
-        <form id="forumRegisterForm" class="forum-auth-form hidden">
-          <input id="forumRegisterUser" placeholder="Usuario (3-24)" autocomplete="username" maxlength="24" required>
-          <input id="forumRegisterName" placeholder="Nombre visible" autocomplete="nickname" maxlength="60">
-          <input id="forumRegisterPass" type="password" placeholder="Contraseña (mínimo 8)" autocomplete="new-password" minlength="8" maxlength="200" required>
+        <form id="forumRegisterForm" class="forum-auth-form hidden" role="tabpanel" aria-labelledby="forumTabRegister">
+          <input id="forumRegisterUser" placeholder="Usuario (3-24)" aria-label="Usuario (3 a 24 caracteres)" autocomplete="username" maxlength="24" required>
+          <input id="forumRegisterName" placeholder="Nombre visible" aria-label="Nombre visible" autocomplete="nickname" maxlength="60">
+          <input id="forumRegisterPass" type="password" placeholder="Contraseña (mínimo 8)" aria-label="Contraseña (mínimo 8 caracteres)" autocomplete="new-password" minlength="8" maxlength="200" required>
           <input class="hp-field" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <button class="btn primary" type="submit">Crear cuenta</button>
         </form>
@@ -2410,15 +2408,17 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
   <div class="footer-newsletter" style="grid-column:1/-1;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06);text-align:center;">
     <p style="margin:0 0 8px;font-size:12px;color:var(--muted,#8a93a6);">📧 Recibe tutoriales y novedades por email</p>
     <form id="newsletterForm" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-      <input type="email" id="newsletterEmail" placeholder="tu@email.com" required style="padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-size:13px;min-width:200px;">
+      <label for="newsletterEmail" class="sr-only">Tu correo electrónico</label>
+      <input type="email" id="newsletterEmail" name="email" autocomplete="email" aria-label="Tu correo electrónico" aria-describedby="newsletterMsg" placeholder="tu@email.com" required style="padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-size:13px;min-width:200px;">
       <button type="submit" style="padding:8px 16px;border-radius:8px;border:none;background:#ff6b35;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Suscribirme</button>
     </form>
     <p id="newsletterMsg" style="margin:6px 0 0;font-size:11px;color:var(--muted,#8a93a6);"></p>
+    <p class="persistencia-aviso">Aviso: en el plan gratuito de Render la newsletter se guarda en disco efímero y puede perderse al reiniciar el servicio. Si configuras BREVO_API_KEY, la copia de tu suscripción viaja además a Brevo.</p>
   </div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="Navegación de la app">
-  <button class="tabbar-btn active" data-view="home" type="button" aria-label="Inicio"><svg class="ic"><use href="#i-gauge"></use></svg><span>Inicio</span></button>
+  <button class="tabbar-btn active" data-view="home" type="button" aria-label="Inicio" aria-current="page"><svg class="ic"><use href="#i-gauge"></use></svg><span>Inicio</span></button>
   <button class="tabbar-btn" data-view="garaje" type="button" aria-label="Mi garaje"><svg class="ic"><use href="#i-car"></use></svg><span>Garaje</span></button>
   <button class="tabbar-btn tabbar-ruta" data-view="ruta" type="button" aria-label="Ruta GPS: ¿dónde vamos?"><svg class="ic"><use href="#i-pin"></use></svg><span>GPS</span></button>
   <button class="tabbar-btn" data-view="obd" type="button" aria-label="Escáner OBD"><svg class="ic"><use href="#i-cpu"></use></svg><span>OBD</span></button>
@@ -2455,16 +2455,16 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
   window.addEventListener('dym:consent', dymGaConfig);
 </script>
 <script src="/js/obd.js?v=20261105c"></script>
-<script src="/js/tutorials.js?v=20261026d"></script>
+<script src="/js/tutorials.js?v=20261124a1"></script>
 
-<script src="/js/voz.js?v=20261121d"></script>
+<script src="/js/voz.js?v=20261124a1"></script>
 <script src="/js/dictado.js?v=20261121a"></script>
 <script src="/js/micro-permiso.js?v=20261120b"></script>
 
 <script src="/js/visual-glow.js?v=20261116c"></script>
 <script src="/js/tienda.js?v=20261121c"></script>
 <script src="/js/planes.js?v=20261113a"></script>
-<script src="/js/app.js?v=20261123e"></script>
+<script src="/js/app.js?v=20261124a1"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>
@@ -2542,10 +2542,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     if ((location.hash || '').replace('#', '') === 'ruta') cargarRuta();
   })();
   </script>
-  <script src="/js/ruta.js?v=20261126a21"></script>
+  <script src="/js/ruta.js?v=20261124a1"></script>
   <script src="/js/maya-incidente.js?v=20261120c"></script>
-  <!-- TensorFlow.js + COCO-SSD (detección de objetos, gratuito, open source) -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js" defer></script>
 </body>
 </html>

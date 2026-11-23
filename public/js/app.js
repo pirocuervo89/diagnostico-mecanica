@@ -272,7 +272,14 @@ function showView(name, fromHistory = false) {
   if (stuckModal) stuckModal.hidden = true;
   releaseStuckPageScroll();
   $$('.view').forEach(v => v.classList.toggle('active', v.id === `view-${name}`));
-  $$('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  $$('[data-view]').forEach(b => {
+    const activo = b.dataset.view === name;
+    b.classList.toggle('active', activo);
+    // La barra inferior y los menús son navegación, no pestañas: `aria-current`
+    // es lo que anuncia el cambio de sección al lector de pantalla.
+    if (activo) b.setAttribute('aria-current', 'page');
+    else b.removeAttribute('aria-current');
+  });
   const nav = $('#nav');
   if (nav) nav.classList.remove('open');
   if (menuBtn) {
@@ -359,6 +366,28 @@ if (appMenu) {
 }
 
 $$('[data-view]').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
+
+// Pestañas WAI-ARIA: flechas, Inicio y Fin mueven el foco y activan la pestaña.
+// Sirve para diagnóstico, tutoriales, foro, tuning y el catálogo.
+document.addEventListener('keydown', event => {
+  const tab = event.target.closest?.('[role="tab"]');
+  if (!tab || tab.disabled) return;
+  const lista = tab.closest('[role="tablist"]');
+  if (!lista) return;
+  const tabs = [...lista.querySelectorAll('[role="tab"]')].filter(t => !t.disabled && t.offsetParent !== null);
+  if (tabs.length < 2) return;
+  const i = tabs.indexOf(tab);
+  let destino = -1;
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') destino = (i + 1) % tabs.length;
+  else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') destino = (i - 1 + tabs.length) % tabs.length;
+  else if (event.key === 'Home') destino = 0;
+  else if (event.key === 'End') destino = tabs.length - 1;
+  else return;
+  event.preventDefault();
+  tabs.forEach((t, k) => { t.tabIndex = k === destino ? 0 : -1; });
+  tabs[destino].focus();
+  tabs[destino].click();
+});
 
 // -------------------------------------------------------------
 // Portada: accesos directos a las páginas públicas que traen tráfico
@@ -797,12 +826,17 @@ function openSymptomSearch(term) {
 
 function setDiagTab(tab = 'symptoms') {
   const solutions = tab === 'solutions';
-  $('#diagSymptoms')?.classList.toggle('hidden', solutions);
-  $('#diagSolutions')?.classList.toggle('hidden', !solutions);
+  const panelSymptoms = $('#diagSymptoms');
+  const panelSolutions = $('#diagSolutions');
+  panelSymptoms?.classList.toggle('hidden', solutions);
+  panelSolutions?.classList.toggle('hidden', !solutions);
+  panelSymptoms?.setAttribute('aria-hidden', String(solutions));
+  panelSolutions?.setAttribute('aria-hidden', String(!solutions));
   $$('.diag-tab').forEach(b => {
     const active = b.dataset.diagTab === (solutions ? 'solutions' : 'symptoms');
     b.classList.toggle('active', active);
     b.setAttribute('aria-selected', String(active));
+    b.tabIndex = active ? 0 : -1;
   });
   if (solutions) renderSolutions($('#solutionSearch')?.value || '');
 }
@@ -2134,7 +2168,9 @@ async function loadProducts() {
   if (!grid) return;
   try {
     grid.innerHTML = '<div class="catalog-loading">Cargando catálogo de repuestos…</div>';
-    const [productsResult, tyresResult] = await Promise.allSettled([api('/api/products'), api('/api/tyres')]);
+    // Lista ligera: la descripción y la compatibilidad se piden al abrir la
+    // ficha con `/api/products/:id`. Antes viajaban 5 MB para pintar tarjetas.
+    const [productsResult, tyresResult] = await Promise.allSettled([api('/api/products?lite=1'), api('/api/tyres')]);
     const products = productsResult.status === 'fulfilled' ? productsResult.value : [];
     const tyresPayload = tyresResult.status === 'fulfilled' ? tyresResult.value : [];
     const tyres = Array.isArray(tyresPayload) ? tyresPayload : (tyresPayload.items || []);
@@ -4786,12 +4822,13 @@ async function openProductSheet(id) {
   const body = $('#productSheetBody');
   if (!modal || !body) return;
   let p = productsCache.find(x => x.id === id);
-  if (!p) {
-    try {
-      p = await api(`/api/products/${encodeURIComponent(id)}`);
-    } catch (err) {
-      return;
-    }
+  try {
+    // La tarjeta solo tiene los campos de la lista ligera; la ficha completa
+    // (descripción, compatibilidad, referencia y tiendas) se pide aquí.
+    const full = await api(`/api/products/${encodeURIComponent(id)}`);
+    p = { ...(p || {}), ...(full || {}) };
+  } catch (err) {
+    if (!p) return;
   }
   if (!p._fitment) p = catalogEnrich(p);
   const fit = p._fitment;

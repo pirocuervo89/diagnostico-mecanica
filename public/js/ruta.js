@@ -1807,9 +1807,9 @@
     ctx3d.beginPath();
     ctx3d.rect(0, 0, w, lineaHorizonte);
     ctx3d.clip();
+    dibujarGuiaDireccionEn(ctx3d, w, h, lineaHorizonte);
     dibujarDeteccionesEn(ctx3d, w, h, Date.now());
     dibujarSenalCamaraEn(ctx3d, w, h);
-    dibujarGuiaDireccionEn(ctx3d, w, h, lineaHorizonte);
     ctx3d.restore();
     dibujarHud3d(w, h);
   }
@@ -2386,11 +2386,50 @@
 
   // Un único bucle de visión para AR y 3D: analiza carriles/señales y lanza
   // COCO-SSD; las dos vistas solo pintan el estado compartido.
+  // TF.js y COCO-SSD pesan ~291 KB y solo se usan en AR/3D: se cargan al abrir
+  // esas vistas. La portada ya no descarga el CDN; si falla, la guía y las
+  // señales siguen funcionando y se avisa una sola vez.
+  let cargandoCoco = null;
+
+  function cargarScript(src, timeout = 12000) {
+    return new Promise((resolve, reject) => {
+      const ya = [...document.scripts].find(s => s.src === src);
+      if (ya && ya.dataset.cargado === '1') return resolve();
+      let s = ya;
+      if (!s) {
+        s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        document.head.appendChild(s);
+      }
+      const reloj = setTimeout(() => reject(new Error(`tiempo agotado: ${src}`)), timeout);
+      s.addEventListener('load', () => { clearTimeout(reloj); s.dataset.cargado = '1'; resolve(); }, { once: true });
+      s.addEventListener('error', () => { clearTimeout(reloj); reject(new Error(`no se pudo cargar: ${src}`)); }, { once: true });
+    });
+  }
+
   function asegurarModeloCoco() {
-    if (modeloCoco || typeof cocoSsd === 'undefined') return;
-    cocoSsd.load()
-      .then(m => { modeloCoco = m; avisar('Detección de objetos activada.', 'ok', 3000); })
-      .catch(e => console.warn('COCO-SSD no disponible:', e));
+    if (modeloCoco) return Promise.resolve(modeloCoco);
+    if (cargandoCoco) return cargandoCoco;
+    const arranque = (async () => {
+      if (typeof cocoSsd === 'undefined') {
+        if (typeof tf === 'undefined') {
+          await cargarScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js');
+        }
+        await cargarScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js');
+      }
+      if (typeof cocoSsd === 'undefined') throw new Error('COCO-SSD no disponible');
+      const m = await cocoSsd.load();
+      modeloCoco = m;
+      avisar('Detección de objetos activada.', 'ok', 3000);
+      return m;
+    })().catch(err => {
+      console.warn('COCO-SSD no disponible:', err?.message || err);
+      avisar('Sin detección de objetos (no se pudo cargar el modelo). La guía de carril y las señales siguen activas.', 'info', 6000);
+      return null;
+    }).finally(() => { cargandoCoco = null; });
+    cargandoCoco = arranque;
+    return arranque;
   }
 
   function iniciarVisionCompartida() {
@@ -2976,7 +3015,11 @@
       if (rw < 8 || rh < 8) continue;
       const coche = d.class === 'car' || d.class === 'truck' || d.class === 'bus';
       const color = coche ? '#ff4d6d' : '#38e1ff';
-      const fondo = coche ? 'rgba(176,12,42,.92)' : 'rgba(0,110,130,.92)';
+      // La proximidad va en la propia etiqueta: un aviso aparte se montaba
+      // sobre el banner del HUD y en el cielo cuando la caja estaba arriba.
+      const distEst = esVehiculo(d.class) ? distanciaCocheEstimada(d.class, rw, w) : 0;
+      const cerca = distEst > 0 && distEst < 30;
+      const fondo = cerca ? 'rgba(176,12,42,.96)' : coche ? 'rgba(176,12,42,.92)' : 'rgba(0,110,130,.92)';
       // Trazo oscuro bajo el color: la caja se lee igual sobre cielo, asfalto
       // claro o el salpicadero. En móvil el mínimo sube a 3 px.
       ctx.lineWidth = Math.max(3, w * 0.006);
@@ -2985,7 +3028,7 @@
       ctx.strokeStyle = color;
       ctx.strokeRect(rx, ry, rw, rh);
 
-      const texto = `${etiquetaObjeto(d.class)} ${Math.round(d.score * 100)}%`;
+      const texto = `${cerca ? '⚠ ' : ''}${etiquetaObjeto(d.class)} ${Math.round(d.score * 100)}%`;
       const altoEtiqueta = Math.max(22, Math.min(28, w * 0.045));
       ctx.font = `bold ${Math.max(13, altoEtiqueta * 0.6)}px sans-serif`;
       const anchoEtiqueta = Math.min(w * 0.72, Math.max(64, ctx.measureText(texto).width + 12));
@@ -2997,8 +3040,6 @@
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
       ctx.fillText(texto, etiquetaX + 6, etiquetaY + altoEtiqueta / 2);
-      if (!esVehiculo(d.class)) continue;
-      const distEst = distanciaCocheEstimada(d.class, rw, w);
       if (!distEst) continue;
       const distTexto = `~${distEst} m`;
       ctx.font = `bold ${Math.max(12, Math.min(18, w * 0.028))}px sans-serif`;
@@ -3010,21 +3051,10 @@
       ctx.strokeText(distTexto, rx + 4, distY);
       ctx.fillStyle = distEst < 30 ? '#ff4d6d' : distEst < 60 ? '#fbbf24' : '#fff';
       ctx.fillText(distTexto, rx + 4, distY);
-      if (distEst < 30) {
-        const aviso = '⚠ PROXIMIDAD';
-        ctx.font = `bold ${Math.max(13, Math.min(17, w * 0.03))}px sans-serif`;
-        ctx.textAlign = 'center';
-        const avisoY = Math.max(16, etiquetaY - 10);
-        ctx.lineWidth = Math.max(3, w * 0.006);
-        ctx.strokeStyle = 'rgba(0,0,0,.75)';
-        ctx.strokeText(aviso, rx + rw / 2, avisoY);
-        ctx.fillStyle = '#ff8fa3';
-        ctx.fillText(aviso, rx + rw / 2, avisoY);
-        if (ahora - ultimoAvisoProximidad > 5000) {
-          ultimoAvisoProximidad = ahora;
-          ultimaVozCarril = ahora;
-          decir('Coche muy cerca delante.');
-        }
+      if (cerca && ahora - ultimoAvisoProximidad > 5000) {
+        ultimoAvisoProximidad = ahora;
+        ultimaVozCarril = ahora;
+        decir('Coche muy cerca delante.');
       }
     }
   }
@@ -3072,13 +3102,16 @@
   // flecha. Se alimenta de carrilSuave (misma fuente que los avisos) y quien
   // la llama se encarga de recortarla al cristal o a la mitad de cámara.
   function dibujarGuiaDireccionEn(ctx, w, h, alto) {
+    // Sin carriles detectados no se inventa la guía: una flecha sobre la
+    // calzada sin datos se lee como una indicación real y puede ser peligrosa.
+    const tieneCarril = !!(carrilSuave && carrilInfo?.ok && carrilSuave.conf > 0.22);
+    if (!tieneCarril) return;
     const baseY = Math.max(h * 0.16, Math.min(alto - 2, h * 0.92));
     const altoGuia = Math.max(30, Math.min(baseY - h * 0.06, h * 0.24));
     const topY = baseY - altoGuia;
-    const tieneCarril = !!(carrilSuave && carrilInfo?.ok && carrilSuave.conf > 0.22);
-    const sesgo = tieneCarril ? Math.max(-1, Math.min(1, carrilSuave.offset - carrilBias)) : 0;
-    const curv = tieneCarril ? Math.max(-1, Math.min(1, carrilSuave.curv)) : 0;
-    const anchoRel = tieneCarril && anchoRef > 0.2
+    const sesgo = Math.max(-1, Math.min(1, carrilSuave.offset - carrilBias));
+    const curv = Math.max(-1, Math.min(1, carrilSuave.curv));
+    const anchoRel = anchoRef > 0.2
       ? Math.max(0.65, Math.min(1.55, carrilSuave.ancho / anchoRef)) : 1;
     const cx = w / 2;
     const abajo = cx + sesgo * w * 0.17;
@@ -3163,9 +3196,9 @@
     ctxAr.beginPath();
     ctxAr.rect(0, 0, w, altoCapa);
     ctxAr.clip();
+    dibujarGuiaDireccionEn(ctxAr, w, h, altoCapa);
     dibujarDeteccionesEn(ctxAr, w, h, ahora);
     dibujarSenalCamaraEn(ctxAr, w, h);
-    dibujarGuiaDireccionEn(ctxAr, w, h, altoCapa);
     ctxAr.restore();
 
     // Línea de ruta dinámica (color según la maniobra) pintada sobre la calzada.
@@ -3199,7 +3232,10 @@
     dibujarPanelAr(w, h, s);
 
     // Señal de límite de velocidad (dato cartográfico de OpenStreetMap).
-    dibujarSenalLimite(w, h, ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null);
+    // Si la cámara ya leyó un disco numérico, el de mapa sobra y se montaba
+    // justo encima del real en la esquina: se omite mientras haya lectura.
+    const leidaCamara = !!(senalInfo && senalTexto && /^\d{1,3}$/.test(senalTexto));
+    if (!leidaCamara) dibujarSenalLimite(w, h, ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null);
   }
 
   function dibujarSenalLimite(w, h, kmh) {

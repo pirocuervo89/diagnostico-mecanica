@@ -1032,9 +1032,13 @@
         state.activePlaylist = null;
         state.libraryTab = libTab.dataset.tutLibtab;
         $$('[data-tut-libtab]').forEach(button => {
-          button.classList.toggle('active', button === libTab);
-          button.setAttribute('aria-selected', String(button === libTab));
+          const activa = button === libTab;
+          button.classList.toggle('active', activa);
+          button.setAttribute('aria-selected', String(activa));
+          button.tabIndex = activa ? 0 : -1;
         });
+        const panel = $('#tutLibContent');
+        if (panel && libTab.id) panel.setAttribute('aria-labelledby', libTab.id);
         renderLibrary();
         return;
       }

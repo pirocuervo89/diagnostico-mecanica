@@ -688,22 +688,24 @@
   }
 
   function bindStaticEvents() {
-    el('forumTabLogin')?.addEventListener('click', () => {
-      el('forumTabLogin').classList.add('active');
-      el('forumTabLogin').setAttribute('aria-selected', 'true');
-      el('forumTabRegister').classList.remove('active');
-      el('forumTabRegister').setAttribute('aria-selected', 'false');
-      el('forumLoginForm').classList.remove('hidden');
-      el('forumRegisterForm').classList.add('hidden');
-    });
-    el('forumTabRegister')?.addEventListener('click', () => {
-      el('forumTabRegister').classList.add('active');
-      el('forumTabRegister').setAttribute('aria-selected', 'true');
-      el('forumTabLogin').classList.remove('active');
-      el('forumTabLogin').setAttribute('aria-selected', 'false');
-      el('forumRegisterForm').classList.remove('hidden');
-      el('forumLoginForm').classList.add('hidden');
-    });
+    const activarAuth = registro => {
+      const activo = registro ? el('forumTabRegister') : el('forumTabLogin');
+      const inactivo = registro ? el('forumTabLogin') : el('forumTabRegister');
+      const panelActivo = registro ? el('forumRegisterForm') : el('forumLoginForm');
+      const panelInactivo = registro ? el('forumLoginForm') : el('forumRegisterForm');
+      activo?.classList.add('active');
+      activo?.setAttribute('aria-selected', 'true');
+      if (activo) activo.tabIndex = 0;
+      inactivo?.classList.remove('active');
+      inactivo?.setAttribute('aria-selected', 'false');
+      if (inactivo) inactivo.tabIndex = -1;
+      panelActivo?.classList.remove('hidden');
+      panelActivo?.removeAttribute('hidden');
+      panelInactivo?.classList.add('hidden');
+      panelInactivo?.setAttribute('hidden', '');
+    };
+    el('forumTabLogin')?.addEventListener('click', () => activarAuth(false));
+    el('forumTabRegister')?.addEventListener('click', () => activarAuth(true));
     el('forumLoginForm')?.addEventListener('submit', async e => {
       e.preventDefault();
       authStatus('Entrando...');

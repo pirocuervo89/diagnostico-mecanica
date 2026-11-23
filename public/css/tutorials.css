@@ -7,7 +7,13 @@
 .view.tut-view.active { display: flex; }
 .tut-view [hidden] { display: none !important; }
 .tut-page-head { align-items: flex-start; }
-.tut-page-head h1 {
+.tut-page-head h1, .tut-page-head h2 {
+  /* El gradiente global deja el texto transparente si falta su fondo; en esta
+     cabecera se usa color sólido para que el título se lea siempre. */
+  color: #f7f8ff !important;
+  -webkit-text-fill-color: #f7f8ff !important;
+  background: none !important;
+  filter: none !important;
   margin: 7px 0 6px;
   font-family: var(--display);
   font-size: clamp(2rem, 4vw, 3.5rem);
@@ -15,7 +21,22 @@
   letter-spacing: -.045em;
   text-transform: uppercase;
 }
-.tut-page-head .lead { max-width: 780px; color: var(--muted); font-size: 14px; line-height: 1.65; }
+/* Las capas visuales posteriores pintan los h2 de .page-head con degradado
+   transparente; esta cabecera necesita color propio y estable. La especificidad
+   con id evita que vuelva a quedar invisible. */
+#view-tutoriales .tut-page-head .eyebrow {
+  color: #fbbf24 !important;
+  -webkit-text-fill-color: #fbbf24 !important;
+  background: none !important;
+}
+#view-tutoriales .tut-page-head h1,
+#view-tutoriales .tut-page-head h2 {
+  color: #f7f8ff !important;
+  -webkit-text-fill-color: #f7f8ff !important;
+  background: none !important;
+  filter: none !important;
+}
+.tut-page-head .lead { max-width: 780px; color: #b9c4d0 !important; font-size: 14px; line-height: 1.65; }
 .tut-head-stats {
   display: flex;
   align-items: stretch;
@@ -486,7 +507,7 @@
   .tut-head-stats b { font-size: 19px; }
 }
 @media (max-width: 460px) {
-  .tut-page-head h1 { font-size: 1.85rem; }
+  .tut-page-head h1, .tut-page-head h2 { font-size: 1.85rem; }
   .tut-head-stats span { padding: 9px; }
   .tut-head-stats small { font-size: 7px; }
   .tut-detail h2 { font-size: 21px; }

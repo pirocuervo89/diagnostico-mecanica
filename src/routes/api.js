@@ -1449,8 +1449,15 @@ router.get('/products', (req, res) => {
   let list = Array.isArray(data) ? data : (data.productos || []);
 
   if (category && category !== 'Todos') {
-    const cat = String(category).toLowerCase();
-    list = list.filter(p => String(p.category || '').toLowerCase() === cat);
+    // El filtro llega de enlaces y formularios con alias («Líquidos»,
+    // «líquidos», «Liquidos y Quimicos»). Se compara sin acentos ni mayúsculas
+    // y, si no hay coincidencia exacta, se acepta el prefijo único.
+    const cat = fold(String(category).trim());
+    const categorias = [...new Set(list.map(p => String(p.category || '').trim()).filter(Boolean))];
+    const exacta = categorias.find(c => fold(c) === cat);
+    const parecida = exacta || categorias.find(c => fold(c).startsWith(cat));
+    const elegida = parecida || categorias.find(c => fold(c).includes(cat)) || String(category);
+    list = list.filter(p => fold(p.category) === fold(elegida));
   }
   if (subcategory && subcategory !== 'Todas') {
     const sub = String(subcategory).toLowerCase();

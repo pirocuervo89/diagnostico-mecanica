@@ -563,7 +563,9 @@
       if (typeof alTerminar === 'function') alTerminar();
     };
     try {
-      const respuesta = await fetch(`/api/tts?tl=es&q=${encodeURIComponent(texto)}`);
+      // El servidor trocea en frases de 190; 1000 es su tope por petición.
+      const recorte = String(texto || '').slice(0, 1000);
+      const respuesta = await fetch(`/api/tts?tl=es&q=${encodeURIComponent(recorte)}`);
       if (!respuesta.ok) throw new Error(`voz ${respuesta.status}`);
       const blob = await respuesta.blob();
       audioUrl = URL.createObjectURL(blob);

@@ -1405,3 +1405,11 @@ test('cuenta: eliminar exige confirmación, borra usuario y cierra sesión', asy
   });
   assert.equal(login.status, 401);
 });
+
+test('el filtro de categoría acepta el alias «Líquidos» sin acentos ni mayúsculas', async () => {
+  const r = await getJSON('/api/products?category=L%C3%ADquidos&lite=1');
+  assert.equal(r.status, 200);
+  assert.ok(Array.isArray(r.body), 'la lista ligera debe ser un array');
+  assert.ok(r.body.length > 0, '«Líquidos» debe devolver productos');
+  assert.ok(r.body.every(p => /^líquidos/i.test(String(p.category || ''))), 'solo productos de líquidos');
+});
