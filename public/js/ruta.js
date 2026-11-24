@@ -3041,10 +3041,14 @@
     const bbox = d && d.bbox;
     if (!Array.isArray(bbox) || bbox.length < 4 || !bbox.every(Number.isFinite)) return false;
     const [x, y, bw, bh] = bbox;
-    const vw = videoAr?.videoWidth || VW;
-    const vh = videoAr?.videoHeight || VH;
-    const cx = ((x + bw / 2) / vw) * VW;
-    const bottom = ((y + bh) / vh) * VH;
+    // El dibujo mapea el vídeo con object-fit: cover (mapearVideoRect); la
+    // comprobación de carril tiene que usar la misma proyección. Con el
+    // estirado anterior, en vertical un coche del carril derecho se evaluaba
+    // como si fuera por el centro y sí avisaba.
+    const [px, py] = mapearVideoPunto(x, y, VW, VH);
+    const [px2, py2] = mapearVideoPunto(x + bw, y + bh, VW, VH);
+    const cx = (px + px2) / 2;
+    const bottom = py2;
     if (bottom < VH * 0.62) return false;
     if (!carrilSuave || !carrilInfo?.ok || carrilSuave.conf <= 0.22) {
       // Sin carril fiable, solo el corredor central: un coche del carril de al
@@ -3124,11 +3128,22 @@
   function dibujarSenalCamaraEn(ctx, w, h) {
     if (!senalInfo) return;
     const caja = mapearVisionRect(senalInfo.x, senalInfo.y, senalInfo.w, senalInfo.h, w, h);
-    const cx = caja.x + caja.w / 2;
-    const cy = caja.y + caja.h / 2;
+    let cx = caja.x + caja.w / 2;
+    let cy = caja.y + caja.h / 2;
     const r = Math.max(12, Math.min(34, Math.max(caja.w, caja.h) * 0.62));
     const texto = senalTexto && /^\d{1,3}$/.test(senalTexto) ? senalTexto : '';
     if (texto) {
+      // En el ADAS el HUD superior se pinta después: si el disco cae debajo
+      // del buscador o de la tarjeta de maniobra, se recoloca como aviso
+      // flotante justo bajo el HUD en vez de quedar medio tapado.
+      if (vistaArActiva) {
+        const { dpr, u } = escalaHudAr(w, h);
+        const cajaBuscar = medirBuscarAr();
+        let techo = cajaBuscar ? (cajaBuscar.bottom + 6) * cajaBuscar.escala : 74 * dpr;
+        if (rutaActiva()?.steps?.length) techo += 126 * u;
+        if (cy - r < techo) cy = techo + r + 8 * dpr;
+        cx = Math.max(r + 4, Math.min(w - r - 4, cx));
+      }
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(255,255,255,.96)';
@@ -3714,16 +3729,38 @@
 
   // HUD del ADAS: tarjeta de maniobra grande bajo el buscador y barra inferior
   // con velocidad, límite, distancia y hora de llegada. Sin cabina ni coche.
+  // El canvas va escalado por DPR: todas las medidas del HUD se expresan en
+  // CSS y se multiplican por la densidad; si no, en un móvil con dpr 3 salen
+  // tres veces más pequeñas que en la QA.
+  function escalaHudAr(w, h) {
+    const dpr = canvasAr?.clientWidth ? w / canvasAr.clientWidth : 1;
+    return { dpr, u: Math.max(0.78, Math.min(1.18, h / dpr / 780)) * dpr };
+  }
+
+  // Posición del buscador en píxeles del canvas, cacheada 500 ms: leer el
+  // layout en cada fotograma a 60 fps no aporta nada y cuesta en móvil.
+  let metricaBuscarAr = null;
+  let metricaBuscarArTs = 0;
+  function medirBuscarAr() {
+    const ahora = performance.now();
+    if (metricaBuscarAr && ahora - metricaBuscarArTs < 500) return metricaBuscarAr;
+    metricaBuscarArTs = ahora;
+    const b = document.getElementById('rutaBuscar')?.getBoundingClientRect();
+    metricaBuscarAr = b && b.height
+      ? { bottom: b.bottom, escala: canvasAr?.clientWidth ? canvasAr.width / canvasAr.clientWidth : 1 }
+      : null;
+    return metricaBuscarAr;
+  }
+
   function dibujarPanelAr(w, h, s) {
-    const u = Math.max(0.78, Math.min(1.18, h / 780));
-    const x = 10;
+    const { dpr, u } = escalaHudAr(w, h);
+    const x = 10 * dpr;
     // La tarjeta empieza justo debajo del buscador real, también con notch.
-    const cajaBuscar = document.getElementById('rutaBuscar')?.getBoundingClientRect();
-    const escalaCss = canvasAr?.clientWidth ? w / canvasAr.clientWidth : 1;
-    const y = cajaBuscar && cajaBuscar.height
-      ? Math.max(74, (cajaBuscar.bottom + 6) * escalaCss)
-      : 74;
-    const pw = w - 20;
+    const cajaBuscar = medirBuscarAr();
+    const y = cajaBuscar
+      ? Math.max(74 * dpr, (cajaBuscar.bottom + 6) * cajaBuscar.escala)
+      : 74 * dpr;
+    const pw = w - 20 * dpr;
     const ph = 92 * u;
     const ruta = rutaActiva();
     // Sin ruta no se pinta tarjeta: el buscador ya está arriba y la cámara
@@ -3806,11 +3843,12 @@
   }
 
   function dibujarInferiorAr(w, h, s) {
-    const u = Math.max(0.78, Math.min(1.18, h / 780));
+    const { dpr, u } = escalaHudAr(w, h);
     const ruta = rutaActiva();
     const kmh = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
-    // Velocímetro abajo a la izquierda, por encima del botón de parar.
-    const vx = 10, vy = h - 156 * u, vw = 92 * u, vh = 62 * u;
+    // Velocímetro abajo a la izquierda, por encima del botón de parar (68 px
+    // CSS + 16 de margen), sin pisarlo en horizontal.
+    const vx = 10 * dpr, vy = h - 62 * u - 100 * dpr, vw = 92 * u, vh = 62 * u;
     rrect(vx, vy, vw, vh, 16 * u);
     ctxAr.fillStyle = 'rgba(5,11,20,.9)';
     ctxAr.fill();
