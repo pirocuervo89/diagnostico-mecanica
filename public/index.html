@@ -44,7 +44,8 @@
   <link rel="stylesheet" href="/css/omega.css?v=20261119a">
   <link rel="stylesheet" href="/css/aurora.css?v=20261119a">
   <link rel="stylesheet" href="/css/halo.css?v=20261120b">
-  <link rel="stylesheet" href="/css/ruta.css?v=20261126a14">
+  <link rel="stylesheet" href="/css/ruta.css?v=20261125a1">
+  <link rel="stylesheet" href="/css/centinela.css?v=20261124a1">
   <link rel="stylesheet" href="/css/interfaz-animada.css?v=20261122c">
   <link rel="stylesheet" href="/css/movil-ligero.css?v=20261121a">
   <meta property="og:type" content="website">  <meta property="og:site_name" content="Diagnóstico y Mecánica">
@@ -227,6 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button data-view="fiabilidad" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Fiabilidad</button>
     <button data-view="chat" type="button"><svg class="ic"><use href="#i-chat"></use></svg>Chat IA</button>
     <button data-view="ruta" type="button" title="Mapa, GPS, navegación y radares"><svg class="ic"><use href="#i-pin"></use></svg>Ruta</button>
+    <button data-view="centinela" type="button" title="Vigilancia local con la cámara del móvil"><svg class="ic"><use href="#i-camera"></use></svg>Centinela</button>
     <button data-view="informe" type="button"><svg class="ic"><use href="#i-file"></use></svg>Informe</button>
     <button data-view="foro" type="button"><svg class="ic"><use href="#i-forum"></use></svg>Foro</button>
     <button data-view="contacto" type="button"><svg class="ic"><use href="#i-mail"></use></svg>Contacto</button>
@@ -1961,8 +1963,6 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
       <canvas id="ruta3d" class="ruta-3d" aria-hidden="true" hidden></canvas>
       <canvas id="rutaCoche3d" class="ruta-coche3d" aria-hidden="true"></canvas>
       <video id="rutaArVideo" class="ruta-ar-video" autoplay playsinline muted></video>
-      <img id="rutaCabinaFoto" class="ruta-cabina-foto" src="/img/cabina-gt4-ar.webp?v=20261126b2" alt="" aria-hidden="true">
-      <canvas id="rutaCabina3d" class="ruta-cabina3d" aria-hidden="true"></canvas>
       <canvas id="rutaArCanvas" class="ruta-ar-canvas" aria-hidden="true"></canvas>
       <div class="ruta-hud">
         <div id="rutaBanner" class="ruta-banner" hidden>
@@ -1974,7 +1974,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
           <div class="ruta-banner-eta" id="rutaBannerEta">-- min</div>
         </div>
         <form id="rutaBuscar" class="ruta-search" role="search">
-          <input id="rutaDestino" type="search" autocomplete="off" placeholder="¿A dónde vas? Calle, ciudad o sitio" aria-label="Destino">
+          <input id="rutaDestino" type="search" autocomplete="off" placeholder="¿A dónde vas?" aria-label="Destino">
           <button type="button" id="rutaMicro" class="ruta-mic" aria-label="Decir el destino por voz" title="Decir el destino por voz"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
           <button type="submit" aria-label="Buscar destino"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
         </form>
@@ -1991,8 +1991,8 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
         </button>
         <button id="rutaNoche" class="ruta-fab ruta-fab-noche" type="button" aria-pressed="true" aria-label="Modo noche del mapa" title="Cambiar a mapa de día">🌙</button>
         <button id="rutaFull" class="ruta-fab ruta-fab-full" type="button" aria-pressed="false" aria-label="Pantalla completa" title="Pantalla completa (F)">⛶</button>
-        <button id="ruta3dToggle" class="ruta-fab ruta-fab-3d" type="button" aria-pressed="false" aria-label="Vista 3D de conducción" title="Vista 3D de conducción">📷</button>
-        <button id="rutaArToggle" class="ruta-fab ruta-fab-ar" type="button" aria-pressed="false" aria-label="ADAS AR (Realidad Aumentada)" title="ADAS AR (cámara + ruta)">🎮</button>
+        <button id="ruta3dToggle" class="ruta-fab ruta-fab-3d" type="button" aria-pressed="false" aria-label="Vista AR (cámara completa)" title="Vista AR (cámara completa)">📷</button>
+        <button id="rutaArToggle" class="ruta-fab ruta-fab-ar" type="button" aria-pressed="false" aria-label="ADAS cámara completa" title="ADAS: cámara, carril y ruta">🎮</button>
         <button id="rutaParar" class="ruta-fab ruta-fab-parar" type="button" aria-label="Detener navegación" title="Detener navegación" hidden>⏹</button>
         <button id="rutaDemo" class="ruta-fab ruta-fab-demo" type="button" aria-pressed="false" aria-label="Modo demostración" title="Modo demostración">▶️</button>
         <button id="rutaCalibrar" class="ruta-fab ruta-fab-calibrar" type="button" aria-label="Calibrar AR" title="Calibrar AR con la orientación del móvil">🎯</button>
@@ -2168,6 +2168,89 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     </div>
   </section>
 
+
+  <!-- ===================== CENTINELA ===================== -->
+  <section id="view-centinela" class="view" data-estado="desarmado">
+    <header class="page-head cent-head">
+      <div>
+        <span class="eyebrow">VIGILANCIA LOCAL · ANDROID</span>
+        <h2>Modo Centinela</h2>
+        <p>La cámara vigila alrededor del coche y guarda los clips en este dispositivo. Nada se sube a Internet.</p>
+      </div>
+      <span class="cent-pill" id="centEstadoPill" data-estado="desarmado"><i></i><span id="centEstadoTexto">Desarmado</span></span>
+    </header>
+
+    <div class="cent-shell" id="centShell" data-estado="desarmado">
+      <div class="cent-stage" id="centStage">
+        <video id="centVideo" class="cent-video" autoplay playsinline muted aria-label="Cámara del centinela"></video>
+        <div class="cent-cover" id="centCover">
+          <span class="cent-eye" aria-hidden="true">◉</span>
+          <strong id="centCoverTitle">Centinela desarmado</strong>
+          <small id="centCoverText">Arma la vigilancia para activar la cámara.</small>
+        </div>
+        <div class="cent-live" id="centLive" hidden><i></i> VIGILANDO</div>
+        <div class="cent-rec" id="centRec" hidden><i></i> REC <span id="centRecTime">00:00 / 00:15</span></div>
+        <div class="cent-alert" id="centAlerta" role="alert" hidden>
+          <b id="centAlertaTitulo">Evento detectado</b>
+          <span id="centAlertaTexto">Grabando…</span>
+        </div>
+        <button class="cent-full" id="centFull" type="button" aria-label="Pantalla completa" title="Pantalla completa">⛶</button>
+      </div>
+
+      <div class="cent-control">
+        <button id="centArmar" class="cent-arm" type="button" aria-pressed="false">
+          <span class="cent-arm-icon" aria-hidden="true">◉</span>
+          <span><b id="centArmarTexto">Armar centinela</b><small id="centArmarSub">Cámara y micrófono locales</small></span>
+        </button>
+        <div class="cent-meta">
+          <span id="centStatus" role="status" aria-live="polite">Desarmado. No se está grabando.</span>
+          <span id="centUso">Calculando almacenamiento…</span>
+        </div>
+        <div class="cent-quick">
+          <button id="centMantener" class="btn ghost" type="button">Mantener pantalla encendida</button>
+          <button id="centAvisos" class="btn ghost" type="button">Activar avisos</button>
+        </div>
+      </div>
+
+      <div class="cent-grid">
+        <section class="panel cent-panel" aria-labelledby="centAjustesTitle">
+          <div class="panel-head">
+            <div><span class="eyebrow">AJUSTES</span><h3 id="centAjustesTitle">Vigilancia</h3></div>
+          </div>
+          <div class="cent-settings">
+            <label>Sensibilidad
+              <select id="centSensibilidad">
+                <option value="baja">Baja</option>
+                <option value="media" selected>Media</option>
+                <option value="alta">Alta</option>
+              </select>
+            </label>
+            <label>Duración del clip
+              <select id="centDuracion">
+                <option value="15" selected>15 segundos</option>
+                <option value="30">30 segundos</option>
+                <option value="60">60 segundos</option>
+              </select>
+            </label>
+            <label class="cent-check"><input id="centAudio" type="checkbox" checked> Grabar audio local</label>
+            <label class="cent-check"><input id="centNotificar" type="checkbox"> Aviso local al detectar</label>
+          </div>
+          <div class="cent-note"><b>Límites:</b> 1 GB por dispositivo · retención 5 días · al superar el tope se borran los clips más antiguos. <b>WhatsApp:</b> próximamente (fase 2, sin credenciales en el cliente).</div>
+          <button id="centBorrarTodo" class="btn ghost danger" type="button">Borrar todos los clips</button>
+        </section>
+
+        <section class="panel cent-panel" aria-labelledby="centGaleriaTitle">
+          <div class="panel-head">
+            <div><span class="eyebrow">GALERÍA LOCAL</span><h3 id="centGaleriaTitle">Clips guardados</h3></div>
+            <span id="centCount" class="tag">0</span>
+          </div>
+          <div id="centGallery" class="cent-gallery"><p class="muted">Todavía no hay clips.</p></div>
+        </section>
+      </div>
+
+      <p class="cent-limit">En web, si bloqueas la pantalla o cambias de app, Android suspende la cámara y el centinela se detiene; la UI te avisa. Para vigilancia con la pantalla apagada hace falta una app nativa. El clip empieza al detectar el evento (el navegador no permite un pre-roll fiable de 5 s); si el evento continúa, se alarga hasta 60 s.</p>
+    </div>
+  </section>
 
   <!-- ===================== FORO DE MECÁNICOS ===================== -->
   <section id="view-foro" class="view" data-pane="list">
@@ -2457,7 +2540,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <script src="/js/obd.js?v=20261105c"></script>
 <script src="/js/tutorials.js?v=20261124a1"></script>
 
-<script src="/js/voz.js?v=20261124a1"></script>
+<script src="/js/voz.js?v=20261124a2"></script>
 <script src="/js/dictado.js?v=20261121a"></script>
 <script src="/js/micro-permiso.js?v=20261120b"></script>
 
@@ -2465,6 +2548,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <script src="/js/tienda.js?v=20261121c"></script>
 <script src="/js/planes.js?v=20261113a"></script>
 <script src="/js/app.js?v=20261124a2"></script>
+<script src="/js/centinela.js?v=20261124a1"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>
@@ -2542,7 +2626,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     if ((location.hash || '').replace('#', '') === 'ruta') cargarRuta();
   })();
   </script>
-  <script src="/js/ruta.js?v=20261124a1"></script>
+  <script src="/js/ruta.js?v=20261125a1"></script>
   <script src="/js/maya-incidente.js?v=20261120c"></script>
 </body>
 </html>

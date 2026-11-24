@@ -1088,6 +1088,14 @@
     mantenerPantalla(document.querySelector('.view.active')?.id || 'home');
   }
 
+  // El centinela pide la pantalla encendida solo al armar; la vista por sí
+  // sola no la mantiene. Al soltar se reevalúa la vista actual: si el usuario
+  // pasó a Ruta mientras el centinela se desarmaba, el wake lock de Ruta sigue.
+  window.CentinelaPantalla = {
+    mantener: () => pedirPantallaEncendida(),
+    soltar: () => mantenerPantalla(vistaPantalla)
+  };
+
   // Desde cualquier punto de la app: saludar y ponerse a escuchar. La portada
   // usa esto en "Preguntar" para que Maya arranque sola.
   window.MayaSaludo = (hablar = true) => saludarMaya(hablar);

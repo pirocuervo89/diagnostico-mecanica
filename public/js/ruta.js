@@ -641,15 +641,18 @@
   function pintarRecientes() {
     const box = view.querySelector('#rutaRecientes');
     if (!box) return;
+    // Al conducir no se muestran recientes: tapaban la tarjeta de maniobra.
+    if (navegando) { box.hidden = true; box.innerHTML = ''; return; }
     const lista = leerRecientes();
     if (!lista.length) { box.hidden = true; box.innerHTML = ''; return; }
     box.hidden = false;
     box.innerHTML = '<span class="ruta-recientes-titulo">Recientes</span>' +
       lista.map(r => `<button type="button" class="ruta-reciente" data-lat="${r.lat}" data-lon="${r.lon}" data-nombre="${String(r.nombre).replace(/"/g, '&quot;')}">${r.nombre}</button>`).join('');
     box.querySelectorAll('[data-lat]').forEach(b => {
-      b.addEventListener('click', () => {
+      b.addEventListener('click', async () => {
         elDestino.value = b.dataset.nombre;
-        fijarDestino(Number(b.dataset.lat), Number(b.dataset.lon), b.dataset.nombre);
+        await fijarDestino(Number(b.dataset.lat), Number(b.dataset.lon), b.dataset.nombre);
+        if (rutaActiva() && (vistaArActiva || vista3dActiva) && !navegando) alternarNavegacion();
       });
     });
   }
@@ -661,12 +664,15 @@
     if (elDestino.value.trim().length < 3) { elResultados.hidden = true; pintarRecientes(); return; }
     temporizadorBusqueda = setTimeout(() => buscar(elDestino.value), 550);
   });
-  elResultados?.addEventListener('click', e => {
+  elResultados?.addEventListener('click', async e => {
     const btn = e.target.closest('[data-lat]');
     if (!btn) return;
     elResultados.hidden = true;
-    elDestino.value = btn.dataset.nombre || 'Destino';
-    fijarDestino(Number(btn.dataset.lat), Number(btn.dataset.lon), btn.dataset.nombre || 'Destino');
+    const nombre = btn.dataset.nombre || 'Destino';
+    elDestino.value = nombre;
+    await fijarDestino(Number(btn.dataset.lat), Number(btn.dataset.lon), nombre);
+    // En cámara/3D, elegir destino arranca la guía sin un segundo toque.
+    if (rutaActiva() && (vistaArActiva || vista3dActiva) && !navegando) alternarNavegacion();
   });
 
   // ------------------------------------------------------------ ruta
@@ -824,6 +830,11 @@
       // Al arrancar, el panel de inicio desaparece y todo pasa a pantalla
       // completa: solo carretera, coche y avisos.
       elPanel.hidden = true;
+      // El buscador sigue disponible, pero sus listas no deben tapar el HUD.
+      elResultados.hidden = true;
+      const recientesNav = view.querySelector('#rutaRecientes');
+      if (recientesNav) { recientesNav.hidden = true; recientesNav.innerHTML = ''; }
+      elDestino?.blur();
       elShell?.classList.add('ruta-completa');
       document.body.classList.add('ruta-pantalla-completa');
       if (elShell?.requestFullscreen && !document.fullscreenElement) {
@@ -1024,8 +1035,6 @@
   let signos3d = [];
   let imagenCoche3d = null;
   let spriteCoche3d = null;
-  let imagenFondo3d = null;
-  let fondo3dListo = false;
   let zoomFondo3d = 1;
   let botones3d = [];
   let stream3d = null;
@@ -1069,12 +1078,6 @@
     if (v && v.srcObject) v.srcObject = null;
   }
 
-  function cargarFondo3d() {
-    if (imagenFondo3d) return;
-    imagenFondo3d = new Image();
-    imagenFondo3d.onload = () => { fondo3dListo = true; };
-    imagenFondo3d.src = '/img/gps-3d-gemini.webp?v=20261126c1';
-  }
   // Cargar la imagen del coche GT4
   imagenCoche3d = new Image();
   imagenCoche3d.src = '/img/hero/golf-hero.webp';
@@ -1779,61 +1782,47 @@
     }
     const w = canvas3d.width, h = canvas3d.height;
     const ahora = performance.now();
-    const t = ahora / 1000;
     ultimoFrame3d = ahora;
-    cargarFondo3d();
-    // 1) Escena base: la imagen de referencia (cockpit + carretera pintada).
-    dibujarFondo3d(w, h, t);
-    // 2) La mitad superior se sustituye por la cámara en vivo: se borra la
-    //    carretera/árboles/señales pintadas y se pinta el video real.
-    const lineaHorizonte = h * 0.5;
     const v = (typeof videoAr !== 'undefined' ? videoAr : null) || document.getElementById('rutaArVideo');
-    if (camara3dActiva && v && v.readyState >= 2 && v.videoWidth) {
-      ctx3d.save();
-      ctx3d.beginPath();
-      ctx3d.rect(0, 0, w, lineaHorizonte);
-      ctx3d.clip();
-      const vw = v.videoWidth, vh = v.videoHeight;
-      const escalaV = Math.max(w / vw, h / vh);
-      const dvw = vw * escalaV, dvh = vh * escalaV;
-      const dvx = (w - dvw) / 2;
-      const dvy = (h - dvh) / 2;
-      ctx3d.drawImage(v, dvx, dvy, dvw, dvh);
-      ctx3d.restore();
+    // La cámara ocupa toda la escena: sin coche, salpicadero ni imagen de
+    // referencia. Si aún no hay cámara se ve un fondo neutro, nunca el coche.
+    if (!camara3dActiva || !v || v.readyState < 2 || !v.videoWidth || !dibujarCamara3d(w, h, v, zoomFondo3d)) {
+      const g = ctx3d.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, '#0a1220');
+      g.addColorStop(1, '#13202f');
+      ctx3d.fillStyle = g;
+      ctx3d.fillRect(0, 0, w, h);
+      ctx3d.fillStyle = 'rgba(226,232,240,.9)';
+      ctx3d.font = `600 ${Math.max(14, Math.min(22, w * 0.04))}px system-ui, sans-serif`;
+      ctx3d.textAlign = 'center';
+      ctx3d.textBaseline = 'middle';
+      ctx3d.fillText('Cámara no disponible', w / 2, h / 2);
     }
-    // Objetos, señal y guía de dirección: misma capa que AR, recortada a la
-    // mitad de cámara para no invadir el salpicadero.
+    // Objetos, señal y guía comparten la cámara a pantalla completa. El zoom
+    // digital se aplica al vídeo y a las capas con la misma transformación
+    // alrededor del centro para que las cajas sigan cuadrando.
     ctx3d.save();
-    ctx3d.beginPath();
-    ctx3d.rect(0, 0, w, lineaHorizonte);
-    ctx3d.clip();
-    dibujarGuiaDireccionEn(ctx3d, w, h, lineaHorizonte);
+    if (zoomFondo3d !== 1) {
+      ctx3d.translate(w / 2, h / 2);
+      ctx3d.scale(zoomFondo3d, zoomFondo3d);
+      ctx3d.translate(-w / 2, -h / 2);
+    }
+    dibujarGuiaDireccionEn(ctx3d, w, h, h);
     dibujarDeteccionesEn(ctx3d, w, h, Date.now());
     dibujarSenalCamaraEn(ctx3d, w, h);
     ctx3d.restore();
     dibujarHud3d(w, h);
   }
 
-  // La vista 3D usa la imagen de referencia del Gemini como escena real de
-  // conducción. El HUD se redibuja encima para que los datos sean reales.
-  function dibujarFondo3d(w, h, t) {
-    if (fondo3dListo && imagenFondo3d) {
-      const iw = imagenFondo3d.naturalWidth, ih = imagenFondo3d.naturalHeight;
-      // Cobertura completa sin deformar: se recorta lo justo por los lados.
-      const escala = Math.max(w / iw, h / ih) * zoomFondo3d;
-      const dw = iw * escala, dh = ih * escala;
-      // Micro-paralaje: da sensación de avance sin mover el punto de fuga.
-      const avance = Math.min(1, Math.abs(velocidad) / 120);
-      const dx = (w - dw) / 2 + Math.sin(t * 0.55) * (1.2 + avance * 1.8);
-      const dy = (h - dh) / 2 + Math.cos(t * 0.43) * (0.8 + avance * 1.2);
-      ctx3d.drawImage(imagenFondo3d, dx, dy, dw, dh);
-    } else {
-      const g = ctx3d.createLinearGradient(0, 0, 0, h);
-      g.addColorStop(0, '#0b1620');
-      g.addColorStop(1, '#1b2a1f');
-      ctx3d.fillStyle = g;
-      ctx3d.fillRect(0, 0, w, h);
-    }
+  // Cámara a pantalla completa con cobertura tipo object-fit: cover. El zoom
+  // digital se centra en la pantalla y se comparte con las capas de visión.
+  function dibujarCamara3d(w, h, v, zoom = 1) {
+    const vw = v.videoWidth, vh = v.videoHeight;
+    if (!vw || !vh) return false;
+    const escala = Math.max(w / vw, h / vh) * zoom;
+    const dw = vw * escala, dh = vh * escala;
+    ctx3d.drawImage(v, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    return true;
   }
 
   function panel3d(x, y, ancho, alto, radio = 14, alpha = 0.86) {
@@ -1895,7 +1884,7 @@
     const calle = s?.name || ruta?.name || 'Calle o carretera';
 
     // --- Tarjeta de próximo giro (arriba izquierda, escala de la referencia)
-    const cw = Math.min(w * 0.42, 330 * u);
+    const cw = Math.min(w * 0.50, 330 * u);
     const ch = 92 * u;
     panel3d(10 * u, 10 * u, cw, ch, 16 * u, 0.90);
     ctx3d.fillStyle = 'rgba(255,255,255,.06)';
@@ -1909,14 +1898,14 @@
     ctx3d.fillStyle = '#f8fafc';
     ctx3d.font = `800 ${19 * u}px system-ui, sans-serif`;
     const titulo = s?.instruction || (s ? `Gira a la ${s.modifier === 'left' ? 'izquierda' : 'derecha'}` : 'Continúa recto');
-    ctx3d.fillText(titulo.slice(0, 28), 64 * u, 38 * u);
+    ctx3d.fillText(titulo.slice(0, 28), 64 * u, 38 * u, Math.max(40, cw - 74 * u));
     ctx3d.fillStyle = '#cbd5e1';
     ctx3d.font = `600 ${14 * u}px system-ui, sans-serif`;
     const dist = s?.distance ? (s.distance > 1000 ? `${(s.distance/1000).toFixed(1)} km` : `${Math.round(s.distance)} m`) : (rest > 1000 ? `${(rest/1000).toFixed(1)} km` : `${Math.round(rest)} m`);
     ctx3d.fillText(`en ${dist}`, 64 * u, 60 * u);
     ctx3d.fillStyle = 'rgba(148,163,184,.9)';
     ctx3d.font = `500 ${12 * u}px system-ui, sans-serif`;
-    ctx3d.fillText(calle.slice(0, 30), 64 * u, 80 * u);
+    ctx3d.fillText(calle.slice(0, 30), 64 * u, 80 * u, Math.max(40, cw - 74 * u));
 
     // --- Brújula (arriba derecha)
     const cxBru = w - 48 * u;
@@ -1941,13 +1930,13 @@
     ctx3d.fillText('N', cxBru, cyBru - 24 * u);
 
     // --- Botonera lateral derecha
-    const bx = w - 34 * u;
-    let by = Math.max(74 * u, cyBru + 52 * u);
-    const pasoB = 42 * u;
-    const rB = 17 * u;
+    const bx = w - 36 * u;
+    let by = Math.max(76 * u, cyBru + 54 * u);
+    const pasoB = 47 * u;
+    const rB = 19 * u;
     const botones = ['+', '−', '🎙', '⚙', '⛽', '⏱'];
     const acciones = [
-      () => { zoomFondo3d = Math.min(1.65, zoomFondo3d + 0.12); },
+      () => { zoomFondo3d = Math.min(1.6, zoomFondo3d + 0.12); },
       () => { zoomFondo3d = Math.max(1, zoomFondo3d - 0.12); },
       () => document.getElementById('rutaMicro')?.click(),
       () => detener3d(),
@@ -1964,7 +1953,7 @@
       ctx3d.textAlign = 'center';
       ctx3d.textBaseline = 'middle';
       ctx3d.fillText(b, bx, by + (b === '+' ? -1 : 1));
-      botones3d.push({ x: bx, y: by, r: Math.max(22, rB + 8), accion: acciones[i] });
+      botones3d.push({ x: bx, y: by, r: Math.max(25, rB + 9), accion: acciones[i] });
       by += pasoB;
     }
 
@@ -1992,7 +1981,7 @@
     }
 
     // --- Tarjeta ETA (abajo centro)
-    const ew = Math.min(w * 0.48, 430 * u), eh = 74 * u, ex = (w - ew) / 2, ey = h - 90 * u;
+    const ew = Math.min(w * 0.42, 380 * u), eh = 74 * u, ex = (w - ew) / 2, ey = h - 90 * u;
     panel3d(ex, ey, ew, eh, 18 * u, 0.88);
     ctx3d.textAlign = 'left';
     ctx3d.textBaseline = 'middle';
@@ -2009,7 +1998,8 @@
     ctx3d.fillText(min ? `${min} min` : '-- min', ex + ew * 0.72, ey + 15 * u);
     ctx3d.fillStyle = '#f8fafc';
     ctx3d.font = `700 ${14 * u}px system-ui, sans-serif`;
-    ctx3d.fillText(calle.slice(0, 34), ex + ew / 2, ey + 47 * u);
+    ctx3d.textAlign = 'center';
+    ctx3d.fillText(calle.slice(0, 34), ex + ew / 2, ey + 47 * u, Math.max(40, ew - 20 * u));
     ctx3d.strokeStyle = 'rgba(34,211,238,.55)';
     ctx3d.lineWidth = 2 * u;
     ctx3d.beginPath(); ctx3d.moveTo(ex + 14 * u, ey + eh - 1); ctx3d.lineTo(ex + ew - 14 * u, ey + eh - 1); ctx3d.stroke();
@@ -2021,15 +2011,15 @@
       () => iniciarAr()
     ];
     for (const [i, icono] of ['◎', '➜'].entries()) {
-      const x = w - 30 * u - i * 50 * u;
+      const x = w - 26 * u - i * 52 * u;
       ctx3d.fillStyle = i === 0 ? 'rgba(37,99,235,.92)' : 'rgba(10,13,18,.86)';
-      ctx3d.beginPath(); ctx3d.arc(x, byBtn, 20 * u, 0, Math.PI * 2); ctx3d.fill();
+      ctx3d.beginPath(); ctx3d.arc(x, byBtn, 22 * u, 0, Math.PI * 2); ctx3d.fill();
       ctx3d.strokeStyle = 'rgba(255,255,255,.16)'; ctx3d.lineWidth = 1; ctx3d.stroke();
       ctx3d.fillStyle = '#f8fafc';
-      ctx3d.font = `700 ${18 * u}px system-ui, sans-serif`;
+      ctx3d.font = `700 ${19 * u}px system-ui, sans-serif`;
       ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
       ctx3d.fillText(icono, x, byBtn + 1);
-      botones3d.push({ x, y: byBtn, r: Math.max(24, 23 * u), accion: accionesInferiores[i] });
+      botones3d.push({ x, y: byBtn, r: Math.max(27, 25 * u), accion: accionesInferiores[i] });
     }
 
     // --- Avisos de estado
@@ -2078,7 +2068,7 @@
     // Un solo modo de vista a la vez: si AR está abierto, se cierra.
     if (typeof vistaArActiva !== 'undefined' && vistaArActiva && typeof detenerAr === 'function') detenerAr();
     vista3dActiva = true;
-    cargarFondo3d();
+    zoomFondo3d = 1;
     arrancarCamara3d();
     // Visión compartida: al entrar en 3D se parte del mismo estado limpio.
     initVision();
@@ -2096,7 +2086,7 @@
     document.getElementById('ruta3dToggle')?.classList.add('activo');
     document.getElementById('ruta3dToggle')?.setAttribute('aria-pressed', 'true');
     document.querySelector('.ruta-shell')?.classList.add('ruta-3d-activo');
-    // Ocultar el coche WebGL: la escena de referencia ya trae el habitáculo.
+    // La cámara llena la escena; el coche WebGL no se usa en este modo.
     const canvasCoche = document.getElementById('rutaCoche3d');
     if (canvasCoche) canvasCoche.style.display = 'none';
     moduloCoche3d?.activar?.(false);
@@ -2541,11 +2531,20 @@
       // Segmentos claros de la fila (las líneas discontinuas dejan huecos).
       const runs = [];
       let ini = -1;
+      // Umbral adaptativo por fila: con sol directo o sombra, un 150 fijo
+      // perdía el carril. Se toma el brillo máximo de la fila y se exige un
+      // porcentaje alto, con suelo y techo para no detectar asfalto claro.
+      let brilloFila = 0;
+      for (let x = 2; x < VW - 2; x++) {
+        const i = (y * VW + x) * 4;
+        brilloFila = Math.max(brilloFila, datos[i], datos[i + 1], datos[i + 2]);
+      }
+      const umbralClaro = Math.max(118, Math.min(205, brilloFila * 0.62));
       for (let x = 2; x < VW - 2; x++) {
         const i = (y * VW + x) * 4;
         const r = datos[i], g = datos[i + 1], b = datos[i + 2];
         const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
-        if (mx > 150 && (mx - mn) < 45) { if (ini < 0) ini = x; }
+        if (mx > umbralClaro && (mx - mn) < 45) { if (ini < 0) ini = x; }
         else if (ini >= 0) {
           const largo = x - ini;
           if (largo >= 2 && largo <= VW * 0.12) runs.push((ini + x - 1) / 2);
@@ -2890,8 +2889,14 @@
       videoAr.srcObject = streamAr;
       await videoAr.play().catch(() => {});
       vistaArActiva = true;
-      document.getElementById('rutaArToggle')?.classList.add('activo');
-      document.getElementById('rutaArToggle')?.setAttribute('aria-pressed', 'true');
+      const botonAr = document.getElementById('rutaArToggle');
+      botonAr?.classList.add('activo');
+      botonAr?.setAttribute('aria-pressed', 'true');
+      if (botonAr) {
+        botonAr.textContent = '✕';
+        botonAr.title = 'Salir del ADAS';
+        botonAr.setAttribute('aria-label', 'Salir del ADAS');
+      }
       document.querySelector('.ruta-shell')?.classList.add('ruta-ar-activo');
       // Pantalla completa real: sin barra del navegador no hay franja que corte
       // la cámara. Se pide dentro del gesto del botón AR.
@@ -2906,7 +2911,11 @@
       canvasAr.classList.add('activo');
       videoAr.classList.add('activo');
       ajustarTamanoAr();
-      prepararCabinaFoto();
+      // La cámara ocupa el 100 %: se retira cualquier resto de cabina o coche.
+      const fotoCabina = document.getElementById('rutaCabinaFoto');
+      if (fotoCabina) fotoCabina.style.display = 'none';
+      const cabina3d = document.getElementById('rutaCabina3d');
+      if (cabina3d) cabina3d.style.display = 'none';
       iniciarSensoresAr();
       initVision();
       // Arranque rápido: reiniciar búfer y analizar el primer fotograma ya.
@@ -2926,7 +2935,9 @@
         animacionAr = requestAnimationFrame(loop);
       };
       loop();
-      avisar('ADAS AR activado. Cámara trasera en directo.', 'ok', 4000);
+      avisar('ADAS activado. Cámara trasera y guía de carril.', 'ok', 4000);
+      // Si ya hay una ruta, se arranca la guía sin pedir otro toque.
+      if (rutaActiva() && !navegando) setTimeout(() => { if (vistaArActiva && !navegando) alternarNavegacion(); }, 350);
     } catch (e) {
       avisar(`No se pudo acceder a la cámara (${e.name}: ${e.message}).`, 'error', 8000);
       console.error('Error cámara AR:', e);
@@ -2943,8 +2954,14 @@
       streamAr = null;
     }
     if (videoAr) videoAr.srcObject = null;
-    document.getElementById('rutaArToggle')?.classList.remove('activo');
-    document.getElementById('rutaArToggle')?.setAttribute('aria-pressed', 'false');
+    const botonAr = document.getElementById('rutaArToggle');
+    botonAr?.classList.remove('activo');
+    botonAr?.setAttribute('aria-pressed', 'false');
+    if (botonAr) {
+      botonAr.textContent = '🎮';
+      botonAr.title = 'ADAS: cámara, carril y ruta';
+      botonAr.setAttribute('aria-label', 'ADAS cámara completa');
+    }
     document.querySelector('.ruta-shell')?.classList.remove('ruta-ar-activo');
     try { screen.orientation?.unlock?.(); } catch (_e) { /* nada */ }
     if (canvasAr) canvasAr.classList.remove('activo');
@@ -3006,9 +3023,51 @@
 
   // Capa común de objetos: cajas, etiqueta traducida y distancia orientativa.
   // La usan AR y 3D leyendo el mismo deteccionesAr.
+  const CLASES_RIESGO = new Set(['car', 'truck', 'bus', 'motorcycle', 'bicycle', 'person']);
+  const AVISO_RIESGO = {
+    car: 'Coche muy cerca delante.',
+    truck: 'Camión muy cerca delante.',
+    bus: 'Autobús muy cerca delante.',
+    motorcycle: 'Moto en la trayectoria.',
+    bicycle: 'Bicicleta en la trayectoria.',
+    person: 'Persona en la trayectoria.'
+  };
+
+  // Solo interesa lo que está en el carril o justo delante. Se proyecta el
+  // centro-bajo de la caja con la misma geometría que analizarVision; si no
+  // hay carril fiable se usa un corredor central conservador. Así un coche
+  // aparcado en el arcén o una persona en la acera no generan caja ni voz.
+  function enTrayectoria(d) {
+    const bbox = d && d.bbox;
+    if (!Array.isArray(bbox) || bbox.length < 4 || !bbox.every(Number.isFinite)) return false;
+    const [x, y, bw, bh] = bbox;
+    const vw = videoAr?.videoWidth || VW;
+    const vh = videoAr?.videoHeight || VH;
+    const cx = ((x + bw / 2) / vw) * VW;
+    const bottom = ((y + bh) / vh) * VH;
+    if (bottom < VH * 0.62) return false;
+    if (!carrilSuave || !carrilInfo?.ok || carrilSuave.conf <= 0.22) {
+      // Sin carril fiable, solo el corredor central: un coche del carril de al
+      // lado o aparcado en el arcén no debe generar aviso.
+      return Math.abs(cx - VW / 2) < VW * 0.13;
+    }
+    const ROI_Y0 = VH * 0.55;
+    const ROI_Y1 = VH * 0.98;
+    const dY = Math.max(ROI_Y0, Math.min(ROI_Y1, bottom));
+    const dn = (ROI_Y1 - dY) / (ROI_Y1 - ROI_Y0);
+    const medio = (VW * 0.92 + (VW * 0.34 - VW * 0.92) * dn) / 2;
+    const u = (cx - VW / 2) / medio;
+    const uL = carrilSuave.aL * dn * dn + carrilSuave.bL * dn + carrilSuave.cL;
+    const uR = carrilSuave.aR * dn * dn + carrilSuave.bR * dn + carrilSuave.cR;
+    // Margen estrecho: el aviso es para lo que está dentro de mi carril, no
+    // para el coche que va por el carril de al lado.
+    const margen = 0.06;
+    return u >= Math.min(uL, uR) - margen && u <= Math.max(uL, uR) + margen;
+  }
+
   function dibujarDeteccionesEn(ctx, w, h, ahora) {
-    const esVehiculo = c => c === 'car' || c === 'truck' || c === 'bus' || c === 'motorcycle';
     for (const d of deteccionesAr) {
+      if (!enTrayectoria(d)) continue;
       const [x, y, bw, bh] = d.bbox;
       const caja = mapearVideoRect(x, y, bw, bh, w, h);
       const rx = caja.x, ry = caja.y, rw = caja.w, rh = caja.h;
@@ -3017,8 +3076,10 @@
       const color = coche ? '#ff4d6d' : '#38e1ff';
       // La proximidad va en la propia etiqueta: un aviso aparte se montaba
       // sobre el banner del HUD y en el cielo cuando la caja estaba arriba.
-      const distEst = esVehiculo(d.class) ? distanciaCocheEstimada(d.class, rw, w) : 0;
-      const cerca = distEst > 0 && distEst < 30;
+      const esRiesgo = CLASES_RIESGO.has(d.class);
+      const distEst = esRiesgo ? distanciaCocheEstimada(d.class, rw, w) : 0;
+      const tocaAbajo = ry + rh >= h * (2 / 3);
+      const cerca = esRiesgo && ((distEst > 0 && distEst < 30) || tocaAbajo);
       const fondo = cerca ? 'rgba(176,12,42,.96)' : coche ? 'rgba(176,12,42,.92)' : 'rgba(0,110,130,.92)';
       // Trazo oscuro bajo el color: la caja se lee igual sobre cielo, asfalto
       // claro o el salpicadero. En móvil el mínimo sube a 3 px.
@@ -3054,7 +3115,7 @@
       if (cerca && ahora - ultimoAvisoProximidad > 5000) {
         ultimoAvisoProximidad = ahora;
         ultimaVozCarril = ahora;
-        decir('Coche muy cerca delante.');
+        decir(AVISO_RIESGO[d.class] || 'Vehículo muy cerca delante.');
       }
     }
   }
@@ -3158,7 +3219,12 @@
     ctx.setLineDash([]);
     ctx.shadowBlur = 0;
 
-    const ang = Math.atan2(arriba - medio, altoGuia * 0.62);
+    // La flecha sigue la próxima maniobra de la ruta, no solo la curva del
+    // carril: así la guía dice «izquierda/derecha» como un GPS.
+    const pasoRuta = rutaActiva()?.steps?.[paso];
+    const modRuta = String(pasoRuta?.modifier || '');
+    const sesgoRuta = modRuta.includes('left') ? -0.5 : modRuta.includes('right') ? 0.5 : 0;
+    const ang = Math.atan2(arriba - medio, altoGuia * 0.62) + sesgoRuta;
     const tam = Math.max(12, Math.min(26, w * 0.038));
     ctx.translate(arriba, topY);
     ctx.rotate(ang);
@@ -3185,57 +3251,19 @@
     ctxAr.clearRect(0, 0, w, h);
 
     // La visión corre en un único bucle compartido con la vista 3D. Aquí solo
-    // se pinta ese estado: objetos, señal y guía dentro del cristal.
+    // se pinta ese estado sobre la cámara completa: sin recorte de cristal,
+    // sin cabina y sin dibujo de coche.
     const ahora = Date.now();
-    // En horizontal la foto 16:9 deja el cristal en una franja de ~56 px y la
-    // guía quedaría cortada. La capa usa ese alto como mínimo, sin bajar del
-    // 42 % de la pantalla (calzada de la foto, nunca el salpicadero).
-    const cristalAlto = baseCristalAr(h);
-    const altoCapa = Math.max(cristalAlto, h * 0.42);
-    ctxAr.save();
-    ctxAr.beginPath();
-    ctxAr.rect(0, 0, w, altoCapa);
-    ctxAr.clip();
-    dibujarGuiaDireccionEn(ctxAr, w, h, altoCapa);
+    dibujarGuiaDireccionEn(ctxAr, w, h, h);
     dibujarDeteccionesEn(ctxAr, w, h, ahora);
     dibujarSenalCamaraEn(ctxAr, w, h);
-    ctxAr.restore();
 
-    // Línea de ruta dinámica (color según la maniobra) pintada sobre la calzada.
     const ruta = rutaActiva();
     const s = ruta?.steps?.[paso] || ruta?.steps?.[0];
 
-    // HUD: velocidad
-    // Cabina: 3D real si está disponible; si no, dibujo 2D de respaldo.
-    const dist = ruta ? restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0) : 0;
-    const eta = ruta ? Math.round((ruta.duration || 0) / 60) : 0;
-    if (cabinaFotoLista) {
-      // La foto ya dibuja volante, cuadro y consola; no se pinta cabina encima.
-    } else if (cabina3dLista && moduloCabina3d) {
-      const v = velocidad;
-      const marcha = v < 1 ? 'N' : v < 20 ? '1' : v < 40 ? '2' : v < 70 ? '3' : v < 100 ? '4' : '5';
-      moduloCabina3d.actualizar({
-        velocidad: v,
-        marcha,
-        distancia: dist,
-        eta,
-        color: colorManiobra(s),
-        maniobra: instruccion(s),
-        calle: s?.name || '',
-        limite: ultimaPos ? (limiteActual(ultimaPos.lat, ultimaPos.lon) || 0) : 0
-      });
-    } else {
-      dibujarCockpit(w, h, s, ruta);
-    }
-
-    // Panel superior de maniobra.
+    // HUD de navegación: maniobra grande bajo el buscador y barra inferior.
     dibujarPanelAr(w, h, s);
-
-    // Señal de límite de velocidad (dato cartográfico de OpenStreetMap).
-    // Si la cámara ya leyó un disco numérico, el de mapa sobra y se montaba
-    // justo encima del real en la esquina: se omite mientras haya lectura.
-    const leidaCamara = !!(senalInfo && senalTexto && /^\d{1,3}$/.test(senalTexto));
-    if (!leidaCamara) dibujarSenalLimite(w, h, ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null);
+    dibujarInferiorAr(w, h, s);
   }
 
   function dibujarSenalLimite(w, h, kmh) {
@@ -3358,7 +3386,9 @@
   // con su caja anterior, se suaviza la posición y se conserva ~0,7 s si un
   // fotograma no lo detecta. Así el recuadro sigue al vehículo sin temblar.
   function estabilizarDetecciones(preds, ahora) {
-    const nuevas = (preds || []).filter(p => p && p.score > 0.5 && Array.isArray(p.bbox));
+    // Las personas suelen salir con algo menos de confianza que un coche;
+    // se les da un umbral ligeramente menor sin abrir la puerta a la basura.
+    const nuevas = (preds || []).filter(p => p && p.score > (p.class === 'person' ? 0.42 : 0.5) && Array.isArray(p.bbox));
     const previas = deteccionesAr || [];
     const usadas = new Set();
     const salida = [];
@@ -3568,8 +3598,8 @@
     ctxAr.fillText(`${min} min`, x + bw - 12, y + bh * 0.74);
   }
 
-  // Panel superior con la próxima maniobra, coloreado según su tipo.
-  function dibujarPanelAr(w, h, s) {
+  // Panel antiguo (se conserva como referencia, ya no se pinta).
+  function dibujarPanelArLegacy(w, h, s) {
     if (!s) return;
     const px = 12, py = 12, pw = w - 24, ph = Math.min(74, h * 0.1);
     rrect(px, py, pw, ph, 16);
@@ -3679,6 +3709,161 @@
         ctxAr.fillStyle = estadoCol;
         ctxAr.fillText(estadoTxt, cx2 + cw2 / 2, cy2 + ch2 / 2 + 1);
       }
+    }
+  }
+
+  // HUD del ADAS: tarjeta de maniobra grande bajo el buscador y barra inferior
+  // con velocidad, límite, distancia y hora de llegada. Sin cabina ni coche.
+  function dibujarPanelAr(w, h, s) {
+    const u = Math.max(0.78, Math.min(1.18, h / 780));
+    const x = 10;
+    // La tarjeta empieza justo debajo del buscador real, también con notch.
+    const cajaBuscar = document.getElementById('rutaBuscar')?.getBoundingClientRect();
+    const escalaCss = canvasAr?.clientWidth ? w / canvasAr.clientWidth : 1;
+    const y = cajaBuscar && cajaBuscar.height
+      ? Math.max(74, (cajaBuscar.bottom + 6) * escalaCss)
+      : 74;
+    const pw = w - 20;
+    const ph = 92 * u;
+    const ruta = rutaActiva();
+    // Sin ruta no se pinta tarjeta: el buscador ya está arriba y la cámara
+    // tiene que quedar limpia.
+    if (!s) return;
+    rrect(x, y, pw, ph, 18 * u);
+    const fondo = ctxAr.createLinearGradient(0, y, 0, y + ph);
+    fondo.addColorStop(0, 'rgba(5,11,20,.95)');
+    fondo.addColorStop(1, 'rgba(3,7,14,.88)');
+    ctxAr.fillStyle = fondo;
+    ctxAr.fill();
+    ctxAr.strokeStyle = 'rgba(56,225,255,.38)';
+    ctxAr.lineWidth = 1.5;
+    ctxAr.stroke();
+
+    const ab = ph - 20 * u;
+    const ax = x + 10 * u, ay = y + 10 * u;
+    const col = colorManiobra(s);
+    rrect(ax, ay, ab, ab, 14 * u);
+    ctxAr.fillStyle = hexRgba(col, 0.95);
+    ctxAr.fill();
+    ctxAr.fillStyle = '#04121c';
+    ctxAr.textAlign = 'center';
+    ctxAr.textBaseline = 'middle';
+    ctxAr.font = `800 ${ab * 0.58}px system-ui, sans-serif`;
+    ctxAr.fillText(flechaPara(s), ax + ab / 2, ay + ab / 2 + 2);
+
+    const d = ultimaPos && Number.isFinite(s.lat)
+      ? distancia(ultimaPos.lat, ultimaPos.lon, s.lat, s.lon)
+      : (s.distance || 0);
+    const distanciaTxt = d >= 1000 ? `${(d / 1000).toFixed(1)} km` : `${Math.max(5, Math.round(d / 5) * 5)} m`;
+    const tx = ax + ab + 12 * u;
+    const anchoTexto = pw - (tx - x) - 84 * u;
+    ctxAr.textAlign = 'left';
+    ctxAr.fillStyle = '#7ee7ff';
+    ctxAr.font = `800 ${11.5 * u}px system-ui, sans-serif`;
+    ctxAr.fillText(s.type === 'arrive' ? 'DESTINO' : `EN ${distanciaTxt}`.toUpperCase(), tx, y + 20 * u);
+    ctxAr.fillStyle = '#f8fafc';
+    ctxAr.font = `800 ${18 * u}px system-ui, sans-serif`;
+    ctxAr.fillText(recortar(instruccion(s), w < 520 ? 24 : 40), tx, y + 45 * u, Math.max(60, anchoTexto));
+    ctxAr.fillStyle = '#b8c8dc';
+    ctxAr.font = `600 ${12.5 * u}px system-ui, sans-serif`;
+    ctxAr.fillText(recortar(s.name || nombreDestino || 'Sigue la ruta', w < 520 ? 26 : 42), tx, y + 68 * u, Math.max(60, anchoTexto));
+
+    const rest = ruta ? restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0) : 0;
+    const min = ruta ? Math.max(1, Math.round((ruta.duration || 0) / 60)) : 0;
+    const llegada = ruta ? horaDeLlegada(ruta.duration * (ruta.distance ? Math.min(1, rest / ruta.distance) : 1)) : '--:--';
+    ctxAr.textAlign = 'right';
+    ctxAr.fillStyle = '#7ee7ff';
+    ctxAr.font = `800 ${11 * u}px system-ui, sans-serif`;
+    ctxAr.fillText('LLEGADA', x + pw - 12 * u, y + 20 * u);
+    ctxAr.fillStyle = '#f8fafc';
+    ctxAr.font = `800 ${19 * u}px system-ui, sans-serif`;
+    ctxAr.fillText(llegada, x + pw - 12 * u, y + 44 * u);
+    ctxAr.fillStyle = '#9fb6cf';
+    ctxAr.font = `600 ${12 * u}px system-ui, sans-serif`;
+    ctxAr.fillText(min ? `${min} min` : '-- min', x + pw - 12 * u, y + 66 * u);
+
+    if (carrilSuave && carrilInfo?.ok && carrilSuave.conf > 0.25) {
+      const curv = Math.abs(carrilSuave.curv);
+      const estado = curv < 0.05 ? '⬆ Carril centrado' : curv < 0.2 ? '↗ Curva suave' : '↗ Curva';
+      const anchoM = anchoRef > 0.2 ? (carrilSuave.ancho * anchoRealM) / anchoRef : 0;
+      const texto = `${estado} · ${anchoM > 0 ? `${anchoM.toFixed(1)} m` : 'ancho —'}`;
+      const ch = 26 * u;
+      ctxAr.font = `700 ${11.5 * u}px system-ui, sans-serif`;
+      const cw = Math.min(pw, Math.max(200 * u, ctxAr.measureText(texto).width + 28 * u));
+      const cx = x + (pw - cw) / 2;
+      const cy = y + ph + 6 * u;
+      rrect(cx, cy, cw, ch, ch / 2);
+      ctxAr.fillStyle = 'rgba(4,10,18,.78)';
+      ctxAr.fill();
+      ctxAr.strokeStyle = 'rgba(56,225,255,.28)';
+      ctxAr.lineWidth = 1;
+      ctxAr.stroke();
+      ctxAr.fillStyle = '#bfe9f7';
+      ctxAr.textAlign = 'center';
+      ctxAr.textBaseline = 'middle';
+      ctxAr.fillText(texto, cx + cw / 2, cy + ch / 2 + 1);
+    }
+  }
+
+  function dibujarInferiorAr(w, h, s) {
+    const u = Math.max(0.78, Math.min(1.18, h / 780));
+    const ruta = rutaActiva();
+    const kmh = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
+    // Velocímetro abajo a la izquierda, por encima del botón de parar.
+    const vx = 10, vy = h - 156 * u, vw = 92 * u, vh = 62 * u;
+    rrect(vx, vy, vw, vh, 16 * u);
+    ctxAr.fillStyle = 'rgba(5,11,20,.9)';
+    ctxAr.fill();
+    ctxAr.strokeStyle = 'rgba(56,225,255,.35)';
+    ctxAr.lineWidth = 1.2;
+    ctxAr.stroke();
+    ctxAr.textAlign = 'left';
+    ctxAr.textBaseline = 'alphabetic';
+    ctxAr.fillStyle = '#f8fafc';
+    ctxAr.font = `900 ${30 * u}px system-ui, sans-serif`;
+    ctxAr.fillText(String(Math.round(velocidad)), vx + 10 * u, vy + vh * 0.66);
+    ctxAr.fillStyle = '#93a8c0';
+    ctxAr.font = `700 ${9.5 * u}px system-ui, sans-serif`;
+    ctxAr.fillText('km/h', vx + 10 * u, vy + vh * 0.86);
+
+    if (kmh) {
+      const lx = vx + vw + 24 * u, ly = vy + vh / 2, lr = 22 * u;
+      ctxAr.beginPath();
+      ctxAr.arc(lx, ly, lr, 0, Math.PI * 2);
+      ctxAr.fillStyle = '#f8fafc';
+      ctxAr.fill();
+      ctxAr.strokeStyle = '#dc2626';
+      ctxAr.lineWidth = 4.5 * u;
+      ctxAr.beginPath();
+      ctxAr.arc(lx, ly, lr * 0.8, 0, Math.PI * 2);
+      ctxAr.stroke();
+      ctxAr.fillStyle = '#0f172a';
+      ctxAr.font = `900 ${16 * u}px system-ui, sans-serif`;
+      ctxAr.textAlign = 'center';
+      ctxAr.textBaseline = 'middle';
+      ctxAr.fillText(String(kmh), lx, ly + 1);
+    }
+
+    const rest = ruta ? restante(ultimaPos?.lat || 0, ultimaPos?.lon || 0) : 0;
+    const min = ruta ? Math.max(1, Math.round((ruta.duration || 0) / 60)) : 0;
+    const llegada = ruta ? horaDeLlegada(ruta.duration * (ruta.distance ? Math.min(1, rest / ruta.distance) : 1)) : '--:--';
+    const ew = Math.min(w - 220 * u, 210 * u);
+    if (ruta && ew > 90 * u) {
+      const ex = (w - ew) / 2, ey = h - 78 * u, eh = 50 * u;
+      rrect(ex, ey, ew, eh, 15 * u);
+      ctxAr.fillStyle = 'rgba(5,11,20,.9)';
+      ctxAr.fill();
+      ctxAr.strokeStyle = 'rgba(56,225,255,.3)';
+      ctxAr.lineWidth = 1.2;
+      ctxAr.stroke();
+      ctxAr.textAlign = 'left';
+      ctxAr.textBaseline = 'middle';
+      ctxAr.fillStyle = '#22d3ee';
+      ctxAr.font = `900 ${16 * u}px system-ui, sans-serif`;
+      ctxAr.fillText(rest >= 1000 ? `${(rest / 1000).toFixed(1)} km` : `${Math.round(rest)} m`, ex + 12 * u, ey + eh * 0.38);
+      ctxAr.fillStyle = '#cbd5e1';
+      ctxAr.font = `600 ${11 * u}px system-ui, sans-serif`;
+      ctxAr.fillText(`${min} min · ${llegada}`, ex + 12 * u, ey + eh * 0.72, ew - 20 * u);
     }
   }
 

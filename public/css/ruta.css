@@ -2718,10 +2718,10 @@ body.viendo-ruta .pwa-install { display: none !important; }
 
 /* Botón para alternar entre mapa 2D y vista 3D */
 #ruta3dToggle {
-  width: 56px !important;
-  height: 56px !important;
-  border-radius: 16px !important;
-  font-size: 20px !important;
+  width: 62px !important;
+  height: 62px !important;
+  border-radius: 17px !important;
+  font-size: 22px !important;
   font-weight: 700 !important;
   background: linear-gradient(135deg, rgba(167, 139, 250, .6), rgba(139, 92, 246, .6)) !important;
   border: 2px solid rgba(167, 139, 250, .8) !important;
@@ -2766,10 +2766,10 @@ body.viendo-ruta .pwa-install { display: none !important; }
 .ruta-shell.ruta-ar-activo .ruta-ar-canvas { display: block; }
 
 #rutaArToggle {
-  width: 56px !important;
-  height: 56px !important;
-  border-radius: 16px !important;
-  font-size: 20px !important;
+  width: 62px !important;
+  height: 62px !important;
+  border-radius: 17px !important;
+  font-size: 22px !important;
   font-weight: 700 !important;
   background: linear-gradient(135deg, rgba(255, 77, 109, .6), rgba(255, 107, 138, .6)) !important;
   border: 2px solid rgba(255, 77, 109, .8) !important;
@@ -3195,7 +3195,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   pointer-events: none;
   image-rendering: auto;
 }
-.ruta-shell.ruta-ar-activo .ruta-cabina-foto.foto-lista { display: block; }
+.ruta-shell.ruta-ar-activo .ruta-cabina-foto.foto-lista { display: none; }
 /* Con la cabina fotorrealista puesta, sólo quedan cámara y stop: los botones
    tapaban el volante y la consola de la foto. */
 .ruta-shell.ruta-ar-activo.ruta-foto-activa #rutaChat,
@@ -3204,9 +3204,9 @@ body.viendo-ruta .pwa-install { display: none !important; }
 .ruta-shell.ruta-ar-activo.ruta-foto-activa #rutaAnchoBtn { display: none !important; }
 .ruta-shell.ruta-ar-activo .ruta-cabina-foto.foto-lista + .ruta-cabina3d { display: none !important; }
 
-/* AR limpio: la cámara y el HUD del canvas mandan; nada de buscador, botones
-   ni paneles HTML encima del coche. Sólo queda el botón de parar. */
-.ruta-shell.ruta-ar-activo .ruta-hud > :not(#rutaParar) { display: none !important; }
+/* ADAS limpio: cámara a pantalla completa, buscador visible y controles
+   grandes. Los paneles del mapa y la cabina no se muestran. */
+.ruta-shell.ruta-ar-activo .ruta-hud > :not(#rutaBuscar):not(#rutaResultados):not(#rutaRecientes):not(#rutaAviso):not(#rutaParar):not(#rutaArToggle):not(#rutaVoz):not(#ruta3dToggle) { display: none !important; }
 .ruta-shell.ruta-ar-activo .ruta-ar-canvas { z-index: 5; }
 .ruta-shell.ruta-ar-activo .ruta-cabina-foto.foto-lista { z-index: 4; }
 
@@ -3224,7 +3224,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   display: none;
   pointer-events: none;
 }
-.ruta-shell.ruta-ar-activo .ruta-cabina3d { display: block; }
+.ruta-shell.ruta-ar-activo .ruta-cabina3d { display: none; }
 .ruta-shell.ruta-ar-activo .ruta-ar-canvas { z-index: 5; }
 
 /* Modo demostración */
@@ -3511,4 +3511,118 @@ body.viendo-ruta main {
 .ruta-shell.ruta-3d-activo .ruta-hud > #ruta3dToggle,
 .ruta-shell.ruta-3d-activo .ruta-hud > #rutaArToggle {
   display: none !important;
+}
+
+/* ============================================================
+   ADAS · cámara limpia 100 %, buscador y mandos táctiles grandes
+   ============================================================ */
+.ruta-cabina-foto,
+.ruta-cabina3d { display: none !important; }
+.ruta-shell.ruta-ar-activo .ruta-ar-video { z-index: 3; }
+.ruta-shell.ruta-ar-activo .ruta-ar-canvas { z-index: 5; }
+
+/* Buscador de destino: visible también al navegar y en pantalla completa. */
+.ruta-shell.ruta-ar-activo .ruta-search {
+  display: flex !important;
+  top: max(10px, env(safe-area-inset-top, 0px)) !important;
+  left: 10px !important;
+  right: 10px !important;
+  min-height: 58px;
+  padding: 7px 7px 7px 16px;
+  border-radius: 18px;
+  z-index: 1500;
+  background: rgba(4, 9, 16, .9);
+  border: 1.5px solid rgba(56, 225, 255, .4);
+  box-shadow: 0 18px 40px -20px rgba(0, 0, 0, .95), 0 0 28px -14px rgba(56, 225, 255, .7);
+}
+.ruta-shell.ruta-ar-activo .ruta-search input {
+  min-height: 44px;
+  font-size: 16.5px !important;
+  font-weight: 600;
+}
+.ruta-shell.ruta-ar-activo .ruta-search button,
+.ruta-shell.ruta-ar-activo .ruta-mic {
+  display: grid !important;
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px;
+  border-radius: 14px;
+}
+.ruta-shell.ruta-ar-activo .ruta-mic { background: rgba(56, 225, 255, .12); }
+.ruta-shell.ruta-ar-activo .ruta-results {
+  top: calc(max(10px, env(safe-area-inset-top, 0px)) + 66px) !important;
+  left: 10px !important;
+  right: 10px !important;
+  max-height: 54%;
+  z-index: 1600 !important;
+  background: rgba(4, 9, 16, .97);
+  border: 1.5px solid rgba(56, 225, 255, .35);
+}
+.ruta-shell.ruta-ar-activo .ruta-result { min-height: 50px; padding: 12px; }
+.ruta-shell.ruta-ar-activo .ruta-result b { font-size: 15px; }
+.ruta-shell.ruta-ar-activo .ruta-result small { font-size: 12px; }
+.ruta-shell.ruta-ar-activo .ruta-recientes:not([hidden]) {
+  display: flex !important;
+  top: calc(max(10px, env(safe-area-inset-top, 0px)) + 68px) !important;
+  left: 10px !important;
+  right: 10px !important;
+  z-index: 1450;
+  background: rgba(4, 9, 16, .92);
+}
+.ruta-shell.ruta-ar-activo .ruta-reciente {
+  min-height: 40px;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+.ruta-shell.ruta-ar-activo .ruta-alert {
+  top: calc(max(10px, env(safe-area-inset-top, 0px)) + 68px) !important;
+  left: 10px !important;
+  right: 10px !important;
+  z-index: 1550;
+  font-size: 14px !important;
+}
+
+/* Mandos grandes: parar a la izquierda, cámara/voz/3D a la derecha. */
+.ruta-shell.ruta-ar-activo .ruta-fab-parar {
+  left: 12px !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+  width: 68px !important;
+  height: 68px !important;
+  font-size: 26px !important;
+  z-index: 1700 !important;
+}
+.ruta-shell.ruta-ar-activo .ruta-hud > #rutaArToggle {
+  display: grid !important;
+  right: 12px !important;
+  left: auto !important;
+  top: auto !important;
+  bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+  width: 62px !important;
+  height: 62px !important;
+  font-size: 26px !important;
+  z-index: 1700 !important;
+}
+.ruta-shell.ruta-ar-activo .ruta-hud > #rutaVoz {
+  display: grid !important;
+  right: 12px !important;
+  left: auto !important;
+  top: auto !important;
+  bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + 74px) !important;
+  width: 56px !important;
+  height: 56px !important;
+  font-size: 22px !important;
+  z-index: 1650 !important;
+}
+.ruta-shell.ruta-ar-activo .ruta-hud > #ruta3dToggle {
+  display: grid !important;
+  right: 12px !important;
+  left: auto !important;
+  top: auto !important;
+  bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + 140px) !important;
+  width: 56px !important;
+  height: 56px !important;
+  font-size: 22px !important;
+  z-index: 1650 !important;
 }
