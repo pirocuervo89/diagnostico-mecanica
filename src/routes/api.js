@@ -1513,6 +1513,26 @@ router.get('/products', (req, res) => {
       subcategory: p.subcategory || '',
       price: p.price || '',
       image: p.image || '',
+      // La tarjeta exige el estado verificado para pintar foto y oferta; sin
+      // estos campos la parrilla salía sin imágenes ni botones de compra.
+      imageStatus: p.imageStatus || '',
+      linkStatus: p.linkStatus || '',
+      // Para la tarjeta basta la tienda; el ASIN completo va en la ficha.
+      priceSource: String(p.priceSource || '').split(' · ')[0],
+      priceCheckedAt: p.priceCheckedAt || '',
+      // Descripción corta y título de la ficha: alimentan la tarjeta y la
+      // extracción de modelos de coche compatible (app.js catalogExtractModels).
+      description: String(p.description || '').slice(0, 140),
+      listingTitle: String(p.listingTitle || '').slice(0, 80),
+      tags: Array.isArray(p.tags) ? p.tags.slice(0, 12) : [],
+      // Sin compatibilidad la tarjeta decía «Compatibilidad por confirmar» y el
+      // filtro por vehículo dejaba de encontrar los productos.
+      compatibility: p.compatibility
+        ? {
+            type: p.compatibility.type || '',
+            models: Array.isArray(p.compatibility.models) ? p.compatibility.models.slice(0, 20) : []
+          }
+        : null,
       // La etiqueta de afiliado tiene que viajar también en la lista ligera:
       // el botón "Ver oferta" de cada tarjeta compra desde aquí, y sin el tag
       // esa venta se perdía.

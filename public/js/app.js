@@ -2269,8 +2269,14 @@ function initCatalog() {
     debounce();
   });
   carInput?.addEventListener('change', () => {
-    const resolved = carInput.value ? catalogResolveCar(carInput.value) : null;
-    if (resolved?.resolved) carInput.value = resolved.label;
+    const raw = carInput.value.trim();
+    const resolved = raw ? catalogResolveCar(raw) : null;
+    const next = resolved?.resolved ? resolved.label : raw;
+    // Al pulsar una tarjeta, el navegador desenfoca este campo antes del clic.
+    // Si el valor ya está aplicado, volver a pintar la rejilla desmonta el
+    // botón y se pierde el primer toque; solo se recalcula si cambió de verdad.
+    if (next === catalogState.car) return;
+    if (resolved?.resolved) carInput.value = next;
     catalogApplyInputs();
   });
   queryInput?.addEventListener('input', debounce);
