@@ -2202,8 +2202,11 @@
   let videoAr = null;
   let modeloCoco = null;
   let deteccionesAr = [];
+  let obstaculosVision = [];
+  let siguienteTrackId = 1;
+  let avisosObjetos = new Map();
   let ultimoAnalisisAr = 0;
-  let ultimoAvisoProximidad = 0;
+  let ultimoAvisoObjeto = 0;
   let loopVision = 0;
   let ultimoObjetoVision = 0;
   let moduloCabina3d = null;
@@ -2413,6 +2416,7 @@
   let ultimoAvisoCarril = 0;
   let ultimoIntentoTexto = 0;
   let senalTexto = '';
+  let senalAvisada = '';
 
   function initVision() {
     if (lienzoVision) return;
@@ -2541,6 +2545,121 @@
     const B = (n * Sud - Sd * Su) / den;
     const C = (Su - B * Sd) / n;
     return { A: 0, B, C };
+  }
+
+  function centroCaja(b) {
+    return [b[0] + b[2] / 2, b[1] + b[3] / 2];
+  }
+
+  // COCO no trae la clase «cono». Se detecta un naranja compacto y vertical
+  // en la mitad inferior; se exige que aparezca dos fotogramas seguidos para
+  // no avisar de una camiseta o de un piloto. Es conservador a propósito.
+  function actualizarConosVision(candidatos, ahora) {
+    const previos = obstaculosVision.filter(o => o.class === 'cone');
+    const usados = new Set();
+    const salida = [];
+    const vw = videoAr?.videoWidth || 640;
+    const vh = videoAr?.videoHeight || 480;
+    for (const c of candidatos) {
+      let mejor = -1;
+      let mejorPunt = 0;
+      previos.forEach((prev, i) => {
+        if (usados.has(i)) return;
+        const solape = iouCajas(prev.bbox, c.bbox);
+        const [pcx, pcy] = centroCaja(prev.bbox);
+        const [ncx, ncy] = centroCaja(c.bbox);
+        const dist = Math.hypot((pcx - ncx) / vw, (pcy - ncy) / vh);
+        const punt = solape + Math.max(0, 1 - dist / 0.25) * 0.2;
+        if ((solape > 0.04 || dist < 0.2) && punt > mejorPunt) {
+          mejorPunt = punt;
+          mejor = i;
+        }
+      });
+      const prev = mejor >= 0 ? previos[mejor] : null;
+      if (prev) usados.add(mejor);
+      salida.push({
+        class: 'cone',
+        score: c.score,
+        bbox: c.bbox,
+        lastSeen: ahora,
+        trackId: prev?.trackId || `obj-${siguienteTrackId++}`,
+        visto: prev ? (prev.visto || 1) + 1 : 1
+      });
+    }
+    previos.forEach((prev, i) => {
+      if (!usados.has(i) && ahora - (prev.lastSeen || 0) < 700) salida.push(prev);
+    });
+    obstaculosVision = salida.slice(0, 4);
+  }
+
+  function detectarConosVision(datos, ahora) {
+    const y0 = Math.round(VH * 0.55);
+    const mascara = new Uint8Array(VW * VH);
+    let naranjas = 0;
+    for (let y = y0; y < VH; y++) {
+      for (let x = 0; x < VW; x++) {
+        const i = (y * VW + x) * 4;
+        const r = datos[i], g = datos[i + 1], b = datos[i + 2];
+        if (r > 165 && g > 45 && g < 175 && b < 95 && r - g > 40 && g - b > 5) {
+          mascara[y * VW + x] = 1;
+          naranjas++;
+        }
+      }
+    }
+    if (naranjas < 6) { actualizarConosVision([], ahora); return; }
+    const visto = new Uint8Array(VW * VH);
+    const candidatos = [];
+    for (let y = y0; y < VH; y++) {
+      for (let x = 0; x < VW; x++) {
+        const idx = y * VW + x;
+        if (!mascara[idx] || visto[idx]) continue;
+        const pila = [idx];
+        visto[idx] = 1;
+        let area = 0, minX = x, maxX = x, minY = y, maxY = y;
+        while (pila.length) {
+          const p = pila.pop();
+          const py = Math.floor(p / VW), px = p - py * VW;
+          area++;
+          if (px < minX) minX = px;
+          if (px > maxX) maxX = px;
+          if (py < minY) minY = py;
+          if (py > maxY) maxY = py;
+          for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+            const nx = px + dx, ny = py + dy;
+            if (nx < 0 || nx >= VW || ny < 0 || ny >= VH) continue;
+            const nIdx = ny * VW + nx;
+            if (mascara[nIdx] && !visto[nIdx]) { visto[nIdx] = 1; pila.push(nIdx); }
+          }
+        }
+        const ancho = maxX - minX + 1, alto = maxY - minY + 1;
+        const relleno = area / (ancho * alto);
+        const ratio = ancho / alto;
+        if (area < 8 || area > 500 || ancho < 2 || ancho > 24 || alto < 4 || alto > 42) continue;
+        if (ratio < 0.2 || ratio > 1.1 || relleno < 0.22 || maxY < VH * 0.62) continue;
+        const vw = videoAr?.videoWidth || 640;
+        const vh = videoAr?.videoHeight || 480;
+        candidatos.push({
+          bbox: [minX / VW * vw, minY / VH * vh, ancho / VW * vw, alto / VH * vh],
+          score: Math.min(0.95, 0.45 + area / 220)
+        });
+      }
+    }
+    candidatos.sort((a, b) => b.score - a.score);
+    actualizarConosVision(candidatos.slice(0, 2), ahora);
+  }
+
+  // Carteles de corte/obra: se leen con la API de texto del navegador cuando
+  // hay una señal roja estable. Se avisa una sola vez por cartel.
+  function avisarSenal(texto) {
+    const t = String(texto || '').toUpperCase().trim();
+    if (!t || t === senalAvisada) return;
+    if (/CORTE|CORTADA|CERRAD|OBRA|DESVIO|DESVÍO/.test(t)) {
+      senalAvisada = t;
+      decir('Calle cortada u obras. Reduce la velocidad.');
+    } else if (/STOP|CEDA/.test(t)) {
+      senalAvisada = t;
+      decir('Señal de stop. Reduce la velocidad.');
+    }
   }
 
   function analizarVision(ahora) {
@@ -2744,7 +2863,10 @@
       senalCandidata = null;
       senalCandidataDesde = 0;
       if (ahora > senalInfoHasta) senalInfo = null;
-      if (!senalInfo && ahora - senalInfoHasta > 2500) senalTexto = '';
+      if (!senalInfo && ahora - senalInfoHasta > 2500) {
+        senalTexto = '';
+        senalAvisada = '';
+      }
     }
 
     // Lectura opcional del número con la API de texto del navegador (si existe).
@@ -2753,11 +2875,20 @@
       try {
         const det = new window.TextDetector();
         det.detect(videoAr).then(lista => {
-          const nums = (lista || []).map(t => (String(t.rawValue || '').match(/\b(10|20|30|40|50|60|70|80|90|100|110|120|130)\b/) || [])[0]).filter(Boolean);
-          if (nums.length) senalTexto = nums[0];
+          const txt = (lista || []).map(t => String(t.rawValue || '').toUpperCase()).join(' ').replace(/\s+/g, ' ').trim();
+          const num = txt.match(/\b(10|20|30|40|50|60|70|80|90|100|110|120|130)\b/);
+          const clave = txt.match(/\b(CORTE|CORTADA|CERRAD[OA]|OBRA|DESVIO|DESVÍO|STOP|CEDA)\b/);
+          if (clave) {
+            senalTexto = clave[0];
+            avisarSenal(clave[0]);
+          } else if (num) {
+            senalTexto = num[0];
+          }
         }).catch(() => {});
       } catch (_e) { /* sin lector de texto */ }
     }
+
+    detectarConosVision(datos, ahora);
   }
 
   function dibujarVision(w, h) {
@@ -2977,6 +3108,11 @@
       bufferR = [];
       carrilSuave = null;
       deteccionesAr = [];
+      obstaculosVision = [];
+      siguienteTrackId = 1;
+      avisosObjetos.clear();
+      ultimoAvisoObjeto = 0;
+      senalAvisada = '';
       ultimoAnalisisVision = 0;
       analizarVision(arInicio);
       document.getElementById('rutaCalibrar')?.classList.remove('calibrado');
@@ -3000,6 +3136,10 @@
   function detenerAr() {
     vistaArActiva = false;
     deteccionesAr = [];
+    obstaculosVision = [];
+    siguienteTrackId = 1;
+    avisosObjetos.clear();
+    ultimoAvisoObjeto = 0;
     if (animacionAr) cancelAnimationFrame(animacionAr);
     animacionAr = null;
     if (streamAr) {
@@ -3053,6 +3193,7 @@
     senalCandidataDesde = 0;
     senalInfoHasta = 0;
     senalTexto = '';
+    senalAvisada = '';
     detenerVisionCompartida();
   }
 
@@ -3066,7 +3207,8 @@
     'traffic light': 'semáforo', 'stop sign': 'stop', 'fire hydrant': 'hidrante',
     dog: 'perro', cat: 'gato', horse: 'caballo', cow: 'vaca',
     backpack: 'mochila', umbrella: 'paraguas', handbag: 'bolso', suitcase: 'maleta',
-    bottle: 'botella', cup: 'vaso', chair: 'silla', bench: 'banco', bird: 'pájaro'
+    bottle: 'botella', cup: 'vaso', chair: 'silla', bench: 'banco', bird: 'pájaro',
+    cone: 'cono'
   };
 
   function etiquetaObjeto(clase) {
@@ -3076,15 +3218,14 @@
 
   // Capa común de objetos: cajas, etiqueta traducida y distancia orientativa.
   // La usan AR y 3D leyendo el mismo deteccionesAr.
-  const CLASES_RIESGO = new Set(['car', 'truck', 'bus', 'motorcycle', 'bicycle', 'person']);
-  const AVISO_RIESGO = {
-    car: 'Coche muy cerca delante.',
-    truck: 'Camión muy cerca delante.',
-    bus: 'Autobús muy cerca delante.',
-    motorcycle: 'Moto en la trayectoria.',
-    bicycle: 'Bicicleta en la trayectoria.',
-    person: 'Persona en la trayectoria.'
-  };
+  // Clases que pueden invadir el carril. El perro y el cono también cuentan:
+  // son obstáculos reales, no adornos del arcén.
+  const CLASES_RIESGO = new Set(['car', 'truck', 'bus', 'motorcycle', 'bicycle', 'person', 'dog', 'cone']);
+
+  function capitalizar(texto) {
+    const t = String(texto || '');
+    return t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+  }
 
   // Solo interesa lo que está en el carril o justo delante. Se proyecta el
   // centro-bajo de la caja con la misma geometría que analizarVision; si no
@@ -3122,15 +3263,51 @@
     return u >= Math.min(uL, uR) - margen && u <= Math.max(uL, uR) + margen;
   }
 
+  // Un aviso por objeto: el ID se conserva entre fotogramas y el mapa evita
+  // repetir la frase mientras siga delante. Si el tracker pierde la caja y la
+  // recupera con otro ID, la comprobación espacial también lo silencia.
+  function avisarObjeto(d, caja, distEst, ahora, w, h) {
+    if (!d || !caja || !CLASES_RIESGO.has(d.class)) return;
+    const id = d.trackId || `${d.class}:${Math.round(caja.x)}:${Math.round(caja.y)}`;
+    if (avisosObjetos.has(id)) return;
+    const cx = (caja.x + caja.w / 2) / Math.max(1, w);
+    const cy = (caja.y + caja.h / 2) / Math.max(1, h);
+    for (const a of avisosObjetos.values()) {
+      if (a.clase === d.class && ahora - a.ts < 15000
+        && Math.hypot(a.cx - cx, a.cy - cy) < 0.22) {
+        avisosObjetos.set(id, { clase: d.class, ts: ahora, cx, cy });
+        return;
+      }
+    }
+    // No se amontonan dos frases en el mismo segundo. El segundo objeto se
+    // avisará en el siguiente fotograma, una sola vez.
+    if (ahora - ultimoAvisoObjeto < 1000) return;
+    avisosObjetos.set(id, { clase: d.class, ts: ahora, cx, cy });
+    ultimoAvisoObjeto = ahora;
+    ultimaVozCarril = ahora;
+    const etiqueta = capitalizar(etiquetaObjeto(d.class));
+    const dist = distEst ? Math.max(2, Math.round(distEst)) : 0;
+    decir(dist
+      ? `${etiqueta} a ${dist} metros. Reduce la velocidad.`
+      : `${etiqueta} en tu trayectoria. Reduce la velocidad.`);
+    if (avisosObjetos.size > 40) {
+      for (const [k, v] of avisosObjetos) {
+        if (ahora - v.ts > 30000) avisosObjetos.delete(k);
+      }
+    }
+  }
+
   function dibujarDeteccionesEn(ctx, w, h, ahora) {
-    for (const d of deteccionesAr) {
+    const objetos = obstaculosVision.length ? deteccionesAr.concat(obstaculosVision) : deteccionesAr;
+    for (const d of objetos) {
+      if (d.class === 'cone' && (d.visto || 0) < 2) continue;
       if (!enTrayectoria(d)) continue;
       const [x, y, bw, bh] = d.bbox;
       const caja = mapearVideoRect(x, y, bw, bh, w, h);
       const rx = caja.x, ry = caja.y, rw = caja.w, rh = caja.h;
       if (rw < 8 || rh < 8) continue;
       const coche = d.class === 'car' || d.class === 'truck' || d.class === 'bus';
-      const color = coche ? '#ff4d6d' : '#38e1ff';
+      const color = coche ? '#ff4d6d' : d.class === 'cone' ? '#fb923c' : '#38e1ff';
       // La proximidad va en la propia etiqueta: un aviso aparte se montaba
       // sobre el banner del HUD y en el cielo cuando la caja estaba arriba.
       const esRiesgo = CLASES_RIESGO.has(d.class);
@@ -3169,11 +3346,7 @@
       ctx.strokeText(distTexto, rx + 4, distY);
       ctx.fillStyle = distEst < 30 ? '#ff4d6d' : distEst < 60 ? '#fbbf24' : '#fff';
       ctx.fillText(distTexto, rx + 4, distY);
-      if (cerca && ahora - ultimoAvisoProximidad > 5000) {
-        ultimoAvisoProximidad = ahora;
-        ultimaVozCarril = ahora;
-        decir(AVISO_RIESGO[d.class] || 'Vehículo muy cerca delante.');
-      }
+      if (cerca) avisarObjeto(d, caja, distEst, ahora, w, h);
     }
   }
 
@@ -3184,7 +3357,8 @@
     let cx = caja.x + caja.w / 2;
     let cy = caja.y + caja.h / 2;
     const r = Math.max(12, Math.min(34, Math.max(caja.w, caja.h) * 0.62));
-    const texto = senalTexto && /^\d{1,3}$/.test(senalTexto) ? senalTexto : '';
+    const texto = senalTexto && (/^\d{1,3}$/.test(senalTexto) || /^[A-ZÁÉÍÓÚÑ]{3,12}$/.test(senalTexto)) ? senalTexto : '';
+    const esNumero = /^\d+$/.test(texto);
     if (texto) {
       // En el ADAS el HUD superior se pinta después: si el disco cae debajo
       // del buscador o de la tarjeta de maniobra, se recoloca como aviso
@@ -3192,7 +3366,7 @@
       if (vistaArActiva) {
         const { dpr, u } = escalaHudAr(w, h);
         const cajaBuscar = medirBuscarAr();
-        let techo = cajaBuscar ? (cajaBuscar.bottom + 6) * cajaBuscar.escala : 74 * dpr;
+        let techo = cajaBuscar ? (cajaBuscar.bottom + 6) * cajaBuscar.escala : 10 * dpr;
         if (rutaActiva()?.steps?.length) techo += 126 * u;
         if (cy - r < techo) cy = techo + r + 8 * dpr;
         cx = Math.max(r + 4, Math.min(w - r - 4, cx));
@@ -3205,7 +3379,9 @@
       ctx.strokeStyle = '#c1121f';
       ctx.stroke();
       ctx.fillStyle = '#0a1018';
-      ctx.font = `bold ${Math.max(15, Math.min(24, r * 0.95, w * 0.065))}px sans-serif`;
+      ctx.font = `bold ${esNumero
+        ? Math.max(15, Math.min(24, r * 0.95, w * 0.065))
+        : Math.max(9, Math.min(16, r * 0.55, w * 0.045))}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(texto, cx, cy + 1);
@@ -3433,7 +3609,9 @@
     if (!anchoPx || !anchoCanvas) return null;
     const anchoReal = clase === 'truck' || clase === 'bus' ? 2.45
       : clase === 'motorcycle' || clase === 'bicycle' ? 0.8
-      : clase === 'person' ? 0.6 : 1.8;
+      : clase === 'person' ? 0.6
+      : clase === 'dog' ? 0.5
+      : clase === 'cone' ? 0.4 : 1.8;
     const focal = anchoCanvas * 0.9;
     return Math.max(2, Math.min(200, Math.round((focal * anchoReal) / anchoPx)));
   }
@@ -3454,33 +3632,45 @@
   // con su caja anterior, se suaviza la posición y se conserva ~0,7 s si un
   // fotograma no lo detecta. Así el recuadro sigue al vehículo sin temblar.
   function estabilizarDetecciones(preds, ahora) {
+    const vw = videoAr?.videoWidth || 640;
+    const vh = videoAr?.videoHeight || 480;
     // Las personas suelen salir con algo menos de confianza que un coche;
     // se les da un umbral ligeramente menor sin abrir la puerta a la basura.
     const nuevas = (preds || []).filter(p => p && p.score > (p.class === 'person' ? 0.42 : 0.5) && Array.isArray(p.bbox));
     const previas = deteccionesAr || [];
     const usadas = new Set();
     const salida = [];
+    const centro = b => [b[0] + b[2] / 2, b[1] + b[3] / 2];
     for (const pred of nuevas) {
       let mejor = -1;
-      let mejorIoU = 0;
+      let mejorPunt = 0;
       previas.forEach((prev, i) => {
         if (usadas.has(i) || prev.class !== pred.class) return;
         const solape = iouCajas(prev.bbox, pred.bbox);
-        if (solape > mejorIoU) { mejorIoU = solape; mejor = i; }
+        const [pcx, pcy] = centro(prev.bbox);
+        const [ncx, ncy] = centro(pred.bbox);
+        const dist = Math.hypot((pcx - ncx) / vw, (pcy - ncy) / vh);
+        const punt = solape + Math.max(0, 1 - dist / 0.22) * 0.18;
+        if ((solape > 0.08 || dist < 0.18) && punt > mejorPunt) {
+          mejorPunt = punt;
+          mejor = i;
+        }
       });
       const caja = pred.bbox.slice();
       let score = Number(pred.score) || 0;
-      if (mejor >= 0 && mejorIoU > 0.12) {
+      let trackId = `obj-${siguienteTrackId++}`;
+      if (mejor >= 0) {
         const prev = previas[mejor];
         usadas.add(mejor);
+        trackId = prev.trackId || trackId;
         for (let k = 0; k < 4; k++) caja[k] = prev.bbox[k] + (caja[k] - prev.bbox[k]) * 0.55;
         score = (prev.score || score) * 0.25 + score * 0.75;
       }
-      salida.push({ ...pred, bbox: caja, score, lastSeen: ahora });
+      salida.push({ ...pred, bbox: caja, score, lastSeen: ahora, trackId });
     }
     // Mantener un instante las cajas que no aparecen en este fotograma.
     previas.forEach((prev, i) => {
-      if (usadas.has(i) || salida.some(p => p.class === prev.class && iouCajas(p.bbox, prev.bbox) > 0.12)) return;
+      if (usadas.has(i) || salida.some(p => p.trackId === prev.trackId)) return;
       if (ahora - (prev.lastSeen || 0) < 700) salida.push({ ...prev, score: (prev.score || 0) * 0.9, lastSeen: prev.lastSeen || ahora });
     });
     return salida.slice(0, 12);
