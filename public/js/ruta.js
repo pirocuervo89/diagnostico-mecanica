@@ -1249,20 +1249,19 @@
 
   function construirTrazado3d(idxBase, w, h, horizonte, cx) {
     const segs = carretera3d;
-    const FOCAL = Math.max(300, w * 1.38) * zoomFondo3d;
     const anchoVia = tipoVia3d === 'autovia' ? 10.4 : tipoVia3d === 'ciudad' ? 7.2 : 8.2;
     const MAX = 260;
+    // Escala fija: sin perspectiva, para que la carretera se vea plana.
+    const escalaPlana = Math.max(16, Math.min(26, w * 0.065)) * (zoomFondo3d || 1);
     const out = [];
     const proyectar = (s, latM) => {
-      const persp = FOCAL / Math.max(1.8, s);
-      const depth = Math.pow(Math.max(0, 1 - s / MAX), 1.35);
-      const escala = Math.min(48, persp * (0.72 + 0.28 * depth));
+      const depth = Math.max(0, 1 - s / MAX);
       return {
         s,
-        x: cx + latM * escala,
-        y: horizonte + (h - horizonte) * depth,
-        ancho: anchoVia * escala,
-        escala,
+        x: cx + latM * escalaPlana,
+        y: h - (h - horizonte) * (s / MAX),
+        ancho: anchoVia * escalaPlana,
+        escala: escalaPlana,
         lat: latM
       };
     };
@@ -1463,27 +1462,8 @@
         ctx3d.ellipse(cx0, cy0, 42 + i * 18, 8 + i * 2, 0, 0, Math.PI * 2);
         ctx3d.fill();
       }
-    }
-
-    if (tipo === 'montana') {
-      perfil3d(w, horizonte, horizonte - h * 0.01, h * 0.13, 1.4, noche ? '#0e2432' : '#6f8c83');
-      perfil3d(w, horizonte, horizonte + h * 0.005, h * 0.09, 2.8, noche ? '#0a1b28' : '#4f7566');
-      if (!noche) {
-        ctx3d.fillStyle = 'rgba(245,248,248,.82)';
-        ctx3d.beginPath();
-        ctx3d.moveTo(w * 0.18, horizonte - h * 0.13);
-        ctx3d.lineTo(w * 0.23, horizonte - h * 0.055);
-        ctx3d.lineTo(w * 0.13, horizonte - h * 0.055);
-        ctx3d.closePath(); ctx3d.fill();
-      }
-    } else if (tipo === 'autovia') {
-      perfil3d(w, horizonte, horizonte, h * 0.045, 0.4, noche ? '#0a1b28' : '#7a9a78');
-      perfil3d(w, horizonte, horizonte + 1, h * 0.026, 2.2, noche ? '#0b1f2b' : '#5f845e');
-    } else {
-      perfil3d(w, horizonte, horizonte, h * 0.038, 0.9, noche ? '#0b1c29' : '#7f9b82');
-    }
-
-    dibujarSkyline3d(w, horizonte, tipo);
+    }    // Terreno plano: sin colinas ni skyline para que la carretera no parezca
+    // una cuesta. El suelo se rellena más abajo de forma uniforme.
 
     const suelo = ctx3d.createLinearGradient(0, horizonte, 0, h);
     if (noche) {
@@ -2190,14 +2170,15 @@
   }
 
   function dibujarCocheGt4Detalle3d(w, h) {
-    const idx = indiceActual3d();
-    const curva = carretera3d[Math.min(carretera3d.length - 1, idx + 1)]?.curva || 0;
+    // El coche va en el carril derecho y apoyado sobre la calzada, no flotando.
+    const p0 = trazado3d.length ? trazado3d[0] : null;
     const cw = Math.max(126, Math.min(w * 0.26, h * 0.38, 250));
     const ch = cw * 0.54;
-    const base = h - Math.max(96, h * 0.115);
-    const tilt = Math.max(-3.4, Math.min(3.4, -curva * 0.18));
-    const rebote = navegando ? Math.sin((ultimoFrame3d || performance.now()) / 190) * Math.min(1.1, velocidad / 110) : 0;
-    const x = w / 2 + Math.max(-18, Math.min(18, -curva * 0.8));
+    const anchoVia0 = p0?.ancho || (w * 0.34);
+    const x = (p0?.x || w / 2) + anchoVia0 * 0.24;
+    const base = (p0?.y || h) - Math.max(2, ch * 0.02);
+    const tilt = 0;
+    const rebote = 0;
 
     ctx3d.save();
     ctx3d.translate(x, base + rebote);
@@ -2979,14 +2960,14 @@
       avisoToast3dHasta = performance.now() + 4200;
     }
     tipoVia3d = tipo;
-    const horizonte = h * (tipo === 'autovia' ? 0.31 : tipo === 'ciudad' || tipo === 'pueblo' ? 0.40 : tipo === 'montana' ? 0.28 : 0.33);
+    // Vista plana: horizonte alto para que la calzada ocupe casi toda la pantalla
+    // sin cuesta arriba.
+    const horizonte = h * 0.10;
     trazado3d = construirTrazado3d(idx, w, h, horizonte, w / 2);
     if (!trazado3d.length) return;
     dibujarFondoDetalle3d(w, h, horizonte, tipo);
-    dibujarEntornoDetalle3d(w, h, horizonte, tipo);
+    // Terreno plano y despejado: sin arbolado, edificios ni tráfico inventado.
     dibujarCalzadaDetalle3d(w, h, horizonte, tipo);
-    dibujarMobiliarioUrbano3d(w, h, tipo);
-    dibujarTrafico3d(w, h, tipo);
     dibujarSenalesDetalle3d(w, h, horizonte);
     dibujarCocheGt4Detalle3d(w, h);
     dibujarHud3d(w, h);
