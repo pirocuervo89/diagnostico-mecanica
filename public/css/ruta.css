@@ -2698,8 +2698,9 @@ body.viendo-ruta .pwa-install { display: none !important; }
   width: 100%;
   height: 100%;
   z-index: 950;
-  background: linear-gradient(180deg, #0a1220 0%, #0e1a2b 40%, #1a2a3f 100%);
+  background: #07111e;
   display: none;
+  touch-action: manipulation;
 }
 .ruta-3d.activo { display: block; }
 .ruta-shell.ruta-3d-activo { height: 100%; min-height: 0; }
@@ -2712,7 +2713,9 @@ body.viendo-ruta .pwa-install { display: none !important; }
   display: none;
   pointer-events: none;
 }
-.ruta-shell.ruta-3d-activo .ruta-coche3d { display: block; }
+/* El 3D ya no usa el canvas WebGL del coche: la escena completa se pinta en
+   #ruta3d (coche + carretera) y el HUD va encima. */
+.ruta-shell.ruta-3d-activo .ruta-coche3d { display: none; }
 .ruta-shell.ruta-3d-activo .ruta-map { display: none; }
 .ruta-shell.ruta-3d-activo .ruta-3d { display: block; }
 
@@ -2741,7 +2744,7 @@ body.viendo-ruta .pwa-install { display: none !important; }
   inset: 0;
   width: 100%;
   height: 100%;
-  /* La cámara llena el fondo; la cabina completa se coloca encima. */
+  /* La cámara llena el fondo; en AR no se coloca ninguna cabina encima. */
   object-fit: cover;
   z-index: 3;
   display: none;
@@ -2764,6 +2767,30 @@ body.viendo-ruta .pwa-install { display: none !important; }
 .ruta-shell.ruta-ar-activo .ruta-3d { display: none; }
 .ruta-shell.ruta-ar-activo .ruta-ar-video { display: block; }
 .ruta-shell.ruta-ar-activo .ruta-ar-canvas { display: block; }
+
+/* ADAS: la cámara es la pantalla completa. Sin cabina, salpicadero ni
+   volante; el vídeo y el canvas se fijan al viewport, no al alto del shell. */
+.ruta-shell.ruta-ar-activo .ruta-ar-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  object-fit: cover;
+  object-position: center;
+  z-index: 3;
+}
+.ruta-shell.ruta-ar-activo .ruta-ar-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 5;
+}
+.ruta-shell.ruta-ar-activo .ruta-cabina-foto,
+.ruta-shell.ruta-ar-activo .ruta-cabina3d,
+.ruta-shell.ruta-ar-activo .ruta-coche3d { display: none !important; }
 
 #rutaArToggle {
   width: 62px !important;
@@ -3625,4 +3652,32 @@ body.viendo-ruta main {
   height: 56px !important;
   font-size: 22px !important;
   z-index: 1650 !important;
+}
+
+/* La ayuda flotante general no pinta nada sobre el GPS/ADAS y además tapaba
+   los mandos del mapa (el 3D en horizontal, entre otros). */
+body.viendo-ruta #oxHelpFab { display: none !important; }
+
+/* Horizontal bajo (móvil girado, 360-430 px de alto): la columna vertical
+   de botones del mapa se salía de la pantalla y el botón ADAS quedaba
+   inalcanzable. Se reparte en dos columnas que caben completas. */
+@media (orientation: landscape) and (max-height: 430px) {
+  .view-gps-fullscreen .ruta-fab-gps,
+  .ruta-fab-gps { left: 12px !important; right: auto !important; bottom: 16px !important; }
+  .view-gps-fullscreen .ruta-fab-noche,
+  .ruta-fab-noche { left: 12px !important; right: auto !important; bottom: 80px !important; }
+  .view-gps-fullscreen .ruta-fab-full,
+  .ruta-fab-full { left: 12px !important; right: auto !important; bottom: 144px !important; }
+  .view-gps-fullscreen .ruta-fab-trafico,
+  .ruta-fab-trafico { left: 12px !important; right: auto !important; bottom: 208px !important; }
+  .view-gps-fullscreen .ruta-fab-ar,
+  .ruta-fab-ar { bottom: 16px !important; }
+  .view-gps-fullscreen .ruta-fab-3d,
+  .ruta-fab-3d { bottom: 92px !important; }
+  .view-gps-fullscreen .ruta-fab-voz,
+  .ruta-fab-voz { bottom: 158px !important; }
+  .view-gps-fullscreen .ruta-fab-chat,
+  .ruta-fab-chat { bottom: 224px !important; }
+  .view-gps-fullscreen .ruta-fab-brujula,
+  .ruta-fab-brujula { bottom: 290px !important; }
 }

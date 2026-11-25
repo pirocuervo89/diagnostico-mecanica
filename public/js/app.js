@@ -313,6 +313,9 @@ function buildAppMenu() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.dataset.view = src.dataset.view;
+    // Si una sección está oculta en los menús (p. ej. Centinela), su copia del
+    // menú lateral tampoco debe aparecer.
+    if (src.hidden) btn.hidden = true;
     btn.innerHTML = src.innerHTML;
     btn.addEventListener('click', () => {
       showView(src.dataset.view);

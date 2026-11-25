@@ -44,8 +44,8 @@
   <link rel="stylesheet" href="/css/omega.css?v=20261119a">
   <link rel="stylesheet" href="/css/aurora.css?v=20261119a">
   <link rel="stylesheet" href="/css/halo.css?v=20261120b">
-  <link rel="stylesheet" href="/css/ruta.css?v=20261125a1">
-  <link rel="stylesheet" href="/css/centinela.css?v=20261124a1">
+  <link rel="stylesheet" href="/css/ruta.css?v=20261125a3">
+  <link rel="stylesheet" href="/css/centinela.css?v=20261125a1">
   <link rel="stylesheet" href="/css/interfaz-animada.css?v=20261122c">
   <link rel="stylesheet" href="/css/movil-ligero.css?v=20261121a">
   <meta property="og:type" content="website">  <meta property="og:site_name" content="Diagnóstico y Mecánica">
@@ -216,6 +216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <nav id="nav" aria-label="Navegación principal">
     <button data-view="home" class="active" type="button"><svg class="ic"><use href="#i-gauge"></use></svg>Inicio</button>
     <button data-view="garaje" class="nav-garaje" type="button"><svg class="ic"><use href="#i-car"></use></svg>Mi garaje</button>
+    <button data-view="centinela" data-cent-menu type="button" title="Vigilancia local con la cámara del móvil"><svg class="ic"><use href="#i-camera"></use></svg>Centinela</button>
     <button data-view="obd" type="button"><svg class="ic"><use href="#i-cpu"></use></svg>OBD-II</button>
     <button data-view="testigos" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Testigos</button>
     <button data-view="diagnostico" type="button"><svg class="ic"><use href="#i-pulse"></use></svg>Diagnóstico</button>
@@ -228,7 +229,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button data-view="fiabilidad" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Fiabilidad</button>
     <button data-view="chat" type="button"><svg class="ic"><use href="#i-chat"></use></svg>Chat IA</button>
     <button data-view="ruta" type="button" title="Mapa, GPS, navegación y radares"><svg class="ic"><use href="#i-pin"></use></svg>Ruta</button>
-    <button data-view="centinela" type="button" title="Vigilancia local con la cámara del móvil"><svg class="ic"><use href="#i-camera"></use></svg>Centinela</button>
     <button data-view="informe" type="button"><svg class="ic"><use href="#i-file"></use></svg>Informe</button>
     <button data-view="foro" type="button"><svg class="ic"><use href="#i-forum"></use></svg>Foro</button>
     <button data-view="contacto" type="button"><svg class="ic"><use href="#i-mail"></use></svg>Contacto</button>
@@ -411,6 +411,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <h3>Protector del conductor</h3>
         <a class="nx-tile-btn" href="/proteccion" style="text-decoration:none">Revisar presupuesto o conducir <svg class="ic"><use href="#i-arrow"></use></svg></a>
         <p class="nx-how"><b>Cómo se usa:</b> pega el presupuesto del taller, consulta la salud de tu coche o marca lo que notes para saber si es seguro seguir conduciendo.</p>
+      </article>
+
+      <article class="nx-tile lime" data-cent-menu>
+        <span class="nx-tile-num">14</span>
+        <span class="nx-tile-ico"><svg class="ic"><use href="#i-camera"></use></svg></span>
+        <h3>Modo Centinela</h3>
+        <button class="nx-tile-btn" type="button" data-view="centinela">Vigilar el coche <svg class="ic"><use href="#i-arrow"></use></svg></button>
+        <p class="nx-how"><b>Cómo se usa:</b> deja el móvil apuntando al coche y activa el centinela. Si detecta movimiento, personas o un golpe, guarda el clip solo en el teléfono.</p>
       </article>
     </div>
 
@@ -1991,7 +1999,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
         </button>
         <button id="rutaNoche" class="ruta-fab ruta-fab-noche" type="button" aria-pressed="true" aria-label="Modo noche del mapa" title="Cambiar a mapa de día">🌙</button>
         <button id="rutaFull" class="ruta-fab ruta-fab-full" type="button" aria-pressed="false" aria-label="Pantalla completa" title="Pantalla completa (F)">⛶</button>
-        <button id="ruta3dToggle" class="ruta-fab ruta-fab-3d" type="button" aria-pressed="false" aria-label="Vista AR (cámara completa)" title="Vista AR (cámara completa)">📷</button>
+        <button id="ruta3dToggle" class="ruta-fab ruta-fab-3d" type="button" aria-pressed="false" aria-label="Vista 3D con coche y carretera" title="Vista 3D con coche y carretera">🚗</button>
         <button id="rutaArToggle" class="ruta-fab ruta-fab-ar" type="button" aria-pressed="false" aria-label="ADAS cámara completa" title="ADAS: cámara, carril y ruta">🎮</button>
         <button id="rutaParar" class="ruta-fab ruta-fab-parar" type="button" aria-label="Detener navegación" title="Detener navegación" hidden>⏹</button>
         <button id="rutaDemo" class="ruta-fab ruta-fab-demo" type="button" aria-pressed="false" aria-label="Modo demostración" title="Modo demostración">▶️</button>
@@ -2200,7 +2208,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
       <div class="cent-control">
         <button id="centArmar" class="cent-arm" type="button" aria-pressed="false">
           <span class="cent-arm-icon" aria-hidden="true">◉</span>
-          <span><b id="centArmarTexto">Armar centinela</b><small id="centArmarSub">Cámara y micrófono locales</small></span>
+          <span><b id="centArmarTexto">Activar modo Centinela</b><small id="centArmarSub">Cámara y micrófono locales</small></span>
         </button>
         <div class="cent-meta">
           <span id="centStatus" role="status" aria-live="polite">Desarmado. No se está grabando.</span>
@@ -2234,8 +2242,9 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
             </label>
             <label class="cent-check"><input id="centAudio" type="checkbox" checked> Grabar audio local</label>
             <label class="cent-check"><input id="centNotificar" type="checkbox"> Aviso local al detectar</label>
+            <label class="cent-check"><input id="centMostrarMenu" type="checkbox" checked> Mostrar Centinela en los menús</label>
           </div>
-          <div class="cent-note"><b>Límites:</b> 1 GB por dispositivo · retención 5 días · al superar el tope se borran los clips más antiguos. <b>WhatsApp:</b> próximamente (fase 2, sin credenciales en el cliente).</div>
+          <div class="cent-note"><b>Límites:</b> 1 GB por dispositivo · retención 5 días · al superar el tope se borran los clips más antiguos. <b>WhatsApp:</b> próximamente (fase 2, sin credenciales en el cliente). Si ocultas Centinela de los menús, sigue disponible en <code>?centinela=1</code>.</div>
           <button id="centBorrarTodo" class="btn ghost danger" type="button">Borrar todos los clips</button>
         </section>
 
@@ -2547,8 +2556,8 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <script src="/js/visual-glow.js?v=20261116c"></script>
 <script src="/js/tienda.js?v=20261121c"></script>
 <script src="/js/planes.js?v=20261113a"></script>
-<script src="/js/app.js?v=20261124a2"></script>
-<script src="/js/centinela.js?v=20261124a1"></script>
+<script src="/js/app.js?v=20261125a1"></script>
+<script src="/js/centinela.js?v=20261125a2"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
 <script src="/js/tyres.js?v=20261106a"></script>
@@ -2626,7 +2635,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     if ((location.hash || '').replace('#', '') === 'ruta') cargarRuta();
   })();
   </script>
-  <script src="/js/ruta.js?v=20261125a2"></script>
+  <script src="/js/ruta.js?v=20261125a5"></script>
   <script src="/js/maya-incidente.js?v=20261120c"></script>
 </body>
 </html>

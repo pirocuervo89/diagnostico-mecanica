@@ -31,6 +31,7 @@
     duracion: $('#centDuracion'),
     audio: $('#centAudio'),
     notificar: $('#centNotificar'),
+    mostrarMenu: $('#centMostrarMenu'),
     borrarTodo: $('#centBorrarTodo'),
     gallery: $('#centGallery'),
     count: $('#centCount')
@@ -69,6 +70,10 @@
   const RANGO_SEVERIDAD = { baja: 1, media: 2, alta: 3 };
 
   let armado = false;
+  // Dos armados a la vez pedirían dos cámaras; el token permite cancelar
+  // mientras Android aún está mostrando el permiso.
+  let armando = false;
+  let armarToken = 0;
   let stream = null;
   let audioTrack = null;
   let audioCtx = null;
@@ -98,13 +103,14 @@
   let clipSeveridad = 'baja';
   let clipActualId = null;
   let resolverGrabacion = null;
+  let deteniendoClip = null;
+  let clipThumb = '';
   let mimeActual = '';
 
   let ultimoEvento = 0;
   let ultimaAcel = null;
   let ultimoImpacto = 0;
   let impactoAttached = false;
-  let enFondo = false;
   let objectUrls = [];
   let clipsCache = new Map();
   let inicializado = false;
@@ -155,7 +161,7 @@
     el.live.hidden = !(armado && estado === 'vigilando');
     el.rec.hidden = !(armado && grabando);
     el.armar.setAttribute('aria-pressed', String(armado));
-    el.armarTexto.textContent = armado ? 'Desarmar centinela' : 'Armar centinela';
+    el.armarTexto.textContent = armado ? 'Desarmar centinela' : 'Activar modo Centinela';
     el.armarSub.textContent = armado ? 'Cámara y micrófono activos' : 'Cámara y micrófono locales';
   }
 
@@ -168,6 +174,15 @@
     el.duracion.value = String(dur);
     el.audio.checked = cfg.audio !== false;
     el.notificar.checked = Boolean(cfg.notificar);
+    if (el.mostrarMenu) el.mostrarMenu.checked = cfg.menu !== false;
+  }
+
+  // Centinela es una sección independiente del GPS, pero quien no la use puede
+  // quitarla de los menús sin perder los clips ni el acceso directo.
+  function aplicarVisibilidadMenu() {
+    const visible = el.mostrarMenu ? el.mostrarMenu.checked : true;
+    document.querySelectorAll('[data-cent-menu]').forEach(n => { n.hidden = !visible; });
+    document.querySelectorAll('#appMenuGrid [data-view="centinela"]').forEach(n => { n.hidden = !visible; });
   }
 
   function guardarConfig() {
@@ -176,7 +191,8 @@
         sensibilidad: el.sensibilidad.value,
         duracion: Number(el.duracion.value),
         audio: el.audio.checked,
-        notificar: el.notificar.checked
+        notificar: el.notificar.checked,
+        menu: el.mostrarMenu ? el.mostrarMenu.checked : true
       }));
     } catch (_e) { /* sin almacenamiento */ }
   }
@@ -201,7 +217,7 @@
   function pedir(req) {
     return new Promise((resolve, reject) => {
       req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error || req.error);
+      req.onerror = () => reject(req.error || new Error('Error de IndexedDB'));
     });
   }
 
@@ -243,15 +259,18 @@
     const corte = Date.now() - LIMITES.MAX_DIAS * 24 * 60 * 60 * 1000;
     let total = clips.reduce((n, c) => n + (c.blob?.size || 0), 0);
     const orden = [...clips].sort((a, b) => a.fecha - b.fecha);
+    let borrados = 0;
     for (const c of orden) {
       const viejo = c.fecha < corte;
       const excede = total > LIMITES.MAX_BYTES;
       if ((viejo || excede) && c.id !== clipActualId) {
         await borrarClip(c.id);
         total -= c.blob?.size || 0;
+        borrados++;
       }
     }
     await actualizarUso();
+    return borrados;
   }
 
   async function actualizarUso() {
@@ -379,8 +398,13 @@
   }
 
   async function armar() {
-    if (armado) return;
+    // `stream`/`grabador` siguen vivos mientras desarmar() guarda el último
+    // clip: no se puede armar otra cámara en esa ventana.
+    if (armado || armando || stream || grabador) return;
+    armando = true;
+    const token = ++armarToken;
     if (!navigator.mediaDevices?.getUserMedia) {
+      armando = false;
       setEstado('error', 'Este navegador no tiene acceso a cámara. Usa Chrome Android actualizado.');
       return;
     }
@@ -388,10 +412,32 @@
     aviso('Solicitando cámara y micrófono…', 'info', 5000);
     try {
       stream = await pedirStream();
+      if (token !== armarToken) {
+        if (stream) {
+          stream.getTracks().forEach(t => { try { t.stop(); } catch (_e) { /* nada */ } });
+          stream = null;
+        }
+        return;
+      }
       if (!stream.getVideoTracks().length) throw new Error('La cámara no devolvió vídeo');
       el.video.srcObject = stream;
       await el.video.play().catch(() => {});
+      if (token !== armarToken) {
+        if (stream) {
+          stream.getTracks().forEach(t => { try { t.stop(); } catch (_e) { /* nada */ } });
+          stream = null;
+        }
+        try { el.video.srcObject = null; } catch (_e) { /* nada */ }
+        return;
+      }
+      // El permiso puede llegar con la app ya en segundo plano: no se arma a
+      // ciegas una cámara que el usuario no ve. Se cancela y se limpia.
+      if (document.hidden) {
+        await desarmar({ porFondo: true });
+        return;
+      }
       armado = true;
+      armando = false;
       audioTrack = stream.getAudioTracks()[0] || null;
       el.shell.classList.add('armado');
       el.shell.classList.remove('evento');
@@ -404,9 +450,12 @@
       try { await navigator.storage?.persist?.(); } catch (_e) { /* opcional */ }
       window.CentinelaPantalla?.mantener?.('centinela');
       if (el.notificar.checked) pedirAvisos(true);
-      await purgar();
+      const borrados = await purgar();
+      if (borrados) await renderGaleria();
       await actualizarUso();
     } catch (e) {
+      armando = false;
+      if (token !== armarToken) return;
       if (stream) {
         try { stream.getTracks().forEach(t => t.stop()); } catch (_e) { /* nada */ }
         stream = null;
@@ -424,11 +473,22 @@
   }
 
   async function desarmar(opciones = {}) {
-    if (grabando) await detenerGrabacion();
+    // Cancela también un armado que aún está pidiendo permisos.
+    armando = false;
+    armarToken++;
+    // Se apaga antes de esperar al clip: si no, movimiento/audio siguen
+    // activos durante la purga y pueden abrir una grabación nueva.
     armado = false;
     detenerMovimiento();
     detenerAudio();
     detenerImpacto();
+    if (grabando) {
+      const parada = detenerGrabacion();
+      // Con la pantalla bloqueada Android congela el encoder: esperar aquí
+      // dejaría la cámara encendida en segundo plano. El clip se cierra solo
+      // cuando el navegador vuelve a darle CPU.
+      if (!opciones.porFondo) await parada;
+    }
     if (stream) {
       try { stream.getTracks().forEach(t => t.stop()); } catch (_e) { /* nada */ }
       stream = null;
@@ -439,7 +499,6 @@
     el.shell.classList.remove('armado', 'evento');
     el.alerta.hidden = true;
     el.rec.hidden = true;
-    enFondo = false;
     window.CentinelaPantalla?.soltar?.();
     const texto = opciones.porFondo
       ? 'La cámara se detuvo al pasar a segundo plano. Vuelve a armar cuando estés delante.'
@@ -691,6 +750,7 @@
   }
 
   function iniciarGrabacion(motivo, severidad) {
+    clipThumb = '';
     if (!stream || typeof window.MediaRecorder === 'undefined') {
       aviso('Este navegador no permite grabar vídeo. El evento se muestra, pero no se guarda.', 'error', 8000);
       return;
@@ -755,8 +815,14 @@
   }
 
   function detenerGrabacion() {
+    // Varias rutas pueden pedir la parada casi a la vez (clic, pantalla
+    // bloqueada, pagehide). Debe haber una sola parada y un solo guardado.
+    if (deteniendoClip) return deteniendoClip;
     if (!grabador) return Promise.resolve();
-    return new Promise(resolve => {
+    // La miniatura se toma con la cámara aún viva; al pasar a segundo plano
+    // los tracks se apagan de inmediato y ya no habría fotograma.
+    clipThumb = capturarMiniatura();
+    deteniendoClip = new Promise(resolve => {
       resolverGrabacion = resolve;
       clearTimeout(clipTimer);
       clearInterval(clipTic);
@@ -767,9 +833,12 @@
       }
       try { rec.stop(); } catch (_e) { finalizarClip(); }
     });
+    return deteniendoClip;
   }
 
   async function finalizarClip() {
+    // Un `stop` tardío no puede volver a cerrar un clip ya guardado.
+    if (!grabador && !grabando) return;
     const rec = grabador;
     grabador = null;
     grabando = false;
@@ -792,8 +861,9 @@
         severidad: clipSeveridad,
         mime: tipo,
         blob,
-        thumb: capturarMiniatura()
+        thumb: clipThumb || capturarMiniatura()
       };
+      clipThumb = '';
       clipActualId = id;
       try {
         await guardarClip(clip);
@@ -801,14 +871,19 @@
       } catch (_e) {
         aviso('El clip se grabó, pero no se pudo guardar en el dispositivo.', 'error', 8000);
       }
-      clipActualId = null;
+      // Se protege el clip recién grabado: si el tope está lleno, la purga
+      // debe borrar los antiguos, no el que acaba de guardarse.
       await purgar();
+      clipActualId = null;
       await renderGaleria();
       await actualizarUso();
     } else {
       aviso('El evento no produjo un clip válido.', 'aviso', 5000);
     }
-    if (armado) setEstado('vigilando', 'La cámara sigue activa; la previsualización vuelve a ocultarse.');
+    // Si ya empezó otro evento mientras se guardaba el anterior, su estado
+    // manda: no se puede volver a «vigilando» con la grabación en marcha.
+    if (armado && !grabando) setEstado('vigilando', 'La cámara sigue activa; la previsualización vuelve a ocultarse.');
+    deteniendoClip = null;
     if (resolverGrabacion) { resolverGrabacion(); resolverGrabacion = null; }
   }
 
@@ -872,24 +947,40 @@
     if (!el.notificar.checked || !('Notification' in window) || Notification.permission !== 'granted') return;
     const titulo = severidad === 'alta' ? 'Centinela: peligro detectado' : 'Centinela: evento detectado';
     const cuerpo = `${motivo}. Clip local en la galería.`;
+    const opciones = {
+      body: cuerpo,
+      tag: 'centinela-evento',
+      icon: '/img/app/icon-192.png',
+      badge: '/img/app/icon-192.png',
+      silent: false
+    };
+    let mostrado = false;
+    const directa = () => {
+      if (mostrado) return;
+      mostrado = true;
+      try { new Notification(titulo, opciones); } catch (_e) { /* sin permiso */ }
+    };
     try {
-      if (navigator.serviceWorker?.ready) {
-        navigator.serviceWorker.ready.then(reg => reg.showNotification?.(titulo, {
-          body: cuerpo,
-          tag: 'centinela-evento',
-          icon: '/img/app/icon-192.png',
-          badge: '/img/app/icon-192.png',
-          silent: false
-        })).catch(() => {});
-      } else {
-        new Notification(titulo, { body: cuerpo, icon: '/img/app/icon-192.png' });
-      }
+      if (!navigator.serviceWorker?.ready) { directa(); return; }
+      // Sin service worker activo `ready` no resuelve nunca y el aviso se
+      // perdía en silencio: a los 1,5 s se muestra directamente.
+      const reloj = setTimeout(directa, 1500);
+      navigator.serviceWorker.ready
+        .then(reg => {
+          if (mostrado) return;
+          if (typeof reg.showNotification !== 'function') { directa(); return; }
+          mostrado = true;
+          clearTimeout(reloj);
+          return reg.showNotification(titulo, opciones)
+            .catch(() => { mostrado = false; directa(); });
+        })
+        .catch(directa);
     } catch (_e) { /* sin permiso */ }
   }
 
   // ------------------------------------------------------------ eventos de UI
   function configurarEventos() {
-    el.armar.addEventListener('click', () => { if (armado) desarmar(); else armar(); });
+    el.armar.addEventListener('click', () => { if (armado || armando) desarmar(); else armar(); });
     el.sensibilidad.addEventListener('change', guardarConfig);
     el.duracion.addEventListener('change', guardarConfig);
     el.audio.addEventListener('change', () => {
@@ -899,6 +990,11 @@
     el.notificar.addEventListener('change', () => {
       guardarConfig();
       if (el.notificar.checked) pedirAvisos();
+    });
+    el.mostrarMenu?.addEventListener('change', () => {
+      guardarConfig();
+      aplicarVisibilidadMenu();
+      if (!el.mostrarMenu.checked) aviso('Centinela oculto de los menús. Puedes volver con ?centinela=1.', 'info', 7000);
     });
     el.mantener.addEventListener('click', () => {
       if (window.CentinelaPantalla?.mantener) {
@@ -935,16 +1031,13 @@
       else if (b.dataset.centAccion === 'borrar') eliminarClip(id);
     });
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        enFondo = true;
-        if (armado) desarmar({ porFondo: true });
-      }
+      if (document.hidden && (armado || armando)) desarmar({ porFondo: true });
     });
     window.addEventListener('pagehide', () => {
-      if (armado) desarmar({ porFondo: true });
+      if (armado || armando) desarmar({ porFondo: true });
     });
     document.addEventListener('viewchange', e => {
-      if (e.detail?.name !== 'centinela' && armado) desarmar({ porSalida: true });
+      if (e.detail?.name !== 'centinela' && (armado || armando)) desarmar({ porSalida: true });
     });
   }
 
@@ -952,15 +1045,18 @@
     if (inicializado) return;
     inicializado = true;
     leerConfig();
+    aplicarVisibilidadMenu();
     if (!('Notification' in window)) {
       el.avisos.disabled = true;
       el.notificar.disabled = true;
       el.notificar.checked = false;
     }
     configurarEventos();
+    // Purgar antes de pintar: si no, la galería enseña clips que se borran
+    // justo después y quedan como vídeos muertos hasta recargar.
+    await purgar();
     await renderGaleria();
     await actualizarUso();
-    await purgar();
     setEstado('desarmado');
     try { await navigator.storage?.persist?.(); } catch (_e) { /* opcional */ }
     const q = new URLSearchParams(location.search);
@@ -982,7 +1078,12 @@
         borrarTodo,
         renderGaleria,
         actualizarUso,
-        estado: () => ({ armado, grabando, clipInicio, clipFin, clipSeveridad, razones: [...clipRazones], modelo: Boolean(modeloCoco) })
+        estado: () => ({
+          armado, grabando, clipInicio, clipFin, clipSeveridad, razones: [...clipRazones],
+          modelo: Boolean(modeloCoco),
+          tracks: stream ? stream.getTracks().filter(t => t.readyState === 'live').length : 0,
+          menu: el.mostrarMenu ? el.mostrarMenu.checked : true
+        })
       };
     }
   }
