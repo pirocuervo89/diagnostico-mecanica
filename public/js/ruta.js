@@ -3795,6 +3795,12 @@
   let metricaBuscarAr = null;
   let metricaBuscarArTs = 0;
   function medirBuscarAr() {
+    // Al navegar el buscador se oculta: la tarjeta de maniobra ocupa su hueco.
+    if (document.querySelector('.ruta-shell')?.classList.contains('ruta-navegando')) {
+      metricaBuscarAr = null;
+      metricaBuscarArTs = 0;
+      return null;
+    }
     const ahora = performance.now();
     if (metricaBuscarAr && ahora - metricaBuscarArTs < 500) return metricaBuscarAr;
     metricaBuscarArTs = ahora;
@@ -3808,11 +3814,12 @@
   function dibujarPanelAr(w, h, s) {
     const { dpr, u } = escalaHudAr(w, h);
     const x = 10 * dpr;
-    // La tarjeta empieza justo debajo del buscador real, también con notch.
+    // La tarjeta empieza justo debajo del buscador real. Al navegar, el
+    // buscador desaparece y la tarjeta sube al borde superior.
     const cajaBuscar = medirBuscarAr();
     const y = cajaBuscar
       ? Math.max(74 * dpr, (cajaBuscar.bottom + 6) * cajaBuscar.escala)
-      : 74 * dpr;
+      : 10 * dpr;
     const pw = w - 20 * dpr;
     const ph = 92 * u;
     const ruta = rutaActiva();
