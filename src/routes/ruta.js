@@ -424,6 +424,108 @@ router.post('/avisos/:id/confirmar', (req, res) => {
   res.json({ aviso: { ...aviso, origen: 'comunidad', edadMs: Date.now() - aviso.creado } });
 });
 
+// ------------------------------------------------------- gasolineras cercanas
+// Overpass devuelve las gasolineras de OpenStreetMap. El frontend las ordena
+// por distancia y permite guardarlas o poner una como destino. No se inventan
+// precios: solo se muestra lo que está mapeado.
+router.get('/gasolineras', async (req, res) => {
+  const lat = num(req.query.lat, -90, 90);
+  const lon = num(req.query.lon, -180, 180);
+  const radio = num(req.query.radio, 1000, 30000) || 15000;
+  if (lat === null || lon === null) return res.status(400).json({ error: 'Faltan coordenadas' });
+
+  const clave = `gas|${lat.toFixed(3)},${lon.toFixed(3)}|${Math.round(radio / 1000)}`;
+  const guardado = leer(clave);
+  if (guardado) return res.json({ gasolineras: guardado, cached: true });
+
+  const consulta = `[out:json][timeout:18];
+    (
+      node["amenity"="fuel"](around:${radio},${lat},${lon});
+      way["amenity"="fuel"](around:${radio},${lat},${lon});
+      relation["amenity"="fuel"](around:${radio},${lat},${lon});
+    );
+    out center tags 50;`;
+  const servidores = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter'
+  ];
+  let datos = null;
+  for (const servidor of servidores) {
+    try {
+      const respuesta = await fetch(servidor, {
+        method: 'POST',
+        headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+        body: new URLSearchParams({ data: consulta }),
+        signal: AbortSignal.timeout(9000)
+      });
+      if (!respuesta.ok) continue;
+      datos = await respuesta.json();
+      break;
+    } catch (_e) { /* se prueba el siguiente espejo */ }
+  }
+
+  try {
+    if (!datos) throw new Error('sin datos');
+    const gasolineras = (datos.elements || [])
+      .map(n => {
+        const glat = Number.isFinite(n.lat) ? n.lat : n.center?.lat;
+        const glon = Number.isFinite(n.lon) ? n.lon : n.center?.lon;
+        if (!Number.isFinite(glat) || !Number.isFinite(glon)) return null;
+        const t = n.tags || {};
+        const calle = [t['addr:street'], t['addr:housenumber']].filter(Boolean).join(' ');
+        const ciudad = t['addr:city'] || t['addr:town'] || t['addr:village'] || '';
+        return {
+          id: String(n.id),
+          name: t.name || t.brand || t.operator || 'Gasolinera',
+          brand: t.brand || t.operator || '',
+          address: [calle, ciudad].filter(Boolean).join(', '),
+          lat: glat,
+          lon: glon,
+          distance: Math.round(distanciaMetros(lat, lon, glat, glon))
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 20);
+    recordar(clave, 20 * 60 * 1000, gasolineras);
+    res.json({ gasolineras });
+  } catch (_e) {
+    // Overpass puede estar saturado. Nominatim ya se usa para las direcciones:
+    // se busca «gasolinera» dentro de un recuadro alrededor del coche y se
+    // devuelve lo que tenga coordenadas. Es un respaldo, no una fuente oficial.
+    try {
+      const delta = Math.min(0.22, Math.max(0.03, radio / 111000));
+      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=20&accept-language=es&countrycodes=es&q=${encodeURIComponent('gasolinera')}&viewbox=${lon - delta},${lat + delta},${lon + delta},${lat - delta}&bounded=1`;
+      const nd = await pedirJson(url, 8000);
+      const gasolineras = (Array.isArray(nd) ? nd : [])
+        .map(n => {
+          const glat = Number(n.lat);
+          const glon = Number(n.lon);
+          if (!Number.isFinite(glat) || !Number.isFinite(glon)) return null;
+          const name = n.name || String(n.display_name || '').split(',')[0] || 'Gasolinera';
+          return {
+            id: `${n.osm_type || 'n'}${n.osm_id || n.place_id}`,
+            name,
+            brand: '',
+            address: String(n.display_name || '').split(',').slice(1, 4).join(', ').trim(),
+            lat: glat,
+            lon: glon,
+            distance: Math.round(distanciaMetros(lat, lon, glat, glon))
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 20);
+      if (gasolineras.length) {
+        recordar(clave, 10 * 60 * 1000, gasolineras);
+        return res.json({ gasolineras, fuente: 'nominatim' });
+      }
+    } catch (_e2) { /* sin respaldo */ }
+    recordar(clave, 3 * 60 * 1000, []);
+    res.json({ gasolineras: [], aviso: 'No se pudieron cargar las gasolineras ahora mismo' });
+  }
+});
+
 // ------------------------------------------------------------ tráfico en vivo (TomTom + HERE, ambos opcionales)
 // Devuelve segmentos con velocidad actual y congestión. Si no hay clave
 // configurada, responde 204 para que el cliente desactive la capa sin error.
