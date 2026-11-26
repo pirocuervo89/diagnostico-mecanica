@@ -1240,6 +1240,11 @@
     })[tipo] || 'CARRETERA';
   }
 
+  // Referencia de velocidad por tipo de vía para cuando OSM no trae maxspeed:
+  // es la misma escala que usan los límites simulados de la ruta larga.
+  const LIMITE_REFERENCIA_3D = { autovia: 120, carretera: 90, comarcal: 80, montana: 60, pueblo: 50, ciudad: 30 };
+  function limiteReferencia3d(tipo) { return LIMITE_REFERENCIA_3D[tipo] || 90; }
+
   function puntoPorS3d(s) {
     if (!trazado3d.length) return null;
     let mejor = trazado3d[0];
@@ -1253,29 +1258,34 @@
 
   function construirTrazado3d(idxBase, w, h, horizonte, cx) {
     const segs = carretera3d;
-    const anchoVia = tipoVia3d === 'autovia' ? 10.4 : tipoVia3d === 'ciudad' ? 7.2 : 8.2;
-    const MAX = 260;
-    // Cámara de persecución elevada: el coche queda centrado y la calzada
-    // ocupa la mitad inferior con perspectiva real, como en la referencia.
-    // La cámara alta evita que la carretera parezca una cuesta arriba.
-    const escalaCerca = Math.max(18, Math.min(30, w * 0.062)) * (zoomFondo3d || 1);
-    const camDist = 9;
-    const carY = h * 0.84;
+    const anchoVia = tipoVia3d === 'autovia' ? 12 : tipoVia3d === 'ciudad' ? 8.6 : 9.6;
+    // La cámara se coloca detrás del carril derecho, no del eje de la vía:
+    // el coche queda centrado en pantalla y las líneas convergen bajo él.
+    const carril = anchoVia / 4;
+    const MAX = 300;
+    const escalaCerca = Math.max(26, Math.min(78, w * 0.078)) * (zoomFondo3d || 1);
+    const camDist = 6.2;
+    // En horizontal el HUD inferior es proporcionalmente más alto: se sube el
+    // coche para que los paneles no le tapen la trasera.
+    const carY = h * (h < 560 ? 0.78 : 0.85);
     const camH = Math.max(4, (carY - horizonte) / escalaCerca);
     const FOCAL = escalaCerca * camDist;
     const out = [];
     const proyectar = (avance, latM) => {
-      const z = camDist + Math.max(0, avance);
-      const escala = FOCAL / z;
+      const escala = FOCAL / Math.max(1.5, camDist + avance);
       return {
-        s: Math.max(0, avance),
-        x: cx + latM * escala,
+        s: avance,
+        x: cx + (latM - carril) * escala,
         y: horizonte + camH * escala,
         ancho: anchoVia * escala,
         escala,
         lat: latM
       };
     };
+    // Punto entre la cámara y el coche: prolonga el asfalto hasta el borde
+    // inferior. Antes la calzada terminaba en las ruedas y el coche parecía
+    // aparcado en el borde de la hierba.
+    const cerca = () => proyectar(-(camDist - 1.5), 0);
     if (!segs.length) {
       out.push(proyectar(0, 0));
       const lat0 = Math.sin(0.4) * 4;
@@ -1283,45 +1293,46 @@
         const lat = Math.sin(s * 0.010) * 3 + Math.sin(s * 0.0035 + 0.4) * 4 - lat0;
         out.push(proyectar(s, lat));
       }
+      out.unshift(cerca());
       return out;
     }
     const base = segs[Math.max(0, Math.min(segs.length - 1, idxBase))];
     const h0 = (base.heading || 0) * Math.PI / 180;
     const cosLat = Math.cos(base.lat * Math.PI / 180);
-    let ultimoAvance = 0;
+    let sAcum = 0;
     let cortar = false;
-    const add = (lat, lon) => {
+    // La profundidad es la distancia recorrida por la ruta, no el avance
+    // proyectado sobre el rumbo del coche. Con lo anterior, un giro de 90°
+    // dejaba de avanzar y se descartaba: la calzada salía recta siempre.
+    const add = (lat, lon, s) => {
       const dx = (lon - base.lon) * 111320 * cosLat;
       const dy = (lat - base.lat) * 110540;
-      const avance = dx * Math.sin(h0) + dy * Math.cos(h0);
       const lateral = dx * Math.cos(h0) - dy * Math.sin(h0);
-      if (avance < 0.6) return;
-      if (avance < ultimoAvance - 2) { cortar = true; return; }
-      if (avance < ultimoAvance + 0.4) return;
-      ultimoAvance = avance;
-      out.push(proyectar(avance, lateral));
+      if (s < 0.4) return;
+      // Si la vía se abre de lado (giro cerrado o cambio de sentido), se corta
+      // en vez de dibujar una calzada atravesada sobre la escena.
+      if (Math.abs(lateral) > 60) { cortar = true; return; }
+      out.push(proyectar(s, lateral));
     };
     out.push(proyectar(0, 0));
-    for (let i = idxBase; i < segs.length - 1 && ultimoAvance < MAX && !cortar; i += 1) {
+    for (let i = idxBase; i < segs.length - 1 && sAcum < MAX && !cortar; i += 1) {
       const a = segs[i];
       const b = segs[i + 1];
       const d = a.dist || 8;
       const pasos = Math.max(1, Math.min(40, Math.ceil(d / 1.5)));
-      for (let k = 1; k <= pasos && ultimoAvance < MAX && !cortar; k += 1) {
+      for (let k = 1; k <= pasos && sAcum < MAX && !cortar; k += 1) {
         const t = k / pasos;
-        add(a.lat + (b.lat - a.lat) * t, a.lon + (b.lon - a.lon) * t);
+        add(a.lat + (b.lat - a.lat) * t, a.lon + (b.lon - a.lon) * t, sAcum + d * t);
       }
+      sAcum += d;
     }
+    // Suavizado suave solo en la geometría real: aplanar los primeros metros
+    // hacia el centro se comía las curvas y la calzada salía siempre recta.
     for (let p = 0; p < 2; p += 1) {
       for (let i = 1; i < out.length - 1; i += 1) out[i].x = (out[i - 1].x + out[i].x * 2 + out[i + 1].x) / 4;
     }
-    for (const p of out) {
-      const k = Math.min(1, p.s / 24);
-      p.x = cx + (p.x - cx) * k;
-    }
-    for (let p = 0; p < 3; p += 1) {
-      for (let i = 1; i < out.length - 1; i += 1) out[i].x = (out[i - 1].x + out[i].x * 2 + out[i + 1].x) / 4;
-    }
+    if (out.length < 2) out.push(proyectar(0, 0));
+    out.unshift(cerca());
     return out;
   }
 
@@ -2075,13 +2086,16 @@
   function dibujarSenalesDetalle3d(w, h, horizonte) {
     const ruta = rutaActiva();
     const s = ruta?.steps?.[paso];
-    const kmh = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
+    // OSM manda si hay maxspeed; si no, se muestra la referencia del tipo de
+    // vía para que la señal exista siempre y no quede el HUD en «?».
+    const kmhReal = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
+    const kmh = kmhReal ?? (ruta ? limiteReferencia3d(tipoVia3d) : null);
     if (kmh) {
-      const p = puntoPorS3d(55);
+      const p = puntoPorS3d(34);
       if (p) {
-        const r = Math.max(11, Math.min(24, p.ancho * 0.075));
-        const x = Math.max(r + 8, Math.min(w - r - 8, p.x + p.ancho / 2 + 3.5 * p.escala));
-        const y = Math.max(horizonte + 30, Math.min(h * 0.78, p.y - r * 2.2));
+        const r = Math.max(15, Math.min(29, p.ancho * 0.12));
+        const x = Math.max(r + 8, Math.min(w - r - 8, p.x + p.ancho / 2 + 2.6 * p.escala));
+        const y = Math.max(horizonte + 26, Math.min(h * 0.78, p.y - r * 2.4));
         ctx3d.strokeStyle = 'rgba(140,150,155,.8)';
         ctx3d.lineWidth = Math.max(1.5, r * 0.12);
         ctx3d.beginPath(); ctx3d.moveTo(x, y + r); ctx3d.lineTo(x, p.y); ctx3d.stroke();
@@ -2098,47 +2112,75 @@
       }
     }
 
-    const salida = s && (Number.isFinite(s.exit) || /off ramp|fork|end of road/i.test(s.type || ''));
+    // OSRM no siempre rellena `exit`: una salida también es un fork, una
+    // incorporación o un final de vía. Antes solo se pintaba con `exit`
+    // numérico y la mayoría de salidas no mostraban cartel.
+    const tipoSalida = /off ramp|fork|end of road/i.test(String(s?.type || ''));
+    const numSalida = Number.isFinite(Number(s?.exit)) && s?.exit !== null && s?.exit !== ''
+      ? Number(s.exit)
+      : (Number.isFinite(Number(s?.exits)) ? Number(s.exits) : null);
+    const salida = Boolean(s && (tipoSalida || numSalida !== null));
     const distSalida = ultimaPos && Number.isFinite(s?.lat)
       ? distancia(ultimaPos.lat, ultimaPos.lon, s.lat, s.lon)
       : 0;
-    // La salida solo entra en el campo visual cuando está cerca: si queda a
-    // 400 m, el cartel no puede estar ya plantado delante del coche.
-    if (salida && (!ultimaPos || distSalida <= 220)) {
-      const z = Math.max(35, Math.min(150, distSalida || 82));
+    // El cartel entra en escena cuando la salida está cerca; a 400 m no puede
+    // estar ya plantado delante del coche.
+    if (salida && (!ultimaPos || distSalida <= 520)) {
+      const z = Math.max(28, Math.min(150, distSalida || 88));
       const p = puntoPorS3d(z);
       if (p) {
-        const an = Math.max(64, Math.min(148, 8.5 * p.escala));
-        const al = Math.max(24, an * 0.30);
-        const x = Math.max(8, Math.min(w - an - 8, Math.max(p.x + p.ancho / 2 + 5 * p.escala, w - an - 18)));
-        const y = Math.max(horizonte + 14, p.y - al - 3 * p.escala);
-        const poste = Math.max(8, Math.min(h * 0.12, 5 * p.escala));
-        ctx3d.fillStyle = 'rgba(126,140,146,.72)';
-        ctx3d.fillRect(x + an * 0.16, y + al, Math.max(2, an * 0.018), poste);
-        ctx3d.fillRect(x + an * 0.80, y + al, Math.max(2, an * 0.018), poste);
-        ctx3d.fillStyle = '#0d5b3a';
-        ctx3d.fillRect(x, y, an, al);
-        ctx3d.strokeStyle = 'rgba(230,248,240,.9)';
-        ctx3d.lineWidth = 1.4;
+        const an = Math.max(96, Math.min(178, w * 0.27));
+        const al = Math.max(32, an * 0.31);
+        const x = Math.max(10, w - an - 14);
+        const y = Math.max(horizonte + 10, Math.min(h * 0.62, p.y - al - 5.5 * p.escala));
+        const poste = Math.max(10, Math.min(h * 0.14, 4.5 * p.escala));
+        ctx3d.fillStyle = 'rgba(120,134,140,.8)';
+        ctx3d.fillRect(x + an * 0.14, y + al, Math.max(2, an * 0.017), poste);
+        ctx3d.fillRect(x + an * 0.83, y + al, Math.max(2, an * 0.017), poste);
+        ctx3d.fillStyle = '#0b5c3b';
+        ctx3d.beginPath();
+        if (ctx3d.roundRect) ctx3d.roundRect(x, y, an, al, Math.max(3, an * 0.035));
+        else ctx3d.rect(x, y, an, al);
+        ctx3d.fill();
+        ctx3d.strokeStyle = 'rgba(235,250,242,.95)';
+        ctx3d.lineWidth = Math.max(1.4, an * 0.012);
         ctx3d.strokeRect(x, y, an, al);
+        // Flecha de salida a la derecha, blanca y grande.
+        ctx3d.save();
+        ctx3d.translate(x + an * 0.19, y + al * 0.52);
+        ctx3d.strokeStyle = '#f4fff8';
+        ctx3d.lineWidth = Math.max(2, al * 0.10);
+        ctx3d.lineCap = 'round';
+        ctx3d.lineJoin = 'round';
+        ctx3d.beginPath();
+        ctx3d.moveTo(-an * 0.09, 0); ctx3d.lineTo(an * 0.05, 0);
+        ctx3d.moveTo(an * 0.04, -al * 0.10); ctx3d.lineTo(an * 0.095, 0); ctx3d.lineTo(an * 0.04, al * 0.10);
+        ctx3d.stroke();
+        ctx3d.restore();
         ctx3d.fillStyle = '#f4fff8';
         ctx3d.textAlign = 'left';
         ctx3d.textBaseline = 'middle';
-        ctx3d.font = `900 ${Math.max(8, Math.min(14, al * 0.34))}px system-ui, sans-serif`;
-        const salidaTxt = Number.isFinite(s.exit) ? `SALIDA ${s.exit}` : 'SALIDA';
-        ctx3d.fillText(salidaTxt, x + 7, y + al * 0.34);
-        ctx3d.font = `600 ${Math.max(6, Math.min(10, al * 0.20))}px system-ui, sans-serif`;
-        ctx3d.fillText(textoCorto3d(s.name || s.ref || '', an - 14), x + 7, y + al * 0.68);
+        ctx3d.font = `900 ${Math.max(11, al * 0.33)}px system-ui, sans-serif`;
+        const salidaTxt = numSalida !== null ? `SALIDA ${numSalida}` : 'SALIDA';
+        ctx3d.fillText(salidaTxt, x + an * 0.29, y + al * 0.34);
+        ctx3d.font = `600 ${Math.max(7, al * 0.19)}px system-ui, sans-serif`;
+        ctx3d.fillText(textoCorto3d(s.name || s.ref || '', an * 0.66), x + an * 0.29, y + al * 0.66);
       }
     }
 
-    const curva = carretera3d[Math.max(0, Math.min(carretera3d.length - 1, indiceActual3d()))]?.curva || 0;
-    if (Math.abs(curva) > 5) {
+    // Curva próxima (no solo la que pisa el coche): se busca el primer tramo
+    // con curvatura real para que los chevrones avisen antes de llegar.
+    const idxCoche = indiceActual3d();
+    let curva = 0;
+    for (let i = idxCoche + 1; i < Math.min(carretera3d.length, idxCoche + 45); i += 1) {
+      if (Math.abs(carretera3d[i].curva || 0) > 2.5) { curva = carretera3d[i].curva; break; }
+    }
+    if (Math.abs(curva) > 2.5) {
       const lado = curva > 0 ? -1 : 1;
-      [28, 42, 56].forEach((ss, i) => {
+      [26, 42, 58, 74].forEach((ss, i) => {
         const p = puntoPorS3d(ss);
         if (!p) return;
-        const r = Math.max(8, Math.min(18, p.ancho * 0.058));
+        const r = Math.max(9, Math.min(21, p.ancho * 0.07));
         const x = p.x + lado * (p.ancho / 2 + 3.5 * p.escala);
         const y = p.y - r * 2.1;
         if (x < r || x > w - r) return;
@@ -2291,13 +2333,16 @@
 
   function dibujarCocheGt4Detalle3d(w, h) {
     // El coche va en el carril derecho y apoyado sobre la calzada, no flotando.
-    const p0 = trazado3d.length ? trazado3d[0] : null;
+    // Primer punto de la calzada a la altura del coche (el 0 es el punto
+    // cercano de la cámara, con escala enorme).
+    const p0 = trazado3d.find(p => p.s >= 0) || trazado3d[0];
     const anchoVia0 = p0?.ancho || (w * 0.34);
-    const cw = Math.max(54, Math.min(anchoVia0 * 0.42, w * 0.30, h * 0.34));
+    const cw = Math.max(62, Math.min(anchoVia0 * 0.40, w * 0.38, h * 0.36));
     const ch = cw * 0.54;
-    const x = (p0?.x || w / 2) + anchoVia0 * 0.24;
-    const base = (p0?.y || h * 0.84) - Math.max(2, ch * 0.02);
-    const tilt = 0;
+    const x = (p0?.x || w / 2) + anchoVia0 * 0.25;
+    const base = (p0?.y || h * 0.85) - Math.max(2, ch * 0.02);
+    const curvaCoche = carretera3d[Math.max(0, Math.min(carretera3d.length - 1, indiceActual3d()))]?.curva || 0;
+    const tilt = Math.max(-4.5, Math.min(4.5, curvaCoche * 0.6));
     const rebote = 0;
 
     ctx3d.save();
@@ -2795,7 +2840,9 @@
     const segundosRestantes = segundosRestantesRuta(ruta, rest);
     const min = ruta && rest > 0 ? Math.max(1, Math.round(segundosRestantes / 60)) : 0;
     const llegada = ruta ? horaDeLlegada(segundosRestantes) : '--:--';
-    const kmh = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
+    const kmhReal = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
+    const kmh = kmhReal ?? (ruta ? limiteReferencia3d(tipoVia3d) : null);
+    const kmhAprox = kmhReal === null && kmh !== null;
     const calle = s?.name || ruta?.name || 'Calle o carretera';
 
     // Tarjeta superior: solo cuando la ruta ya está en marcha.
@@ -2869,9 +2916,9 @@
       ctx3d.strokeStyle = '#dc2626'; ctx3d.lineWidth = 4.5 * u;
       ctx3d.beginPath(); ctx3d.arc(sx, sy, sr * 0.8, 0, Math.PI * 2); ctx3d.stroke();
       ctx3d.fillStyle = '#0f172a';
-      ctx3d.font = `900 ${16 * u}px system-ui, sans-serif`;
+      ctx3d.font = `900 ${(kmhAprox ? 13 : 16) * u}px system-ui, sans-serif`;
       ctx3d.textAlign = 'center'; ctx3d.textBaseline = 'middle';
-      ctx3d.fillText(String(kmh), sx, sy + 1);
+      ctx3d.fillText(kmhAprox ? `≈${kmh}` : String(kmh), sx, sy + 1);
     } else {
       ctx3d.strokeStyle = 'rgba(148,163,184,.7)'; ctx3d.lineWidth = 2 * u;
       ctx3d.beginPath(); ctx3d.arc(sx, sy, sr * 0.82, 0, Math.PI * 2); ctx3d.stroke();
@@ -2996,7 +3043,9 @@
       const tw = Math.min(w - 30 * u, 360 * u);
       const th = 34 * u;
       const tx = (w - tw) / 2;
-      const ty = Math.max(66 * u, h * 0.16);
+      const ty = (navegando && ruta)
+        ? 12 * u + 106 * u + 8 * u
+        : Math.max(66 * u, h * 0.16);
       ctx3d.fillStyle = 'rgba(8,17,28,.94)';
       ctx3d.beginPath();
       if (ctx3d.roundRect) ctx3d.roundRect(tx, ty, tw, th, 12 * u);
