@@ -2083,9 +2083,99 @@
     }
   }
 
+  // Primera salida real por delante del coche (puede ser un paso posterior al
+  // giro inmediato): el cartel y el ramal deben enseñar la salida que se coge.
+  function salidaCercana3d(maxDist = 600) {
+    const ruta = rutaActiva();
+    if (!ruta || !ultimaPos) return null;
+    const desde = Math.max(0, paso);
+    for (let i = desde; i < Math.min(ruta.steps.length, desde + 2); i += 1) {
+      const st = ruta.steps[i];
+      if (!st || !Number.isFinite(st.lat)) continue;
+      const tipo = String(st.type || '').toLowerCase();
+      const nombre = String(st.name || '');
+      const num = Number.isFinite(Number(st.exit)) && st.exit !== null && st.exit !== ''
+        ? Number(st.exit)
+        : (Number.isFinite(Number(st.exits)) ? Number(st.exits) : null);
+      const esSalida = num !== null || /off ramp|fork|end of road/.test(tipo) || /^sal(ida|ir|e)\b/i.test(nombre);
+      if (!esSalida) {
+        if (i === desde && !/continue|depart|new name/.test(tipo)) return null;
+        continue;
+      }
+      const d = distancia(ultimaPos.lat, ultimaPos.lon, st.lat, st.lon);
+      if (d <= maxDist) return { s: st, d, num };
+    }
+    return null;
+  }
+
+  // Ramal de salida: franja de deceleración que se abre a la derecha y cuña
+  // blanca (gore) para que la salida se lea en el asfalto, no solo en el HUD.
+  function dibujarRamalSalida3d(w, h) {
+    if (!navegando) return;
+    const info = salidaCercana3d(260);
+    if (!info || info.d < 25) return;
+    const d = info.d;
+    const a = puntoPorS3d(Math.max(16, d - 70));
+    const b = puntoPorS3d(Math.max(18, d - 32));
+    const c = puntoPorS3d(Math.max(20, d - 2));
+    if (!a || !b || !c) return;
+    const borde = (p, extra = 0) => p.x + p.ancho / 2 + extra * p.escala;
+    ctx3d.save();
+    ctx3d.beginPath();
+    ctx3d.moveTo(borde(a), a.y);
+    ctx3d.lineTo(borde(b, 2.0), b.y);
+    ctx3d.lineTo(borde(c, 4.0), c.y);
+    ctx3d.lineTo(borde(c), c.y);
+    ctx3d.lineTo(borde(b), b.y);
+    ctx3d.lineTo(borde(a), a.y);
+    ctx3d.closePath();
+    ctx3d.fillStyle = modoNoche3d ? '#22303d' : '#3d474f';
+    ctx3d.fill();
+    ctx3d.strokeStyle = 'rgba(241,247,250,.92)';
+    ctx3d.lineWidth = Math.max(1.4, 0.14 * b.escala);
+    ctx3d.beginPath();
+    ctx3d.moveTo(borde(a), a.y);
+    ctx3d.lineTo(borde(b, 2.0), b.y);
+    ctx3d.lineTo(borde(c, 4.0), c.y);
+    ctx3d.stroke();
+    // Cuña de divergencia: rayas blancas gruesas entre la vía y el ramal.
+    ctx3d.strokeStyle = 'rgba(241,247,250,.9)';
+    ctx3d.lineWidth = Math.max(2.4, 0.16 * b.escala);
+    for (let i = 1; i <= 5; i += 1) {
+      const t = i / 6;
+      const xe = borde(a) + (borde(c, 4.0) - borde(a)) * t;
+      const ye = a.y + (c.y - a.y) * t;
+      const xi = borde(a) + (borde(c) - borde(a)) * t;
+      const yi = a.y + (c.y - a.y) * t;
+      ctx3d.beginPath();
+      ctx3d.moveTo(xi + (xe - xi) * 0.15, yi + (ye - yi) * 0.15);
+      ctx3d.lineTo(xe, ye);
+      ctx3d.stroke();
+    }
+    // Flecha blanca sobre el ramal, en el sentido de la salida.
+    const pa = puntoPorS3d(Math.max(5, d - 38));
+    const qa = puntoPorS3d(Math.max(8, d - 26));
+    if (pa && qa) {
+      const ang = Math.atan2(qa.x - pa.x, -(qa.y - pa.y));
+      ctx3d.save();
+      ctx3d.translate(pa.x + pa.ancho / 2 + 2.2 * pa.escala, pa.y);
+      ctx3d.rotate(ang);
+      ctx3d.strokeStyle = 'rgba(245,250,252,.9)';
+      ctx3d.lineWidth = Math.max(1.4, pa.escala * 0.18);
+      ctx3d.lineCap = 'round';
+      ctx3d.lineJoin = 'round';
+      ctx3d.beginPath();
+      ctx3d.moveTo(-pa.escala * 0.5, pa.escala * 0.5);
+      ctx3d.lineTo(0, -pa.escala * 0.5);
+      ctx3d.lineTo(pa.escala * 0.5, pa.escala * 0.5);
+      ctx3d.stroke();
+      ctx3d.restore();
+    }
+    ctx3d.restore();
+  }
+
   function dibujarSenalesDetalle3d(w, h, horizonte) {
     const ruta = rutaActiva();
-    const s = ruta?.steps?.[paso];
     // OSM manda si hay maxspeed; si no, se muestra la referencia del tipo de
     // vía para que la señal exista siempre y no quede el HUD en «?».
     const kmhReal = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
@@ -2112,26 +2202,22 @@
       }
     }
 
-    // OSRM no siempre rellena `exit`: una salida también es un fork, una
-    // incorporación o un final de vía. Antes solo se pintaba con `exit`
-    // numérico y la mayoría de salidas no mostraban cartel.
-    const tipoSalida = /off ramp|fork|end of road/i.test(String(s?.type || ''));
-    const numSalida = Number.isFinite(Number(s?.exit)) && s?.exit !== null && s?.exit !== ''
-      ? Number(s.exit)
-      : (Number.isFinite(Number(s?.exits)) ? Number(s.exits) : null);
-    const salida = Boolean(s && (tipoSalida || numSalida !== null));
-    const distSalida = ultimaPos && Number.isFinite(s?.lat)
-      ? distancia(ultimaPos.lat, ultimaPos.lon, s.lat, s.lon)
-      : 0;
+    // La salida que toca coger puede estar varios pasos por delante del giro
+    // inmediato: se busca la primera salida real y se usa esa para el cartel.
+    const salidaInfo = salidaCercana3d(560);
+    const salida = Boolean(salidaInfo);
+    const numSalida = salidaInfo?.num ?? null;
+    const distSalida = salidaInfo?.d ?? 0;
     // El cartel entra en escena cuando la salida está cerca; a 400 m no puede
     // estar ya plantado delante del coche.
     if (salida && (!ultimaPos || distSalida <= 520)) {
       const z = Math.max(28, Math.min(150, distSalida || 88));
       const p = puntoPorS3d(z);
       if (p) {
-        const an = Math.max(96, Math.min(178, w * 0.27));
+        const an = Math.max(96, Math.min(178, w * 0.30));
         const al = Math.max(32, an * 0.31);
-        const x = Math.max(10, w - an - 14);
+        // Deja libre la columna de botones de la derecha (27u + radio).
+        const x = Math.max(10, w - an - 54);
         const y = Math.max(horizonte + 10, Math.min(h * 0.62, p.y - al - 5.5 * p.escala));
         const poste = Math.max(10, Math.min(h * 0.14, 4.5 * p.escala));
         ctx3d.fillStyle = 'rgba(120,134,140,.8)';
@@ -2164,7 +2250,7 @@
         const salidaTxt = numSalida !== null ? `SALIDA ${numSalida}` : 'SALIDA';
         ctx3d.fillText(salidaTxt, x + an * 0.29, y + al * 0.34);
         ctx3d.font = `600 ${Math.max(7, al * 0.19)}px system-ui, sans-serif`;
-        ctx3d.fillText(textoCorto3d(s.name || s.ref || '', an * 0.66), x + an * 0.29, y + al * 0.66);
+        ctx3d.fillText(textoCorto3d(salidaInfo.s.name || salidaInfo.s.ref || '', an * 0.72), x + an * 0.29, y + al * 0.66);
       }
     }
 
@@ -2339,10 +2425,11 @@
     const anchoVia0 = p0?.ancho || (w * 0.34);
     const cw = Math.max(62, Math.min(anchoVia0 * 0.40, w * 0.38, h * 0.36));
     const ch = cw * 0.54;
-    const x = (p0?.x || w / 2) + anchoVia0 * 0.25;
+    // El carril derecho está centrado en pantalla por construcción: el coche
+    // va exactamente en ese eje, plano y sin balanceo lateral.
+    const x = w / 2;
     const base = (p0?.y || h * 0.85) - Math.max(2, ch * 0.02);
-    const curvaCoche = carretera3d[Math.max(0, Math.min(carretera3d.length - 1, indiceActual3d()))]?.curva || 0;
-    const tilt = Math.max(-4.5, Math.min(4.5, curvaCoche * 0.6));
+    const tilt = 0;
     const rebote = 0;
 
     ctx3d.save();
@@ -3130,12 +3217,15 @@
     tipoVia3d = tipo;
     // Horizonte alto y cámara elevada: la calzada llena la escena sin
     // convertirse en una cuesta. En ciudad se sube para dejar ver edificios.
-    const horizonte = h * (tipo === 'ciudad' || tipo === 'pueblo' ? 0.26 : tipo === 'montana' ? 0.15 : 0.18);
+    // En horizontal el horizonte baja para que la tarjeta superior no tape el
+    // punto de fuga ni la entrada de las curvas.
+    const horizonte = h * (h < 560 ? 0.24 : (tipo === 'ciudad' || tipo === 'pueblo' ? 0.26 : tipo === 'montana' ? 0.15 : 0.18));
     trazado3d = construirTrazado3d(idx, w, h, horizonte, w / 2);
     if (!trazado3d.length) return;
     dibujarFondoDetalle3d(w, h, horizonte, tipo);
     dibujarEntornoDetalle3d(w, h, horizonte, tipo);
     dibujarCalzadaDetalle3d(w, h, horizonte, tipo);
+    dibujarRamalSalida3d(w, h);
     dibujarMobiliarioUrbano3d(w, h, tipo);
     dibujarSenalesDetalle3d(w, h, horizonte);
     dibujarCocheGt4Detalle3d(w, h);
