@@ -100,7 +100,7 @@
     const via = s.ref ? ` por la ${s.ref}` : '';
     const salida = Number.isFinite(s.exit) ? ` (salida ${s.exit})` : '';
     const nombre = s.name ? ` en ${s.name}` : '';
-    if (s.type === 'depart') return `Sal${via || nombre}`;
+    if (s.type === 'depart') return s.name ? `Sal por ${s.name}` : 'Comienza la ruta';
     if (s.type === 'arrive') return 'Llegas a tu destino';
     if (s.type === 'roundabout' || s.type === 'rotary') return `Toma la rotonda${salida}${nombre}`;
     if (s.type === 'merge') return `Incorpórate${via}${nombre}`;
@@ -111,6 +111,24 @@
       ? 'a la izquierda'
       : m === 'right' || m === 'slight right' || m === 'sharp right' ? 'a la derecha' : 'recto';
     return `Gira ${giro}${via}${nombre}`;
+  }
+
+  // Instrucción sin el nombre de la calle: el banner y el ADAS tienen una
+  // línea corta y el nombre ya se muestra aparte. Evita el «Gira a la dere-
+  // cha en…» cortado en móvil.
+  function instruccionCorta(s) {
+    if (!s) return 'Continúa';
+    if (s.type === 'arrive') return 'Llegas a tu destino';
+    if (s.type === 'roundabout' || s.type === 'rotary') return 'Toma la rotonda';
+    if (s.type === 'merge') return 'Incorpórate';
+    if (s.type === 'fork') return String(s.modifier).includes('left') ? 'Desvío izquierdo' : 'Desvío derecho';
+    if (s.type === 'end of road') return 'Al final, gira';
+    if (s.type === 'depart') return s.name ? `Sal por ${s.name}` : 'Comienza la ruta';
+    const m = String(s.modifier || '');
+    if (/uturn/.test(m)) return 'Cambio de sentido';
+    if (/left/.test(m)) return 'Gira a la izquierda';
+    if (/right/.test(m)) return 'Gira a la derecha';
+    return 'Continúa';
   }
 
   function flecha(s) {
@@ -702,6 +720,7 @@
     gasolinerasError = '';
     panelGas3d = false;
     panelAvisos3d = false;
+    limites = [];
     guardarReciente(nombre, lat, lon);
     const recientes = view.querySelector('#rutaRecientes');
     if (recientes) recientes.hidden = true;
@@ -721,7 +740,7 @@
       const datos = await r.json();
       if (!r.ok || !datos.route) throw new Error(datos.error || 'Sin ruta');
       alternativas = Array.isArray(datos.routes) && datos.routes.length ? datos.routes : [datos.route];
-      if (Array.isArray(datos.route.limits) && datos.route.limits.length) limites = datos.route.limits;
+      limites = Array.isArray(datos.route.limits) ? datos.route.limits : [];
       seleccion = 0;
       paso = 0;
       avisados.clear();
@@ -782,8 +801,12 @@
       ? distancia(ultimaPos.lat, ultimaPos.lon, s.lat, s.lon)
       : (s.distance || 0);
     if (elBannerDist) elBannerDist.textContent = `En ${metros(d)}`;
-    if (elBannerTexto) elBannerTexto.textContent = instruccion(s);
-    if (elBannerEta && ruta) elBannerEta.textContent = `${minutos(ruta.duration)} · ${metros(ruta.distance)}`;
+    if (elBannerTexto) elBannerTexto.textContent = instruccionCorta(s);
+    if (elBannerEta && ruta) {
+      const quedan = ultimaPos ? restante(ultimaPos.lat, ultimaPos.lon) : ruta.distance;
+      if (s.type === 'arrive' || quedan < 15) elBannerEta.textContent = 'Llegada';
+      else elBannerEta.textContent = `${minutos(segundosRestantesRuta(ruta, quedan))} · ${metros(quedan)}`;
+    }
   }
 
   function pintarPanel() {
@@ -892,9 +915,7 @@
       // Se sale de pantalla completa y vuelve el panel de inicio.
       elShell?.classList.remove('ruta-completa');
       document.body.classList.remove('ruta-pantalla-completa');
-      if (document.fullscreenElement && document.exitFullscreen) {
-        try { document.exitFullscreen().catch(() => {}); } catch (_e) { /* nada */ }
-      }
+      salirPantallaCompleta();
     }
     pintarPanel();
     pintarBanner(rutaActiva(), paso);
@@ -952,7 +973,7 @@
       const datos = await r.json();
       if (!r.ok || !datos.route) throw new Error(datos.error || 'Sin ruta');
       alternativas = Array.isArray(datos.routes) && datos.routes.length ? datos.routes : [datos.route];
-      if (Array.isArray(datos.route.limits) && datos.route.limits.length) limites = datos.route.limits;
+      limites = Array.isArray(datos.route.limits) ? datos.route.limits : [];
       seleccion = 0;
       paso = 0;
       avisados.clear();
@@ -2293,7 +2314,9 @@
       if (p) {
         const an = Math.min(96, Math.max(62, w * 0.15));
         const al = an * 0.46;
-        const x = Math.max(8, Math.min(w - an - 8, p.x - p.ancho / 2 - an - 3 * p.escala));
+        // En horizontal la señal de límite cae al lado del cartel de ciudad:
+        // se aparta el cartel a la izquierda para que no se pisen.
+        const x = Math.max(8, Math.min(w - an - 8, p.x - p.ancho / 2 - an - (h < 560 ? 58 : 3) * p.escala));
         const y = Math.max(horizonte + 18, p.y - al - 4 * p.escala);
         const poste = Math.max(8, 4 * p.escala);
         ctx3d.fillStyle = 'rgba(120,135,140,.8)';
@@ -2428,7 +2451,10 @@
     // El carril derecho está centrado en pantalla por construcción: el coche
     // va exactamente en ese eje, plano y sin balanceo lateral.
     const x = w / 2;
-    const base = (p0?.y || h * 0.85) - Math.max(2, ch * 0.02);
+    const baseY = p0?.y || h * 0.85;
+    // En horizontal el panel de ETA ocupa el pie: el coche sube para no
+    // quedar medio tapado por la tarjeta.
+    const base = (h < 560 ? Math.min(baseY, h - 118) : baseY) - Math.max(2, ch * 0.02);
     const tilt = 0;
     const rebote = 0;
 
@@ -2712,6 +2738,13 @@
       ctx3d.moveTo(-r * 0.22, -r * 0.52); ctx3d.lineTo(-r * 0.22, r * 0.52);
       ctx3d.moveTo(r * 0.22, -r * 0.52); ctx3d.lineTo(r * 0.22, r * 0.52);
       ctx3d.moveTo(-r * 0.62, 0); ctx3d.lineTo(r * 0.62, 0);
+      ctx3d.stroke();
+    } else if (tipo === 'ar') {
+      ctx3d.strokeRect(-r * 0.7, -r * 0.5, r * 1.4, r * 1.0);
+      ctx3d.beginPath(); ctx3d.arc(0, 0, r * 0.28, 0, Math.PI * 2); ctx3d.stroke();
+      ctx3d.beginPath();
+      ctx3d.moveTo(-r * 0.42, -r * 0.5); ctx3d.lineTo(-r * 0.28, -r * 0.78);
+      ctx3d.lineTo(r * 0.28, -r * 0.78); ctx3d.lineTo(r * 0.42, -r * 0.5);
       ctx3d.stroke();
     } else if (tipo === 'close') {
       ctx3d.beginPath();
@@ -3090,7 +3123,7 @@
         ['plus', () => { zoomFondo3d = Math.min(1.55, zoomFondo3d + 0.08); }, false],
         ['minus', () => { zoomFondo3d = Math.max(0.85, zoomFondo3d - 0.08); }, false],
         ['mic', () => document.getElementById('rutaMicro')?.click(), false],
-        ['gear', () => document.getElementById('menuBtn')?.click(), false],
+        ['ar', () => iniciarAr(), false],
         ['fuel', () => abrirGasolineras3d(), panelGas3d],
         ['bell', () => alternarAvisos3d(), panelAvisos3d],
         [modoNoche3d ? 'sun' : 'moon', () => { modoNoche3d = !modoNoche3d; }, modoNoche3d],
@@ -3249,7 +3282,7 @@
   function iniciar3d() {
     if (!init3d()) return;
     // Un solo modo de vista a la vez: si AR está abierto, se cierra.
-    if (typeof vistaArActiva !== 'undefined' && vistaArActiva && typeof detenerAr === 'function') detenerAr();
+    if (typeof vistaArActiva !== 'undefined' && vistaArActiva && typeof detenerAr === 'function') detenerAr(true);
     vista3dActiva = true;
     zoomFondo3d = 1;
     // El 3D no pide cámara: la carretera, el coche y el entorno se generan
@@ -4245,7 +4278,7 @@
     }
   }
 
-  function detenerAr() {
+  function detenerAr(mantenerPantalla = false) {
     vistaArActiva = false;
     deteccionesAr = [];
     obstaculosVision = [];
@@ -4307,10 +4340,23 @@
     senalTexto = '';
     senalAvisada = '';
     detenerVisionCompartida();
+    // Al salir del ADAS sin ruta se devuelve la app a su sitio: antes se
+    // quedaba fija a pantalla completa y sin una salida clara.
+    if (!mantenerPantalla && !navegando) {
+      const shell = document.querySelector('.ruta-shell');
+      shell?.classList.remove('ruta-completa');
+      document.body.classList.remove('ruta-pantalla-completa');
+      salirPantallaCompleta();
+      setTimeout(() => mapa?.invalidateSize(), 180);
+    }
   }
 
   function toggleAr() {
-    if (vistaArActiva) detenerAr(); else iniciarAr();
+    if (vistaArActiva) {
+      detenerAr();
+      // Con la ruta en marcha, cerrar la cámara devuelve a la conducción 3D.
+      if (navegando && !vista3dActiva) iniciar3d();
+    } else iniciarAr();
   }
 
   const ETIQUETAS_COCO = {
@@ -5162,7 +5208,7 @@
     ctxAr.fillText(s.type === 'arrive' ? 'DESTINO' : `EN ${distanciaTxt}`.toUpperCase(), tx, y + 20 * u);
     ctxAr.fillStyle = '#f8fafc';
     ctxAr.font = `800 ${18 * u}px system-ui, sans-serif`;
-    ctxAr.fillText(recortar(instruccion(s), w < 520 ? 24 : 40), tx, y + 45 * u, Math.max(60, anchoTexto));
+    ctxAr.fillText(recortar(instruccionCorta(s), w < 520 ? 24 : 40), tx, y + 45 * u, Math.max(60, anchoTexto));
     ctxAr.fillStyle = '#b8c8dc';
     ctxAr.font = `600 ${12.5 * u}px system-ui, sans-serif`;
     ctxAr.fillText(recortar(s.name || nombreDestino || 'Sigue la ruta', w < 520 ? 26 : 42), tx, y + 68 * u, Math.max(60, anchoTexto));
@@ -5738,15 +5784,23 @@
     elFull.title = activa ? 'Salir de pantalla completa' : 'Pantalla completa';
     elFull.textContent = activa ? '⤢' : '⛶';
   }
+  function salirPantallaCompleta() {
+    const intento = () => {
+      if (!document.fullscreenElement) return;
+      try { document.exitFullscreen?.()?.catch?.(() => {}); } catch (_e) { /* nada */ }
+      try { document.webkitExitFullscreen?.(); } catch (_e) { /* nada */ }
+    };
+    intento();
+    setTimeout(intento, 350);
+  }
+
   async function alternarPantallaCompleta() {
     const activa = pantallaCompletaActiva();
     if (activa) {
-      if (document.fullscreenElement && document.exitFullscreen) {
-        try { await document.exitFullscreen(); } catch (_e) { /* ya salió */ }
-      }
       elShell?.classList.remove('ruta-completa');
       document.body.classList.remove('ruta-pantalla-completa');
       pintarBotonFull(false);
+      salirPantallaCompleta();
       setTimeout(() => mapa?.invalidateSize(), 180);
       return;
     }

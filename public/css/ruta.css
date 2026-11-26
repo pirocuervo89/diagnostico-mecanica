@@ -856,6 +856,17 @@ body.viendo-ruta .pwa-install { display: none !important; }
   transform: none;
 }
 .ruta-shell.ruta-conduciendo .ruta-alert { top: 12px; left: 12px; right: 90px; }
+
+/* En 2D el banner ocupa todo el ancho y el velocímetro se montaba encima de
+   su ETA. Baja el velocímetro y los avisos justo debajo del banner. */
+.ruta-shell.ruta-navegando.ruta-conduciendo:not(.ruta-3d-activo):not(.ruta-ar-activo) .ruta-speed {
+  top: 112px !important;
+  bottom: auto !important;
+}
+.ruta-shell.ruta-navegando.ruta-conduciendo:not(.ruta-3d-activo):not(.ruta-ar-activo) .ruta-alert {
+  top: 112px !important;
+  right: 92px !important;
+}
 .ruta-shell.ruta-conduciendo .ruta-fab-noche,
 .ruta-shell.ruta-conduciendo .ruta-fab-full { display: none; }    /* menos botones al conducir */
 
@@ -3469,6 +3480,11 @@ body.ruta-demo .ruta-shell::after {
   bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
+/* El aviso de cookies tapaba el botón de iniciar la ruta en el móvil: en la
+   vista GPS se oculta y se recupera al salir. */
+body.viendo-ruta .consent-bar { display: none !important; }
+body.viendo-ruta:has(.consent-bar:not([hidden])) { padding-bottom: 0 !important; }
+
 /* La vista GPS es pantalla completa en cualquier orientación: en horizontal
    el ancho supera los 700 px y la cabecera/tabbar seguían comiéndose el AR. */
 body.viendo-ruta .topbar,
@@ -3544,6 +3560,17 @@ body.viendo-ruta main {
 .ruta-shell.ruta-3d-activo .ruta-hud > #ruta3dToggle,
 .ruta-shell.ruta-3d-activo .ruta-hud > #rutaArToggle {
   display: none !important;
+}
+
+/* En móviles estrechos la maniobra y la ETA no caben a 19 px: se baja un
+   punto para que el texto se lea entero, sin elipsis. */
+@media (max-width: 430px) {
+  .ruta-shell.ruta-navegando .ruta-banner-info strong {
+    font-size: 16px !important;
+  }
+  .ruta-shell.ruta-navegando .ruta-banner-eta {
+    font-size: 12px !important;
+  }
 }
 
 /* ============================================================
