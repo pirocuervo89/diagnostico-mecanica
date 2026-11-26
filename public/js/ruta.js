@@ -1251,23 +1251,31 @@
     const segs = carretera3d;
     const anchoVia = tipoVia3d === 'autovia' ? 10.4 : tipoVia3d === 'ciudad' ? 7.2 : 8.2;
     const MAX = 260;
-    // Escala fija: sin perspectiva, para que la carretera se vea plana.
-    const escalaPlana = Math.max(16, Math.min(26, w * 0.065)) * (zoomFondo3d || 1);
+    // Cámara de persecución elevada: el coche queda centrado y la calzada
+    // ocupa la mitad inferior con perspectiva real, como en la referencia.
+    // La cámara alta evita que la carretera parezca una cuesta arriba.
+    const escalaCerca = Math.max(18, Math.min(30, w * 0.062)) * (zoomFondo3d || 1);
+    const camDist = 9;
+    const carY = h * 0.84;
+    const camH = Math.max(4, (carY - horizonte) / escalaCerca);
+    const FOCAL = escalaCerca * camDist;
     const out = [];
-    const proyectar = (s, latM) => {
-      const depth = Math.max(0, 1 - s / MAX);
+    const proyectar = (avance, latM) => {
+      const z = camDist + Math.max(0, avance);
+      const escala = FOCAL / z;
       return {
-        s,
-        x: cx + latM * escalaPlana,
-        y: h - (h - horizonte) * (s / MAX),
-        ancho: anchoVia * escalaPlana,
-        escala: escalaPlana,
+        s: Math.max(0, avance),
+        x: cx + latM * escala,
+        y: horizonte + camH * escala,
+        ancho: anchoVia * escala,
+        escala,
         lat: latM
       };
     };
     if (!segs.length) {
+      out.push(proyectar(0, 0));
       const lat0 = Math.sin(0.4) * 4;
-      for (let s = 1.8; s <= MAX; s *= 1.055) {
+      for (let s = 2; s <= MAX; s *= 1.05) {
         const lat = Math.sin(s * 0.010) * 3 + Math.sin(s * 0.0035 + 0.4) * 4 - lat0;
         out.push(proyectar(s, lat));
       }
@@ -1276,25 +1284,25 @@
     const base = segs[Math.max(0, Math.min(segs.length - 1, idxBase))];
     const h0 = (base.heading || 0) * Math.PI / 180;
     const cosLat = Math.cos(base.lat * Math.PI / 180);
-    let ultimoAvance = 1.8;
+    let ultimoAvance = 0;
     let cortar = false;
     const add = (lat, lon) => {
       const dx = (lon - base.lon) * 111320 * cosLat;
       const dy = (lat - base.lat) * 110540;
       const avance = dx * Math.sin(h0) + dy * Math.cos(h0);
       const lateral = dx * Math.cos(h0) - dy * Math.sin(h0);
-      if (avance < 1.8) return;
+      if (avance < 0.6) return;
       if (avance < ultimoAvance - 2) { cortar = true; return; }
-      if (avance < ultimoAvance + 0.45) return;
+      if (avance < ultimoAvance + 0.4) return;
       ultimoAvance = avance;
       out.push(proyectar(avance, lateral));
     };
-    out.push(proyectar(1.8, 0));
+    out.push(proyectar(0, 0));
     for (let i = idxBase; i < segs.length - 1 && ultimoAvance < MAX && !cortar; i += 1) {
       const a = segs[i];
       const b = segs[i + 1];
       const d = a.dist || 8;
-      const pasos = Math.max(1, Math.min(14, Math.ceil(d / 3)));
+      const pasos = Math.max(1, Math.min(40, Math.ceil(d / 1.5)));
       for (let k = 1; k <= pasos && ultimoAvance < MAX && !cortar; k += 1) {
         const t = k / pasos;
         add(a.lat + (b.lat - a.lat) * t, a.lon + (b.lon - a.lon) * t);
@@ -1304,7 +1312,7 @@
       for (let i = 1; i < out.length - 1; i += 1) out[i].x = (out[i - 1].x + out[i].x * 2 + out[i + 1].x) / 4;
     }
     for (const p of out) {
-      const k = Math.min(1, p.s / 32);
+      const k = Math.min(1, p.s / 24);
       p.x = cx + (p.x - cx) * k;
     }
     for (let p = 0; p < 3; p += 1) {
@@ -1419,6 +1427,73 @@
     }
   }
 
+  // Franja de bosque lejano: pinos pequeños a lo largo del horizonte para que
+  // el paisaje no quede vacío y se parezca a la referencia de montaña.
+  function dibujarBosqueFondo3d(w, horizonte, tipo) {
+    if (tipo === 'ciudad' || tipo === 'pueblo') return;
+    const base = horizonte + 2;
+    const escalaW = Math.max(0.7, Math.min(1.6, w / 390));
+    const n = Math.max(30, Math.floor(w / 8));
+    for (let i = 0; i < n; i += 1) {
+      const x = (i / n) * (w + 24) - 12 + ((i * 37) % 9) - 4;
+      const alto = Math.max(7, (11 + (i * 13) % 13) * escalaW);
+      const ancho = alto * 0.52;
+      const tono = i % 3;
+      ctx3d.fillStyle = modoNoche3d
+        ? (tono === 0 ? '#0b2a22' : tono === 1 ? '#0f3329' : '#0a241d')
+        : (tono === 0 ? '#3c7a52' : tono === 1 ? '#2f6b45' : '#4a8a5a');
+      ctx3d.beginPath();
+      ctx3d.moveTo(x, base - alto);
+      ctx3d.lineTo(x + ancho / 2, base);
+      ctx3d.lineTo(x - ancho / 2, base);
+      ctx3d.closePath();
+      ctx3d.fill();
+    }
+  }
+
+  // Suelo low-poly: facetas triangulares suaves que dan volumen al terreno
+  // sin tapar la calzada (que se pinta después, encima).
+  function dibujarSueloLowPoly3d(w, h, horizonte, tipo) {
+    if (tipo === 'ciudad' || tipo === 'pueblo') return;
+    const paleta = modoNoche3d
+      ? ['#0d261f', '#102c24', '#0a1d17', '#12332a']
+      : ['#6f9459', '#7ea662', '#648a50', '#86ab6b'];
+    const cols = 6;
+    const filas = 5;
+    const x0 = -w * 0.12;
+    const x1 = w * 1.12;
+    const y0 = horizonte + (h - horizonte) * 0.04;
+    const y1 = h + 12;
+    const dx = (x1 - x0) / cols;
+    const dy = (y1 - y0) / filas;
+    let k = 0;
+    for (let r = 0; r < filas; r += 1) {
+      for (let c = 0; c < cols; c += 1) {
+        k += 1;
+        const xa = x0 + c * dx;
+        const ya = y0 + r * dy;
+        const xb = xa + dx;
+        const yb = ya + dy;
+        const jx = ((k * 53) % 15) - 7;
+        const jy = ((k * 29) % 11) - 5;
+        ctx3d.fillStyle = paleta[k % paleta.length];
+        ctx3d.beginPath();
+        ctx3d.moveTo(xa + jx, ya + jy);
+        ctx3d.lineTo(xb, ya);
+        ctx3d.lineTo(xa, yb);
+        ctx3d.closePath();
+        ctx3d.fill();
+        ctx3d.fillStyle = paleta[(k + 2) % paleta.length];
+        ctx3d.beginPath();
+        ctx3d.moveTo(xb, ya);
+        ctx3d.lineTo(xb, yb);
+        ctx3d.lineTo(xa, yb);
+        ctx3d.closePath();
+        ctx3d.fill();
+      }
+    }
+  }
+
   function dibujarFondoDetalle3d(w, h, horizonte, tipo) {
     const noche = modoNoche3d;
     const cielo = ctx3d.createLinearGradient(0, 0, 0, horizonte);
@@ -1462,8 +1537,27 @@
         ctx3d.ellipse(cx0, cy0, 42 + i * 18, 8 + i * 2, 0, 0, Math.PI * 2);
         ctx3d.fill();
       }
-    }    // Terreno plano: sin colinas ni skyline para que la carretera no parezca
-    // una cuesta. El suelo se rellena más abajo de forma uniforme.
+    }
+
+    if (tipo === 'montana') {
+      perfil3d(w, horizonte, horizonte - h * 0.01, h * 0.13, 1.4, noche ? '#0e2432' : '#6f8c83');
+      perfil3d(w, horizonte, horizonte + h * 0.005, h * 0.09, 2.8, noche ? '#0a1b28' : '#4f7566');
+      if (!noche) {
+        ctx3d.fillStyle = 'rgba(245,248,248,.82)';
+        ctx3d.beginPath();
+        ctx3d.moveTo(w * 0.18, horizonte - h * 0.13);
+        ctx3d.lineTo(w * 0.23, horizonte - h * 0.055);
+        ctx3d.lineTo(w * 0.13, horizonte - h * 0.055);
+        ctx3d.closePath(); ctx3d.fill();
+      }
+    } else if (tipo === 'autovia') {
+      perfil3d(w, horizonte, horizonte, h * 0.045, 0.4, noche ? '#0a1b28' : '#7a9a78');
+      perfil3d(w, horizonte, horizonte + 1, h * 0.026, 2.2, noche ? '#0b1f2b' : '#5f845e');
+    } else {
+      perfil3d(w, horizonte, horizonte, h * 0.038, 0.9, noche ? '#0b1c29' : '#7f9b82');
+    }
+
+    dibujarSkyline3d(w, horizonte, tipo);
 
     const suelo = ctx3d.createLinearGradient(0, horizonte, 0, h);
     if (noche) {
@@ -1481,6 +1575,9 @@
     }
     ctx3d.fillStyle = suelo;
     ctx3d.fillRect(0, horizonte, w, h - horizonte);
+
+    dibujarSueloLowPoly3d(w, h, horizonte, tipo);
+    dibujarBosqueFondo3d(w, horizonte, tipo);
 
     const bruma = ctx3d.createLinearGradient(0, horizonte - h * 0.06, 0, horizonte + 8);
     bruma.addColorStop(0, 'rgba(210,230,235,0)');
@@ -1687,19 +1784,24 @@
 
   function dibujarEntornoDetalle3d(w, h, horizonte, tipo) {
     const pts = trazado3d;
-    for (let i = pts.length - 1; i >= 5; i -= 3) {
+    let n = 0;
+    for (let i = pts.length - 1; i >= 5; i -= 2) {
       const p = pts[i];
-      if (p.escala < 2.2) continue;
-      const lado = i % 2 ? 1 : -1;
-      const off = p.ancho * 0.64 + (7 + (i % 3) * 2) * p.escala;
+      if (p.escala < 1.6) continue;
+      const lado = (n % 2) ? 1 : -1;
+      n += 1;
+      const off = p.ancho * 0.62 + (2.4 + (n % 3) * 0.9) * p.escala;
       if (off > w) continue;
       const x = p.x + lado * off;
       if (x < -w * 0.15 || x > w * 1.15) continue;
       const base = p.y;
       if (tipo === 'montana') {
-        const alto = Math.min(h * 0.30, (5.5 + (i % 4) * 1.7) * p.escala);
+        const alto = Math.min(h * 0.30, (5.5 + (n % 4) * 1.7) * p.escala);
         dibujarArbol3d(x, base, alto, 'montana');
-        if (i % 11 === 0) {
+        if (n % 2 === 0) {
+          dibujarArbol3d(p.x - lado * (p.ancho / 2 + (2.2 + (n % 3) * 0.7) * p.escala), base, alto * 0.7, 'montana');
+        }
+        if (n % 11 === 0) {
           ctx3d.fillStyle = modoNoche3d ? '#202b31' : '#9b927f';
           ctx3d.beginPath();
           ctx3d.moveTo(x + lado * 4 * p.escala, base);
@@ -1709,29 +1811,40 @@
         }
       } else if (tipo === 'ciudad') {
         if (p.escala > 22) continue;
-        const alto = Math.min(h * 0.23, (6.5 + (i % 5) * 1.8) * p.escala);
+        const alto = Math.min(h * 0.23, (6.5 + (n % 5) * 1.8) * p.escala);
         const ancho = Math.min(8 * p.escala, w * 0.10);
-        dibujarEdificio3d(x, base, alto, ancho, i);
-        if (i % 7 === 0) {
+        dibujarEdificio3d(x, base, alto, ancho, n);
+        if (n % 7 === 0) {
           for (const l of [-1, 1]) {
             dibujarFarola3d(p.x + l * (p.ancho / 2 + 2.2 * p.escala), base, Math.min(h * 0.18, 5.8 * p.escala));
           }
         }
-        if (i % 11 === 0) dibujarArbol3d(p.x + lado * (p.ancho / 2 + 3.1 * p.escala), base, Math.min(h * 0.12, 3.6 * p.escala), 'ciudad');
+        if (n % 11 === 0) dibujarArbol3d(p.x + lado * (p.ancho / 2 + 3.1 * p.escala), base, Math.min(h * 0.12, 3.6 * p.escala), 'ciudad');
       } else if (tipo === 'pueblo') {
         if (p.escala > 24) continue;
-        const alto = Math.min(h * 0.20, (4.5 + (i % 3) * 1.6) * p.escala);
+        const alto = Math.min(h * 0.20, (4.5 + (n % 3) * 1.6) * p.escala);
         dibujarCasa3d(x, base, alto, Math.min(6.5 * p.escala, w * 0.085));
-        if (i % 8 === 0) {
+        if (n % 8 === 0) {
           ctx3d.fillStyle = modoNoche3d ? '#37453c' : '#6d7e5e';
           ctx3d.fillRect(x - 4 * p.escala, base - 0.8 * p.escala, 8 * p.escala, 0.8 * p.escala);
         }
-        if (i % 13 === 0) dibujarArbol3d(p.x + lado * (p.ancho / 2 + 3 * p.escala), base, Math.min(h * 0.10, 3.3 * p.escala), 'carretera');
+        if (n % 13 === 0) dibujarArbol3d(p.x + lado * (p.ancho / 2 + 3 * p.escala), base, Math.min(h * 0.10, 3.3 * p.escala), 'carretera');
       } else if (tipo === 'autovia') {
-        if (i % 5 === 0) {
-          dibujarArbol3d(p.x + lado * (p.ancho / 2 + 4.2 * p.escala), base, Math.min(h * 0.15, 4.2 * p.escala), 'carretera');
+        dibujarArbol3d(
+          p.x + lado * (p.ancho / 2 + (2.0 + (n % 3) * 0.6) * p.escala),
+          base,
+          Math.min(h * 0.15, (3.6 + (n % 4) * 0.8) * p.escala),
+          'carretera'
+        );
+        if (n % 2 === 0) {
+          dibujarArbol3d(
+            p.x - lado * (p.ancho / 2 + (2.6 + (n % 2) * 0.7) * p.escala),
+            base,
+            Math.min(h * 0.11, (2.7 + (n % 3) * 0.5) * p.escala),
+            'carretera'
+          );
         }
-        if (i % 9 === 0) {
+        if (n % 6 === 0) {
           ctx3d.strokeStyle = modoNoche3d ? 'rgba(125,145,155,.6)' : 'rgba(95,111,115,.65)';
           ctx3d.lineWidth = Math.max(1, 0.11 * p.escala);
           const xl = p.x + lado * (p.ancho * 0.58);
@@ -1744,9 +1857,12 @@
           ctx3d.beginPath(); ctx3d.arc(xl + lado * 1.6 * p.escala, base - alt, 1.9 * p.escala, 0, Math.PI * 2); ctx3d.fill();
         }
       } else {
-        const alto = Math.min(h * 0.24, (4.8 + (i % 4) * 1.4) * p.escala);
+        const alto = Math.min(h * 0.24, (4.8 + (n % 4) * 1.4) * p.escala);
         dibujarArbol3d(x, base, alto, 'carretera');
-        if (i % 13 === 0) {
+        if (n % 2 === 0) {
+          dibujarArbol3d(p.x - lado * (p.ancho / 2 + (2.0 + (n % 3) * 0.7) * p.escala), base, alto * 0.7, 'carretera');
+        }
+        if (n % 13 === 0) {
           ctx3d.strokeStyle = modoNoche3d ? 'rgba(110,95,70,.7)' : 'rgba(139,122,91,.72)';
           ctx3d.lineWidth = Math.max(1, 0.16 * p.escala);
           ctx3d.beginPath();
@@ -1927,13 +2043,13 @@
   }
 
   function dibujarFlechasDetalle3d(w, h) {
-    for (let s = 18; s <= 112; s += 24) {
+    for (let s = 10; s <= 86; s += 16) {
       const p = puntoPorS3d(s);
       const q = puntoPorS3d(s + 5);
       if (!p || !q) continue;
       const ang = Math.atan2(q.x - p.x, -(q.y - p.y));
-      const half = Math.min(13, Math.max(3, p.ancho * 0.055));
-      const len = Math.min(24, Math.max(5, p.ancho * 0.075));
+      const half = Math.min(22, Math.max(4, p.ancho * 0.11));
+      const len = Math.min(30, Math.max(6, p.ancho * 0.14));
       ctx3d.save();
       ctx3d.translate(p.x + p.ancho * 0.245, p.y);
       ctx3d.rotate(ang);
@@ -2172,11 +2288,11 @@
   function dibujarCocheGt4Detalle3d(w, h) {
     // El coche va en el carril derecho y apoyado sobre la calzada, no flotando.
     const p0 = trazado3d.length ? trazado3d[0] : null;
-    const cw = Math.max(126, Math.min(w * 0.26, h * 0.38, 250));
-    const ch = cw * 0.54;
     const anchoVia0 = p0?.ancho || (w * 0.34);
+    const cw = Math.max(54, Math.min(anchoVia0 * 0.42, w * 0.30, h * 0.34));
+    const ch = cw * 0.54;
     const x = (p0?.x || w / 2) + anchoVia0 * 0.24;
-    const base = (p0?.y || h) - Math.max(2, ch * 0.02);
+    const base = (p0?.y || h * 0.84) - Math.max(2, ch * 0.02);
     const tilt = 0;
     const rebote = 0;
 
@@ -2960,14 +3076,15 @@
       avisoToast3dHasta = performance.now() + 4200;
     }
     tipoVia3d = tipo;
-    // Vista plana: horizonte alto para que la calzada ocupe casi toda la pantalla
-    // sin cuesta arriba.
-    const horizonte = h * 0.10;
+    // Horizonte alto y cámara elevada: la calzada llena la escena sin
+    // convertirse en una cuesta. En ciudad se sube para dejar ver edificios.
+    const horizonte = h * (tipo === 'ciudad' || tipo === 'pueblo' ? 0.26 : tipo === 'montana' ? 0.15 : 0.18);
     trazado3d = construirTrazado3d(idx, w, h, horizonte, w / 2);
     if (!trazado3d.length) return;
     dibujarFondoDetalle3d(w, h, horizonte, tipo);
-    // Terreno plano y despejado: sin arbolado, edificios ni tráfico inventado.
+    dibujarEntornoDetalle3d(w, h, horizonte, tipo);
     dibujarCalzadaDetalle3d(w, h, horizonte, tipo);
+    dibujarMobiliarioUrbano3d(w, h, tipo);
     dibujarSenalesDetalle3d(w, h, horizonte);
     dibujarCocheGt4Detalle3d(w, h);
     dibujarHud3d(w, h);
