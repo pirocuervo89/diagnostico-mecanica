@@ -1083,7 +1083,6 @@
   let ctx3d = null;
   let carretera3d = [];
   let firmaRuta3d = '';
-  let idx3dSuave = null;
   let progreso3d = 0;
   let scrollOffset3d = 0;
   let zoomFondo3d = 1;
@@ -1105,8 +1104,12 @@
     const segs = [];
     for (let i = 0; i < pts.length - 1; i++) {
       const a = pts[i], b = pts[i + 1];
-      const dx = b[1] - a[1], dy = b[0] - a[0];
-      const dist = Math.sqrt(dx * dx + dy * dy) * 111000;
+      // La longitud se acorta con el coseno de la latitud: sin esa corrección
+      // el rumbo de los tramos este-oeste salía torcido y la carretera 3D
+      // giraba de más al proyectarla.
+      const cosLat = Math.cos((a[0] * Math.PI) / 180);
+      const dx = (b[1] - a[1]) * cosLat, dy = b[0] - a[0];
+      const dist = Math.sqrt(dx * dx + dy * dy) * 111320;
       const heading = Math.atan2(dx, dy) * 180 / Math.PI;
       segs.push({ lat: a[0], lon: a[1], dist, heading, curva: 0 });
     }
@@ -1140,7 +1143,6 @@
   let modoNoche3d = false;
   let tipoVia3d = 'carretera';
   let tipoVia3dAnterior = '';
-  let avisoTipoVia3dHasta = 0;
   let avisoToast3d = '';
   let avisoToast3dHasta = 0;
   let ultimoExceso3d = 0;
@@ -1214,14 +1216,16 @@
     const s = ruta.steps?.[paso] || ruta.steps?.[0] || {};
     const ref = String(s.ref || '').toUpperCase().replace(/\s+/g, '');
     const nombre = String(`${s.name || ''} ${ruta.name || ''}`).toLowerCase();
-    const kmh = ultimaPos ? Number(limiteActual(ultimaPos.lat, ultimaPos.lon)) || 0 : 0;
+    // null = límite desconocido. Antes se convertía en 0 y cualquier curva
+    // sin dato de OSM pasaba a «PUERTO DE MONTAÑA» aunque fuera una recta
+    // comarcal; ahora el tipo se decide por nombre/ref y, si hay límite, por él.
+    const kmh = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
     const curva = curvaturaMedia3d(idx);
-    if (/^(A|AP|E)-?\d/.test(ref) || /autov[ií]a|autopista|autopista|freeway|motorway/.test(nombre) || kmh >= 100) return 'autovia';
-    if (/puerto|coll|sierra|monta[nñ]a|mirador|desfiladero/.test(nombre) || (curva > 9 && (!kmh || kmh <= 90))) return 'montana';
-    if (kmh && kmh <= 50) return /avenida|plaza|paseo|ronda|granv[ií]a/.test(nombre) ? 'ciudad' : 'pueblo';
+    if (/^(A|AP|E)-?\d/.test(ref) || /autov[ií]a|autopista|freeway|motorway/.test(nombre) || (kmh !== null && kmh >= 100)) return 'autovia';
+    if (/puerto|coll|sierra|monta[nñ]a|mirador|desfiladero/.test(nombre) || (kmh !== null && kmh <= 70 && curva > 12)) return 'montana';
+    if (kmh !== null && kmh <= 50) return /avenida|plaza|paseo|ronda|granv[ií]a/.test(nombre) ? 'ciudad' : 'pueblo';
     if (/calle|avenida|plaza|paseo|ronda|traves[ií]a|urbano/.test(nombre)) return 'ciudad';
     if (/^(N|C)-?\d/.test(ref) || /comarcal|carretera/.test(nombre)) return 'comarcal';
-    if (kmh <= 90) return 'carretera';
     return 'carretera';
   }
 
@@ -2793,7 +2797,6 @@
     const llegada = ruta ? horaDeLlegada(segundosRestantes) : '--:--';
     const kmh = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
     const calle = s?.name || ruta?.name || 'Calle o carretera';
-    const compacto = w < 560 || h < 440;
 
     // Tarjeta superior: solo cuando la ruta ya está en marcha.
     if (navegando && ruta) {
@@ -3106,7 +3109,6 @@
 
   function iniciar3d() {
     if (!init3d()) return;
-    idx3dSuave = null;
     // Un solo modo de vista a la vez: si AR está abierto, se cierra.
     if (typeof vistaArActiva !== 'undefined' && vistaArActiva && typeof detenerAr === 'function') detenerAr();
     vista3dActiva = true;
