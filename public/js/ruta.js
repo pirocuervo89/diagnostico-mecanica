@@ -681,6 +681,13 @@
   pintarRecientes();
 
   elBuscar?.addEventListener('submit', e => { e.preventDefault(); buscar(elDestino.value); });
+  // Delegado en el panel: el botón se repinta al avanzar de paso y el listener
+  // directo podía quedarse en un nodo viejo. Así el arranque funciona siempre.
+  elPanel?.addEventListener('click', ev => {
+    if (!ev.target.closest('#rutaEmpezar')) return;
+    ev.preventDefault();
+    alternarNavegacion();
+  });
   elDestino?.addEventListener('input', () => {
     clearTimeout(temporizadorBusqueda);
     if (elDestino.value.trim().length < 3) { elResultados.hidden = true; pintarRecientes(); return; }
@@ -846,7 +853,6 @@
     pintarEta(ruta, ruta.duration);
     pintarBanner(ruta, paso);
 
-    elPanel.querySelector('#rutaEmpezar')?.addEventListener('click', alternarNavegacion);
     elPanel.querySelectorAll('[data-ruta]').forEach(btn => {
       btn.addEventListener('click', () => {
         seleccion = Number(btn.dataset.ruta) || 0;
