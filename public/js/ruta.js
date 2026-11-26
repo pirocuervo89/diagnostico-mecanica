@@ -63,6 +63,12 @@
   let rumboAuto = true;      // mapa orientado al rumbo del coche
   let giro = 0;              // grados que lleva girado el mapa
   let animacionGiro = 0;
+  let wakeLock = null;
+  let wakePendiente = false;
+  let anunciosVoz = new Set();
+  let ultimaVozRuta = 0;
+  let ultimoAvisoExceso = 0;
+  let llegadaHecha = false;
 
   const CLAVE_NOCHE = 'dm_ruta_noche';
   const CLAVE_VOZ = 'dm_ruta_voz';
@@ -129,6 +135,70 @@
     if (/left/.test(m)) return 'Gira a la izquierda';
     if (/right/.test(m)) return 'Gira a la derecha';
     return 'Continúa';
+  }
+
+  // La pantalla del móvil no debe apagarse mientras se conduce. Si el
+  // navegador no soporta Wake Lock (iOS antiguo), no pasa nada: se sigue
+  // navegando igual y el aviso simplemente no existe.
+  async function pedirPantallaDespierta() {
+    if (wakeLock || wakePendiente) return;
+    if (!navegando && !vistaArActiva) return;
+    if (!navigator.wakeLock?.request) return;
+    wakePendiente = true;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock?.addEventListener?.('release', () => { wakeLock = null; });
+    } catch (_e) {
+      wakeLock = null;
+    } finally {
+      wakePendiente = false;
+    }
+  }
+
+  function soltarPantallaDespierta() {
+    if (!wakeLock) return;
+    try { wakeLock.release?.(); } catch (_e) { /* ya liberado */ }
+    wakeLock = null;
+  }
+
+  function sincronizarPantallaDespierta() {
+    if (navegando || vistaArActiva) pedirPantallaDespierta();
+    else soltarPantallaDespierta();
+  }
+
+  // Avisos hablados antes del cruce. Dos distancias (lejos/cerca) y un
+  // «ahora»: suficiente para no perder el giro sin convertir el viaje en una
+  // sucesión de frases. Se marcan por paso para no repetirlos en cada fix.
+  function anunciarManiobra(s, d) {
+    if (!navegando || !s || !vozActiva || !Number.isFinite(d)) return;
+    const esLlegada = s.type === 'arrive';
+    const esGiro = /left|right|uturn/.test(String(s.modifier || ''));
+    const esEspecial = /roundabout|rotary|merge|fork|end of road/.test(String(s.type || ''));
+    if (!esLlegada && !esGiro && !esEspecial) return;
+    const bandas = esLlegada ? [300, 80] : (velocidad >= 75 ? [900, 250] : [500, 120]);
+    if (!esLlegada && d <= 20) {
+      const clave = `ahora:${paso}`;
+      if (anunciosVoz.has(clave)) return;
+      if (Date.now() - ultimaVozRuta < 1200) return;
+      anunciosVoz.add(clave);
+      ultimaVozRuta = Date.now();
+      decir(`${instruccion(s)} ahora`);
+      return;
+    }
+    if (d <= 8) return;
+    const i = bandas.findIndex(b => d <= b);
+    if (i < 0) return;
+    const prefijo = esLlegada ? 'llegada' : 'giro';
+    const clave = `${prefijo}:${paso}:${bandas[i]}`;
+    if (anunciosVoz.has(clave)) return;
+    if (Date.now() - ultimaVozRuta < 1800) return;
+    for (let j = 0; j <= i; j += 1) anunciosVoz.add(`${prefijo}:${paso}:${bandas[j]}`);
+    const salto = d >= 100 ? 50 : 10;
+    const distanciaAviso = Math.max(20, Math.round(d / salto) * salto);
+    ultimaVozRuta = Date.now();
+    decir(esLlegada
+      ? `Llegas a tu destino en ${metros(distanciaAviso)}`
+      : `En ${metros(distanciaAviso)}, ${instruccion(s)}`);
   }
 
   function flecha(s) {
@@ -519,6 +589,15 @@
 
     const limite = limiteActual(lat, lon);
     pintarVelocidad(Math.min(velocidad, 260), limite);
+    // Un solo aviso cada 45 s: si sigues por encima del límite no se repite en
+    // cada fix, pero tampoco se queda callado todo el viaje. En demo no se
+    // avisa porque la velocidad es simulada.
+    if (navegando && !demoActiva && limite && velocidad > limite + 8 && Date.now() - ultimoAvisoExceso > 45000) {
+      ultimoAvisoExceso = Date.now();
+      avisar(`Vas a ${Math.round(velocidad)} km/h · límite ${limite}`, 'radar', 7000);
+      pitido(760);
+      decir('Atención: vas por encima del límite. Reduce la velocidad.');
+    }
 
     if (!yo) {
       yo = L.marker([lat, lon], { icon: iconoYo(), zIndexOffset: 500 }).addTo(mapa);
@@ -684,9 +763,17 @@
   // Delegado en el panel: el botón se repinta al avanzar de paso y el listener
   // directo podía quedarse en un nodo viejo. Así el arranque funciona siempre.
   elPanel?.addEventListener('click', ev => {
-    if (!ev.target.closest('#rutaEmpezar')) return;
-    ev.preventDefault();
-    alternarNavegacion();
+    if (ev.target.closest('#rutaEmpezar')) {
+      ev.preventDefault();
+      alternarNavegacion();
+      return;
+    }
+    if (ev.target.closest('#rutaOtraRuta')) {
+      elPanel.hidden = true;
+      elDestino.value = '';
+      elResultados.hidden = true;
+      elDestino.focus();
+    }
   });
   elDestino?.addEventListener('input', () => {
     clearTimeout(temporizadorBusqueda);
@@ -732,6 +819,9 @@
     const recientes = view.querySelector('#rutaRecientes');
     if (recientes) recientes.hidden = true;
     fueraRuta = 0;
+    llegadaHecha = false;
+    anunciosVoz.clear();
+    ultimaVozRuta = 0;
     if (destino) mapa.removeLayer(destino);
     destino = L.marker([lat, lon], { icon: iconoDestino() }).addTo(mapa);
 
@@ -858,6 +948,8 @@
         seleccion = Number(btn.dataset.ruta) || 0;
         paso = 0;
         avisados.clear();
+        anunciosVoz.clear();
+        llegadaHecha = false;
         pintarRuta();
         pintarPanel();
         cargarAvisos();
@@ -865,7 +957,7 @@
     });
   }
 
-  function alternarNavegacion() {
+  function alternarNavegacion(silencioso = false) {
     navegando = !navegando;
     elShell?.classList.toggle('ruta-conduciendo', navegando);
     elShell?.classList.toggle('ruta-navegando', navegando);
@@ -887,18 +979,31 @@
       }
       siguiendo = true;
       paso = 0;
+      llegadaHecha = false;
+      anunciosVoz.clear();
+      ultimaVozRuta = 0;
       // OSRM entrega un primer paso "depart" en el punto de salida. Si se deja
       // como paso activo, al alejarse del origen ya nunca se alcanza y la
       // navegación se queda mostrando ese paso para siempre.
       const rutaNav = rutaActiva();
       if (rutaNav?.steps?.[0]?.type === 'depart' && rutaNav.steps.length > 1) paso = 1;
+      // La primera indicación se dice al arrancar, sin esperar al siguiente fix
+      // del GPS: el conductor acaba de pulsar «iniciar» y necesita saber ya
+      // cuál es la primera maniobra.
+      const sInicio = rutaNav?.steps?.[paso];
+      if (ultimaPos && sInicio) {
+        const dInicio = Number.isFinite(sInicio.lat)
+          ? distancia(ultimaPos.lat, ultimaPos.lon, sInicio.lat, sInicio.lon)
+          : 0;
+        anunciarManiobra(sInicio, dInicio);
+      }
       // Rumbo arriba al conducir, salvo que lo hayas dejado en norte a mano.
       try { rumboAuto = localStorage.getItem(CLAVE_RUMBO) !== '0'; } catch (_e) { rumboAuto = true; }
       pintarBrujula();
       // De noche el mapa oscuro se lee mejor en el coche, pero solo se cambia
       // si el usuario no había elegido tema a mano.
       try { if (localStorage.getItem(CLAVE_NOCHE) === null) aplicarTema(true); } catch (_e) { /* nada */ }
-      avisar('Navegación iniciada. Te aviso de radares, obras y averías.', 'ok', 5000);
+      if (!silencioso) avisar('Navegación iniciada. Te aviso de radares, obras y averías.', 'ok', 5000);
       if (ultimaPos) {
         // Modo primera persona: el coche queda en la parte inferior del mapa.
         mapa.setView([ultimaPos.lat, ultimaPos.lon], zoomPorVelocidad(velocidad), { animate: true, duration: 0.8 });
@@ -908,15 +1013,18 @@
         mapa.panTo(target, { animate: true, duration: 0.6 });
       }
       seguirRumbo(true);
-      decir('Navegación iniciada. Nos vamos.');
+      if (!silencioso) decir('Navegación iniciada. Nos vamos.');
+      sincronizarPantallaDespierta();
       revisarOBD(true);
     } else {
       // Al parar se vuelve al norte: un mapa torcido sin ruta activa confunde.
       rumboAuto = false;
       aplicarGiro(0);
       pintarBrujula();
-      decir('Navegación detenida');
-      avisar('Navegación detenida.', 'info', 3000);
+      if (!silencioso) {
+        decir('Navegación detenida');
+        avisar('Navegación detenida.', 'info', 3000);
+      }
       if (demoActiva) detenerDemo();
       // Se sale de pantalla completa y vuelve el panel de inicio.
       elShell?.classList.remove('ruta-completa');
@@ -927,6 +1035,40 @@
     pintarBanner(rutaActiva(), paso);
     // Durante la navegación el panel de inicio no se muestra.
     if (rutaActiva()) elPanel.hidden = navegando;
+    sincronizarPantallaDespierta();
+  }
+
+  // Final de trayecto: se apaga la cámara/3D, se sale de pantalla completa y
+  // se deja un resumen claro. Sin esto la app seguía «navegando» para siempre
+  // después de llegar y el botón de parar seguía en pantalla.
+  function finalizarLlegada() {
+    if (llegadaHecha) return;
+    llegadaHecha = true;
+    const nombre = nombreDestino || 'tu destino';
+    if (vistaArActiva) detenerAr(true);
+    if (vista3dActiva) detener3d();
+    if (navegando) alternarNavegacion(true);
+    anunciosVoz.clear();
+    elBanner.hidden = true;
+    elEta.hidden = true;
+    elVel.hidden = true;
+    elResultados.hidden = true;
+    elPanel.hidden = false;
+    elPanel.innerHTML = `
+      <div class="ruta-llegada">
+        <div class="ruta-llegada-bandera" aria-hidden="true">⚑</div>
+        <div class="ruta-llegada-texto">
+          <small>DESTINO ALCANZADO</small>
+          <b>${nombre}</b>
+          <span>Has llegado. Buen viaje.</span>
+        </div>
+        <button type="button" id="rutaOtraRuta">Buscar otro destino</button>
+      </div>`;
+    avisar(`Has llegado a ${nombre}.`, 'ok', 9000);
+    decir(`Has llegado a ${nombre}. Fin de la ruta.`);
+    pitido(1040);
+    try { navigator.vibrate?.([90, 60, 90, 60, 180]); } catch (_e) { /* sin vibración */ }
+    setTimeout(() => mapa?.invalidateSize(), 220);
   }
 
   function restante(lat, lon) {
@@ -983,6 +1125,8 @@
       seleccion = 0;
       paso = 0;
       avisados.clear();
+      anunciosVoz.clear();
+      llegadaHecha = false;
       pintarRuta(false);
       pintarPanel();
       mapa.setView([lat, lon], 17);
@@ -1017,8 +1161,8 @@
     // Un salto de GPS puede dejar varias maniobras atrás. Se avanzan las que
     // ya quedaron detrás de la posición actual para que el ETA no cuente el
     // camino de vuelta al cruce perdido.
+    const idxActual = navegando ? indicePuntoRuta3d(lat, lon) : -1;
     if (navegando) {
-      const idxActual = indicePuntoRuta3d(lat, lon);
       while (paso < ruta.steps.length - 1) {
         const proximo = ruta.steps[paso];
         if (!Number.isFinite(proximo.lat)) break;
@@ -1038,11 +1182,27 @@
       if (fueraRuta >= 2) { fueraRuta = 0; recalcular(lat, lon); }
     }
     const d = Number.isFinite(s.lat) ? distancia(lat, lon, s.lat, s.lon) : 0;
-    if (desvio <= 60 && d < 45 && paso < ruta.steps.length - 1) {
+    if (navegando) {
+      if (s.type === 'arrive' && d <= 30 && desvio <= 40) {
+        finalizarLlegada();
+        return;
+      }
+      anunciarManiobra(s, d);
+    }
+    // Se avanza cuando la maniobra ya queda detrás en la geometría (o el GPS
+    // está prácticamente encima), no 45 m antes: antes el banner enseñaba el
+    // giro siguiente mientras el coche aún no había llegado al cruce.
+    const idxPaso = Number.isFinite(s.lat) && navegando ? indicePuntoRuta3d(s.lat, s.lon) : -1;
+    const yaPasado = idxPaso >= 0 && idxActual > idxPaso;
+    if (desvio <= 60 && (yaPasado || d < 12) && d < 30 && paso < ruta.steps.length - 1) {
       paso += 1;
       const siguiente = ruta.steps[paso];
-      decir(instruccion(siguiente));
-      if (siguiente.type === 'arrive') avisar('Has llegado a tu destino.', 'ok', 9000);
+      if (siguiente.type === 'arrive' && Number.isFinite(siguiente.lat)
+        && distancia(lat, lon, siguiente.lat, siguiente.lon) <= 30) {
+        finalizarLlegada();
+        return;
+      }
+      if (siguiente.type === 'arrive') avisar('Llegas a tu destino.', 'ok', 6000);
       pintarPanel();
       pintarBanner(ruta, paso);
     }
@@ -1074,12 +1234,27 @@
       avisos = Array.isArray(datos.avisos) ? datos.avisos : [];
       // Los límites de velocidad no se pintan como chinchetas: son demasiados.
       // Se usan para el velocímetro.
-      limites = avisos
+      // Los límites de la ruta no deben desaparecer si OSM no devuelve
+      // ninguno: se conservan y se fusionan sin duplicar.
+      const limitesRuta = limites.slice();
+      const limitesOsm = avisos
         .filter(a => a.kind === 'limite')
         .map(a => ({ lat: a.lat, lon: a.lon, kmh: parseInt(String(a.maxspeed).match(/(\d+)/)?.[1] || '', 10) || 0 }))
         .filter(l => l.kmh > 0);
+      const vistos = new Set();
+      limites = [...limitesRuta, ...limitesOsm].filter(l => {
+        if (!Number.isFinite(l.lat) || !Number.isFinite(l.lon) || !l.kmh) return false;
+        const clave = `${l.lat.toFixed(4)}|${l.lon.toFixed(4)}|${l.kmh}`;
+        if (vistos.has(clave)) return false;
+        vistos.add(clave);
+        return true;
+      });
       capaAvisos.clearLayers();
       avisos.filter(a => a.kind !== 'limite').forEach(pintarAviso);
+      // El límite llega después del panel; si el coche está parado no habrá
+      // otro fix hasta que arranque. Se refresca el velocímetro ahora mismo
+      // para que la señal de límite no tarde minutos en aparecer.
+      if (ultimaPos) pintarVelocidad(Math.min(velocidad, 260), limiteActual(ultimaPos.lat, ultimaPos.lon));
       const visibles = avisos.filter(a => a.kind !== 'limite');
       if (elInfo) {
         elInfo.textContent = visibles.length
@@ -4228,6 +4403,7 @@
       videoAr.srcObject = streamAr;
       await videoAr.play().catch(() => {});
       vistaArActiva = true;
+      sincronizarPantallaDespierta();
       const botonAr = document.getElementById('rutaArToggle');
       botonAr?.classList.add('activo');
       botonAr?.setAttribute('aria-pressed', 'true');
@@ -4286,6 +4462,7 @@
 
   function detenerAr(mantenerPantalla = false) {
     vistaArActiva = false;
+    sincronizarPantallaDespierta();
     deteccionesAr = [];
     obstaculosVision = [];
     siguienteTrackId = 1;
@@ -5832,6 +6009,9 @@
       avisar('Cargando tráfico en vivo…', 'info', 2000);
       actualizarTrafico();
     }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') sincronizarPantallaDespierta();
   });
   document.addEventListener('fullscreenchange', () => {
     const activa = Boolean(document.fullscreenElement);
