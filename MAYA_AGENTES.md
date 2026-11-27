@@ -43,10 +43,22 @@ Opciones:
 El worker exige que el repositorio no tenga cambios tracked sin commit. Así no
 mezcla tu trabajo con el de Maya. `data/products.json` queda excluido del commit.
 
-## 3. Usar el taller desde Maya
+## 3. Entrar al apartado de administrador
 
-Inicia sesión con la cuenta administradora (el primer usuario registrado) y
-escribe en el chat:
+En la app, abre **Más → Administrador** (o el enlace «Administrador» del pie).
+
+- Si la instalación no tiene ninguna cuenta, aparece un formulario para crear la
+  **primera cuenta**, que será la única administradora. Ese formulario se cierra
+  para siempre en cuanto existe un usuario.
+- Si ya hay cuentas, solo se puede entrar con el usuario y la contraseña de la
+  cuenta con rol `admin`. Una cuenta normal recibe un aviso y no ve el taller.
+
+Dentro del panel puedes ver la cola, enviar una orden directamente y abrir Maya.
+La sesión dura 30 días y se puede cerrar con «Salir».
+
+## 4. Usar el taller desde Maya
+
+Inicia sesión con la cuenta administradora y escribe en el chat:
 
 ```text
 agente: el botón de cambiar destino tapa el banner en 3D; arréglalo y comprueba el móvil

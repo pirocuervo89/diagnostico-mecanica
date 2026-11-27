@@ -19,6 +19,7 @@ import proteccionRouter from './src/routes/proteccion.js';
 import ttsRouter from './src/routes/tts.js';
 import rutaRouter from './src/routes/ruta.js';
 import mayaAgentRouter from './src/routes/maya_agent.js';
+import adminRouter from './src/routes/admin.js';
 import { startPriceSync } from './src/lib/price_sync.js';
 import { installShutdownBackup, backupStatus } from './src/lib/db_persist.js';
 
@@ -79,6 +80,8 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/forum', forumRouter);
+// Acceso propio del administrador: alta única y login solo para el rol admin.
+app.use('/api/admin', adminRouter);
 app.use('/api/garage', garageRouter);
 app.use('/api/testigos', testigosRouter);
 app.use('/api/tutorials', tutorialsRouter);

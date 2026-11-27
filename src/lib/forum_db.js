@@ -323,6 +323,12 @@ export function isBanned(user) {
   return Boolean(user?.banned_until && user.banned_until > nowISO());
 }
 
+export function registrationState() {
+  const users = Number(db.prepare('SELECT COUNT(*) AS n FROM users').get().n);
+  const admins = Number(db.prepare("SELECT COUNT(*) AS n FROM users WHERE role = 'admin'").get().n);
+  return { users, admins, setupOpen: users === 0 };
+}
+
 export function registerUser({ username, displayName, password }, meta = {}) {
   const cleanUsername = cleanText(username, 24).toLowerCase();
   const name = cleanText(displayName || username, 60) || cleanUsername;

@@ -45,6 +45,7 @@
   <link rel="stylesheet" href="/css/aurora.css?v=20261119a">
   <link rel="stylesheet" href="/css/halo.css?v=20261120b">
   <link rel="stylesheet" href="/css/ruta.css?v=20261127b7">
+  <link rel="stylesheet" href="/css/admin.css?v=20261127a1">
   <link rel="stylesheet" href="/css/centinela.css?v=20261125a1">
   <link rel="stylesheet" href="/css/interfaz-animada.css?v=20261122c">
   <link rel="stylesheet" href="/css/movil-ligero.css?v=20261121a">
@@ -232,6 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button data-view="ruta" type="button" title="Mapa, GPS, navegación y radares"><svg class="ic"><use href="#i-pin"></use></svg>Ruta</button>
     <button data-view="informe" type="button"><svg class="ic"><use href="#i-file"></use></svg>Informe</button>
     <button data-view="foro" type="button"><svg class="ic"><use href="#i-forum"></use></svg>Foro</button>
+    <button data-view="admin" class="nav-admin" type="button" title="Acceso de administrador"><svg class="ic"><use href="#i-shield"></use></svg>Administrador</button>
     <button data-view="contacto" type="button"><svg class="ic"><use href="#i-mail"></use></svg>Contacto</button>
   </nav>
 
@@ -2476,6 +2478,107 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
   </section>
 
 
+  <!-- ===================== ACCESO DE ADMINISTRADOR ===================== -->
+  <section id="view-admin" class="view admin-view">
+    <div class="page-head admin-head">
+      <div>
+        <span class="eyebrow"><i></i> TALLER DE AGENTES · ACCESO RESTRINGIDO</span>
+        <h2>Administrador</h2>
+        <p class="lead">Desde aquí puedes entrar con la cuenta administradora y dar órdenes a los agentes. La web solo encola la orden; el worker de tu equipo es el que ejecuta, prueba y sube los cambios.</p>
+      </div>
+      <span class="admin-lock-badge"><svg class="ic"><use href="#i-lock"></use></svg> Solo administrador</span>
+    </div>
+
+    <div id="adminGate" class="panel admin-gate">
+      <div class="admin-gate-head">
+        <span class="cap-ico"><svg class="ic"><use href="#i-shield"></use></svg></span>
+        <div>
+          <h3 id="adminGateTitle">Entrar como administrador</h3>
+          <p id="adminGateText" class="muted">Solo la cuenta administradora puede ver el taller y enviar órdenes a Maya.</p>
+        </div>
+      </div>
+
+      <form id="adminLoginForm" class="admin-form" autocomplete="on">
+        <label>Usuario
+          <input id="adminLoginUser" placeholder="Tu usuario" autocomplete="username" maxlength="24" required>
+        </label>
+        <label>Contraseña
+          <input id="adminLoginPass" type="password" placeholder="Tu contraseña" autocomplete="current-password" maxlength="200" required>
+        </label>
+        <input class="hp-field" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn primary" type="submit"><svg class="ic"><use href="#i-shield"></use></svg> Entrar como administrador</button>
+      </form>
+
+      <form id="adminSetupForm" class="admin-form hidden" autocomplete="off">
+        <p class="admin-setup-note">Esta instalación todavía no tiene ninguna cuenta. La que crees aquí será la <b>única administradora</b> y también servirá para el foro.</p>
+        <label>Usuario
+          <input id="adminSetupUser" placeholder="3-24 letras o números" autocomplete="username" maxlength="24" required>
+        </label>
+        <label>Nombre visible
+          <input id="adminSetupName" placeholder="Cómo quieres aparecer" autocomplete="nickname" maxlength="60">
+        </label>
+        <label>Contraseña
+          <input id="adminSetupPass" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" minlength="8" maxlength="200" required>
+        </label>
+        <label>Repite la contraseña
+          <input id="adminSetupConfirm" type="password" placeholder="Otra vez" autocomplete="new-password" minlength="8" maxlength="200" required>
+        </label>
+        <input class="hp-field" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn primary" type="submit"><svg class="ic"><use href="#i-shield"></use></svg> Crear cuenta administradora</button>
+      </form>
+
+      <div id="adminNoAccess" class="admin-no-access hidden">
+        <p>Has entrado con una cuenta normal. Esta zona solo acepta la cuenta administradora.</p>
+        <button id="adminSwitchAccount" class="btn ghost" type="button">Cerrar sesión y probar otra cuenta</button>
+      </div>
+
+      <div id="adminGateStatus" class="form-status" role="status" aria-live="polite"></div>
+      <p class="admin-footnote">La contraseña se guarda cifrada en el servidor. No se envía a ningún servicio externo.</p>
+    </div>
+
+    <div id="adminPanel" class="admin-panel hidden">
+      <div class="panel admin-who">
+        <div class="admin-who-copy">
+          <span class="eyebrow">SESIÓN ADMINISTRADORA</span>
+          <strong id="adminWhoName">Administrador</strong>
+          <span id="adminWhoRole" class="tag">admin</span>
+        </div>
+        <button id="adminLogout" class="btn ghost sm" type="button"><svg class="ic"><use href="#i-close"></use></svg> Salir</button>
+      </div>
+
+      <div id="adminStats" class="admin-stats" aria-live="polite"></div>
+
+      <div class="panel admin-order">
+        <div class="panel-head">
+          <div>
+            <span class="eyebrow"><i></i> ÓRDENES A LOS AGENTES</span>
+            <h3>¿Qué hay que arreglar?</h3>
+            <p class="muted">Descríbelo como se lo dirías a Maya. El worker lo ejecutará en tu equipo, pasará las pruebas y hará commit y push.</p>
+          </div>
+          <span id="adminWorker" class="tag">Worker sin configurar</span>
+        </div>
+        <form id="adminOrderForm" class="admin-order-form">
+          <label class="sr-only" for="adminOrderText">Orden para los agentes</label>
+          <textarea id="adminOrderText" rows="4" maxlength="2000" placeholder="Ej.: El botón de cambiar destino tapa el aviso en 3D; arréglalo y pruébalo en móvil." required></textarea>
+          <div class="admin-order-actions">
+            <button class="btn primary" type="submit"><svg class="ic"><use href="#i-send"></use></svg> Enviar orden</button>
+            <button id="adminOpenMaya" class="btn ghost" type="button"><svg class="ic"><use href="#i-chat"></use></svg> Abrir Maya</button>
+            <button id="adminRefresh" class="btn ghost sm" type="button"><svg class="ic"><use href="#i-refresh"></use></svg> Actualizar</button>
+          </div>
+        </form>
+        <div id="adminOrderStatus" class="form-status" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="panel admin-tasks">
+        <div class="panel-head">
+          <div><span class="eyebrow"><i></i> COLA DEL TALLER</span><h3>Últimas órdenes</h3></div>
+          <span id="adminTaskCount" class="tag">0</span>
+        </div>
+        <div id="adminTaskList" class="admin-task-list"><p class="muted">Todavía no hay órdenes.</p></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================== FICHA DE PRODUCTO ===================== -->
   <div id="productModal" class="product-modal" hidden>
     <div class="product-modal-backdrop" data-product-close></div>
@@ -2505,6 +2608,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     <button data-view="chat" type="button">Chat IA</button>
     <button data-view="informe" type="button">Informe</button>
     <button data-view="foro" type="button">Foro</button>
+    <button data-view="admin" type="button">Administrador</button>
     <button data-view="contacto" type="button">Contacto</button>
   </nav>
   <div class="footer-legal">
@@ -2604,6 +2708,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <script src="/js/garage.js?v=20261122b"></script>
 <script src="/js/testigos.js?v=20261120b"></script>
 <script src="/js/forum.js?v=20261124a1"></script>
+<script src="/js/admin.js?v=20261127a2"></script>
 <script>
 (function () {
   // Glow interactivo: sigue el cursor en tarjetas y paneles.

@@ -1,4 +1,4 @@
-const CACHE = 'dm-app-v207';
+const CACHE = 'dm-app-v208';
 const CORE = [
   '/',
   '/index.html',
@@ -12,6 +12,7 @@ const CORE = [
   '/css/futurista.css',
   '/css/interfaz-animada.css',
   '/css/ruta.css',
+  '/css/admin.css',
   '/css/centinela.css',
   '/css/legal.css',
   '/fonts/fonts.css',
@@ -28,6 +29,7 @@ const CORE = [
   '/js/buying.js',
   '/js/consent.js',
   '/js/forum.js',
+  '/js/admin.js',
   '/js/garage.js',
   '/js/scan.js',
   '/js/testigos.js',
