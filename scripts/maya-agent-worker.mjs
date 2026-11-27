@@ -72,6 +72,15 @@ async function report(taskId, payload) {
   await api(`/api/maya-agent/tasks/${taskId}/result`, payload);
 }
 
+async function progress(taskId, message) {
+  try {
+    await api(`/api/maya-agent/tasks/${taskId}/progress`, { message });
+  } catch (error) {
+    // El progreso es informativo: si falla, la orden sigue su curso.
+    console.warn(`[maya-agent] No se pudo publicar el progreso: ${error.message}`);
+  }
+}
+
 function tail(text, max = 1800) {
   const clean = String(text || '').trim();
   return clean.length > max ? `…${clean.slice(-max)}` : clean;
@@ -79,6 +88,7 @@ function tail(text, max = 1800) {
 
 async function processTask(task) {
   console.log(`[maya-agent] Orden #${task.id}: ${task.instruction}`);
+  await progress(task.id, 'Comprobando que el repositorio está limpio…');
   const status = await run('git', ['status', '--porcelain', '--untracked-files=no']);
   if (status.code !== 0) {
     await report(task.id, { status: 'error', summary: `No se pudo leer git: ${tail(status.out)}` });
@@ -92,6 +102,7 @@ async function processTask(task) {
     return;
   }
 
+  await progress(task.id, `OpenCode está trabajando${MODEL ? ` con ${MODEL}` : ''}…`);
   const args = ['run', '--auto'];
   if (MODEL) args.push('-m', MODEL);
   args.push(task.instruction);
@@ -105,6 +116,7 @@ async function processTask(task) {
   }
 
   if (RUN_TESTS) {
+    await progress(task.id, 'Pasando las pruebas antes de guardar…');
     const tests = await run('npm', ['test'], { timeout: TEST_TIMEOUT });
     if (tests.code !== 0) {
       await report(task.id, {
@@ -115,6 +127,7 @@ async function processTask(task) {
     }
   }
 
+  await progress(task.id, 'Preparando el commit…');
   await run('git', ['add', '-A', '--', '.', ':(exclude)data/products.json']);
   const staged = await run('git', ['diff', '--cached', '--quiet']);
   if (staged.code === 0) {
@@ -134,6 +147,7 @@ async function processTask(task) {
   let pushed = false;
   let summary = `Cambios guardados en el commit ${hash}.`;
   if (PUSH) {
+    await progress(task.id, 'Subiendo al repositorio…');
     const push = await run('git', ['push'], { timeout: 120_000 });
     if (push.code !== 0) {
       await report(task.id, { status: 'error', summary: `Commit ${hash} creado, pero el push falló.\n${tail(push.out)}`, commit: hash, pushed: false });
@@ -153,7 +167,12 @@ async function loop() {
   for (;;) {
     let task = null;
     try {
-      const data = await api('/api/maya-agent/next', {});
+      // Long-poll: si no hay orden, el servidor mantiene la conexión hasta 20 s
+      // y devuelve la orden en cuanto llega. En modo de una pasada se consulta
+      // una vez para no quedarse esperando.
+      const data = ONCE
+        ? await api('/api/maya-agent/next', {})
+        : await api('/api/maya-agent/wait', { timeoutMs: 20000 });
       task = data.task;
     } catch (error) {
       console.error(`[maya-agent] No se pudo consultar la cola: ${error.message}`);
@@ -169,7 +188,7 @@ async function loop() {
       }
     }
     if (ONCE) return;
-    await new Promise(resolve => setTimeout(resolve, task ? 1000 : 8000));
+    await new Promise(resolve => setTimeout(resolve, task ? 1000 : 500));
   }
 }
 

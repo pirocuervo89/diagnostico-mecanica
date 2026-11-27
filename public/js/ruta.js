@@ -80,6 +80,7 @@
   const CLAVE_POS = 'dm_ruta_ultima';
   const CLAVE_RUMBO = 'dm_ruta_rumbo';
   const CLAVE_RECIENTES = 'dm_ruta_recientes';
+  const CLAVE_RUTA = 'dm_ruta_activa';
 
   // ------------------------------------------------------------ utilidades
   const metros = m => (m >= 1000 ? `${(m / 1000).toFixed(m >= 10000 ? 0 : 1)} km` : `${Math.round(m)} m`);
@@ -255,6 +256,11 @@
     if (vozActiva) decir('Voz activada');
     else avisar('Indicaciones silenciadas.', 'info', 3000);
   }
+
+  let ultimoFix = 0;
+  let gpsPerdido = false;
+  let ultimoAvisoGps = 0;
+  let ultimoAvisoPrecision = 0;
 
   function avisar(texto, tono = 'info', ms = 6000) {
     if (!elAviso) return;
@@ -563,6 +569,13 @@
     const { latitude: lat, longitude: lon, accuracy, speed, heading } = pos.coords;
     const ahora = Date.now();
     const precision = Number.isFinite(accuracy) && accuracy > 0 ? accuracy : null;
+    if (!esRespaldo) {
+      ultimoFix = ahora;
+      if (gpsPerdido) {
+        gpsPerdido = false;
+        avisar('Señal GPS recuperada. Sigues en ruta.', 'ok', 4500);
+      }
+    }
     // Un fix de 150 m de radio no sirve para navegar: movería el coche a otra
     // calle. Si ya hay una posición reciente, se conserva y se espera a uno
     // mejor; si es el primero, se acepta para no dejar el mapa vacío.
@@ -571,6 +584,12 @@
       return;
     }
     ultimaPrecision = precision ?? ultimaPrecision;
+    // Con un fix de más de 80 m no se dan indicaciones habladas: la posición
+    // puede estar en la calle de al lado y la voz mandaría el giro equivocado.
+    if (navegando && !esRespaldo && ultimaPrecision > 80 && ahora - ultimoAvisoPrecision > 30000) {
+      ultimoAvisoPrecision = ahora;
+      avisar('GPS impreciso (±' + Math.round(ultimaPrecision) + ' m). Las indicaciones de voz esperan a una señal mejor.', 'aviso', 7000);
+    }
     if (elGps && ultimaPrecision) {
       elGps.title = `GPS ±${Math.round(ultimaPrecision)} m`;
       elGps.setAttribute('aria-label', `Centrar en mi posición. Precisión ±${Math.round(ultimaPrecision)} metros`);
@@ -678,8 +697,15 @@
 
   function errorGps(err) {
     // Si ya hay una posición, un error suelto del GPS (un túnel, el primer
-    // fix del arranque) no debe pedir permisos que ya están dados.
-    if (ultimaPos) return;
+    // fix del arranque) no debe pedir permisos que ya están dados. Pero si
+    // estamos navegando, el conductor necesita saber que la señal se ha ido.
+    if (ultimaPos) {
+      if (navegando && Date.now() - ultimoAvisoGps > 30000) {
+        ultimoAvisoGps = Date.now();
+        avisar('Sin señal GPS. Mantén la ruta marcada; sigo intentando conectar.', 'aviso', 10000);
+      }
+      return;
+    }
     if (err && err.code === 1) {
       navigator.permissions?.query?.({ name: 'geolocation' })
         .then(p => {
@@ -764,9 +790,43 @@
     }
   }
 
+  function escaparRuta(value = '') {
+    return String(value).replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    }[char]));
+  }
+
   function leerRecientes() {
     try { return JSON.parse(localStorage.getItem(CLAVE_RECIENTES) || '[]'); } catch (_e) { return []; }
   }
+
+  // La ruta activa se guarda solo como destino, no como geometría: al volver
+  // se recalcula con el tráfico y la posición actuales. Caduca a las 12 h.
+  function leerRutaActiva() {
+    try {
+      const r = JSON.parse(localStorage.getItem(CLAVE_RUTA) || 'null');
+      if (!r || !Number.isFinite(r.lat) || !Number.isFinite(r.lon)) return null;
+      if (!r.ts || Date.now() - r.ts > 12 * 60 * 60 * 1000) return null;
+      return r;
+    } catch (_e) { return null; }
+  }
+
+  function guardarRutaActiva() {
+    if (!destinoCoord) return;
+    try {
+      localStorage.setItem(CLAVE_RUTA, JSON.stringify({
+        lat: destinoCoord.lat,
+        lon: destinoCoord.lon,
+        nombre: nombreDestino || 'Destino',
+        ts: Date.now()
+      }));
+    } catch (_e) { /* sin espacio */ }
+  }
+
+  function limpiarRutaActiva() {
+    try { localStorage.removeItem(CLAVE_RUTA); } catch (_e) { /* sin espacio */ }
+  }
+
   function guardarReciente(nombre, lat, lon) {
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
     const lista = leerRecientes().filter(r => !(Math.abs(r.lat - lat) < 1e-4 && Math.abs(r.lon - lon) < 1e-4));
@@ -780,10 +840,26 @@
     // Al conducir no se muestran recientes: tapaban la tarjeta de maniobra.
     if (navegando) { box.hidden = true; box.innerHTML = ''; return; }
     const lista = leerRecientes();
-    if (!lista.length) { box.hidden = true; box.innerHTML = ''; return; }
+    const activa = leerRutaActiva();
+    if (!lista.length && !activa) { box.hidden = true; box.innerHTML = ''; return; }
     box.hidden = false;
-    box.innerHTML = '<span class="ruta-recientes-titulo">Recientes</span>' +
-      lista.map(r => `<button type="button" class="ruta-reciente" data-lat="${r.lat}" data-lon="${r.lon}" data-nombre="${String(r.nombre).replace(/"/g, '&quot;')}">${r.nombre}</button>`).join('');
+    let html = '';
+    if (activa) {
+      html += '<span class="ruta-recientes-titulo">Ruta sin terminar</span>' +
+        `<button type="button" class="ruta-reciente ruta-continuar" data-continuar="1">Continuar a ${escaparRuta(activa.nombre)}</button>`;
+    }
+    if (lista.length) {
+      html += '<span class="ruta-recientes-titulo">Recientes</span>' +
+        lista.map(r => `<button type="button" class="ruta-reciente" data-lat="${r.lat}" data-lon="${r.lon}" data-nombre="${escaparRuta(r.nombre)}">${escaparRuta(r.nombre)}</button>`).join('');
+    }
+    box.innerHTML = html;
+    box.querySelector('[data-continuar]')?.addEventListener('click', async () => {
+      const r = leerRutaActiva();
+      if (!r) { pintarRecientes(); return; }
+      elDestino.value = r.nombre || 'Destino';
+      await fijarDestino(r.lat, r.lon, r.nombre);
+      if (rutaActiva() && !navegando) alternarNavegacion();
+    });
     box.querySelectorAll('[data-lat]').forEach(b => {
       b.addEventListener('click', async () => {
         elDestino.value = b.dataset.nombre;
@@ -878,6 +954,7 @@
       avisados.clear();
       pintarRuta();
       pintarPanel();
+      guardarRutaActiva();
       cargarAvisos();
       // En el móvil el panel queda al pie del mapa: se deja a la vista para no
       // tener que buscar el botón de arrancar la navegación.
@@ -1013,6 +1090,8 @@
         try { elShell.requestFullscreen({ navigationUI: 'hide' }).catch(() => {}); } catch (_e) { /* fallback: clase fija */ }
       }
       siguiendo = true;
+      ultimoFix = Date.now();
+      gpsPerdido = false;
       paso = 0;
       llegadaHecha = false;
       anunciosVoz.clear();
@@ -1052,6 +1131,8 @@
       sincronizarPantallaDespierta();
       revisarOBD(true);
     } else {
+      limpiarRutaActiva();
+      gpsPerdido = false;
       // Al parar se vuelve al norte: un mapa torcido sin ruta activa confunde.
       rumboAuto = false;
       aplicarGiro(0);
@@ -1096,6 +1177,7 @@
   function finalizarLlegada() {
     if (llegadaHecha) return;
     llegadaHecha = true;
+    limpiarRutaActiva();
     const nombre = nombreDestino || 'tu destino';
     if (vistaArActiva) detenerAr(true);
     if (vista3dActiva) detener3d();
@@ -1239,7 +1321,7 @@
         finalizarLlegada();
         return;
       }
-      anunciarManiobra(s, d);
+      if (!ultimaPrecision || ultimaPrecision <= 80) anunciarManiobra(s, d);
     }
     // Se avanza cuando la maniobra ya queda detrás en la geometría (o el GPS
     // está prácticamente encima), no 45 m antes: antes el banner enseñaba el
@@ -6160,6 +6242,21 @@
     });
   }
 
+  // Vigilante de señal: un error suelto no se anuncia, pero una pérdida de
+  // más de 10 s navegando sí. Al volver el fix se retira el aviso solo.
+  setInterval(() => {
+    if (!navegando) { gpsPerdido = false; return; }
+    const sin = Date.now() - (ultimoFix || 0) > 10000;
+    if (sin && !gpsPerdido) {
+      gpsPerdido = true;
+      avisar('Sin señal GPS. Mantén la ruta marcada; sigo intentando conectar.', 'aviso', 18000);
+      decir('Atención: he perdido la señal del GPS. Sigue la ruta marcada.');
+    } else if (!sin && gpsPerdido) {
+      gpsPerdido = false;
+      avisar('Señal GPS recuperada. Sigues en ruta.', 'ok', 4500);
+    }
+  }, 4000);
+
   window.Ruta = {
     ir: (lat, lon, nombre) => { window.showView?.('ruta'); setTimeout(() => fijarDestino(lat, lon, nombre), 700); },
     irA,
@@ -6227,7 +6324,8 @@
       posicion: ultimaPos ? { lat: Number(ultimaPos.lat.toFixed(5)), lon: Number(ultimaPos.lon.toFixed(5)) } : null,
       destino: destinoCoord ? { lat: Number(destinoCoord.lat.toFixed(5)), lon: Number(destinoCoord.lon.toFixed(5)), nombre: nombreDestino || '' } : null,
       navegando: Boolean(navegando),
-      precision: ultimaPrecision ? Math.round(ultimaPrecision) : null
+      precision: ultimaPrecision ? Math.round(ultimaPrecision) : null,
+      gpsPerdido: Boolean(gpsPerdido)
     })
   };
 })();

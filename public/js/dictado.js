@@ -115,10 +115,23 @@
   let ultimoGesto = 0;
   let timer = null;
   let barra = null;
+  let escuchaAnunciada = null;
+
+  // Avisa al resto de la app de que el micrófono está capturando. Así Maya
+  // deja de hablar y no se lee una respuesta encima de la pregunta siguiente.
+  function anunciarEscucha(activo) {
+    const valor = Boolean(activo);
+    if (escuchaAnunciada === valor) return;
+    escuchaAnunciada = valor;
+    try {
+      window.dispatchEvent(new CustomEvent('maya:escucha', { detail: { activo: valor } }));
+    } catch (_e) { /* navegador sin CustomEvent */ }
+  }
 
   function boton() { return $('vozMic'); }
 
   function pintar(activo) {
+    anunciarEscucha(activo);
     const b = boton();
     if (b) {
       b.classList.toggle('grabando', activo);

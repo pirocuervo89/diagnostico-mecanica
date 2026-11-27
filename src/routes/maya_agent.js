@@ -2,7 +2,8 @@ import express from 'express';
 import crypto from 'crypto';
 import { userFromSession } from '../lib/forum_db.js';
 import {
-  createAgentTask, listAgentTasks, claimNextAgentTask, finishAgentTask, agentQueueStats
+  createAgentTask, listAgentTasks, claimNextAgentTask, finishAgentTask, agentQueueStats,
+  updateAgentTaskProgress
 } from '../lib/maya_agent_db.js';
 
 const router = express.Router();
@@ -81,6 +82,35 @@ router.get('/tasks', requireAdmin, (_req, res) => {
 // Solo el worker local, con token, puede recoger y cerrar órdenes.
 router.post('/next', requireWorker, (_req, res) => {
   res.json({ task: claimNextAgentTask() });
+});
+
+// Long-poll: el worker se queda esperando hasta 25 s. La orden se recoge en
+// cuanto el administrador la envía, sin esperar al siguiente sondeo de 8 s.
+router.post('/wait', requireWorker, async (req, res) => {
+  try {
+    const timeout = Math.min(25000, Math.max(1000, Number(req.body?.timeoutMs) || 20000));
+    const started = Date.now();
+    while (Date.now() - started < timeout) {
+      const task = claimNextAgentTask();
+      if (task) return res.json({ task });
+      await new Promise(resolve => setTimeout(resolve, 900));
+    }
+    res.json({ task: null });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// El worker publica en qué punto está para que el panel lo vea en vivo.
+router.post('/tasks/:id/progress', requireWorker, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: 'Identificador no válido.' });
+  try {
+    const task = updateAgentTaskProgress(id, req.body?.message);
+    res.json({ task });
+  } catch (error) {
+    res.status(error.status || 400).json({ error: error.message });
+  }
 });
 
 router.post('/tasks/:id/result', requireWorker, (req, res) => {

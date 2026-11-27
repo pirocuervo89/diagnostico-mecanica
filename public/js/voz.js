@@ -60,6 +60,10 @@
 
   // Por defecto la IA contesta en voz alta: así se puede hablar sin mirar.
   let autoRead = store.get(STORE_READ, '1') === '1';
+  // El botón de dictado (dictado.js) avisa cuando abre el micrófono. Mientras
+  // escucha, Maya no debe leer respuestas ni arrancar el modo llamada: sería
+  // hablar encima del usuario.
+  let escuchaExterna = false;
 
   let lang = store.get(STORE_LANG, 'es-ES');
   let speakingBubble = null;
@@ -295,7 +299,7 @@
     // Solo se lee sola la respuesta que acaba de llegar. Las que ya estaban en
     // el chat (al abrirlo o cambiar de vista) nunca se leen: si no, el móvil se
     // pone a hablar solo con todo el historial.
-    if (autoSpeak && autoRead && !bubble.classList.contains('voz-no-auto')) {
+    if (autoSpeak && autoRead && !escuchaExterna && !bubble.classList.contains('voz-no-auto')) {
       clearTimeout(addReadButton.timer);
       addReadButton.timer = setTimeout(() => {
         const todas = document.querySelectorAll('#chatBox .bubble.assistant:not(.typing)');
@@ -1102,6 +1106,15 @@
   // Voz para el resto de la app (avisos de ruta, radares): usa el mismo motor
   // del sistema o la voz del servidor cuando el móvil no trae ninguna.
   window.MayaHablar = (texto = '') => hablarTexto(String(texto).slice(0, 300));
+  window.MayaPararVoz = stopSpeaking;
+  window.addEventListener('maya:escucha', event => {
+    escuchaExterna = Boolean(event.detail?.activo);
+    if (!escuchaExterna) return;
+    stopSpeaking();
+    // Si el modo llamada tenía el micrófono continuo, se cierra para no
+    // competir con el botón de dictado por el mismo micrófono.
+    if (llamadaActiva) pararLlamada();
+  });
   // La portada pregunta y escucha la respuesta directamente (sin «Maya»).
   window.MayaEscuchar = () => activarLlamada({ directo: true });
 

@@ -125,6 +125,8 @@ test('orden de preferencia: forzado, genérico, presets, Gemini y Pollinations a
   assert.equal(resolveProvider({ OPENROUTER_API_KEY: 'k' }).id, 'openrouter');
   assert.equal(resolveProvider({ MISTRAL_API_KEY: 'k' }).id, 'mistral');
   assert.equal(resolveProvider({ GEMINI_API_KEY: 'k' }).id, 'gemini');
+  assert.equal(resolveProvider({ ZAI_API_KEY: 'k' }).id, 'zai');
+  assert.equal(resolveProvider({ ZAI_API_KEY: 'k' }).model, 'glm-4.7-flash');
 
   const allKeys = {
     AI_API_KEY: 'k', AI_BASE_URL: 'http://x/v1',
@@ -154,6 +156,7 @@ test('el catálogo de proveedores es público y no lleva claves', () => {
   assert.ok(list.length >= 7);
   assert.ok(list.every(p => p.id && p.label && typeof p.keyEnv === 'string' && !('apiKey' in p)));
   assert.ok(list.some(p => p.id === 'pollinations' && p.free === true && p.keyEnv === ''));
+  assert.ok(list.some(p => p.id === 'zai' && p.keyEnv === 'ZAI_API_KEY'));
 });
 
 test('callAI usa el formato OpenAI: ruta, cabecera, modelo y mensaje', async () => {

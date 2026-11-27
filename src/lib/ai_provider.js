@@ -89,6 +89,17 @@ const PRESETS = {
     accountEnv: 'CLOUDFLARE_ACCOUNT_ID',
     altModels: ['@cf/openai/gpt-oss-120b', '@cf/meta/llama-3.1-8b-instruct', '@cf/qwen/qwen2.5-72b-instruct']
   },
+  // Z.ai GLM Flash: modelos Flash con coste 0 (entrada y salida) y sin
+  // tarjeta. Endpoint OpenAI-compatible. La clave es gratuita y se crea en
+  // z.ai; el modelo por defecto es el Flash más reciente.
+  zai: {
+    id: 'zai',
+    label: 'Z.ai GLM Flash (gratis)',
+    kind: 'openai',
+    baseUrl: 'https://api.z.ai/api/paas/v4',
+    model: 'glm-4.7-flash',
+    keyEnv: 'ZAI_API_KEY'
+  },
   // SambaNova Cloud: tier gratuito sin tarjeta (20 RPM, 20 RPD, 200K TPD por
   // modelo). Modelos: DeepSeek-V3.1, Llama 3.3 70B, gpt-oss-120b. Los modelos
   // en preview son solo para evaluación.
@@ -127,7 +138,7 @@ const PRESETS = {
 
 // Orden de preferencia cuando no se fuerza AI_PROVIDER: primero el interruptor
 // genérico, después los presets y Gemini al final.
-const AUTO_ORDER = ['compatible', 'groq', 'cloudflare', 'openrouter', 'sambanova', 'mistral', 'cerebras', 'nvidia', 'openai', 'gemini'];
+const AUTO_ORDER = ['compatible', 'groq', 'cloudflare', 'zai', 'openrouter', 'sambanova', 'mistral', 'cerebras', 'nvidia', 'openai', 'gemini'];
 
 // Orden para visión. Pollinations queda fuera a propósito: solo acepta texto.
 const AUTO_VISION_ORDER = ['gemini', 'cloudflare', 'openai', 'openrouter', 'mistral', 'groq', 'cerebras', 'compatible'];

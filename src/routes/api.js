@@ -32,6 +32,9 @@ import { enrichDTC, deriveSystem, deriveSeverity, normSeverity } from '../lib/dt
 import { findKnowledgeCases, userFromSession } from '../lib/forum_db.js';
 import { planState } from '../lib/plans.js';
 import { searchWebContext, searchForumContext, researchSources } from '../lib/web_search.js';
+import {
+  classifyMayaQuery, confidenceFor, sanitizeCitations, evidenceInstruction
+} from '../lib/maya_quality.js';
 import { listTutorials } from '../lib/tutorial_db.js';
 import { createAgentTask, listAgentTasks } from '../lib/maya_agent_db.js';
 import { scanVehicleDocument } from '../lib/document_scan.js';
@@ -2258,7 +2261,7 @@ const MAYA_CATALOGO_PROMPT = [
   'Si el usuario quiere añadir su coche al garaje y no lo tiene guardado, pídele la foto de la ficha técnica y usa camara_docs. Si no tiene cuenta, ofrécele crearla y usa registro.'
 ].join('\n');
 
-function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock = '', dtcBlock = '', historyBlock = '', maxWords = MAX_AI_REPLY_WORDS, pushFull = true }) {
+function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock = '', dtcBlock = '', historyBlock = '', intent = {}, confidence = {}, maxWords = MAX_AI_REPLY_WORDS, pushFull = true }) {
   const engine = context.engineReliability;
   const knownIssues = Array.isArray(context.knownIssues) ? context.knownIssues : [];
 
@@ -2307,6 +2310,9 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     historyBlock,
     historyBlock ? '' : '',
     dtcBlock,
+    '',
+    '### Criterio de esta respuesta (prioritario)',
+    evidenceInstruction(intent, confidence),
     '',
     '### Reglas obligatorias de esta respuesta',
     `- Responde en español, sin tablas, con listas cortas, y no superes ${maxWords} palabras.`,
@@ -2724,12 +2730,13 @@ router.post('/chat/ai', rateLimit({ windowMs: 60_000, max: 15 }), async (req, re
   const forumReferences = forumReferencesFor(query, context);
   const forumBlock = forumKnowledgeBlock(forumReferences);
   const vehicle = chatVehicle(vehicleRecord, context);
+  const intent = classifyMayaQuery(query, context);
 
   // Las dos búsquedas respetan WEB_SEARCH_ENABLED=0 y nunca lanzan excepción.
   // Los foros van primero: un hilo con el mismo síntoma vale más que una ficha
   // comercial, y Stack Exchange aporta casos técnicos con diagnóstico cerrado.
   const searchQuery = webQueryFor(query, context);
-  const [forumRefsWeb, plainWeb] = necesitaFuentes(query)
+  const [forumRefsWeb, plainWeb] = intent.needsSources
     ? await Promise.all([
         searchForumContext(searchQuery, { limit: 6, env: process.env }),
         searchWebContext(searchQuery, { limit: 3, env: process.env })
@@ -2749,6 +2756,8 @@ router.post('/chat/ai', rateLimit({ windowMs: 60_000, max: 15 }), async (req, re
     source: 'expert_rules',
     ai_error: aiError.reason || 'provider_error',
     ai_pending: false,
+    confidence: confidenceFor({ intent, forumCount: forumReferences.length, webCount: webReferences.length }),
+    intent: { mode: intent.mode, needsSources: intent.needsSources },
     vehicle
   });
 
@@ -2777,6 +2786,14 @@ router.post('/chat/ai', rateLimit({ windowMs: 60_000, max: 15 }), async (req, re
     dtcBlock += `${dtcBlock ? '\n\n' : ''}### Averías leídas por el OBD del coche\n${obdCodes.join(', ')}. Tenlas en cuenta al responder: si alguna explica el síntoma, dilo y ordena la gravedad.`;
   }
 
+  const confidence = confidenceFor({
+    intent,
+    dtcExact: Boolean(fichaDtc),
+    engine: Boolean(context.engineReliability),
+    forumCount: forumReferences.length,
+    webCount: webReferences.length,
+    symptomCount: sintomasInternos(query, context).length
+  });
   const plan = planDePeticion(req);
   const prompt = chatAiPrompt({
     query,
@@ -2786,6 +2803,8 @@ router.post('/chat/ai', rateLimit({ windowMs: 60_000, max: 15 }), async (req, re
     symptomBlock: sintomasInternosBlock(query, context),
     dtcBlock,
     historyBlock,
+    intent,
+    confidence,
     maxWords: plan.aiWords || MAX_AI_REPLY_WORDS,
     pushFull: plan.id !== 'full'
   });
@@ -2810,7 +2829,7 @@ router.post('/chat/ai', rateLimit({ windowMs: 60_000, max: 15 }), async (req, re
   let reply = ai.text;
   // Maya puede pedir una acción; se quita del texto antes de mostrarlo.
   const maya = extraerMaya(reply);
-  reply = maya.texto;
+  reply = sanitizeCitations(maya.texto, webReferences.length);
   const accionesMaya = maya.acciones.length ? maya.acciones : accionesPorReglas(query);
   if (ai.finishReason === 'MAX_TOKENS') {
     reply += '\n\n*[La respuesta se ha truncado por longitud. Pida "continúa" para completarla.]*';
@@ -2834,6 +2853,8 @@ router.post('/chat/ai', rateLimit({ windowMs: 60_000, max: 15 }), async (req, re
     finish_reason: ai.finishReason,
     model: ai.model,
     ai_pending: false,
+    confidence,
+    intent: { mode: intent.mode, needsSources: intent.needsSources },
     maya: accionesMaya,
     vehicle
   });

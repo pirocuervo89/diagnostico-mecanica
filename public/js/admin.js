@@ -66,9 +66,12 @@
     }
     list.innerHTML = tasks.map(task => {
       const status = Object.prototype.hasOwnProperty.call(STATUS_LABEL, task.status) ? task.status : 'pending';
-      const detail = [task.summary, task.commit ? `commit ${task.commit}` : '', task.pushed ? 'subido' : '']
-        .filter(Boolean)
-        .join(' · ');
+      const detail = [
+        task.status === 'running' ? (task.progress || 'Trabajando…') : '',
+        task.summary,
+        task.commit ? `commit ${task.commit}` : '',
+        task.pushed ? 'subido' : ''
+      ].filter(Boolean).join(' · ');
       return `<article class="admin-task">
         <span class="admin-task-status ${status}">${STATUS_LABEL[status]}</span>
         <div class="admin-task-body">
@@ -289,4 +292,13 @@
   window.addEventListener('load', () => {
     if (document.getElementById('view-admin')?.classList.contains('active')) load();
   });
+
+  // Refresco suave mientras el panel está abierto: la orden y el progreso del
+  // worker aparecen sin pulsar nada. Se pausa al cambiar de pestaña o de vista.
+  setInterval(() => {
+    if (!state.admin) return;
+    if (document.visibilityState !== 'visible') return;
+    if (!document.getElementById('view-admin')?.classList.contains('active')) return;
+    load();
+  }, 5000);
 })();

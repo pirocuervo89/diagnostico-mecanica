@@ -27,10 +27,17 @@ db.exec(`
     finished_at TEXT,
     summary TEXT NOT NULL DEFAULT '',
     commit_hash TEXT NOT NULL DEFAULT '',
-    pushed INTEGER NOT NULL DEFAULT 0
+    pushed INTEGER NOT NULL DEFAULT 0,
+    progress TEXT NOT NULL DEFAULT '',
+    progress_at TEXT
   );
   CREATE INDEX IF NOT EXISTS idx_maya_agent_status ON maya_agent_tasks(status, id);
 `);
+
+// Migración para instalaciones que ya tenían la tabla sin progreso en vivo.
+const columnas = new Set(db.prepare('PRAGMA table_info(maya_agent_tasks)').all().map(c => c.name));
+if (!columnas.has('progress')) db.exec("ALTER TABLE maya_agent_tasks ADD COLUMN progress TEXT NOT NULL DEFAULT ''");
+if (!columnas.has('progress_at')) db.exec('ALTER TABLE maya_agent_tasks ADD COLUMN progress_at TEXT');
 
 const nowISO = () => new Date().toISOString();
 
@@ -46,7 +53,9 @@ function fromRow(row) {
     finishedAt: row.finished_at || null,
     summary: row.summary || '',
     commit: row.commit_hash || '',
-    pushed: Boolean(row.pushed)
+    pushed: Boolean(row.pushed),
+    progress: row.progress || '',
+    progressAt: row.progress_at || null
   };
 }
 
@@ -79,9 +88,9 @@ export function claimNextAgentTask() {
     if (!row) return null;
     const info = db.prepare(`
       UPDATE maya_agent_tasks
-      SET status = 'running', claimed_at = ?
+      SET status = 'running', claimed_at = ?, progress = ?, progress_at = ?
       WHERE id = ? AND status = 'pending'
-    `).run(nowISO(), row.id);
+    `).run(nowISO(), 'Preparando el repositorio…', nowISO(), row.id);
     if (info.changes) return taskById(row.id);
   }
   return null;
@@ -92,9 +101,23 @@ export function finishAgentTask(id, { status = 'done', summary = '', commit = ''
   const text = String(summary || '').slice(0, 4000);
   const info = db.prepare(`
     UPDATE maya_agent_tasks
-    SET status = ?, finished_at = ?, summary = ?, commit_hash = ?, pushed = ?
+    SET status = ?, finished_at = ?, summary = ?, commit_hash = ?, pushed = ?, progress = '', progress_at = ?
     WHERE id = ? AND status = 'running'
-  `).run(finalStatus, nowISO(), text, String(commit || '').slice(0, 80), pushed ? 1 : 0, Number(id));
+  `).run(finalStatus, nowISO(), text, String(commit || '').slice(0, 80), pushed ? 1 : 0, nowISO(), Number(id));
+  if (!info.changes) {
+    throw Object.assign(new Error('La orden no existe o ya no está en ejecución.'), { status: 409 });
+  }
+  return taskById(id);
+}
+
+export function updateAgentTaskProgress(id, message) {
+  const text = String(message || '').replace(/\s+/g, ' ').trim().slice(0, 400);
+  if (!text) return taskById(id);
+  const info = db.prepare(`
+    UPDATE maya_agent_tasks
+    SET progress = ?, progress_at = ?
+    WHERE id = ? AND status = 'running'
+  `).run(text, nowISO(), Number(id));
   if (!info.changes) {
     throw Object.assign(new Error('La orden no existe o ya no está en ejecución.'), { status: 409 });
   }

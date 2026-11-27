@@ -141,6 +141,14 @@ test('taller de agentes: el worker necesita token y cierra la orden', async () =
   assert.ok(claim.body.task);
   assert.equal(claim.body.task.status, 'running');
 
+  const progress = await request(`/api/maya-agent/tasks/${claim.body.task.id}/progress`, {
+    method: 'POST',
+    headers: { 'x-agent-token': AGENT_TOKEN },
+    body: { message: 'OpenCode está trabajando…' }
+  });
+  assert.equal(progress.status, 200);
+  assert.equal(progress.body.task.progress, 'OpenCode está trabajando…');
+
   const empty = await request('/api/maya-agent/next', {
     method: 'POST', headers: { 'x-agent-token': AGENT_TOKEN }
   });
@@ -176,4 +184,36 @@ test('Maya solo acepta órdenes de agente desde la cuenta admin', async () => {
   assert.equal(status.status, 200);
   assert.ok(Array.isArray(status.body.agent_tasks));
   assert.ok(status.body.agent_tasks.some(task => task.id === accepted.body.agent_task.id));
+});
+
+test('el worker recoge la orden por long-poll y publica el progreso', async () => {
+  const created = await request('/api/maya-agent/tasks', {
+    method: 'POST', cookie: adminCookie, body: { instruction: 'Revisa el aviso de GPS sin señal' }
+  });
+  assert.equal(created.status, 201);
+
+  const wait = await request('/api/maya-agent/wait', {
+    method: 'POST',
+    headers: { 'x-agent-token': AGENT_TOKEN },
+    body: { timeoutMs: 2500 }
+  });
+  assert.equal(wait.status, 200);
+  assert.ok(wait.body.task);
+  assert.equal(wait.body.task.status, 'running');
+
+  const progress = await request(`/api/maya-agent/tasks/${wait.body.task.id}/progress`, {
+    method: 'POST',
+    headers: { 'x-agent-token': AGENT_TOKEN },
+    body: { message: 'Pasando las pruebas…' }
+  });
+  assert.equal(progress.status, 200);
+  assert.equal(progress.body.task.progress, 'Pasando las pruebas…');
+
+  const closed = await request(`/api/maya-agent/tasks/${wait.body.task.id}/result`, {
+    method: 'POST',
+    headers: { 'x-agent-token': AGENT_TOKEN },
+    body: { status: 'done', summary: 'Comprobado', pushed: false }
+  });
+  assert.equal(closed.status, 200);
+  assert.equal(closed.body.task.progress, '');
 });

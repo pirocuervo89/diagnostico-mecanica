@@ -54,6 +54,8 @@ En la app, abre **Más → Administrador** (o el enlace «Administrador» del pi
   cuenta con rol `admin`. Una cuenta normal recibe un aviso y no ve el taller.
 
 Dentro del panel puedes ver la cola, enviar una orden directamente y abrir Maya.
+El panel se actualiza cada 5 segundos y muestra el paso actual del worker
+(«OpenCode está trabajando…», «Pasando las pruebas…», «Subiendo…»).
 La sesión dura 30 días y se puede cerrar con «Salir».
 
 ## 4. Usar el taller desde Maya
@@ -75,6 +77,9 @@ termine, la orden pasa a `done` con el commit y si se subió, o a `error` con el
 motivo (por ejemplo, pruebas fallidas).
 
 ## Qué hace el worker
+
+El worker usa *long-poll*: si no hay órdenes, mantiene la conexión abierta y
+recoge la orden en cuanto se envía, sin esperar a un sondeo lento.
 
 1. Comprueba que el árbol de trabajo está limpio.
 2. Ejecuta `opencode run --auto "<orden>"`.

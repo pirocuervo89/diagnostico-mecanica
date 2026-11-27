@@ -2588,9 +2588,13 @@ function scrollToBubbleStart(bubble) {
 
 function chatMeta(res, fallback = 'Respuesta del motor experto local.') {
   const fromAI = res?.source === 'ai_provider' || res?.source === 'gemini_ai';
+  const conf = res?.confidence;
+  const badge = conf && conf.level && conf.level !== 'na'
+    ? ` <span class="tag chat-confidence ${esc(conf.level)}" title="${esc(conf.note || '')}">${esc(conf.label || 'Contraste')}${conf.sources ? ` · ${conf.sources} ${conf.sources === 1 ? 'fuente' : 'fuentes'}` : ''}</span>`
+    : '';
   if (fromAI) {
     const label = res.provider_label ? `Respuesta generada por IA (${esc(res.provider_label)}).` : 'Respuesta generada por IA.';
-    return `<small class="chat-meta">${label}</small>`;
+    return `<small class="chat-meta">${label}${badge}</small>`;
   }
   if (res?.ai_pending) {
     return '<small class="chat-meta">Respuesta rápida del motor experto. Ampliando con IA y fuentes…</small>';
@@ -2813,6 +2817,9 @@ async function manejarComandoVoz(texto) {
 async function submitChat(text) {
   const query = String(text || '').trim();
   if (!query || chatBusy) return;
+  // Si Maya estaba leyendo la respuesta anterior, se calla antes de procesar
+  // la nueva pregunta. Así no hay dos voces compitiendo.
+  window.MayaPararVoz?.();
   if (await manejarComandoVoz(query)) return;
   chatBusy = true;
   if (typeof gtag === 'function') gtagTrack('diagnosis_started');
