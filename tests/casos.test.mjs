@@ -1192,9 +1192,9 @@ test('catálogo de accesorios de tuning: productos reales, categorías, filtros 
   const { status, body } = await getJSON('/api/tuning-products');
   assert.equal(status, 200);
   assert.ok(body.items.length >= 230, 'debe haber un catálogo amplio de productos reales');
-  assert.equal(body.categories.length, 21);
+  assert.equal(body.categories.length, 31);
   const categoryIds = new Set(body.categories.map(c => c.id));
-  for (const id of ['pantallas-carplay', 'iluminacion-ambiente', 'audio-video', 'interior-accesorios']) {
+  for (const id of ['pantallas-carplay', 'iluminacion-ambiente', 'audio-video', 'interior-accesorios', 'reprogramacion', 'asientos-baket', 'body-kits', 'downpipes', 'modulos-llave', 'colas-escape']) {
     assert.ok(categoryIds.has(id), `debe existir la categoría ${id}`);
   }
   const pantallas = body.items.filter(i => i.category === 'pantallas-carplay');
@@ -1202,6 +1202,7 @@ test('catálogo de accesorios de tuning: productos reales, categorías, filtros 
   assert.ok(pantallas.every(i => /\d+,\d{2} €/.test(i.price)), 'las pantallas deben tener precio real');
   assert.ok(pantallas.every(i => Number(i.price.replace('.', '').replace(',', '.').replace(' €', '')) <= 350), 'las pantallas no deben superar 350 €');
   assert.equal(body.items.filter(i => i.price === 'Consultar').length, 0, 'ninguna ficha debe quedar sin precio');
+  assert.ok(body.items.filter(i => i.category === 'reprogramacion').length >= 10, 'debe haber máquinas de reprogramación');
   assert.ok(body.items.filter(i => i.category === 'iluminacion-ambiente').length >= 15);
   assert.ok(body.items.filter(i => i.category === 'audio-video').length >= 8);
   assert.ok(body.items.filter(i => i.category === 'interior-accesorios').length >= 6);
@@ -1210,8 +1211,14 @@ test('catálogo de accesorios de tuning: productos reales, categorías, filtros 
   assert.equal(body.items.filter(i => !(i.links || []).length).length, 0, 'toda pieza debe tener enlaces');
   assert.equal(body.items.filter(i => !(i.fitment || []).length).length, 0, 'toda pieza debe declarar compatibilidad');
   assert.ok(body.items.every(i => i.links.every(l => /^https:\/\//.test(l.url))));
-  assert.ok(!body.affiliate || body.affiliate.status === 'sin_cuenta');
+  assert.ok(['activo', 'sin_cuenta'].includes(body.affiliate.status));
   assert.equal(body.stats.store, body.items.length);
+
+  const repro = await getJSON('/api/tuning-products?category=reprogramacion');
+  assert.equal(repro.status, 200);
+  assert.equal(repro.body.items.length, 14);
+  assert.ok(repro.body.items.every(i => i.category === 'reprogramacion'));
+  assert.ok(repro.body.items.some(i => /KESS3/i.test(i.name)));
 
   const turbo = await getJSON('/api/tuning-products?category=turbo');
   assert.equal(turbo.status, 200);
@@ -1231,10 +1238,13 @@ test('catálogo de accesorios de tuning: productos reales, categorías, filtros 
   assert.equal(detail.body.category, 'turbo');
   assert.equal((await getJSON('/api/tuning-products/no-existe')).status, 404);
 
-  // Todas las fichas son de tienda y conservan la ficha antigua que ya era real.
+  // Conviven fichas de tienda (foto y ASIN) con fichas curadas (enlaces oficiales/búsqueda).
   const shop = body.items.filter(i => i.source === 'tienda');
-  assert.equal(shop.length, body.items.length);
+  const curated = body.items.filter(i => i.source === 'curado');
+  assert.ok(shop.length >= 230, 'debe conservarse el catálogo de tienda');
+  assert.ok(curated.length >= 100, 'debe haber accesorios y máquinas curadas');
   assert.ok(shop.every(i => i.links.some(l => /^https:\/\/www\.amazon\.es\/dp\//.test(l.url))));
+  assert.ok(curated.every(i => i.photoKind === 'categoria' && i.verifiedAt && i.links.length >= 2));
   const legacy = body.items.find(i => i.id === 'tienda-amz-b0gtmbtqf4');
   assert.ok(legacy, 'la ficha antigua debe seguir en el catálogo');
   assert.equal(legacy.category, 'admision');
@@ -1248,23 +1258,29 @@ test('catálogo de accesorios: foto del vendedor, archivo local y enlaces único
   const sinArchivo = body.items.filter(i => !existsSync(path.join(ROOT, 'public', i.image.replace(/^\//, ''))));
   assert.deepEqual(sinArchivo.map(i => i.id), [], 'toda foto referenciada debe existir en public/');
 
-  // Todas las fotos son del vendedor: las nuevas, por ASIN; las antiguas, del catálogo de tienda.
+  // Las fichas de tienda conservan ASIN; las curadas usan una foto de categoría existente.
   for (const item of body.items) {
-    assert.equal(item.photoKind, 'tienda', `${item.id} debe usar foto de tienda`);
-    if (item.image.startsWith('/img/tienda/')) {
-      const asin = item.id.slice('tienda-amz-'.length);
-      assert.match(asin, /^[a-z0-9]{10}$/);
-      assert.equal(item.image.toLowerCase(), `/img/tienda/${asin}.jpg`);
-      assert.ok(item.links.some(l => /^https:\/\/www\.amazon\.es\/dp\/[A-Z0-9]{10}(\?tag=[^&\s]+)?$/.test(l.url) && l.url.includes(`/dp/${asin.toUpperCase()}`)), `${item.id} debe enlazar a su ASIN`);
+    assert.ok(['tienda', 'categoria'].includes(item.photoKind), `${item.id} declara un tipo de foto válido`);
+    if (item.source === 'tienda') {
+      assert.equal(item.photoKind, 'tienda', `${item.id} debe usar foto de tienda`);
+      if (item.image.startsWith('/img/tienda/')) {
+        const asin = item.id.slice('tienda-amz-'.length);
+        assert.match(asin, /^[a-z0-9]{10}$/);
+        assert.equal(item.image.toLowerCase(), `/img/tienda/${asin}.jpg`);
+        assert.ok(item.links.some(l => /^https:\/\/www\.amazon\.es\/dp\/[A-Z0-9]{10}(\?tag=[^&\s]+)?$/.test(l.url) && l.url.includes(`/dp/${asin.toUpperCase()}`)), `${item.id} debe enlazar a su ASIN`);
+      } else {
+        assert.ok(item.image.startsWith('/img/productos/'), `${item.id} debe conservar su foto de tienda`);
+      }
     } else {
-      assert.ok(item.image.startsWith('/img/productos/'), `${item.id} debe conservar su foto de tienda`);
+      assert.equal(item.photoKind, 'categoria', `${item.id} debe usar foto de categoría`);
+      assert.match(item.image, /^\/img\/(productos|products|recambios)\//, `${item.id} debe usar una foto local`);
     }
   }
 
-  // No puede haber dos piezas compartiendo el mismo archivo.
+  // Las fotos de tienda no pueden repetirse; las de categoría sí son compartidas.
   const repetidas = new Map();
-  for (const item of body.items) repetidas.set(item.image, (repetidas.get(item.image) || 0) + 1);
-  assert.deepEqual([...repetidas].filter(([, n]) => n > 1), [], 'ninguna foto puede estar repetida');
+  for (const item of body.items.filter(i => i.source === 'tienda')) repetidas.set(item.image, (repetidas.get(item.image) || 0) + 1);
+  assert.deepEqual([...repetidas].filter(([, n]) => n > 1), [], 'ninguna foto de tienda puede estar repetida');
 
   for (const item of body.items) {
     const urls = item.links.map(l => l.url);

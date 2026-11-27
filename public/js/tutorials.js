@@ -309,7 +309,7 @@
   }
 
   function renderCard(item) {
-    const tags = [item.languageLabel, LEVEL_LABELS[item.level] || item.level, SOURCE_LABELS[item.sourceType] || item.sourceType].filter(Boolean);
+    const tags = [item.languageLabel, LEVEL_LABELS[item.level] || item.level, SOURCE_LABELS[item.sourceType] || item.sourceType, ...(item.dtcs || []).slice(0, 2).map(dtc => `DTC ${dtc}`), ...(item.components || []).slice(0, 1).map(component => String(component).replace(/^Pieza:\s*/i, '').slice(0, 42))].filter(Boolean);
     return `<article class="tut-card" data-tut-card="${esc(item.id)}">
       <button class="tut-card-media" type="button" data-tut-open="${esc(item.id)}" aria-label="Abrir ${esc(item.title)}">${mediaHtml(item)}</button>
       <div class="tut-card-body">
@@ -585,6 +585,30 @@
     </div>`;
   }
 
+  function tutorialPart(item) {
+    const components = Array.isArray(item.components) ? item.components : [];
+    return (components.find(component => /^Pieza:\s*/i.test(component)) || '').replace(/^Pieza:\s*/i, '').trim();
+  }
+
+  function techHtml(item) {
+    const dtcs = (item.dtcs || []).filter(Boolean);
+    const symptoms = (item.symptoms || []).filter(Boolean);
+    const components = (item.components || []).filter(component => !/^Pieza:\s*/i.test(component));
+    const part = tutorialPart(item);
+    if (!dtcs.length && !symptoms.length && !components.length && !part) return '';
+    const rows = [
+      dtcs.length ? `<dt>Código DTC</dt><dd>${dtcs.map(dtc => `<b>${esc(dtc)}</b>`).join(' · ')}</dd>` : '',
+      symptoms.length ? `<dt>Síntoma</dt><dd>${symptoms.map(esc).join(' · ')}</dd>` : '',
+      components.length ? `<dt>Componente</dt><dd>${components.map(esc).join(' · ')}</dd>` : '',
+      part ? `<dt>Pieza probable</dt><dd><b>${esc(part)}</b></dd>` : ''
+    ].filter(Boolean).join('');
+    return `<div class="tut-detail-section"><h4>${icon('alert')} Código, síntoma y pieza</h4>
+      <dl class="tut-kv">${rows}</dl>
+      ${part ? `<div class="actions" style="margin-top:10px"><button class="btn primary sm" type="button" data-tut-buy-part="${esc(part)}">${icon('cart')} Buscar ${esc(part)} en la tienda</button></div>` : ''}
+      <p class="tut-help">La pieza es orientativa: confirma referencia, medida, motor y compatibilidad antes de comprar. El vídeo puede mostrar otra versión del vehículo.</p>
+    </div>`;
+  }
+
   function renderDetail(data) {
     const body = $('#tutDetailBody');
     const item = data.tutorial;
@@ -615,6 +639,7 @@
         <div class="tut-detail-copy">
           <p>${esc(item.description || 'Sin descripción verificada para este vídeo.')}</p>
         </div>
+        ${techHtml(item)}
         ${warnings.length ? `<div class="tut-detail-section"><h4>${icon('alert')} Advertencias de seguridad</h4><div class="tut-warning-box"><ul>${warnings.map(warning => `<li>${esc(warning)}</li>`).join('')}</ul></div></div>` : ''}
         ${(item.tags || []).length ? `<div class="tut-detail-section"><h4>${icon('tag')} Etiquetas</h4><div class="tut-tag-list">${item.tags.map(tag => `<span>${esc(tag)}</span>`).join('')}</div></div>` : ''}
         <div class="tut-detail-section"><h4>${icon('check')} Verificación</h4><p class="tut-help">${esc(item.verificationSource || 'Fuente no indicada')} · Comprobado ${esc(item.lastCheckedAt || 'sin fecha')} · Licencia: ${esc(item.license || 'No especificada')}</p></div>
@@ -1001,6 +1026,15 @@
       if (open) {
         event.preventDefault();
         openTutorial(open.dataset.tutOpen);
+        return;
+      }
+      const buyPart = event.target.closest('[data-tut-buy-part]');
+      if (buyPart) {
+        event.preventDefault();
+        const part = buyPart.dataset.tutBuyPart || '';
+        closeTutorial();
+        showView('tienda');
+        setTimeout(() => window.Tienda?.buscar?.(part, { scroll: true }), 260);
         return;
       }
       const close = event.target.closest('[data-tut-close]');

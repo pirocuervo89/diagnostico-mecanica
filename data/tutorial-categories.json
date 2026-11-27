@@ -796,6 +796,10 @@
       {
         "id": "comprobaciones-tras-sustituir",
         "name": "Comprobaciones tras sustituir"
+      },
+      {
+        "id": "admision-deportiva",
+        "name": "Admisión deportiva"
       }
     ]
   },
@@ -1168,6 +1172,10 @@
       {
         "id": "redes-con-osciloscopio",
         "name": "Redes con osciloscopio"
+      },
+      {
+        "id": "reprogramacion-ecu",
+        "name": "Reprogramación de centralita"
       }
     ]
   },
@@ -1416,6 +1424,10 @@
       {
         "id": "calibraciones",
         "name": "Calibraciones"
+      },
+      {
+        "id": "llantas-y-neumaticos",
+        "name": "Llantas y neumáticos"
       }
     ]
   },
@@ -1576,6 +1588,34 @@
       {
         "id": "reparacion-de-conectores",
         "name": "Reparación de conectores"
+      },
+      {
+        "id": "asientos-deportivos",
+        "name": "Asientos deportivos y bucket"
+      },
+      {
+        "id": "volantes-deportivos",
+        "name": "Volantes deportivos"
+      },
+      {
+        "id": "alfombrillas-y-acabados",
+        "name": "Alfombrillas y acabados"
+      },
+      {
+        "id": "body-kits-y-paragolpes",
+        "name": "Body kits y paragolpes"
+      },
+      {
+        "id": "taloneras-y-difusores",
+        "name": "Taloneras y difusores"
+      },
+      {
+        "id": "escape-y-downpipe",
+        "name": "Escape y downpipe"
+      },
+      {
+        "id": "colas-de-escape",
+        "name": "Colas de escape"
       }
     ]
   },
@@ -1772,6 +1812,10 @@
       {
         "id": "calibracion-de-herramientas",
         "name": "Calibración de herramientas"
+      },
+      {
+        "id": "maquinas-de-reprogramacion",
+        "name": "Máquinas de reprogramación"
       }
     ]
   },

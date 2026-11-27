@@ -4774,7 +4774,8 @@ function setTuningTab(name = 'guias') {
   if (!tabs.length) return;
   const panes = {
     guias: $('#tuningPaneGuias'),
-    accesorios: $('#tuningPaneAccesorios')
+    accesorios: $('#tuningPaneAccesorios'),
+    reprogramacion: $('#tuningPaneRepro')
   };
   tabs.forEach(tab => {
     const active = tab.dataset.tuningTab === name;
@@ -4786,12 +4787,13 @@ function setTuningTab(name = 'guias') {
     if (pane) pane.hidden = key !== name;
   });
   if (name === 'accesorios') loadTuningProducts();
+  if (name === 'reprogramacion') loadReprogramacion();
 }
 
 function openTuningProducts(category = 'all') {
   tpCategory = category;
   showView('tuning');
-  setTuningTab('accesorios');
+  setTuningTab(category === 'reprogramacion' ? 'reprogramacion' : 'accesorios');
 }
 
 $$('[data-tuning-tab]').forEach(tab => {
@@ -4891,7 +4893,10 @@ function renderTpGrid() {
     grid.innerHTML = '<div class="tp-empty">No hay accesorios con esos filtros. Prueba otra categoría o quita el filtro de coche.</div>';
     return;
   }
-  grid.innerHTML = items.map((item, index) => {
+  grid.innerHTML = items.map((item, index) => tpCard(item, index)).join('');
+}
+
+function tpCard(item, index) {
     const links = (item.links || []).map(l => `<a class="tp-link" href="${esc(l.url)}" target="_blank" rel="sponsored nofollow noopener noreferrer">${esc(l.shop)} ${icon('arrow')}</a>`).join('');
     const fits = (item.fitment || []).slice(0, 2).map(f => `<span class="tp-fit">${esc(f)}</span>`).join('');
     const more = (item.fitment || []).length > 2 ? `<span class="tp-fit more">+${item.fitment.length - 2}</span>` : '';
@@ -4911,8 +4916,92 @@ function renderTpGrid() {
           <div class="tp-links">${links}</div>
         </div>
       </article>`;
-  }).join('');
 }
+
+
+let rpCache = null;
+let rpQuery = '';
+let rpFilter = 'all';
+
+async function loadReprogramacion(force = false) {
+  const grid = $('#rpGrid');
+  if (!grid) return;
+  if (rpCache && !force) {
+    renderRpGrid();
+    return;
+  }
+  grid.innerHTML = '<div class="notice">Cargando máquinas de reprogramación…</div>';
+  try {
+    const slow = new Promise((_, reject) => setTimeout(() => reject(new Error('el servidor tarda demasiado en responder')), 15000));
+    rpCache = await Promise.race([api('/api/tuning-products?category=reprogramacion'), slow]);
+    const count = $('#rpCount');
+    if (count) count.textContent = fmtNum((rpCache.items || []).length);
+    const legal = $('#rpLegal');
+    if (legal) legal.textContent = rpCache.disclaimer || '';
+    renderRpGrid();
+  } catch (err) {
+    grid.innerHTML = `<div class="tp-empty">No se pudieron cargar las máquinas: ${esc(err.message)}. <button class="btn ghost sm" type="button" id="rpRetry">Reintentar</button></div>`;
+    grid.querySelector('#rpRetry')?.addEventListener('click', () => loadReprogramacion(true));
+  }
+}
+
+function rpMatches(item) {
+  const price = String(item.price || '');
+  if (rpFilter === 'pro' && price.length < 3) return false;
+  if (rpFilter === 'eco' && price.length > 2) return false;
+  if (!rpQuery) return true;
+  const text = foldText([item.name, item.brand, item.note, (item.fitment || []).join(' ')].join(' '));
+  return rpQuery.split(/\s+/).filter(Boolean).every(term => text.includes(term));
+}
+
+function updateRpCounts() {
+  const items = rpCache?.items || [];
+  const all = $('#rpAllCount'); if (all) all.textContent = fmtNum(items.length);
+  const pro = $('#rpProCount'); if (pro) pro.textContent = fmtNum(items.filter(item => String(item.price || '').length >= 3).length);
+  const eco = $('#rpEcoCount'); if (eco) eco.textContent = fmtNum(items.filter(item => String(item.price || '').length <= 2).length);
+}
+
+function renderRpGrid() {
+  const grid = $('#rpGrid');
+  if (!grid || !rpCache) return;
+  updateRpCounts();
+  const items = (rpCache.items || []).filter(rpMatches);
+  const counter = $('#rpResults');
+  if (counter) counter.textContent = `${items.length} de ${(rpCache.items || []).length} herramientas`;
+  if (!items.length) {
+    grid.innerHTML = '<div class="tp-empty">No hay herramientas con ese filtro. Prueba otra palabra o vuelve a «Todas».</div>';
+    return;
+  }
+  grid.innerHTML = items.map((item, index) => tpCard(item, index)).join('');
+}
+
+const rpSearchInput = $('#rpSearch');
+if (rpSearchInput) {
+  let timer = 0;
+  rpSearchInput.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      rpQuery = foldText(rpSearchInput.value.trim());
+      renderRpGrid();
+    }, 120);
+  });
+}
+
+const rpFilters = $('#rpFilters');
+if (rpFilters) {
+  rpFilters.addEventListener('click', event => {
+    const button = event.target.closest('[data-rp-filter]');
+    if (!button) return;
+    rpFilter = button.dataset.rpFilter || 'all';
+    rpFilters.querySelectorAll('[data-rp-filter]').forEach(item => {
+      const active = item === button;
+      item.classList.toggle('active', active);
+      item.setAttribute('aria-selected', String(active));
+    });
+    renderRpGrid();
+  });
+}
+
 
 function catName(id) {
   return (tpCache?.categories || []).find(c => c.id === id)?.name || id;

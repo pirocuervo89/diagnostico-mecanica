@@ -1797,6 +1797,47 @@ function aiNotice(result) {
  * Completa el contexto del chat con la ficha del vehículo y del motor.
  * Es local y no hace red: /api/chat puede responder al instante.
  */
+function tutorialChatFields(tutorial) {
+  const components = Array.isArray(tutorial.components) ? tutorial.components : [];
+  const part = (components.find(component => /^Pieza:\s*/i.test(component)) || '').replace(/^Pieza:\s*/i, '').trim();
+  return {
+    id: tutorial.id,
+    title: tutorial.title,
+    url: tutorial.url,
+    category: tutorial.categoryName || tutorial.categoryId || '',
+    level: tutorial.level || '',
+    dtcs: Array.isArray(tutorial.dtcs) ? tutorial.dtcs : [],
+    symptoms: Array.isArray(tutorial.symptoms) ? tutorial.symptoms : [],
+    components,
+    part
+  };
+}
+
+function tutorialsForQuery(query, limit = 4) {
+  const text = String(query || '');
+  const dtc = (text.match(/\b[PBCU][0-9A-F]{4}\b/i) || [])[0]?.toUpperCase() || '';
+  const stop = new Set([
+    'para', 'como', 'coche', 'coches', 'motor', 'fallo', 'fallos', 'codigo', 'averia',
+    'problema', 'tengo', 'hace', 'cuando', 'donde', 'porque', 'esta', 'este', 'unos',
+    'unas', 'del', 'las', 'los', 'con', 'sin', 'mas', 'menos', 'muy', 'que', 'por'
+  ]);
+  const terms = fold(text).split(/\W+/).filter(term => term.length >= 4 && !stop.has(term)).slice(0, 3);
+  const found = [];
+  try {
+    if (dtc) found.push(...listTutorials({ dtc, limit }).items);
+    if (!found.length && terms.length) found.push(...listTutorials({ q: terms.join(' '), limit }).items);
+    if (!found.length && terms.length) found.push(...listTutorials({ q: terms[0], limit }).items);
+  } catch (error) {
+    console.warn('[TUTORIALES] No se pudo enriquecer el contexto:', error.message);
+  }
+  const seen = new Set();
+  return found.filter(item => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  }).slice(0, limit).map(tutorialChatFields);
+}
+
 function resolveChatContext(query, inputContext = {}) {
   const context = inputContext && typeof inputContext === 'object' ? { ...inputContext } : {};
   let vehicleRecord = null;
@@ -1897,14 +1938,22 @@ function resolveChatContext(query, inputContext = {}) {
       const tuts = relatedTutorialsForVehicle(vehicleRecord, 4);
       if (Array.isArray(tuts) && tuts.length) {
         context.tutorials = tuts.map(t => ({
-          id: t.id,
-          title: t.title,
-          url: t.url,
-          category: t.category_name || t.category_id,
-          level: t.level
+          ...tutorialChatFields(t),
+          relationNote: 'Tutorial del catálogo general; verifica que el procedimiento coincide con la versión exacta.'
         }));
       }
     } catch (_e) { /* sin tutoriales disponibles */ }
+  }
+
+  // También sin vehículo identificado: si la consulta trae un DTC o un síntoma,
+  // Maya recibe el vídeo concreto y la pieza probable para no inventarlos.
+  const queryTutorials = tutorialsForQuery(query, 4);
+  if (queryTutorials.length) {
+    const merged = Array.isArray(context.tutorials) ? context.tutorials : [];
+    for (const tutorial of queryTutorials) {
+      if (!merged.some(item => item.id === tutorial.id)) merged.push(tutorial);
+    }
+    context.tutorials = merged.slice(0, 6);
   }
 
   return { context, vehicleRecord };
@@ -2133,7 +2182,12 @@ function chatAiPrompt({ query, context, forumBlock, webReferences, symptomBlock 
     : '';
 
   const tutorialBlock = Array.isArray(context.tutorials) && context.tutorials.length
-    ? `### Tutoriales relacionados del catálogo interno\n${context.tutorials.map((t, i) => `${i + 1}. ${clip(t.title, 110)}${t.category ? ` (${t.category})` : ''} — ${t.url}`).join('\n')}\nSi vienen al caso, recomienda uno citando su título. No inventes pasos que no estén en la ficha del motor.`
+    ? `### Tutoriales verificados y pieza probable\n${context.tutorials.map((t, i) => {
+        const dtc = Array.isArray(t.dtcs) && t.dtcs.length ? ` · DTC ${t.dtcs.join(', ')}` : '';
+        const symptom = Array.isArray(t.symptoms) && t.symptoms.length ? ` · Síntoma: ${clip(t.symptoms.join(', '), 120)}` : '';
+        const part = t.part ? ` · Pieza probable: ${clip(t.part, 80)}` : '';
+        return `${i + 1}. ${clip(t.title, 110)}${t.category ? ` (${t.category})` : ''}${dtc}${symptom}${part} — ${t.url}`;
+      }).join('\n')}\nSi la consulta menciona un DTC o síntoma, usa el tutorial y la pieza que aparecen aquí; cita el título y no inventes referencias, pasos ni compatibilidades que no estén en la ficha. Si no hay tutorial para ese DTC, dilo expresamente.`
     : '';
 
   const gps = context.gps;

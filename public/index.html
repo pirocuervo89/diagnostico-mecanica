@@ -225,6 +225,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button data-view="sala" type="button" title="Sala de máquinas"><svg class="ic"><use href="#i-gauge"></use></svg>Sala</button>
     <button data-view="tutoriales" type="button"><svg class="ic"><use href="#i-play"></use></svg>Tutoriales</button>
     <button data-view="tienda" type="button" title="Tienda: recambios, aceites, neumáticos y tuning"><svg class="ic"><use href="#i-cart"></use></svg>Tienda</button>
+    <button data-view="tuning" type="button" title="Tuning, accesorios y máquinas de reprogramación"><svg class="ic"><use href="#i-gauge"></use></svg>Tuning</button>
     <button data-view="planes" type="button" title="Planes y precios"><svg class="ic"><use href="#i-file"></use></svg>Planes</button>
     <button data-view="fiabilidad" type="button"><svg class="ic"><use href="#i-alert"></use></svg>Fiabilidad</button>
     <button data-view="chat" type="button"><svg class="ic"><use href="#i-chat"></use></svg>Chat IA</button>
@@ -1501,6 +1502,9 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
       <button class="tuning-subtab" type="button" role="tab" aria-selected="false" aria-controls="tuningPaneAccesorios" data-tuning-tab="accesorios" id="tuningTabAccesorios" tabindex="-1">
         <svg class="ic"><use href="#i-cart"></use></svg>Accesorios Tuning
       </button>
+      <button class="tuning-subtab" type="button" role="tab" aria-selected="false" aria-controls="tuningPaneRepro" data-tuning-tab="reprogramacion" id="tuningTabRepro" tabindex="-1">
+        <svg class="ic"><use href="#i-cpu"></use></svg>Reprogramación ECU
+      </button>
     </div>
 
     <div id="tuningPaneGuias" class="tuning-pane" role="tabpanel" aria-labelledby="tuningTabGuias">
@@ -1547,6 +1551,38 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
         <div id="tpGrid" class="tp-grid"><div class="notice">Cargando accesorios…</div></div>
         <p class="affiliate-note">Enlaces de afiliado: si compras desde aquí podemos recibir una comisión, sin coste extra para ti. <a href="/legal/afiliacion.html">Más información</a>.</p>
         <p class="tp-legal" id="tpLegal"></p>
+      </div>
+    </div>
+
+    <div id="tuningPaneRepro" class="tuning-pane" role="tabpanel" aria-labelledby="tuningTabRepro" hidden>
+      <div class="tuning-accessories">
+        <header class="page-head">
+          <div>
+            <span class="eyebrow">REPROGRAMACIÓN Y CALIBRACIÓN</span>
+            <h2>Máquinas para modificar centralitas</h2>
+            <p>Herramientas profesionales como Alientech, Autotuner o Flex, y alternativas económicas. Cada ficha explica qué hace, sus límites y enlaza a tutoriales y a la web oficial. La calibración se hace con copia de seguridad, protocolo correcto y respeto a la homologación.</p>
+          </div>
+          <span class="page-meta"><svg class="ic"><use href="#i-cpu"></use></svg> <b id="rpCount">—</b> herramientas</span>
+        </header>
+        <div class="tuning-warning panel">
+          <svg class="ic"><use href="#i-shield"></use></svg>
+          <div><b>Leer y escribir una ECU no es “stage 1”.</b><p>Una herramienta no crea una buena calibración. Necesitas banco, datos, copia original, licencias y conocimiento del motor. No borres DPF, EGR ni catalizador: es ilegal y puede bloquear la ECU. Si no dominas el protocolo, acude a un especialista.</p></div>
+        </div>
+        <div class="tp-controls panel">
+          <div class="tp-search">
+            <svg class="ic"><use href="#i-search"></use></svg>
+            <input id="rpSearch" type="search" autocomplete="off" placeholder="Busca: KESS3, Autotuner, Flex, PCMFlash, HP Tuners…" aria-label="Buscar máquinas de reprogramación">
+          </div>
+          <span class="tp-results" id="rpResults">—</span>
+        </div>
+        <div id="rpFilters" class="tp-tabs" role="tablist" aria-label="Filtros de máquinas de reprogramación">
+          <button class="tp-tab active" type="button" role="tab" aria-selected="true" data-rp-filter="all">Todas<span id="rpAllCount">—</span></button>
+          <button class="tp-tab" type="button" role="tab" aria-selected="false" data-rp-filter="pro">Profesionales<span id="rpProCount">—</span></button>
+          <button class="tp-tab" type="button" role="tab" aria-selected="false" data-rp-filter="eco">Económicas<span id="rpEcoCount">—</span></button>
+        </div>
+        <div id="rpGrid" class="tp-grid"><div class="notice">Cargando máquinas de reprogramación…</div></div>
+        <p class="affiliate-note">Enlaces de afiliado y enlaces oficiales. Si compras desde una tienda afiliada podemos recibir una comisión, sin coste extra para ti. <a href="/legal/afiliacion.html">Más información</a>.</p>
+        <p class="tp-legal" id="rpLegal"></p>
       </div>
     </div>
   </section>
@@ -1724,7 +1760,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     <header class="plans-head">
       <span class="eyebrow"><i></i> PLANES</span>
       <h2>Elige cuánto quieres saber</h2>
-      <p>Todos los planes incluyen la tienda, los 741 síntomas y los 9.201 códigos de avería. Lo que cambia es el número de coches en el garaje y el detalle del asistente.</p>
+      <p>Todos los planes incluyen la tienda, los 941 síntomas y los 9.201 códigos de avería. Lo que cambia es el número de coches en el garaje y el detalle del asistente.</p>
       <p id="plansState" class="plans-state" aria-live="polite"></p>
     </header>
     <div class="shop-how" role="note" aria-label="Cómo usar los planes">
@@ -2463,6 +2499,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     <button data-view="garaje" type="button">Mi garaje</button>
     <button data-view="testigos" type="button">Testigos</button>
     <button data-view="productos" type="button">Productos</button>
+    <button data-view="tuning" type="button">Tuning y ECU</button>
     <button data-view="chat" type="button">Chat IA</button>
     <button data-view="informe" type="button">Informe</button>
     <button data-view="foro" type="button">Foro</button>
@@ -2546,7 +2583,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
   window.addEventListener('dym:consent', dymGaConfig);
 </script>
 <script src="/js/obd.js?v=20261105c"></script>
-<script src="/js/tutorials.js?v=20261124a1"></script>
+<script src="/js/tutorials.js?v=20261127a2"></script>
 
 <script src="/js/voz.js?v=20261124a2"></script>
 <script src="/js/dictado.js?v=20261121a"></script>
@@ -2555,7 +2592,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <script src="/js/visual-glow.js?v=20261116c"></script>
 <script src="/js/tienda.js?v=20261121c"></script>
 <script src="/js/planes.js?v=20261113a"></script>
-<script src="/js/app.js?v=20261127a2"></script>
+<script src="/js/app.js?v=20261127a4"></script>
 <script src="/js/centinela.js?v=20261127a3"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>

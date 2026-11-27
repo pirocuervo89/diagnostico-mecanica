@@ -102,7 +102,7 @@ test('tutoriales: metadatos, categorías y semilla verificada', async () => {
   const { status, body } = await request('/api/tutorials/meta');
   assert.equal(status, 200);
   assert.equal(body.categories.length, 20);
-  assert.equal(body.stats.total, 193);
+  assert.equal(body.stats.total, 393);
   assert.ok(body.stats.subcategories >= 50);
   assert.ok(body.stats.durationSeconds > 0);
   assert.ok(body.stats.byLanguage.some(item => item.language === 'es'));
@@ -116,6 +116,7 @@ test('tutoriales: búsqueda por DTC y filtros combinados', async () => {
   assert.equal(search.status, 200);
   assert.ok(search.body.total >= 1);
   assert.ok(search.body.items.some(item => item.dtcs.includes('P0299')));
+  assert.ok(search.body.items.some(item => (item.components || []).some(component => /^Pieza:/.test(component))), 'la ficha debe indicar la pieza probable');
 
   const filtered = await request('/api/tutorials?category=electricidad&subcategory=alternador&language=es&embeddable=1&limit=10');
   assert.equal(filtered.status, 200);
@@ -319,7 +320,7 @@ test('tutoriales: importación solo para admin y validación de categorías', as
   assert.equal(updated.body.imported, 1);
 
   const stats = await request('/api/tutorials/stats');
-  assert.equal(stats.body.total, 194);
+  assert.equal(stats.body.total, 394);
   const refreshed = await request(`/api/tutorials/${TEST_TUTORIAL_ID}`);
   assert.equal(refreshed.body.tutorial.title, 'Comprobación de alternador con multímetro (actualizado)');
 });
@@ -353,5 +354,5 @@ test('tutoriales: persistencia de la base de datos tras reiniciar', async () => 
   assert.equal(detail.body.tutorial.id, TEST_TUTORIAL_ID);
   assert.equal(detail.body.tutorial.title, 'Comprobación de alternador con multímetro (actualizado)');
   const stats = await request('/api/tutorials/stats');
-  assert.equal(stats.body.total, 194);
+  assert.equal(stats.body.total, 394);
 });
