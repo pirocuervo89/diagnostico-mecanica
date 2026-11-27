@@ -46,9 +46,12 @@
     MAX_CLIP: 60,
     MERGE_WINDOW: 10 * 1000,
     COOLDOWN: 8 * 1000,
-    MOTION_MS: 200,
-    COCO_MS: 700,
-    AUDIO_MS: 200,
+    // 3 fotogramas/s bastan para detectar una persona o un golpe y ahorran
+    // CPU/batería frente a analizar 5 veces por segundo.
+    MOTION_MS: 340,
+    MOTION_CONFIRM: 2,
+    COCO_MS: 1600,
+    AUDIO_MS: 250,
     DEFAULT_DURATION: 15
   };
   try {
@@ -82,11 +85,17 @@
   let audioTimer = 0;
   let audioBase = 0.008;
   let ultimoSonido = 0;
+  // El pitido y la vibración del propio centinela pueden colarse por el
+  // micrófono y abrir otra grabación. Se ignora el audio unos segundos.
+  let ignorarAudioHasta = 0;
 
   let motionCanvas = null;
   let motionCtx = null;
   let motionTimer = 0;
   let prevLuma = null;
+  let motionLuma = null;
+  let motionBloques = null;
+  let motionRacha = 0;
 
   let modeloCoco = null;
   let cargandoCoco = null;
@@ -384,7 +393,14 @@
 
   // ------------------------------------------------------------ cámara
   async function pedirStream() {
-    const baseVideo = { facingMode: { ideal: 'environment' }, width: { ideal: 640 }, height: { ideal: 480 } };
+    // 20 fps son suficientes para un clip de vigilancia y reducen el trabajo
+    // del codificador y el consumo frente a 30 fps.
+    const baseVideo = {
+      facingMode: { ideal: 'environment' },
+      width: { ideal: 640 },
+      height: { ideal: 480 },
+      frameRate: { ideal: 20, max: 24 }
+    };
     const quiereAudio = el.audio.checked;
     try {
       return await navigator.mediaDevices.getUserMedia({ video: baseVideo, audio: quiereAudio });
@@ -446,7 +462,9 @@
       iniciarMovimiento();
       iniciarAudio();
       iniciarImpacto();
-      cargarCoco();
+      // El detector de objetos se descarga solo cuando el movimiento confirma
+      // que hay algo. Así no se gastan datos, CPU ni batería en una vigilancia
+      // tranquila (garaje, aparcamiento de noche o cámara tapada).
       try { await navigator.storage?.persist?.(); } catch (_e) { /* opcional */ }
       window.CentinelaPantalla?.mantener?.('centinela');
       if (el.notificar.checked) pedirAvisos(true);
@@ -510,13 +528,25 @@
   }
 
   // ------------------------------------------------------------ movimiento
+  // Lienzo pequeño y buffers reutilizados: el análisis de movimiento pasa de
+  // ~58.000 píxeles por frame a ~20.000 y deja de crear arrays en cada vuelta.
+  const MOTION_W = 192;
+  const MOTION_H = 108;
+  const MOTION_BX = 16;
+  const MOTION_BY = 18;
+  const MOTION_COLS = MOTION_W / MOTION_BX;
+  const MOTION_ROWS = MOTION_H / MOTION_BY;
+
   function iniciarMovimiento() {
     if (motionTimer) return;
     motionCanvas = document.createElement('canvas');
-    motionCanvas.width = 320;
-    motionCanvas.height = 180;
+    motionCanvas.width = MOTION_W;
+    motionCanvas.height = MOTION_H;
     motionCtx = motionCanvas.getContext('2d', { willReadFrequently: true });
+    motionLuma = new Uint8Array(MOTION_W * MOTION_H);
+    motionBloques = new Float32Array(MOTION_COLS * MOTION_ROWS);
     prevLuma = null;
+    motionRacha = 0;
     motionTimer = setInterval(analizarMovimiento, LIMITES.MOTION_MS);
   }
 
@@ -524,6 +554,9 @@
     clearInterval(motionTimer);
     motionTimer = 0;
     prevLuma = null;
+    motionLuma = null;
+    motionBloques = null;
+    motionRacha = 0;
     motionCtx = null;
     motionCanvas = null;
   }
@@ -531,37 +564,46 @@
   function analizarMovimiento() {
     if (!armado || !motionCtx || !el.video.videoWidth) return;
     try {
-      motionCtx.drawImage(el.video, 0, 0, 320, 180);
-      const data = motionCtx.getImageData(0, 0, 320, 180).data;
-      const luma = new Uint8Array(320 * 180);
+      motionCtx.drawImage(el.video, 0, 0, MOTION_W, MOTION_H);
+      const data = motionCtx.getImageData(0, 0, MOTION_W, MOTION_H).data;
+      const luma = motionLuma;
       for (let i = 0, p = 0; i < data.length; i += 4, p++) {
         luma[p] = (data[i] * 77 + data[i + 1] * 150 + data[i + 2] * 29) >> 8;
       }
-      if (!prevLuma) { prevLuma = luma; return; }
-      const bloques = new Float32Array(16 * 9);
+      if (!prevLuma) { prevLuma = luma.slice(); return; }
+      const bloques = motionBloques;
+      bloques.fill(0);
       let total = 0;
-      for (let y = 0; y < 180; y++) {
-        const by = (y / 20) | 0;
-        for (let x = 0; x < 320; x++) {
-          const p = y * 320 + x;
+      for (let y = 0; y < MOTION_H; y++) {
+        const by = (y / MOTION_BY) | 0;
+        for (let x = 0; x < MOTION_W; x++) {
+          const p = y * MOTION_W + x;
           const d = Math.abs(luma[p] - prevLuma[p]);
           total += d;
-          bloques[by * 16 + ((x / 20) | 0)] += d;
+          bloques[by * MOTION_COLS + ((x / MOTION_BX) | 0)] += d;
         }
       }
-      prevLuma = luma;
-      const mediaGlobal = total / (320 * 180);
+      prevLuma.set(luma);
+      const mediaGlobal = total / (MOTION_W * MOTION_H);
       const umbral = { baja: 26, media: 17, alta: 10 }[el.sensibilidad.value] || 17;
       let cambios = 0;
       for (let b = 0; b < bloques.length; b++) {
-        const mediaBloque = bloques[b] / 400;
+        const mediaBloque = bloques[b] / (MOTION_BX * MOTION_BY);
         // Se resta la variación global de luz: un cambio de exposición no debe
         // disparar el centinela; una silueta que entra en la escena, sí.
         if (mediaBloque - mediaGlobal > umbral) cambios++;
       }
+      // Dos frames seguidos evitan que un coche que pasa lejos, una mosca o
+      // una racha de ruido abran una grabación de 15 segundos.
       if (cambios >= 2) {
-        dispararEvento('Movimiento', cambios >= 8 ? 'media' : 'baja');
-        if (modeloCoco) analizarCoco();
+        motionRacha += 1;
+        if (motionRacha >= LIMITES.MOTION_CONFIRM) {
+          dispararEvento('Movimiento', cambios >= 8 ? 'media' : 'baja');
+          if (!modeloCoco && !cargandoCoco) cargarCoco();
+          else if (modeloCoco) analizarCoco();
+        }
+      } else {
+        motionRacha = 0;
       }
     } catch (_e) { /* frame no disponible */ }
   }
@@ -648,6 +690,7 @@
 
   function analizarAudio() {
     if (!armado || !audioAnalyser || !audioBuf) return;
+    if (Date.now() < ignorarAudioHasta) return;
     try {
       audioAnalyser.getFloatTimeDomainData(audioBuf);
       let suma = 0;
@@ -671,6 +714,7 @@
     audioAnalyser = null;
     audioBuf = null;
     audioBase = 0.008;
+    ignorarAudioHasta = 0;
   }
 
   function iniciarImpacto() {
@@ -757,7 +801,7 @@
     }
     const conAudio = Boolean(audioTrack);
     mimeActual = mimePreferido(conAudio);
-    const opciones = { videoBitsPerSecond: 1500000 };
+    const opciones = { videoBitsPerSecond: 1200000 };
     if (conAudio) opciones.audioBitsPerSecond = 64000;
     if (mimeActual) opciones.mimeType = mimeActual;
     try {
@@ -770,6 +814,8 @@
     clipRazones = new Set([motivo]);
     clipSeveridad = severidad;
     clipInicio = Date.now();
+    // La alarma del evento no debe convertirse en un segundo evento.
+    ignorarAudioHasta = clipInicio + 4500;
     const base = Math.max(5, Number(el.duracion.value) || LIMITES.DEFAULT_DURATION);
     const duracion = severidad === 'alta' ? Math.min(LIMITES.MAX_CLIP, Math.max(base, 30)) : base;
     clipFin = clipInicio + duracion * 1000;
@@ -902,7 +948,10 @@
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return;
-      const ctx = new Ctx();
+      // Si el analizador de audio ya tiene un contexto, se reutiliza. Crear uno
+      // nuevo en cada evento despierta el hardware de audio y gasta batería.
+      const reutilizar = audioCtx && audioCtx.state !== 'closed';
+      const ctx = reutilizar ? audioCtx : new Ctx();
       const osc = ctx.createOscillator();
       const gan = ctx.createGain();
       osc.type = 'square';
@@ -913,7 +962,7 @@
       osc.connect(gan).connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.5);
-      setTimeout(() => ctx.close?.(), 800);
+      if (!reutilizar) setTimeout(() => ctx.close?.(), 800);
     } catch (_e) { /* sin audio */ }
   }
 
@@ -1081,6 +1130,7 @@
         estado: () => ({
           armado, grabando, clipInicio, clipFin, clipSeveridad, razones: [...clipRazones],
           modelo: Boolean(modeloCoco),
+          motionRacha,
           tracks: stream ? stream.getTracks().filter(t => t.readyState === 'live').length : 0,
           menu: el.mostrarMenu ? el.mostrarMenu.checked : true
         })
@@ -1096,7 +1146,13 @@
     listar: listarClips,
     borrarTodo,
     renderGaleria,
-    actualizarUso
+    actualizarUso,
+    estado: () => ({
+      armado, grabando, clipInicio, clipFin, clipSeveridad,
+      razones: [...clipRazones], modelo: Boolean(modeloCoco),
+      motionRacha,
+      tracks: stream ? stream.getTracks().filter(t => t.readyState === 'live').length : 0
+    })
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

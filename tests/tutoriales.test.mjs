@@ -161,14 +161,14 @@ test('tutoriales: visita anónima y visita autenticada con historial', async () 
 
   const admin = await request('/api/forum/auth/register', {
     method: 'POST',
-    body: { username: 'tutorial_admin', displayName: 'Admin Tutoriales', password: 'claveSegura123' }
+    body: { username: 'tutorialadmin', displayName: 'Admin Tutoriales', password: 'claveSegura123' }
   });
   assert.equal(admin.status, 201);
   adminCookie = admin.cookie;
 
   const user = await request('/api/forum/auth/register', {
     method: 'POST',
-    body: { username: 'tutorial_user', displayName: 'Usuario Tutoriales', password: 'claveSegura456' }
+    body: { username: 'tutorialuser', displayName: 'Usuario Tutoriales', password: 'claveSegura456' }
   });
   assert.equal(user.status, 201);
   userCookie = user.cookie;

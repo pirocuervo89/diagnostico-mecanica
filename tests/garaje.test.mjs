@@ -107,7 +107,7 @@ test('garaje: exige sesión para las operaciones privadas y el estado es públic
 });
 
 test('garaje: alta de vehículo, validaciones y foto privada', async () => {
-  const cookie = await registerUser('garaje_uno');
+  const cookie = await registerUser('garajeuno');
   const created = await call('/api/garage/vehicles', {
     method: 'POST',
     cookie,
@@ -147,7 +147,7 @@ test('garaje: alta de vehículo, validaciones y foto privada', async () => {
 });
 
 test('garaje: mantenimiento documentado del motor enlazado', async () => {
-  const cookie = await registerUser('garaje_dos');
+  const cookie = await registerUser('garajedos');
   const created = await call('/api/garage/vehicles', {
     method: 'POST',
     cookie,
@@ -191,7 +191,7 @@ test('garaje: mantenimiento documentado del motor enlazado', async () => {
 });
 
 test('garaje: mantenimiento con aviso, historial y documento privado', async () => {
-  const cookie = await registerUser('garaje_tres');
+  const cookie = await registerUser('garajetres');
   const created = await call('/api/garage/vehicles', {
     method: 'POST',
     cookie,
@@ -255,8 +255,8 @@ test('garaje: mantenimiento con aviso, historial y documento privado', async () 
 });
 
 test('garaje: cada usuario solo ve lo suyo', async () => {
-  const owner = await registerUser('garaje_dueno');
-  const intruder = await registerUser('garaje_intruso');
+  const owner = await registerUser('garajedueno');
+  const intruder = await registerUser('garajeintruso');
 
   const created = await call('/api/garage/vehicles', {
     method: 'POST',
@@ -287,7 +287,7 @@ test('garaje: cada usuario solo ve lo suyo', async () => {
 });
 
 test('garaje: eliminar exige confirmación explícita', async () => {
-  const cookie = await registerUser('garaje_borra');
+  const cookie = await registerUser('garajeborra');
   const created = await call('/api/garage/vehicles', {
     method: 'POST',
     cookie,
@@ -310,12 +310,12 @@ test('plan Gratis: un solo coche y el segundo empuja al plan Full', async () => 
   // cuenta nueva.
   const login = await call('/api/forum/auth/login', {
     method: 'POST',
-    body: { username: 'garaje_borra', password: 'clave-segura-123' }
+    body: { username: 'garajeborra', password: 'clave-segura-123' }
   });
   assert.equal(login.status, 200);
   const cookie = login.cookie;
   const db = new DatabaseSync(path.join(TMP, 'forum.sqlite'));
-  db.prepare("UPDATE users SET plan = 'free', plan_expires_at = NULL WHERE username = ?").run('garaje_borra');
+  db.prepare("UPDATE users SET plan = 'free', plan_expires_at = NULL WHERE username = ?").run('garajeborra');
   db.close();
 
   const primero = await call('/api/garage/vehicles', {

@@ -272,11 +272,11 @@ test('listado de síntomas con icono, nombre y categoría', async () => {
   assert.equal(new Set(body.map(s => s.name.toLowerCase())).size, body.length, 'no debe haber nombres duplicados');
 });
 
-test('250 síntomas nuevos con ficha técnica completa y trazabilidad genérica', async () => {
+test('450 síntomas curados con ficha técnica completa y trazabilidad genérica', async () => {
   const { status, body } = await getJSON('/api/symptoms');
   assert.equal(status, 200);
   const curated = body.filter(s => s.curated);
-  assert.equal(curated.length, 250);
+  assert.equal(curated.length, 450);
   assert.ok(curated.every(s => s.area && s.description && s.driveRisk && s.source));
   assert.ok(curated.every(s => s.commonCauses.length >= 2 && s.quickChecks.length >= 2));
   assert.ok(curated.every(s => s.tools.length >= 2 && s.solutions.length >= 1));
@@ -287,7 +287,7 @@ test('categorías de síntomas y filtros de API', async () => {
   const meta = await getJSON('/api/symptoms/meta');
   assert.equal(meta.status, 200);
   assert.equal(meta.body.total, SYMPTOM_TOTAL);
-  assert.equal(meta.body.curated, 250);
+  assert.equal(meta.body.curated, 450);
   assert.equal(meta.body.categories.reduce((n, c) => n + c.count, 0), SYMPTOM_TOTAL);
   assert.ok(meta.body.categories.every(c => c.id && c.label && c.count >= 0));
   const filtered = await getJSON('/api/symptoms?category=frenos-chasis');
@@ -811,7 +811,7 @@ test('foro: publicar requiere sesión', async () => {
 test('foro: primer usuario administrador y segundo usuario normal', async () => {
   const one = await forumRequest('/api/forum/auth/register', {
     method: 'POST',
-    body: { username: 'mecanico_test', displayName: 'Mecánico Test', password: 'claveSegura123' }
+    body: { username: 'mecanicotest', displayName: 'Mecánico Test', password: 'claveSegura123' }
   });
   assert.equal(one.status, 201);
   assert.equal(one.body.user.role, 'admin');
@@ -820,14 +820,14 @@ test('foro: primer usuario administrador y segundo usuario normal', async () => 
 
   const two = await forumRequest('/api/forum/auth/register', {
     method: 'POST',
-    body: { username: 'ayudante_test', displayName: 'Ayudante Test', password: 'claveSegura456' }
+    body: { username: 'ayudantetest', displayName: 'Ayudante Test', password: 'claveSegura456' }
   });
   assert.equal(two.status, 201);
   assert.equal(two.body.user.role, 'user');
   forumUser = two.cookie;
 
   const me = await forumRequest('/api/forum/auth/me', { cookie: forumUser });
-  assert.equal(me.body.user.username, 'ayudante_test');
+  assert.equal(me.body.user.username, 'ayudantetest');
 });
 
 test('foro: caso con datos técnicos y adjunto validado', async () => {
@@ -858,7 +858,7 @@ test('foro: caso con datos técnicos y adjunto validado', async () => {
   assert.equal(created.body.ref, 'CASO-00001');
   assert.deepEqual(created.body.dtcs, ['P0299', 'P0300']);
   assert.equal(created.body.attachmentsList.length, 1);
-  assert.equal(created.body.author.username, 'ayudante_test');
+  assert.equal(created.body.author.username, 'ayudantetest');
 
   const file = await fetch(`${BASE}${created.body.attachmentsList[0].url}`);
   assert.equal(file.status, 200);
@@ -945,7 +945,7 @@ test('foro: la IA cita los casos internos y diferencia propuestas', async () => 
 });
 
 test('foro: perfil, reputación y actualización de perfil', async () => {
-  const profile = await forumRequest('/api/forum/users/ayudante_test');
+  const profile = await forumRequest('/api/forum/users/ayudantetest');
   assert.equal(profile.status, 200);
   assert.equal(profile.body.stats.cases, 1);
   assert.ok(profile.body.stats.replies >= 1);
@@ -963,7 +963,7 @@ test('foro: perfil, reputación y actualización de perfil', async () => {
 test('foro: mensajes privados solo para sus participantes', async () => {
   const sent = await forumRequest('/api/forum/messages', {
     method: 'POST', cookie: forumAdmin,
-    body: { to: 'ayudante_test', body: '¿Puedes subir la medición final de presión?' }
+    body: { to: 'ayudantetest', body: '¿Puedes subir la medición final de presión?' }
   });
   assert.equal(sent.status, 201);
   forumThreadId = sent.body.threadId;
@@ -979,7 +979,7 @@ test('foro: mensajes privados solo para sus participantes', async () => {
 
   const third = await forumRequest('/api/forum/auth/register', {
     method: 'POST',
-    body: { username: 'intruso_test', displayName: 'Intruso', password: 'claveSegura789' }
+    body: { username: 'intrusotest', displayName: 'Intruso', password: 'claveSegura789' }
   });
   forumIntruder = third.cookie;
   const denied = await forumRequest(`/api/forum/messages/${forumThreadId}`, { cookie: forumIntruder });
@@ -1365,7 +1365,7 @@ test('un JSON malformado devuelve 400 y no un error interno', async () => {
 });
 
 test('cuenta: eliminar exige confirmación, borra usuario y cierra sesión', async () => {
-  const username = `borrame_${Date.now().toString().slice(-8)}`;
+  const username = `borrame${Date.now().toString().slice(-8)}`;
   const created = await forumRequest('/api/forum/auth/register', {
     method: 'POST',
     body: { username, displayName: 'Cuenta de prueba', password: 'clave-segura-123' }

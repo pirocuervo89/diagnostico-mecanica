@@ -132,7 +132,7 @@ test('la salud exige sesión y se calcula con el garaje real', async () => {
 
   const registration = await call('/api/forum/auth/register', {
     method: 'POST',
-    body: { username: 'protector_api', displayName: 'Protector API', password: 'clave-segura-123' }
+    body: { username: 'protectorapi', displayName: 'Protector API', password: 'clave-segura-123' }
   });
   assert.equal(registration.status, 201);
   assert.ok(registration.cookie);

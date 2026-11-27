@@ -39,7 +39,7 @@ for (const s of symptoms) {
     if (!Array.isArray(s.solutions) || s.solutions.length < 1) errors.push(`${s.id}: soluciones insuficientes`);
   }
 }
-if (curated.length !== 250) errors.push(`Se esperaban 250 síntomas nuevos; hay ${curated.length}`);
+if (curated.length !== 450) errors.push(`Se esperaban 450 síntomas curados; hay ${curated.length}`);
 
 console.log(JSON.stringify({
   records: symptoms.length,

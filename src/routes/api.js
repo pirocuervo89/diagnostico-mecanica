@@ -2099,7 +2099,7 @@ const MAYA_VISTAS = new Set([
   'inicio', 'home', 'chat', 'garaje', 'obd', 'dtc', 'testigos', 'luz',
   'productos', 'tienda', 'tutoriales', 'tuning', 'vehiculos', 'diagnostico',
   'ruta', 'planes', 'foro', 'informe', 'sala', 'compra', 'contacto',
-  'fiabilidad', 'neumaticos'
+  'fiabilidad', 'neumaticos', 'centinela'
 ]);
 const MAYA_MAX_ACCIONES = 3;
 const MAYA_CATALOGO_PROMPT = [
@@ -2107,8 +2107,8 @@ const MAYA_CATALOGO_PROMPT = [
   'Si además de contestar conviene enseñarle algo al usuario, añade AL FINAL una línea exacta:',
   'MAYAJSON {"acciones":[{"hacer":"abrir","donde":"garaje"},{"hacer":"camara_docs"}]}',
   'También vale una sola acción: MAYAJSON {"hacer":"abrir","donde":"ruta"}.',
-  'Vistas válidas: inicio (portada), chat (Maya), garaje (mis coches y papeles), obd (escáner), dtc (códigos), testigos (cámara del testigo), luz (detalle de un testigo), productos/tienda (catálogo), tutoriales, tuning, vehiculos (fichas), diagnostico (síntomas), ruta (GPS), planes, foro, informe, sala (perfil), compra (guía), contacto, fiabilidad, neumaticos.',
-  'Acciones válidas: abrir {donde}; camara (foto del testigo); camara_docs (foto de la ficha técnica); conectar_obd u obd (abrir y conectar el escáner); registro (crear cuenta); productos {que}; buscar {que,donde}; tutoriales {que}; ficha {que} (abrir la ficha de un producto); diagnostico {que} (buscar un síntoma); ruta {que} (poner destino); navegacion {accion: iniciar|detener}; voz_gps {accion: on|off}; pantalla_completa; reportar {kind: accidente|retencion|obra|policia|peligro|vehiculo}; informe; probar (autoprueba de vistas).',
+  'Vistas válidas: inicio (portada), chat (Maya), garaje (mis coches y papeles), obd (escáner), dtc (códigos), testigos (cámara del testigo), luz (detalle de un testigo), productos/tienda (catálogo), tutoriales, tuning, vehiculos (fichas), diagnostico (síntomas), ruta (GPS), planes, foro, informe, sala (perfil), compra (guía), contacto, fiabilidad, neumaticos, centinela (vigilancia local).',
+  'Acciones válidas: abrir {donde}; camara (foto del testigo); camara_docs (foto de la ficha técnica); conectar_obd u obd (abrir y conectar el escáner); obd_leer (leer códigos del escáner ya conectado); registro (crear cuenta); garaje_nuevo (añadir vehículo); productos {que}; buscar {que,donde}; tutoriales {que}; ficha {que} (abrir la ficha de un producto); diagnostico {que} (buscar un síntoma); ruta {que} (poner destino); navegacion {accion: iniciar|detener}; voz_gps {accion: on|off}; pantalla_completa; reportar {kind: accidente|retencion|obra|policia|peligro|vehiculo}; centinela {accion: armar|desarmar|estado}; informe; probar (autoprueba de vistas); reparar (recuperar la app si se queda bloqueada).',
   'Usa solo estas acciones y no inventes nombres. No propongas pagos, borrados ni cambios de cuenta. Si una acción no aporta nada, no escribas la línea. Nunca menciones MAYAJSON ni expliques la acción: el usuario solo debe ver que la app le lleva a lo que necesita.',
   'Si el usuario quiere añadir su coche al garaje y no lo tiene guardado, pídele la foto de la ficha técnica y usa camara_docs. Si no tiene cuenta, ofrécele crearla y usa registro.'
 ].join('\n');
@@ -2238,6 +2238,7 @@ const MAYA_VISTA_PATTERNS = [
   ['contacto', /contacto/],
   ['fiabilidad', /fiabilidad/],
   ['neumaticos', /(neumaticos?|ruedas?|llantas?)/],
+  ['centinela', /(centinela|vigilancia|vigilar (el )?coche)/],
   ['chat', /(chat|maya|hablar con (la )?ia)/],
   ['inicio', /(inicio|portada|home)/]
 ];
@@ -2271,8 +2272,16 @@ function normalizarAccionMaya(accion) {
     const donde = normalizarVistaMaya(accion.donde);
     return donde ? { hacer: 'abrir', donde } : null;
   }
-  if (['camara', 'camara_docs', 'conectar_obd', 'obd', 'registro', 'pantalla_completa', 'informe', 'probar'].includes(hacer)) {
+  if (['camara', 'camara_docs', 'conectar_obd', 'obd', 'obd_leer', 'registro', 'garaje_nuevo', 'pantalla_completa', 'informe', 'probar', 'reparar'].includes(hacer)) {
     return { hacer };
+  }
+  if (hacer === 'centinela') {
+    const accion = fold(accion.accion || accion.que);
+    return {
+      hacer: 'centinela',
+      accion: /(desarm|apag|parar|deten|quita)/.test(accion) ? 'desarmar'
+        : /(estado|como esta|esta armado)/.test(accion) ? 'estado' : 'armar'
+    };
   }
   if (hacer === 'productos' || hacer === 'tutoriales') {
     const que = textoMaya(accion.que);
@@ -2333,6 +2342,15 @@ function accionesPorReglas(query) {
   }
   if (/(registr|crear cuenta|darme de alta|hacer(me)? una cuenta|alta de cuenta)/.test(q)) {
     return [{ hacer: 'registro' }];
+  }
+  if (/(arma|activa|enciende|pon|vigila).*(centinela|vigilancia)/.test(q)) {
+    return [{ hacer: 'abrir', donde: 'centinela' }, { hacer: 'centinela', accion: 'armar' }];
+  }
+  if (/(desarma|apaga|para|deten|quita).*(centinela|vigilancia)/.test(q)) {
+    return [{ hacer: 'abrir', donde: 'centinela' }, { hacer: 'centinela', accion: 'desarmar' }];
+  }
+  if (/(estado|como esta|esta armado).*(centinela|vigilancia)/.test(q)) {
+    return [{ hacer: 'abrir', donde: 'centinela' }, { hacer: 'centinela', accion: 'estado' }];
   }
   if (/(pantalla completa|a pantalla completa)/.test(q)) {
     return [{ hacer: 'abrir', donde: 'ruta' }, { hacer: 'pantalla_completa' }];

@@ -69,6 +69,10 @@
   let ultimaVozRuta = 0;
   let ultimoAvisoExceso = 0;
   let llegadaHecha = false;
+  let ultimaPrecision = null;
+  let ultimoGuardadoPos = 0;
+  let limiteCache = { lat: 0, lon: 0, kmh: 0, ts: 0 };
+  let ultimaVigilancia = { lat: 0, lon: 0, ts: 0 };
 
   const CLAVE_NOCHE = 'dm_ruta_noche';
   const CLAVE_VOZ = 'dm_ruta_voz';
@@ -530,12 +534,20 @@
   // Límite de la vía: el tag maxspeed del tramo de OpenStreetMap más cercano.
   function limiteActual(lat, lon) {
     if (!limites.length) return null;
+    const ahora = Date.now();
+    // Mientras el coche no se mueve 18 m no hace falta recorrer toda la lista
+    // de límites en cada fix: el resultado es el mismo y se ahorra CPU.
+    if (limiteCache.ts && ahora - limiteCache.ts < 12000
+      && distancia(lat, lon, limiteCache.lat, limiteCache.lon) < 18) {
+      return limiteCache.kmh || null;
+    }
     let mejor = null;
     let mejorD = 60;
     for (const l of limites) {
       const d = distancia(lat, lon, l.lat, l.lon);
       if (d < mejorD) { mejorD = d; mejor = l; }
     }
+    limiteCache = { lat, lon, kmh: mejor?.kmh || 0, ts: ahora };
     return mejor ? mejor.kmh : null;
   }
 
@@ -550,6 +562,19 @@
   function alMover(pos, esRespaldo = false) {
     const { latitude: lat, longitude: lon, accuracy, speed, heading } = pos.coords;
     const ahora = Date.now();
+    const precision = Number.isFinite(accuracy) && accuracy > 0 ? accuracy : null;
+    // Un fix de 150 m de radio no sirve para navegar: movería el coche a otra
+    // calle. Si ya hay una posición reciente, se conserva y se espera a uno
+    // mejor; si es el primero, se acepta para no dejar el mapa vacío.
+    if (!esRespaldo && precision && precision > 120 && ultimaPos && ahora - ultimaVez < 12000) {
+      if (elGps) elGps.title = `Señal GPS débil (±${Math.round(precision)} m). Acércate al exterior.`;
+      return;
+    }
+    ultimaPrecision = precision ?? ultimaPrecision;
+    if (elGps && ultimaPrecision) {
+      elGps.title = `GPS ±${Math.round(ultimaPrecision)} m`;
+      elGps.setAttribute('aria-label', `Centrar en mi posición. Precisión ±${Math.round(ultimaPrecision)} metros`);
+    }
     // Si llega un fix real, el aviso de «sin señal» deja de ser cierto.
     if (!esRespaldo && elAviso && !elAviso.hidden && /^Sin señal GPS/.test(elAviso.textContent)) elAviso.hidden = true;
     // Filtro de jitter: a baja velocidad se ignoran microsaltos del GPS.
@@ -583,9 +608,16 @@
       if (velocidadObjetivo < 1 && velocidad < 1.5) velocidad = 0;
       if (velocidad > 260) velocidad = 260;
     }
+    const posAnterior = ultimaPos;
     ultimaPos = { lat, lon };
     ultimaVez = ahora;
-    try { localStorage.setItem(CLAVE_POS, JSON.stringify({ lat, lon, ts: ahora })); } catch (_e) { /* sin espacio */ }
+    // Escribir en localStorage en cada fix desgasta almacenamiento y consume
+    // CPU sin aportar precisión. Basta cada 8 s o cuando el coche se mueve 10 m.
+    if (!esRespaldo && (!ultimoGuardadoPos || ahora - ultimoGuardadoPos > 8000
+      || !posAnterior || distancia(posAnterior.lat, posAnterior.lon, lat, lon) > 10)) {
+      ultimoGuardadoPos = ahora;
+      try { localStorage.setItem(CLAVE_POS, JSON.stringify({ lat, lon, ts: ahora })); } catch (_e) { /* sin espacio */ }
+    }
 
     const limite = limiteActual(lat, lon);
     pintarVelocidad(Math.min(velocidad, 260), limite);
@@ -606,7 +638,7 @@
     } else {
       yo.setLatLng([lat, lon]);
       halo.setLatLng([lat, lon]);
-      halo.setRadius(Math.min(accuracy || 25, 200));
+      halo.setRadius(Math.min(ultimaPrecision || 25, 200));
     }
     girarCoche(yo.getElement(), rumbo);
     // Rumbo arriba: el mapa gira con el coche. Solo con velocidad suficiente
@@ -664,7 +696,10 @@
   function arrancarGps() {
     if (!navigator.geolocation) { avisar('Este navegador no tiene GPS disponible.', 'aviso', 8000); return; }
     gpsIniciado = true;
-    navigator.geolocation.watchPosition(alMover, errorGps, { enableHighAccuracy: true, maximumAge: 4000, timeout: 20000 });
+    // Prioridad a la precisión: no se reutiliza una posición de hace 4 s si
+    // hay una nueva disponible. El timeout amplio evita cortar en frío al
+    // primer fix dentro del coche.
+    navigator.geolocation.watchPosition(alMover, errorGps, { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 });
     // Respaldo: hay móviles (y posiciones simuladas) donde watchPosition no
     // entrega nada aunque una consulta puntual sí responde. Si en 8 s no ha
     // llegado ninguna posición, se pregunta cada 2 s. En cuanto llega una, se
@@ -688,7 +723,7 @@
         navigator.geolocation.getCurrentPosition(
           alMover,
           () => {},
-          { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
+          { enableHighAccuracy: true, maximumAge: 500, timeout: 8000 }
         );
       }, 2000);
     }, 8000);
@@ -5599,6 +5634,12 @@
 
   function vigilarAvisos(lat, lon) {
     if (!capaAvisos) return;
+    const ahora = Date.now();
+    // Los avisos tienen radios de cientos de metros: recalcularlos cada 8 m
+    // no cambia el resultado y multiplica el trabajo por cada fix.
+    if (ultimaVigilancia.ts && ahora - ultimaVigilancia.ts < 4000
+      && distancia(lat, lon, ultimaVigilancia.lat, ultimaVigilancia.lon) < 8) return;
+    ultimaVigilancia = { lat, lon, ts: ahora };
     const pendientes = avisos.filter(a => !avisados.has(a.id));
     for (const a of pendientes) {
       const d = distancia(lat, lon, a.lat, a.lon);
@@ -6151,7 +6192,8 @@
     estado: () => ({
       posicion: ultimaPos ? { lat: Number(ultimaPos.lat.toFixed(5)), lon: Number(ultimaPos.lon.toFixed(5)) } : null,
       destino: destinoCoord ? { lat: Number(destinoCoord.lat.toFixed(5)), lon: Number(destinoCoord.lon.toFixed(5)), nombre: nombreDestino || '' } : null,
-      navegando: Boolean(navegando)
+      navegando: Boolean(navegando),
+      precision: ultimaPrecision ? Math.round(ultimaPrecision) : null
     })
   };
 })();

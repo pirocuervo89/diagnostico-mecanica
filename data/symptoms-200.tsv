@@ -1,0 +1,210 @@
+area|name|description|severity|specific_causes|specific_checks|dtc
+gasolina|Arranque largo en frío con olor a gasolina|El motor gira más de lo normal antes de arrancar y se percibe combustible sin fuga visible|Media|Inyector con goteo;Válvula de purga del cánister atascada;Presión de combustible que cae tras parar|Medir caída de presión tras apagar;Probar estanqueidad de inyectores;Revisar cánister y electroválvula|P0442,P0455
+gasolina|Ralentí inestable tras arrancar en frío|Las revoluciones oscilan y el motor vibra durante los primeros segundos|Media|Cuerpo de mariposa sucio;Fuga de vacío en admisión;Sensor de temperatura con lectura falsa|Limpiar y adaptar mariposa;Prueba de humo en admisión;Comparar temperatura de motor y ambiente|P0507,P0113
+gasolina|Tirón al acelerar entre 2.000 y 3.000 rpm|El motor da un tirón corto al solicitar aceleración parcial|Media|Bujía o bobina degradada;Mezcla pobre transitoria;Sensor MAF lento|Contar fallos por cilindro;Comparar caudal medido y solicitado;Revisar bujías y bobinas|P0300,P0101
+gasolina|Consumo alto en ciudad sin pérdida de potencia|El ordenador marca un consumo muy superior al habitual en trayectos urbanos|Baja|Sonda lambda envejecida;Presión de neumáticos baja;Filtro de aire sucio|Leer correcciones de mezcla;Comprobar presiones;Revisar filtro y admisión|P0133
+gasolina|Olor a gasolina después de repostar|El olor aparece al llenar el depósito y desaparece al circular|Alta|Válvula de retención del cánister;Junta del aforador;Tubo de llenado agrietado|Inspeccionar zona del aforador;Prueba de estanqueidad del depósito;Revisar tubo de llenado|P0455,P0442
+gasolina|Cascabeleo a plena carga en cuesta|Se oye un golpeteo de detonación al acelerar con el motor caliente|Media|Combustible de octanaje bajo;Carbonilla en cámara;Sensor de detonación flojo|Usar octanaje especificado;Revisar sensor de detonación;Inspeccionar carbonilla con boroscopio|P0325
+gasolina|Fallo de encendido intermitente en un cilindro|El motor vibra y el testigo parpadea en aceleraciones concretas|Alta|Bobina con aislamiento dañado;Bujía desgastada;Inyector obstruido|Intercambiar bobina y ver si migra el fallo;Medir compresión;Probar inyector|P0301,P0302
+gasolina|Humo negro al acelerar a fondo|Sale humo oscuro por el escape solo con aceleración fuerte|Media|Mezcla rica;Filtro de aire muy sucio;Sensor MAF sobrevalorando caudal|Leer lambda y correcciones;Revisar filtro;Comparar MAF con referencia|P0172
+gasolina|Humo blanco persistente tras calentar|El humo blanco no desaparece cuando el motor alcanza temperatura|Alta|Junta de culata dañada;Refrigerante entrando a la cámara;Turbocompresor con fuga interna|Probar gases en refrigerante;Medir compresión;Revisar turbo y bujías|P0300
+gasolina|Ralentí que sube y baja al conectar el aire|La aguja oscila al activar el aire acondicionado y el motor casi se cala|Media|Cuerpo de mariposa desadaptado;Fuga de vacío;Compresor con carga excesiva|Revisar adaptaciones;Prueba de humo;Medir presión del aire acondicionado|P0507
+gasolina|Arranque inmediato y calado al soltar el freno|El motor arranca bien pero se para al iniciar la marcha|Media|Convertidor de par bloqueado;Fuga de vacío;Presión de combustible baja|Comprobar convertidor;Prueba de vacío;Medir presión de combustible|P0087
+gasolina|Pérdida de potencia en cuestas con carga|El coche acelera bien en llano pero pierde fuerza al subir|Media|Bomba de combustible débil;Admisión restringida;Compresión baja|Medir presión en carga;Revisar filtro y mariposa;Probar compresión|P0087
+gasolina|Olor dulce en el escape y consumo de refrigerante|El nivel de refrigerante baja y el escape huele dulce|Alta|Junta de culata;Intercambiador de calefacción;Culata agrietada|Prueba de gases en refrigerante;Inspeccionar bujías;Medir pérdida de presión|P0300
+gasolina|Golpeteo metálico leve al soltar el acelerador|Se oye un clic o golpe seco al levantar el pie|Media|Tensor de cadena desgastado;Soporte de motor;Válvula de mariposa|Revisar tensor y cadena;Comprobar soportes;Adaptar mariposa|P0011
+gasolina|Motor que tarda en bajar de revoluciones|Al soltar el acelerador el régimen cae lentamente|Media|Cuerpo de mariposa sucio;Fuga de vacío;Pedal electrónico desadaptado|Limpiar mariposa;Prueba de humo;Revisar pedal y adaptaciones|P0507
+gasolina|Consumo excesivo después de cambiar bujías|El consumo sube justo después de sustituir las bujías|Media|Bujías de grado térmico incorrecto;Separación de electrodo errónea;Bobina mal conectada|Verificar referencia y separación;Revisar conexiones;Leer correcciones|P0300
+gasolina|Fallo de arranque en caliente tras parar diez minutos|En frío arranca y en caliente necesita varias vueltas|Media|Inyector que gotea;Presión de combustible que no se mantiene;Sensor de temperatura|Medir presión residual;Probar inyectores;Comparar temperatura|P0087
+gasolina|Ralentí bajo con vibración en el volante|El motor vibra en parado y las revoluciones quedan por debajo de lo normal|Media|Soporte de motor vencido;Mariposa sucia;Mezcla pobre|Revisar soportes;Limpiar mariposa;Leer correcciones de mezcla|P0171
+gasolina|Olor a combustible en el habitáculo con la calefacción|El olor entra por la ventilación al encender la calefacción|Alta|Fuga en rampa de inyectores;Manguito de combustible;Cánister saturado|Inspeccionar rampa y manguitos;Prueba de estanqueidad;Revisar cánister|P0455
+gasolina|Pérdida de potencia intermitente con testigo de motor|La potencia cae a golpes y el testigo se enciende y apaga|Alta|Sensor de cigüeñal intermitente;Bomba de combustible;Mazo de cables|Registrar fallos y parámetros;Revisar sensor y conector;Medir presión de combustible|P0335
+
+diesel|Humo blanco denso al arrancar en frío|Sale una nube blanca al arrancar y se reduce al calentar|Media|Calentadores defectuosos;Inyección adelantada;Compresión baja|Probar calentadores;Leer avance de inyección;Medir compresión|P0380
+diesel|Humo negro bajo aceleración con pérdida de potencia|El humo negro aumenta y el coche no empuja como antes|Media|EGR obstruida;Turbo con poca presión;Inyectores desgastados|Leer presión de turbo;Revisar EGR;Probar retorno de inyectores|P0299
+diesel|Tirones a bajas revoluciones en frío|El motor da tirones al circular suave con el motor frío|Media|Inyector con retorno alto;EGR que no cierra;Presión de rail inestable|Medir retorno;Comprobar EGR;Leer presión de rail|P0087
+diesel|Ralentí irregular con olor a gasoil|El ralentí vibra y huele a combustible sin fuga visible|Media|Inyector que gotea;Filtro de combustible obstruido;Entrada de aire|Probar inyectores;Cambiar filtro;Buscar aire en el circuito|P0093
+diesel|Dificultad de arranque en caliente|El motor caliente necesita más vueltas que en frío|Media|Bomba de alta desgastada;Sensor de temperatura;Inyector con fuga|Medir presión de rail en caliente;Comparar temperaturas;Probar retorno|P0087
+diesel|Consumo alto de gasoil en trayectos cortos|El consumo sube mucho en uso urbano y con paradas frecuentes|Baja|Regeneraciones de FAP frecuentes;Termostato abierto;Presión de neumáticos|Leer intervalos de regeneración;Comprobar temperatura;Revisar presiones|P2002
+diesel|Ruido de inyectores tipo traqueteo en carga|Se oye un traqueteo seco que aumenta al acelerar|Media|Inyector desgastado;Presión de rail baja;Calibración incorrecta|Probar retorno y correcciones;Medir presión;Revisar codificación|P0093
+diesel|Fuga de gasoil visible bajo el motor|Aparece un charco de combustible bajo el vano motor|Alta|Tubo de retorno agrietado;Junta de bomba;Filtro mal montado|Localizar fuga con motor en marcha;Revisar juntas;Comprobar filtro| 
+diesel|Olor a gasoil en el habitáculo|El olor aparece al arrancar o al circular con la ventilación abierta|Alta|Fuga en retorno de inyectores;Junta de bomba;Filtro de combustible|Inspeccionar circuito de baja presión;Prueba de estanqueidad;Revisar filtro| 
+diesel|Motor que se cala al reducir|El motor se para al bajar marchas o al llegar a un cruce|Alta|Válvula EGR atascada abierta;Inyector que gotea;Sensor de régimen|Comprobar EGR;Probar inyectores;Leer señal de régimen|P0401
+diesel|Pérdida de potencia con testigo de precalentamiento|El testigo de calentadores se enciende y el coche entra en emergencia|Media|Calentador defectuoso;Módulo de calentadores;Mazo de cables|Leer fallos de calentadores;Medir resistencia;Revisar conector|P0380
+diesel|Arranque con mucho humo y olor acre|El escape echa humo denso y huele a combustible sin quemar|Media|Calentadores fríos;Inyector que gotea;Compresión baja|Probar calentadores;Medir retorno;Probar compresión|P0300
+diesel|Golpeteo fuerte en frío que desaparece al calentar|El motor suena metálico en frío y se suaviza con temperatura|Media|Pistón con holgura;Inyector desgastado;Aceite incorrecto|Medir compresión;Probar inyectores;Verificar especificación de aceite| 
+diesel|Exceso de humo azul en diésel|Sale humo azul y el nivel de aceite baja|Alta|Turbo con fuga de aceite;Guías de válvula;Segmentos desgastados|Revisar turbo;Medir compresión;Inspeccionar admisión|P0299
+diesel|Consumo de aceite con humo por el escape|El motor consume aceite y el escape humea de forma continua|Alta|Segmentos desgastados;Turbo;Junta de válvulas|Medir compresión;Revisar turbo;Prueba de fugas| 
+diesel|Ralentí alto y estable en frío|El motor queda acelerado más tiempo del previsto tras arrancar|Baja|Sensor de temperatura;Termostato;Adaptación de ralentí|Comparar temperatura;Revisar termostato;Resetear adaptaciones|P0113
+diesel|Tirones al mantener velocidad constante|El coche da pequeños tirones sin cambiar la posición del acelerador|Media|EGR oscilante;Sensor MAF;Presión de rail|Registrar EGR y MAF;Comprobar presión;Revisar conectores|P0401
+diesel|Pérdida de potencia tras repostar|El motor pierde fuerza justo después de llenar el depósito|Media|Combustible contaminado;Filtro obstruido;Aire en el circuito|Analizar combustible;Cambiar filtro;Purgar circuito|P0087
+diesel|Ruido de bomba de alta presión|Se oye un zumbido o golpeteo en la zona de la bomba|Alta|Bomba desgastada;Presión de rail baja;Regulador defectuoso|Medir presión y caudal;Revisar regulador;Inspeccionar bomba|P0087
+diesel|Fallo de arranque tras quedarse sin combustible|El motor no arranca después de agotar el depósito|Media|Aire en el circuito;Filtro seco;Bomba descebada|Purgar el circuito;Cambiar filtro;Cebar la bomba| 
+
+turbo|Silbido agudo al acelerar|Se oye un silbido que sube con las revoluciones|Media|Fuga en manguito de admisión;Turbo desgastado;Junta del colector|Prueba de presión con humo;Revisar holgura del eje;Inspeccionar juntas|P0299
+turbo|Pérdida de presión de turbo en cuesta|La presión de sobrealimentación cae al subir con carga|Alta|Actuador de geometría;Fuga de vacío;Turbo obstruido|Comparar presión real y solicitada;Probar actuador;Revisar admisión|P0299
+turbo|Humo negro al pisar a fondo con turbo|El humo aparece justo cuando entra el turbo|Media|Mezcla rica;Fuga de admisión;Inyectores desgastados|Leer lambda;Prueba de humo;Probar inyectores|P0234
+turbo|Ruido de soplado al soltar acelerador|Se oye un soplido fuerte al levantar el pie|Baja|Válvula de descarga;Manguito suelto;Turbo con holgura|Revisar válvula;Apretar abrazaderas;Comprobar eje|P0299
+turbo|Tirones al entrar el turbo|El motor da un tirón al pasar de 1.800 rpm|Media|Geometría variable atascada;Sensor de presión;Fuga de vacío|Mover geometría con máquina;Comparar sensores;Prueba de humo|P0234
+turbo|Falta de potencia hasta 2.000 rpm|El coche sale muy perezoso y luego empuja de golpe|Media|Turbo pequeño con geometría cerrada;EGR abierta;Fuga de admisión|Revisar geometría;Comprobar EGR;Prueba de estanqueidad|P0299
+turbo|Consumo alto con humo negro|El consumo sube y el escape humea en aceleración|Media|Filtro de aire sucio;MAF;Inyectores|Cambiar filtro;Limpiar MAF;Probar inyectores|P0101
+turbo|Silbido de admisión en ralentí|Se oye un silbido fino con el motor parado en tráfico|Baja|Fuga en colector;Junta de mariposa;Manguito agrietado|Prueba de humo;Revisar juntas;Apretar abrazaderas|P0507
+turbo|Fuga de aire en manguito de admisión|El motor pierde potencia y silba tras una revisión|Alta|Manguito mal montado;Abrazadera floja;Manguito agrietado|Inspección visual;Prueba de presión;Sustituir manguito|P0299
+turbo|Pérdida de potencia con olor a escape en admisión|Huele a gases de escape cerca del filtro de aire|Alta|Junta de colector rota;Tubo EGR perforado;Turbo con fuga|Prueba de humo;Revisar EGR;Inspeccionar colector|P0401
+turbo|Ruido de wastegate al reducir|Se oye un clac metálico al soltar el acelerador|Media|Actuador de wastegate;Muelle vencido;Varilla suelta|Comprobar actuador;Ajustar varilla;Revisar vacío|P0299
+turbo|Turbo que no sopla y testigo de motor|El coche no tiene potencia y el testigo queda fijo|Alta|Turbo gripado;Sensor de presión;Actuador eléctrico|Girar el eje a mano;Leer presión;Revisar actuador|P0299
+turbo|Exceso de presión de turbo|El motor entra en protección por sobrepresión|Alta|Geometría atascada;Actuador;Sensor MAP|Comparar presión;Mover geometría;Revisar sensor|P0234
+turbo|Vibración del motor a plena carga|La carrocería vibra al acelerar con el turbo a tope|Media|Soporte de motor;Fuga de admisión;Desequilibrio del turbo|Revisar soportes;Prueba de humo;Comprobar eje del turbo|P0299
+turbo|Humo azul por turbo con consumo de aceite|Sale humo azul y el turbo tiene aceite en la admisión|Alta|Retén del turbo;Tubería de retorno obstruida;Presión de cárter alta|Revisar retorno;Medir presión de cárter;Sustituir retén|P0299
+turbo|Ruido metálico en frío en la admisión|Se oye un roce metálico al arrancar en frío|Alta|Álabes del turbo;Tornillo suelto en admisión;Tensor|Inspeccionar turbo;Revisar admisión;Comprobar tensor|P0299
+turbo|Ralentí inestable por fuga de vacío|El ralentí oscila y se oye un siseo en el vano|Media|Manguito de vacío;Válvula de derivación;Junta de admisión|Prueba de humo;Revisar manguitos;Medir vacío|P0507
+turbo|Pérdida de potencia tras lavado de motor|El coche pierde fuerza después de lavar el vano motor|Media|Conector de sensor mojado;Fuga de admisión;Masa|Secar conectores;Revisar admisión;Comprobar masas|P0101
+turbo|Silbido que aumenta con las revoluciones|El silbido crece de forma proporcional al régimen|Media|Fuga de presión;Turbo desgastado;Manguito|Prueba de presión;Revisar holgura;Sustituir manguito|P0299
+turbo|Testigo de avería tras sustituir filtro de aire|El testigo aparece después de cambiar el filtro|Baja|Filtro mal montado;MAF desconectado;Tapa de admisión mal cerrada|Revisar montaje;Conectar MAF;Comprobar tapa|P0101
+
+inyeccion|Olor a gasolina en el aceite|El aceite huele a combustible y el nivel puede subir|Alta|Inyector con goteo;Bomba de alta con fuga interna;Trajetos muy cortos|Analizar aceite;Probar inyectores;Revisar bomba|P0087
+inyeccion|Mezcla pobre con ralentí inestable|El motor tiembla y la lambda indica mezcla pobre|Media|Toma de aire;Presión de combustible baja;Inyector obstruido|Prueba de humo;Medir presión;Limpiar inyector|P0171
+inyeccion|Mezcla rica con humo negro y consumo alto|La lambda indica exceso de combustible y el escape humea|Media|Inyector que gotea;Sensor MAF;Presión de combustible alta|Probar inyectores;Comparar MAF;Medir presión|P0172
+inyeccion|Fallo de sonda lambda calentada|El testigo indica calefacción de lambda y el consumo sube|Media|Calefactor de la sonda;Conector;Fusible|Medir resistencia del calefactor;Revisar conector;Comprobar fusible|P0135
+inyeccion|Consumo alto tras instalar lambda genérica|El consumo empeora después de cambiar la sonda|Media|Sonda no compatible;Mala conexión;Adaptaciones no borradas|Verificar referencia;Revisar conexión;Borrar adaptaciones|P0133
+inyeccion|Inyector que gotea y huele a combustible|Hay olor a gasolina y el motor arranca mal en caliente|Alta|Inyector desgastado;Junta tórica;Rampa con fugas|Probar banco de inyectores;Revisar juntas;Medir presión residual|P0087
+inyeccion|Fallo de encendido en cilindro 1 en frío|El fallo aparece solo con el motor frío|Media|Bujía;Bobina;Inyector|Intercambiar componentes;Medir compresión;Leer contador de fallos|P0301
+inyeccion|Bobina que falla con humedad|El motor falla los días de lluvia o tras lavar|Media|Aislamiento de bobina;Tapa de bujías;Conector|Pulverizar agua en oscuridad;Revisar bobina;Sellar conector|P0300
+inyeccion|Bujía negra en un solo cilindro|La bujía sale carbonizada solo en un cilindro|Media|Inyector que gotea;Compresión baja;Bobina débil|Probar inyector;Medir compresión;Intercambiar bobina|P0302
+inyeccion|Bujía blanca en un cilindro|La bujía sale muy clara y el electrodo está desgastado|Alta|Mezcla pobre;Inyector obstruido;Fuga de admisión|Comparar inyectores;Prueba de humo;Medir lambda|P0171
+inyeccion|Arranque largo con bujías nuevas|El motor arranca peor después de cambiar bujías|Media|Grado térmico incorrecto;Separación;Par de apriete|Verificar referencia;Ajustar separación;Revisar par|P0300
+inyeccion|Ralentí que oscila con el motor caliente|La aguja sube y baja cuando el motor está a temperatura|Media|Inyector;Sensor de temperatura;Mariposa|Probar inyectores;Comparar temperatura;Adaptar mariposa|P0507
+inyeccion|Corte de inyección a 3.000 rpm|El motor corta de golpe al llegar a ese régimen|Alta|Sensor de régimen;Presión de combustible;Centralita en protección|Leer corte y parámetros;Medir presión;Revisar sensor|P0335
+inyeccion|Olor a combustible en el escape|El escape huele a gasolina sin humo visible|Media|Mezcla rica;Inyector;Catalizador frío|Leer lambda;Probar inyector;Revisar catalizador|P0172
+inyeccion|Consumo alto con sonda lambda nueva|El consumo no baja después de sustituir la sonda|Media|Adaptaciones;Fuga de escape;Sonda incorrecta|Borrar adaptaciones;Revisar fugas;Verificar referencia|P0133
+inyeccion|Fallo intermitente de sensor de árbol de levas|El motor pierde potencia y el testigo aparece y desaparece|Media|Sensor;Conector;Cadena desgastada|Leer señal;Revisar conector;Comprobar sincronización|P0340
+inyeccion|Fallo de sensor de cigüeñal en caliente|El motor se cala al calentarse y luego arranca|Alta|Sensor;Mazo de cables;Rueda fónica|Medir señal en caliente;Revisar cableado;Inspeccionar rueda|P0335
+inyeccion|Pérdida de potencia con mezcla pobre|El coche no acelera y la lambda marca pobre|Alta|Bomba de combustible;Fuga de vacío;Inyector obstruido|Medir presión;Prueba de humo;Limpiar inyectores|P0171
+inyeccion|Explosiones en el escape al reducir|Se oyen petardos al soltar el acelerador|Media|Mezcla rica;Fuga de escape;Encendido tardío|Leer lambda;Revisar escape;Comprobar avance|P0172
+inyeccion|Testigo de motor tras repostar combustible de baja calidad|El testigo aparece poco después de repostar|Media|Combustible contaminado;Sensor de detonación;Lambda|Analizar combustible;Leer fallos;Revisar sensores|P0325
+
+anticontaminacion|Testigo de EGR encendido con tirones|El testigo de motor aparece y el coche da tirones|Media|EGR obstruida;Sensor de posición;Mazo de cables|Leer posición de EGR;Limpiar válvula;Revisar conector|P0401
+anticontaminacion|Ralentí inestable por EGR abierta|El ralentí tiembla y el motor casi se cala|Media|EGR atascada abierta;Carbonilla;Sensor de caudal|Comprobar cierre de EGR;Limpiar;Comparar MAF|P0402
+anticontaminacion|Humo negro por EGR obstruida|El escape humea y el motor pierde potencia|Media|EGR cerrada;Admisión sucia;Turbo|Limpiar EGR;Revisar admisión;Medir presión de turbo|P0401
+anticontaminacion|FAP saturado con pérdida de potencia|El coche entra en protección y no pasa de cierta velocidad|Alta|Filtro de partículas lleno;Regeneración incompleta;Sensor de presión|Leer carga de hollín;Forzar regeneración;Revisar sensores|P2002
+anticontaminacion|Regeneración de FAP que no termina|El ventilador sigue encendido y el consumo sube|Media|Trajetos cortos;Sensor de temperatura;EGR|Circular en carretera;Leer temperaturas;Revisar EGR|P2002
+anticontaminacion|Humo blanco por inyector de AdBlue|Sale humo blanco y el nivel de AdBlue baja|Media|Inyector de urea;Presión;Sensor NOx|Revisar inyector;Medir presión;Leer NOx| 
+anticontaminacion|Testigo de AdBlue con pocos kilómetros|El aviso aparece y queda poca autonomía|Media|Nivel bajo;Sensor de nivel;Calidad de urea|Rellenar con urea homologada;Revisar sensor;Leer calidad| 
+anticontaminacion|Olor a amoniaco tras repostar AdBlue|Se percibe un olor fuerte después de rellenar|Baja|Derrame;Tapa mal cerrada;Válvula de venteo|Limpiar derrame;Cerrar tapa;Revisar venteo| 
+anticontaminacion|Consumo alto de AdBlue|El depósito de urea se vacía mucho antes de lo normal|Media|Inyector que dosifica de más;Sensor NOx;Fuga|Medir consumo;Revisar inyector;Comprobar fugas| 
+anticontaminacion|Testigo de NOx con marcha limitada|El coche limita potencia y avisa del sistema NOx|Alta|Sensor NOx;AdBlue;Catalizador SCR|Leer eficiencia;Revisar urea;Comprobar sensor| 
+anticontaminacion|Fuga en sensor de presión diferencial de FAP|El testigo aparece y la lectura de presión es errática|Media|Tubo obstruido;Sensor;Conector|Soplar tubos;Comparar lectura;Revisar conector|P2453
+anticontaminacion|Humo negro tras sustituir catalizador|El humo aparece después de montar el catalizador nuevo|Media|Junta de escape;Sensor lambda;Adaptaciones|Revisar juntas;Leer lambda;Borrar adaptaciones|P0420
+anticontaminacion|Olor a huevo podrido en el escape|El escape huele a azufre al acelerar|Media|Catalizador saturado;Mezcla rica;Combustible con azufre|Leer lambda;Revisar catalizador;Cambiar combustible|P0420
+anticontaminacion|Catalizador que golpea en frío|Se oye un golpe metálico bajo el coche al arrancar|Baja|Soporte roto;Pantalla suelta;Cerámica rota|Revisar soportes;Comprobar pantalla;Inspeccionar catalizador|P0420
+anticontaminacion|Fallo de sonda lambda tras el catalizador|El testigo indica eficiencia baja del catalizador|Media|Sonda;Fuga de escape;Catalizador|Comparar señales;Revisar fugas;Probar catalizador|P0420
+anticontaminacion|Humo azul por aceite en el escape|El escape humea azul y el aceite baja|Alta|Turbo;Guías de válvula;Segmentos|Revisar turbo;Medir compresión;Inspeccionar guías| 
+anticontaminacion|Exceso de hollín en la válvula EGR|La EGR se obstruye en pocos miles de kilómetros|Media|Combustión rica;Aceite en admisión;EGR desgastada|Leer lambda;Revisar turbo;Limpiar y comprobar EGR|P0401
+anticontaminacion|Tirones al regenerar el FAP|El motor da tirones durante la regeneración|Media|Inyectores;Sensor de presión;Temperatura|Leer correcciones;Comprobar sensores;Revisar inyectores|P2002
+anticontaminacion|Testigo de motor tras limpiar EGR|El testigo aparece después de limpiar la válvula|Baja|Conector;Adaptación;Junta mal montada|Revisar conexión;Borrar adaptaciones;Comprobar junta|P0401
+anticontaminacion|Pérdida de potencia con filtro de partículas obstruido|El coche no acelera y el FAP está al límite|Alta|FAP lleno;Sensor de presión;Regeneración|Leer carga;Forzar regeneración;Sustituir si no baja|P2002
+
+electrico|Batería que se descarga en dos días|El coche arranca con pinzas y vuelve a quedarse sin batería|Alta|Consumo parásito;Alternador;Batería agotada|Medir consumo en reposo;Probar carga;Testar batería| 
+electrico|Arranque lento con luces débiles|El motor gira despacio y las luces bajan al arrancar|Alta|Batería;Masa;Motor de arranque|Medir tensión de arranque;Revisar masas;Probar arranque|P0562
+electrico|Testigo de batería encendido en marcha|El testigo de carga queda encendido con el motor en marcha|Alta|Alternador;Correa;Regulador|Medir tensión de carga;Revisar correa;Probar alternador|P0620
+electrico|Olor a huevo podrido en el vano motor|Se percibe olor a azufre cerca de la batería|Alta|Batería sobrecargada;Regulador;Cortocircuito|Medir tensión;Revisar regulador;Inspeccionar cables|P0562
+electrico|Consumo parásito con el coche cerrado|La batería baja aunque no se use el coche|Alta|Módulo que no duerme;Luz interior;Radio|Medir caída de corriente;Aislar fusibles;Revisar módulos| 
+electrico|Alternador que carga 12,2 V|La tensión no sube al arrancar el motor|Alta|Alternador;Correa;Regulador|Medir en bornes;Comprobar correa;Probar diodos|P0620
+electrico|Alternador que carga 15,5 V|La tensión de carga es demasiado alta|Alta|Regulador;Masa;Batería|Medir regulador;Revisar masas;Comprobar batería|P0562
+electrico|Luces que parpadean al ralentí|Las luces oscilan con el motor parado en tráfico|Media|Regulador;Masa;Alternador|Medir rizado;Revisar masas;Probar alternador|P0620
+electrico|Cuadro de instrumentos que se apaga|El cuadro se apaga y vuelve a encender en marcha|Alta|Conector;Masa;Módulo|Revisar conector;Medir masas;Leer fallos|U0140
+electrico|Pantalla que se reinicia al arrancar|La pantalla multimedia se reinicia con el arranque|Baja|Batería;Tensión de arranque;Módulo|Medir caída de tensión;Revisar batería;Actualizar módulo| 
+electrico|Fallo de comunicación CAN intermitente|Aparecen varios testigos a la vez y desaparecen|Alta|Cable CAN;Conector;Módulo|Medir resistencia CAN;Revisar conectores;Aislar módulo|U0100
+electrico|Testigo de ABS y control de estabilidad a la vez|Los dos testigos se encienden juntos|Media|Sensor de rueda;Bomba ABS;Masa|Leer fallos;Comparar velocidades;Revisar masa|C0035
+electrico|Ventilador que funciona con el motor frío|El electroventilador arranca nada más encender|Media|Sensor de temperatura;Relé;Módulo|Leer temperatura;Probar relé;Revisar módulo|P0117
+electrico|Fusible que se funde al conectar el remolque|El fusible salta al enchufar la piña|Media|Cortocircuito en remolque;Cable pinzado;Masa|Revisar piña;Aislar cable;Medir continuidad| 
+electrico|Cable de masa de motor corroído y arranque débil|El motor arranca mal y algunas luces fallan|Media|Óxido;Tornillo flojo;Cable|Limpiar masa;Apretar;Medir caída| 
+electrico|Sensor de temperatura que marca -40 °C|La temperatura del motor aparece fuera de rango|Media|Sensor;Conector;Cableado|Medir resistencia;Revisar conector;Comprobar cable|P0113
+electrico|Sensor MAP con lectura fija|La presión de admisión no cambia al acelerar|Media|Sensor;Vacío;Conector|Comparar lectura;Revisar manguito;Medir señal|P0101
+electrico|Sensor MAF sucio con mezcla pobre|El caudal de aire medido es bajo y la lambda corrige|Media|Suciedad;Fuga;Conector|Limpiar MAF;Prueba de humo;Comparar caudal|P0101
+electrico|Llave que no reconoce el inmovilizador|El coche no arranca y aparece el símbolo de llave|Alta|Pila de llave;Antena;Módulo|Probar segunda llave;Revisar antena;Leer fallos| 
+electrico|Cierre centralizado que actúa solo|Las puertas se cierran o abren sin pulsar|Media|Mando;Actuador;Cableado|Probar mando;Revisar actuador;Inspeccionar cable| 
+
+transmision|Rasca al meter segunda en frío|La segunda entra con roce hasta que la caja calienta|Media|Sincronizador;Aceite incorrecto;Varillaje|Cambiar aceite;Revisar varillaje;Inspeccionar sincronizador| 
+transmision|Ruido de engranajes en quinta|Se oye un zumbido que aumenta en quinta|Media|Rodamiento;Engranaje;Nivel de aceite|Comprobar nivel;Escuchar en elevador;Inspeccionar caja| 
+transmision|Olor a aceite de caja en el habitáculo|Huele a valvulina dentro del coche|Media|Fuga por retén;Ventilación;Tapón|Localizar fuga;Revisar nivel;Comprobar ventilación| 
+transmision|Fuga de valvulina por retén|Aparece aceite en la campana o en el suelo|Media|Retén;Junta;Respiradero obstruido|Limpiar y localizar;Revisar respiradero;Sustituir retén| 
+transmision|Palanca que se sale de la marcha|La marcha se desengancha sola al acelerar|Alta|Varillaje;Sincronizador;Soporte de caja|Revisar varillaje;Comprobar soportes;Inspeccionar caja| 
+transmision|Pedal de embrague que no retorna tras pisarlo a fondo|El pedal no vuelve solo después de pisar|Alta|Muelle;Circuito hidráulico;Colín|Revisar muelle;Purgar circuito;Comprobar colín| 
+transmision|Embrague que patina en cuesta|El motor sube de vueltas sin que el coche acelere|Alta|Disco desgastado;Fuga de aceite;Colín|Prueba de patinaje;Revisar fuga;Medir desgaste| 
+transmision|Ruido de bimasa al arrancar|Se oye un golpe o campaneo al arrancar|Alta|Bimasa desgastada;Muelle;Embrague|Escuchar en frío;Revisar holgura;Sustituir kit| 
+transmision|Vibración al soltar el embrague|La carrocería vibra al arrancar en primera|Media|Disco;Bimasa;Soporte|Revisar kit;Comprobar soportes;Probar salida| 
+transmision|Tirones al cambiar de marcha|El coche da tirones al subir o bajar marcha|Media|Embrague;Varillaje;Sensores|Revisar embrague;Ajustar varillaje;Leer fallos| 
+transmision|Caja automática con tirones al engranar en frío|La caja cambia bruscamente hasta calentar|Media|Nivel de ATF;Electroválvula;Adaptaciones|Comprobar nivel;Leer presiones;Resetear adaptaciones|P0700
+transmision|Caja automática que tarda en engranar la D|Al mover la palanca a D el coche tarda en moverse|Media|Presión de ATF;Electroválvula;Mecatrónica|Medir presión;Leer fallos;Revisar mecatrónica|P0700
+transmision|Testigo de caja automática encendido|El testigo de la caja queda fijo y hay marcha de emergencia|Alta|Mecatrónica;Sensor;ATF|Leer códigos;Comprobar nivel;Revisar conector|P0700
+transmision|Ruido de diferencial en curva|Se oye un zumbido al girar en curva|Media|Aceite;Rodamiento;Corona|Comprobar nivel;Escuchar;Inspeccionar diferencial| 
+transmision|Fuga de aceite en diferencial trasero|Hay aceite en la carcasa del diferencial|Media|Retén;Junta;Respiradero|Localizar fuga;Revisar nivel;Limpiar respiradero| 
+transmision|Palier que hace clac al girar|Se oye un clac al girar a tope|Media|Junta homocinética;Fuelle;Grasa|Inspeccionar fuelle;Probar holgura;Sustituir junta| 
+transmision|Vibración a 80 km/h por palier|La dirección vibra a una velocidad concreta|Media|Palier desequilibrado;Fuelle;Rodamiento|Equilibrar;Revisar fuelle;Comprobar holgura| 
+transmision|Ruido de rodamiento en la transmisión|Zumbido que cambia al girar o acelerar|Media|Rodamiento;Aceite;Holgura|Escuchar en elevador;Revisar nivel;Medir holgura| 
+transmision|Caja DSG que no pasa de segunda|La caja se queda en segunda y avisa|Alta|Mecatrónica;Embrague;Sensor|Leer fallos;Medir presiones;Revisar embragues|P0700
+transmision|Pérdida de tracción en curva con 4x4|El coche patina o arrastra en curva cerrada|Alta|Diferencial;ACEITE;Sensor|Revisar nivel;Leer fallos;Probar en superficie deslizante| 
+
+frenos|Pedal de freno esponjoso|El pedal se hunde más de lo normal y frena poco|Alta|Aire en circuito;Fuga;Líquido viejo|Purgar;Buscar fugas;Cambiar líquido| 
+frenos|Freno que se queda agarrado tras soltar|El coche no rueda libre después de frenar|Alta|Pinza;Manguito;Líquido|Comprobar temperatura;Revisar pinza;Cambiar manguito| 
+frenos|Chirrido al frenar en frío|Se oye un chirrido agudo en las primeras frenadas|Baja|Pastilla;Disco;Polvo|Limpiar;Revisar espesor;Aplicar pasta| 
+frenos|Vibración del volante al frenar|El volante vibra al pisar el freno a velocidad|Media|Disco alabeado;Pastilla;Buje|Medir alabeo;Revisar pastillas;Comprobar buje| 
+frenos|Coche que se va a un lado al frenar|Al frenar tira hacia un lado|Alta|Pinza;Pastilla;Líquido|Comparar temperaturas;Revisar pinza;Purgar| 
+frenos|Testigo de ABS encendido en seco|El testigo queda fijo sin circular sobre hielo|Media|Sensor;Masa;Módulo|Leer fallos;Comparar ruedas;Revisar conector|C0035
+frenos|ABS que actúa sin necesidad|El pedal vibra al frenar suave en seco|Alta|Sensor;Rueda fónica;Módulo|Comparar señales;Inspeccionar rueda;Leer fallos|C0035
+frenos|Freno de mano que no sujeta|El coche se mueve con el freno de mano puesto|Alta|Cable;Zapata;Mecanismo|Ajustar cable;Revisar zapatas;Probar en cuesta| 
+frenos|Líquido de frenos negro|El líquido del depósito está oscuro|Media|Humedad;Desgaste de gomas;Contaminación|Cambiar líquido;Revisar fugas;Medir humedad| 
+frenos|Pastilla de freno con desgaste irregular|Una pastilla está mucho más gastada que la otra|Media|Pinza;Guía;Disco|Revisar pinza;Limpiar guías;Medir disco| 
+frenos|Disco rayado en una cara|El disco presenta surcos profundos en una cara|Media|Pastilla;Piedra;Pinza|Sustituir disco;Revisar pastilla;Comprobar pinza| 
+frenos|Dirección que tiembla a 100 km/h|El volante vibra a velocidad de autovía|Media|Equilibrado;Neumático;Rodamiento|Equilibrar ruedas;Revisar neumático;Comprobar rodamiento| 
+frenos|Dirección dura al girar en parado|El volante cuesta mucho con el coche parado|Alta|Bomba;Correa;Líquido|Medir presión;Revisar correa;Comprobar nivel| 
+frenos|Volante que no vuelve al centro|Tras girar, el volante no regresa solo|Media|Alineación;Rótula;Dirección|Alinear;Revisar rótulas;Comprobar cremallera| 
+frenos|Ruido de suspensión en badenes|Se oye un golpe al pasar por un badén|Media|Amortiguador;Silentblock;Bieleta|Revisar holguras;Probar amortiguador;Sustituir bieleta| 
+frenos|Amortiguador que pierde aceite|La carcasa del amortiguador está manchada|Media|Retén;Vástago;Kilometraje|Limpiar y comprobar;Revisar vástago;Sustituir por eje| 
+frenos|Coche que rebota tras un bache|La carrocería sigue botando después del bache|Media|Amortiguador;Muelle;Soporte|Prueba de rebote;Revisar muelle;Comprobar soporte| 
+frenos|Ruido de rodamiento que sube con la velocidad|Zumbido que aumenta al acelerar|Media|Rodamiento;Neumático;Equilibrado|Cambiar rueda de lado;Revisar rodamiento;Equilibrar| 
+frenos|Neumático con desgaste en los bordes|El neumático se gasta más por un borde|Media|Presión;Alineación;Suspensión|Medir presión;Alinear;Revisar suspensión| 
+frenos|Testigo de presión de neumáticos intermitente|El aviso aparece y desaparece sin perder aire|Media|Sensor;Batería del sensor;Receptor|Comprobar presiones;Leer sensores;Revisar receptor| 
+
+refrigeracion|Temperatura que sube en atasco|La aguja sube al circular lento o parado|Alta|Ventilador;Radiador;Termostato|Comprobar ventilador;Limpiar radiador;Revisar termostato|P0128
+refrigeracion|Temperatura que baja en carretera|La temperatura cae al circular rápido|Media|Termostato abierto;Sensor;Ventilador|Revisar termostato;Comparar sensor;Comprobar ventilador|P0128
+refrigeracion|Pérdida de refrigerante sin charco|El nivel baja pero no se ve fuga|Media|Junta de culata;Radiador;Manguito|Prueba de presión;Revisar bujías;Comprobar manguitos| 
+refrigeracion|Olor dulce dentro del habitáculo|Huele a anticongelante con la calefacción|Alta|Radiador de calefacción;Manguito;Junta|Localizar fuga;Revisar calefacción;Prueba de presión| 
+refrigeracion|Ventilador que no arranca en caliente|La temperatura sube y el ventilador no gira|Alta|Motor del ventilador;Relé;Sensor|Alimentar ventilador;Probar relé;Revisar sensor|P0117
+refrigeracion|Calefacción que no calienta|Sale aire frío con el motor caliente|Media|Radiador de calefacción;Aire en circuito;Compuerta|Purgar;Comprobar manguitos;Revisar compuerta| 
+refrigeracion|Aire acondicionado que enfría poco|El aire sale fresco pero no frío|Media|Gas;Compresor;Condensador|Medir presiones;Revisar compresor;Limpiar condensador| 
+refrigeracion|Aire acondicionado que huele a humedad|Sale olor desagradable al encender el aire|Baja|Filtro;Evaporador;Drenaje|Cambiar filtro;Limpiar evaporador;Revisar drenaje| 
+refrigeracion|Compresor que no engrana|El compresor no se conecta al pedir frío|Alta|Presión;Embrague;Sensor|Medir presiones;Comprobar embrague;Revisar sensor| 
+refrigeracion|Ruido de compresor al conectar el aire|Se oye un ruido al activar el aire|Media|Compresor;Correa;Soporte|Revisar correa;Comprobar soporte;Medir presiones| 
+refrigeracion|Agua en el suelo del copiloto|Aparece agua en la alfombrilla|Media|Drenaje;Radiador de calefacción;Junta|Limpiar drenaje;Revisar radiador;Comprobar junta| 
+refrigeracion|Vaho persistente en el parabrisas|El parabrisas se empaña y no se limpia|Media|Drenaje;Filtro;Recirculación|Revisar drenaje;Cambiar filtro;Comprobar compuerta| 
+refrigeracion|Refrigerante con aceite|El depósito muestra una película aceitosa|Alta|Junta de culata;Intercambiador;Culata|Prueba de gases;Revisar intercambiador;Medir compresión| 
+refrigeracion|Refrigerante con burbujas|Salen burbujas al acelerar con el depósito abierto|Alta|Junta de culata;Culata;Purga|Prueba de gases;Medir compresión;Purgar| 
+refrigeracion|Manguito de refrigeración hinchado|Un manguito está deformado o blando|Alta|Presión;Manguito;Tapón|Medir presión;Sustituir manguito;Revisar tapón| 
+refrigeracion|Termostato que abre tarde|El motor tarda mucho en alcanzar temperatura|Media|Termostato;Sensor;Refrigerante|Comprobar apertura;Comparar sensor;Revisar nivel|P0128
+refrigeracion|Termostato que abre pronto|El motor no mantiene temperatura|Media|Termostato;Sensor;Ventilador|Comprobar apertura;Comparar sensor;Revisar ventilador|P0128
+refrigeracion|Electroventilador que gira siempre|El ventilador queda encendido con el motor frío|Media|Relé;Sensor;Módulo|Probar relé;Leer temperatura;Revisar módulo|P0117
+refrigeracion|Clima que sopla caliente en un lado|Un lado del habitáculo sale caliente y el otro frío|Media|Compuerta;Motor de compuerta;Gas|Calibrar compuertas;Revisar motor;Medir presiones| 
+refrigeracion|Testigo de temperatura intermitente|La aguja sube y baja sin patrón claro|Media|Sensor;Conector;Masa|Comparar temperaturas;Revisar conector;Medir masa|P0117
+
+confort|Elevalunas que sube lento|La ventanilla sube despacio o se atasca|Baja|Guía;Motor;Falta de lubricación|Lubricar guía;Medir motor;Revisar interruptor| 
+confort|Cierre centralizado que no abre una puerta|Una puerta no responde al mando|Baja|Actuador;Cableado;Mando|Probar actuador;Revisar cable;Sincronizar mando| 
+confort|Testigo de airbag encendido|El testigo de airbag queda fijo|Alta|Conector;Sensor;Módulo|Leer fallos;Revisar conector;No manipular airbag|B1000
+confort|Aviso de cinturón con el cinturón puesto|El coche avisa aunque el cinturón esté abrochado|Baja|Sensor;Conector;Módulo|Revisar hebilla;Comprobar conector;Leer fallos| 
+confort|Sensor de aparcamiento que pita solo|Los sensores pitan sin obstáculo|Baja|Sensor sucio;Conector;Módulo|Limpiar sensores;Revisar conexión;Leer fallos| 
+confort|Cámara trasera que no enciende|La pantalla no muestra la cámara al meter marcha atrás|Media|Cámara;Cable;Módulo|Revisar alimentación;Comprobar cable;Leer fallos| 
+confort|Espejo retrovisor que no se pliega|El espejo no recoge al cerrar|Baja|Motor;Engranaje;Mando|Probar motor;Revisar engranaje;Comprobar mando| 
+confort|Limpiaparabrisas que se para en medio|Las escobillas se detienen fuera de posición|Media|Motor;Relé;Mecanismo|Revisar mecanismo;Probar relé;Ajustar posición| 
+confort|Luz de matrícula fundida repetidamente|La bombilla se funde cada pocos meses|Baja|Portafusible;Humedad;Tensión|Revisar portalámparas;Sellar;Medir tensión| 
+confort|Faro LED que parpadea|El faro LED parpadea o se apaga|Media|Balasto;Conector;Módulo|Intercambiar balasto;Revisar conector;Leer fallos| 
+confort|Consumo de 12 V alto en híbrido|La batería auxiliar se descarga en híbrido|Alta|Convertidor;Batería auxiliar;Consumo parásito|Medir carga;Probar batería;Buscar consumo| 
+confort|Batería de 12 V descargada en híbrido|El híbrido no arranca por la batería auxiliar|Alta|Batería;Convertidor;Consumo|Cargar y testar;Revisar convertidor;Medir reposo| 
+confort|Testigo de sistema híbrido encendido|Aparece un aviso del sistema híbrido|Alta|Batería de tracción;Inversor;Sensor|Leer códigos;Revisar aislamiento;No manipular alta tensión| 
+confort|Ventilador de batería híbrida ruidoso|Se oye un ventilador fuerte en la batería|Media|Filtro;Ventilador;Temperatura|Limpiar filtro;Revisar ventilador;Leer temperatura| 
+confort|Coche híbrido que no arranca en eléctrico|El motor térmico arranca siempre y no usa EV|Media|Batería;Temperatura;Modo de conducción|Leer estado de batería;Comprobar temperatura;Revisar modo| 
+confort|Freno regenerativo que se siente brusco|La frenada cambia de forma abrupta al soltar|Media|Batería;ABS;Calibración|Leer frenada;Revisar ABS;Calibrar| 
+confort|Aviso de colisión que salta sin obstáculo|El aviso de colisión se activa solo|Media|Radar;Cámara;Parabrisas|Limpiar sensores;Calibrar;Revisar parámetro| 
+confort|Testigo de ángulo muerto intermitente|El aviso de ángulo muerto parpadea sin coche|Media|Radar;Conector;Módulo|Limpiar radar;Revisar conector;Calibrar| 
+confort|Techo solar que no cierra|El techo se queda abierto o a medio cerrar|Media|Guía;Motor;Mando|Revisar guía;Probar motor;Resetear| 
+confort|Olor a humedad en el maletero|Huele a humedad y aparece agua en el maletero|Media|Junta;Drenaje;Piloto|Revisar junta;Limpiar drenaje;Sellar piloto| 

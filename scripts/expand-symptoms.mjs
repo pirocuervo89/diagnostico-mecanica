@@ -85,6 +85,13 @@ const areaConfig = {
     checks: ['Prueba de patinaje y desacoplamiento', 'Revisar recorrido del pedal y fugas'],
     solutions: ['Sustituir el kit de embrague si el desgaste está confirmado.', 'Purgar y reparar el circuito hidráulico.']
   },
+  transmision: {
+    category: 'transmision', area: 'Transmisión', components: ['transmision', 'motor'],
+    tools: ['Escáner OBD', 'Elevador', 'Herramienta de holguras', 'Llave dinamométrica'],
+    causes: ['Desgaste interno o nivel incorrecto', 'Holgura, fuga o actuador defectuoso'],
+    checks: ['Comprobar nivel, fugas y holguras', 'Leer adaptaciones y probar en carga'],
+    solutions: ['Reparar el componente confirmado y ajustar el nivel.', 'Verificar cambios y ausencia de ruidos en prueba.']
+  },
   manual: {
     category: 'transmision', area: 'Caja manual', components: ['transmision'],
     tools: ['Escáner OBD', 'Elevador', 'Llave dinamométrica', 'Herramienta de varillaje'],
@@ -176,6 +183,13 @@ const areaConfig = {
     checks: ['Leer todos los módulos y medir red CAN', 'Comprobar alimentación, masas y codificación'],
     solutions: ['Reparar el cableado o módulo confirmado.', 'Codificar y verificar comunicación estable.']
   },
+  anticontaminacion: {
+    category: 'anticontaminacion', area: 'Anticontaminación', components: ['egr', 'dpf', 'sensores'],
+    tools: ['Escáner OBD', 'Máquina de humo', 'Manómetro diferencial', 'Boroscopio'],
+    causes: ['Sistema de escape o recirculación fuera de parámetro', 'Sensor o actuador de emisiones degradado'],
+    checks: ['Leer eficiencia y presión del sistema', 'Comprobar sensores, manguitos y actuadores'],
+    solutions: ['Reparar el componente confirmado y borrar adaptaciones.', 'Verificar eficiencia y ausencia de DTC tras la reparación.']
+  },
   egr: {
     category: 'anticontaminacion', area: 'Válvula EGR', components: ['egr', 'admision', 'sensores'],
     tools: ['Escáner OBD', 'Limpiador de EGR', 'Multímetro', 'Herramienta de actuadores'],
@@ -255,9 +269,13 @@ function slug(value) {
     .slice(0, 90);
 }
 
-const rows = readText('data/symptoms-250.tsv').split(/\r?\n/).filter(Boolean);
-if (rows[0].startsWith('area|')) rows.shift();
-if (rows.length !== 250) throw new Error(`El TSV debe contener 250 síntomas; contiene ${rows.length}`);
+const symptomFiles = ['data/symptoms-250.tsv', 'data/symptoms-200.tsv'];
+const rows = symptomFiles.flatMap(file => {
+  const list = readText(file).split(/\r?\n/).filter(Boolean);
+  if (list[0]?.startsWith('area|')) list.shift();
+  return list;
+});
+if (rows.length !== 450) throw new Error(`Los TSV deben contener 450 síntomas; contienen ${rows.length}`);
 
 const existingNames = new Set(current.map(s => String(s.name || s.n).toLowerCase()));
 const existingIds = new Set(current.map(s => s.id));
@@ -323,7 +341,11 @@ for (const line of rows) {
   existingNames.add(name.toLowerCase());
 }
 
-if (added.length !== 250) throw new Error(`Se esperaban 250 síntomas nuevos; se generaron ${added.length}`);
+// El catálogo puede venir ya con los 250 primeros curados (base de 741). En
+// ese caso solo faltan los 200 nuevos; si se parte de la base de 204, faltan
+// los 450. Así el script es idempotente y no duplica al ejecutarlo dos veces.
+const expectedNew = Math.max(0, 450 - current.filter(s => s.curated).length);
+if (added.length !== expectedNew) throw new Error(`Se esperaban ${expectedNew} síntomas nuevos; se generaron ${added.length}`);
 
 const merged = [...current, ...added].sort((a, b) => {
   const ai = categories.findIndex(c => c.id === a.categoryId);
@@ -342,8 +364,8 @@ const audit = {
   withRelatedDtc: merged.filter(s => (s.relatedDtc || []).length).length,
   withoutRelatedDtc: merged.filter(s => !(s.relatedDtc || []).length).length,
   curatedRecords: merged.filter(s => s.curated).length,
-  source: '204 síntomas previos + 250 síntomas técnicos nuevos. Los nuevos no acreditan compatibilidad por modelo.',
-  validation: 'Relaciones DTC y componentes genéricas; pendientes de validación por motor y versión.'
+  source: '204 síntomas previos + 250 síntomas técnicos + 200 síntomas de revisión documental. Los nuevos no acreditan compatibilidad por modelo.',
+  validation: 'Relaciones DTC y componentes genéricas; revisión documental pendiente de validación por motor y versión.'
 };
 
 write('data/symptoms.json', merged);

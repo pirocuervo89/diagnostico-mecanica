@@ -17,12 +17,13 @@ const VISTAS_MAYA = new Set([
   'home', 'inicio', 'chat', 'garaje', 'obd', 'dtc', 'testigos', 'luz',
   'productos', 'tutoriales', 'tuning', 'vehiculos', 'diagnostico', 'ruta',
   'tienda', 'planes', 'foro', 'informe', 'sala', 'compra', 'contacto',
-  'fiabilidad', 'neumaticos'
+  'fiabilidad', 'neumaticos', 'centinela'
 ]);
 
 function ejecutarMaya(acciones) {
   if (!Array.isArray(acciones) || !acciones.length) return;
   for (const accion of acciones.slice(0, 3)) {
+    try {
     const hacer = String((accion && accion.hacer) || '').toLowerCase();
     if (hacer === 'abrir') {
       const donde = String(accion.donde || '').toLowerCase();
@@ -80,6 +81,37 @@ function ejecutarMaya(acciones) {
       window.Ruta?.pantallaCompleta?.();
     } else if (hacer === 'probar') {
       window.Maya?.probar?.();
+    } else if (hacer === 'reparar') {
+      window.Maya?.reparar?.('petición de Maya');
+    } else if (hacer === 'centinela') {
+      const accionCent = String(accion.accion || 'armar').toLowerCase();
+      showView('centinela');
+      setTimeout(() => {
+        if (accionCent === 'estado') {
+          const estado = window.Centinela?.estado?.() || null;
+          const texto = estado
+            ? `Centinela ${estado.armado ? 'armado' : 'desarmado'}${estado.grabando ? ', grabando un evento' : ''}.`
+            : 'El centinela está disponible; ábrelo para armarlo.';
+          if (typeof addBubble === 'function') addBubble(texto, 'assistant');
+        } else if (accionCent === 'desarmar') {
+          window.Centinela?.desarmar?.();
+        } else {
+          window.Centinela?.armar?.();
+        }
+      }, 350);
+    } else if (hacer === 'garaje_nuevo') {
+      showView('garaje');
+      setTimeout(() => {
+        const btn = document.getElementById('garageAddBtn') || document.querySelector('[data-garage-add]');
+        btn?.click();
+      }, 500);
+    } else if (hacer === 'obd_leer') {
+      showView('obd');
+      setTimeout(() => {
+        const leer = document.getElementById('obdRead') || document.querySelector('[data-obd-read]');
+        if (leer) leer.click();
+        else document.getElementById('obdConnect')?.click();
+      }, 550);
     } else if (hacer === 'ficha') {
       // «Abre la ficha del producto X»: lleva a la tienda y abre la ficha.
       const que = String(accion.que || '').trim();
@@ -132,6 +164,10 @@ function ejecutarMaya(acciones) {
         }
       }, 600);
     }
+    } catch (error) {
+      // Una acción rota no puede impedir que se ejecuten las siguientes.
+      console.warn('Maya: no se pudo ejecutar la acción', accion, error);
+    }
   }
 }
 // Autoprueba de vistas: Maya puede recorrer la app y decir qué falta. No pulsa
@@ -145,15 +181,123 @@ function probarMaya() {
     if (!el) { faltan.push(vista); continue; }
     if (!(el.innerText || '').trim()) vacias.push(vista);
   }
-  const resumen = faltan.length || vacias.length
-    ? `Autoprueba: ${vistas.length - faltan.length - vacias.length}/${vistas.length} vistas correctas.${faltan.length ? ` Faltan: ${faltan.join(', ')}.` : ''}${vacias.length ? ` Vacías: ${vacias.join(', ')}.` : ''}`
-    : `Autoprueba: las ${vistas.length} vistas cargan y tienen contenido.`;
+  // Comprobación de módulos vivos, no solo de que el HTML exista. Así Maya
+  // detecta un script que no cargó y puede intentar recuperarlo.
+  const modulos = {
+    ruta: Boolean(window.Ruta),
+    centinela: Boolean(window.Centinela),
+    obd: Boolean(window.OBDParser || document.getElementById('obdConnect')),
+    tienda: Boolean(window.Tienda),
+    voz: Boolean(window.MayaHablar),
+    garaje: Boolean(document.getElementById('garageApp'))
+  };
+  const controles = [
+    ['chatInput', 'chat'], ['rutaBuscar', 'ruta'], ['obdConnect', 'obd'],
+    ['garageAddBtn', 'garaje'], ['centArmar', 'centinela']
+  ];
+  const sinControl = controles.filter(([id]) => !document.getElementById(id)).map(([, vista]) => vista);
+  const modulosCaidos = Object.entries(modulos).filter(([, ok]) => !ok).map(([nombre]) => nombre);
+  const fallos = faltan.length + vacias.length + sinControl.length + modulosCaidos.length;
+  const resumen = fallos
+    ? `Autoprueba: ${vistas.length - faltan.length - vacias.length}/${vistas.length} vistas correctas.${faltan.length ? ` Faltan: ${faltan.join(', ')}.` : ''}${vacias.length ? ` Vacías: ${vacias.join(', ')}.` : ''}${sinControl.length ? ` Sin control: ${[...new Set(sinControl)].join(', ')}.` : ''}${modulosCaidos.length ? ` Módulos caídos: ${modulosCaidos.join(', ')}.` : ''}`
+    : `Autoprueba: ${vistas.length} vistas, módulos y controles principales correctos.`;
   showView('chat');
   if (typeof addBubble === 'function') addBubble(resumen, 'assistant');
-  return { ok: !faltan.length && !vacias.length, total: vistas.length, faltan, vacias };
+  return { ok: fallos === 0, total: vistas.length, faltan, vacias, sinControl: [...new Set(sinControl)], modulos };
 }
 
-window.Maya = { ejecutar: ejecutarMaya, ver: showView, probar: probarMaya };
+// ---------------------------------------------------------------
+// MAYAGUARD: red de seguridad de la app. No recarga a ciegas ni toca datos:
+// si dos fallos seguidos dejan un modal o el scroll bloqueados, los libera y
+// vuelve a montar la vista actual. Maya puede consultarlo o lanzarlo a mano.
+// ---------------------------------------------------------------
+const mayaErrores = [];
+let mayaReparando = false;
+
+function mayaToast(texto, conBoton = true) {
+  if (typeof document === 'undefined' || !document.body) return null;
+  let box = document.getElementById('mayaGuard');
+  if (!box) {
+    box = document.createElement('aside');
+    box.id = 'mayaGuard';
+    box.setAttribute('role', 'status');
+    box.setAttribute('aria-live', 'polite');
+    box.style.cssText = 'position:fixed;left:12px;right:12px;bottom:86px;z-index:9999;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid rgba(56,225,255,.45);border-radius:14px;background:rgba(8,14,24,.96);color:#e6f7ff;font:600 13px/1.4 system-ui,sans-serif;box-shadow:0 18px 45px -22px #000;backdrop-filter:blur(12px)';
+    document.body.appendChild(box);
+  }
+  box.replaceChildren();
+  const txt = document.createElement('span');
+  txt.textContent = texto;
+  box.appendChild(txt);
+  if (conBoton) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = 'Reintentar';
+    btn.style.cssText = 'flex:none;padding:8px 12px;border:0;border-radius:9px;background:#38e1ff;color:#04121a;font:800 12px system-ui,sans-serif;cursor:pointer';
+    btn.addEventListener('click', () => { box.hidden = true; mayaReparar('botón Reintentar'); });
+    box.appendChild(btn);
+  }
+  box.hidden = false;
+  clearTimeout(mayaToast._t);
+  mayaToast._t = setTimeout(() => { if (box) box.hidden = true; }, 9000);
+  return box;
+}
+
+function mayaReparar(motivo = '') {
+  if (mayaReparando) return { ok: false, motivo: 'reparación en curso' };
+  mayaReparando = true;
+  try {
+    document.body?.classList.remove('modal-open');
+    if (document.body) document.body.style.overflow = '';
+    ['productModal', 'appMenu'].forEach(id => {
+      const nodo = document.getElementById(id);
+      if (nodo) nodo.hidden = true;
+    });
+    document.querySelectorAll('.tut-modal').forEach(nodo => { nodo.hidden = true; });
+    const vista = document.querySelector('.view.active')?.id.replace(/^view-/, '') || 'home';
+    try { showView(vista, true); } catch (_e) { /* la vista se reconstruye al navegar */ }
+    try { fetch('/api/health', { cache: 'no-store' }).catch(() => {}); } catch (_e) {}
+    if (motivo) mayaToast('Maya ha recuperado la pantalla. Si sigue fallando, vuelve a abrir la sección.', false);
+    return { ok: true, vista, motivo };
+  } finally {
+    setTimeout(() => { mayaReparando = false; }, 600);
+  }
+}
+
+function mayaRegistrarFallo(error, origen = 'error') {
+  const mensaje = String(error?.message || error || 'Fallo sin detalle').slice(0, 300);
+  mayaErrores.push({ mensaje, origen, ts: Date.now() });
+  if (mayaErrores.length > 30) mayaErrores.shift();
+  const recientes = mayaErrores.filter(e => Date.now() - e.ts < 15000);
+  if (recientes.length >= 2 && !mayaReparando) {
+    mayaToast('Maya ha detectado un problema y está intentando recuperar la app…');
+    setTimeout(() => mayaReparar('fallo interno'), 300);
+  }
+}
+
+if (!window.__mayaGuardInstalado) {
+  window.__mayaGuardInstalado = true;
+  window.addEventListener('error', event => {
+    if (!event?.message) return;
+    if (event.filename && location.origin && !event.filename.startsWith(location.origin)) return;
+    mayaRegistrarFallo(event.error || event.message, 'error');
+  });
+  window.addEventListener('unhandledrejection', event => {
+    mayaRegistrarFallo(event.reason, 'promesa');
+  });
+}
+
+window.Maya = {
+  ejecutar: ejecutarMaya,
+  ver: showView,
+  probar: probarMaya,
+  reparar: mayaReparar,
+  diagnosticar: () => ({
+    vista: document.querySelector('.view.active')?.id.replace(/^view-/, '') || 'home',
+    errores: mayaErrores.slice(-10),
+    modulos: { ruta: Boolean(window.Ruta), centinela: Boolean(window.Centinela), obd: Boolean(window.OBDParser || document.getElementById('obdConnect')), tienda: Boolean(window.Tienda) }
+  })
+};
 // El escáner de la ficha y otros módulos usan estas funciones desde window.
 // Sin estas dos líneas, «Continuar» no aplicaba el vehículo ni cambiaba de vista.
 window.showView = showView;
@@ -5162,6 +5306,10 @@ document.addEventListener('viewchange', e => {
     if (e.detail.name === 'planes') gtagTrack('subscription_view');
   }
   if (e.detail.name === 'vehiculos') loadVehicles();
+  if (e.detail.name === 'diagnostico') {
+    if (!symptomsCache.length) loadSymptoms();
+    if (!componentsCache.length) loadComponents();
+  }
   if (e.detail.name === 'tuning') {
     loadTuning();
     if (document.querySelector('[data-tuning-tab="accesorios"].active')) loadTuningProducts();
@@ -5220,14 +5368,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   // Sin hash se queda la portada (view-home, ya activa en el HTML): el coche,
   // la pregunta a la IA y la ficha técnica están en la primera pantalla.
-  Promise.all([
-    loadStats(),
+  // Los catálogos grandes (síntomas 1,1 MB, componentes, coches, tuning) no
+  // bloquean el primer pintado: se piden cuando el móvil está libre. Si el
+  // usuario abre Diagnóstico antes, el `viewchange` los carga al momento.
+  loadStats().catch(err => console.warn('No se pudieron cargar las estadísticas:', err.message));
+  const cargasDiferidas = () => Promise.all([
     loadSymptoms(),
     loadComponents(),
     loadVehicles(),
     loadTuning(),
     searchDtc('P0300')
-  ]).catch(err => console.error('Error en inicialización:', err));
+  ]).catch(err => console.warn('Error en cargas diferidas:', err.message));
+  if ('requestIdleCallback' in window) requestIdleCallback(cargasDiferidas, { timeout: 2600 });
+  else setTimeout(cargasDiferidas, 1200);
 });
 
 window.addEventListener('hashchange', () => showView(location.hash.slice(1), true));

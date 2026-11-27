@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { extraerMaya, accionesPorReglas, MAYA_VISTAS, normalizarAccionMaya } from '../src/routes/api.js';
 
 test('el catálogo de Maya cubre todas las vistas de la app', () => {
-  for (const vista of ['inicio', 'chat', 'garaje', 'obd', 'dtc', 'testigos', 'luz', 'productos', 'tienda', 'tutoriales', 'tuning', 'vehiculos', 'diagnostico', 'ruta', 'planes', 'foro', 'informe', 'sala', 'compra', 'contacto', 'fiabilidad', 'neumaticos']) {
+  for (const vista of ['inicio', 'chat', 'garaje', 'obd', 'dtc', 'testigos', 'luz', 'productos', 'tienda', 'tutoriales', 'tuning', 'vehiculos', 'diagnostico', 'ruta', 'planes', 'foro', 'informe', 'sala', 'compra', 'contacto', 'fiabilidad', 'neumaticos', 'centinela']) {
     assert.ok(MAYA_VISTAS.has(vista), `falta la vista ${vista}`);
   }
 });
@@ -17,6 +17,7 @@ test('las frases naturales abren la vista o lanzan la acción correcta', () => {
   assert.deepEqual(accionesPorReglas('se ha encendido un testigo raro'), [{ hacer: 'camara' }]);
   assert.deepEqual(accionesPorReglas('pásame la foto de la ficha técnica'), [{ hacer: 'camara_docs' }]);
   assert.deepEqual(accionesPorReglas('prueba la app entera'), [{ hacer: 'probar' }]);
+  assert.deepEqual(accionesPorReglas('arma el centinela'), [{ hacer: 'abrir', donde: 'centinela' }, { hacer: 'centinela', accion: 'armar' }]);
 });
 
 test('las acciones de ruta encadenan abrir y actuar', () => {

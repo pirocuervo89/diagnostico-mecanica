@@ -325,9 +325,11 @@ export function isBanned(user) {
 
 export function registerUser({ username, displayName, password }, meta = {}) {
   const cleanUsername = cleanText(username, 24).toLowerCase();
-  const name = cleanText(displayName || username, 60);
-  if (!/^[a-z0-9._-]{3,24}$/.test(cleanUsername)) {
-    throw Object.assign(new Error('El usuario debe tener 3-24 caracteres: letras, números, punto, guion o guion bajo.'), { status: 400 });
+  const name = cleanText(displayName || username, 60) || cleanUsername;
+  // Nombre de usuario normal: letras y números, sin puntos, guiones ni
+  // símbolos. Las cuentas antiguas con esos caracteres siguen pudiendo entrar.
+  if (!/^[a-z0-9]{3,24}$/.test(cleanUsername)) {
+    throw Object.assign(new Error('El usuario debe tener 3-24 letras o números, sin puntos ni símbolos. Ejemplo: Juan85.'), { status: 400 });
   }
   if (String(password || '').length < 8 || String(password || '').length > 200) {
     throw Object.assign(new Error('La contraseña debe tener entre 8 y 200 caracteres.'), { status: 400 });
