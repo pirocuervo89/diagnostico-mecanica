@@ -2501,6 +2501,19 @@ const chatRecomendados = $('#chatRecomendados');
 const chatForumRefs = $('#chatForumRefs');
 let chatBusy = false;
 
+// El taller de agentes solo aparece si la sesión es administradora. La cola y
+// el token del worker se validan en el servidor; esto es solo la pista visual.
+(async () => {
+  try {
+    const me = await api('/api/maya-agent/me');
+    if (!me?.admin) return;
+    const hint = document.getElementById('mayaAgentHint');
+    if (!hint) return;
+    hint.hidden = false;
+    hint.innerHTML = `<b>Taller de agentes</b> · eres administrador. Escribe <code>agente: ...</code> para ordenar un arreglo y <code>estado agentes</code> para ver la cola.`;
+  } catch { /* sin taller configurado */ }
+})();
+
 // -------------------------------------------------------------
 // CHAT: historial y acciones de mensaje
 // -------------------------------------------------------------
@@ -2589,6 +2602,35 @@ function renderChatExtras(res) {
   if (!chatForumRefs) return;
   const forum = Array.isArray(res?.forum_references) ? res.forum_references : [];
   const web = Array.isArray(res?.web_references) ? res.web_references : [];
+  const tutorials = Array.isArray(res?.tutorials) ? res.tutorials.slice(0, 4) : [];
+  const parts = [...new Set(tutorials.map(t => String(t.part || '').trim()).filter(Boolean))].slice(0, 3);
+  const tutorialPanel = tutorials.length ? `
+    <div class="panel recommended-panel">
+      <div class="panel-head">
+        <div><span class="eyebrow">TUTORIALES VERIFICADOS</span><h3>Vídeo, código y pieza</h3></div>
+        <span class="tag">${icon('play')} ${tutorials.length} del catálogo</span>
+      </div>
+      <div class="web-reference-list">
+        ${tutorials.map(t => {
+          const codes = (t.dtcs || []).map(esc).join(' · ');
+          const syn = (t.symptoms || []).slice(0, 2).map(esc).join(' · ');
+          const meta = [
+            codes ? `DTC ${codes}` : '',
+            syn ? `Síntoma: ${syn}` : '',
+            t.part ? `Pieza probable: ${t.part}` : ''
+          ].filter(Boolean).join(' · ');
+          return `<a class="web-reference" href="${esc(t.url || '#')}" target="_blank" rel="noopener noreferrer">
+            <span class="forum-ref">${esc(t.category || 'Tutorial')}</span>
+            <strong>${esc(t.title || 'Tutorial')}</strong>
+            <small>${meta ? esc(meta) : 'Sin código ni síntoma indicados.'}</small>
+          </a>`;
+        }).join('')}
+      </div>
+      ${parts.length ? `<div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        ${parts.map(part => `<button class="btn ghost sm" type="button" data-chat-buy-part="${esc(part)}">${icon('cart')} Buscar ${esc(part)}</button>`).join('')}
+      </div>` : ''}
+      <p class="forum-note">El vídeo puede mostrar otra versión del vehículo. La pieza es orientativa: confirma referencia y compatibilidad antes de comprar.</p>
+    </div>` : '';
   const forumPanel = forum.length ? `
     <div class="panel recommended-panel">
       <div class="panel-head">
@@ -2621,7 +2663,15 @@ function renderChatExtras(res) {
       </div>
       <p class="forum-note">Resultados externos no verificados. Úsalos como pistas y confirma siempre con la ficha del motor y pruebas de taller.</p>
     </div>` : '';
-  chatForumRefs.innerHTML = forumPanel + webPanel;
+  chatForumRefs.innerHTML = tutorialPanel + forumPanel + webPanel;
+  chatForumRefs.querySelectorAll('[data-chat-buy-part]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const part = btn.dataset.chatBuyPart || '';
+      if (!part) return;
+      showView('tienda');
+      setTimeout(() => window.Tienda?.buscar?.(part, { scroll: true }), 260);
+    });
+  });
   if (Array.isArray(res?.productos_recomendados) && res.productos_recomendados.length && chatRecomendados) {
     const groupLabels = {
       herramienta: 'Herramientas y equipos',
@@ -2697,6 +2747,9 @@ async function manejarComandoVoz(texto) {
   }
   if (/^(deten|para|stop)( la)? navegacion$/.test(n)) {
     window.Ruta?.detenerNavegacion?.(); addBubble('Navegación detenida.', 'assistant'); return true;
+  }
+  if (/^(cambia|cambiar|corrige|corregir)( el)? destino$|^sal(ir)? de (la )?navegacion$|^quiero cambiar (el )?destino$/.test(n)) {
+    window.Ruta?.salirNavegacion?.(); addBubble('Navegación cancelada. Dime el nuevo destino.', 'assistant'); return true;
   }
   if (/^silencia (la )?voz$|^mute$/.test(n)) { window.Ruta?.voz?.(false); addBubble('Voz silenciada.', 'assistant'); return true; }
   if (/^(activa|enciende)( la)? voz$/.test(n)) { window.Ruta?.voz?.(true); addBubble('Voz activada.', 'assistant'); return true; }
@@ -2798,7 +2851,9 @@ async function submitChat(text) {
     // Las dos fases salen a la vez: la local contesta al instante y la IA ya
     // está trabajando mientras el usuario lee, en vez de sumar un viaje de ida
     // y vuelta entero antes de pedirla.
-    const aiPendiente = api('/api/chat/ai', {
+    const esOrdenAgente = /^(?:agente|agentes|ordena a (?:los )?agentes|maya[, ]+agente)\s*:/i.test(query)
+      || /^(?:estado|como van)(?: de)?(?: los)? agentes$/i.test(query);
+    const aiPendiente = esOrdenAgente ? Promise.resolve(null) : api('/api/chat/ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

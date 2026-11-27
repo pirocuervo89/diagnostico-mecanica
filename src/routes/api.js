@@ -33,6 +33,7 @@ import { findKnowledgeCases, userFromSession } from '../lib/forum_db.js';
 import { planState } from '../lib/plans.js';
 import { searchWebContext, searchForumContext, researchSources } from '../lib/web_search.js';
 import { listTutorials } from '../lib/tutorial_db.js';
+import { createAgentTask, listAgentTasks } from '../lib/maya_agent_db.js';
 import { scanVehicleDocument } from '../lib/document_scan.js';
 import { findEquivalents, sizeSummary, rimWidthRange, checkWheelFit } from '../lib/tyres.js';
 import { autodocUrlFor, autodocSearch, aliexpressUrlFor, temuUrlFor } from '../lib/tiendas.js';
@@ -42,6 +43,20 @@ import { getGA4Data } from '../lib/ga4_api.js';
 
 // Búsqueda insensible a mayúsculas y acentos.
 const fold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// El taller de agentes solo acepta órdenes de la cuenta admin. La sesión es la
+// misma cookie del foro; el worker usa un token distinto que nunca llega al navegador.
+function adminFromRequest(req) {
+  try {
+    const raw = String(req.headers.cookie || '');
+    const part = raw.split(';').map(value => value.trim()).find(value => value.startsWith('dym_forum_session='));
+    if (!part) return null;
+    const user = userFromSession(decodeURIComponent(part.slice(part.indexOf('=') + 1)));
+    return user && !user.banned && user.role === 'admin' ? user : null;
+  } catch {
+    return null;
+  }
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, '..', '..', 'data');
@@ -1813,29 +1828,110 @@ function tutorialChatFields(tutorial) {
   };
 }
 
+// Palabras de relleno que no describen una avería: si entran en la búsqueda,
+// cualquier vídeo que las mencione parece relevante.
+const TUTORIAL_QUERY_STOP = new Set([
+  'para', 'como', 'coche', 'coches', 'vehiculo', 'vehiculos', 'fallo', 'fallos',
+  'codigo', 'codigos', 'averia', 'averias', 'problema', 'problemas', 'tengo',
+  'tiene', 'tienen', 'hace', 'hacen', 'cuando', 'donde', 'porque', 'esta',
+  'este', 'esto', 'estos', 'estas', 'estan', 'unos', 'unas', 'del', 'las',
+  'los', 'con', 'sin', 'mas', 'menos', 'muy', 'que', 'por', 'sale', 'salen',
+  'tira', 'tiran', 'echa', 'echan', 'noto', 'nota', 'llevo', 'lleva', 'desde',
+  'entre', 'sobre', 'hasta', 'despues', 'antes', 'siempre', 'nunca', 'mucho',
+  'mucha', 'poco', 'poca', 'algo', 'algun', 'alguna', 'quiero', 'puedo',
+  'podria', 'sabes', 'dime', 'ayuda', 'ayudame', 'favor', 'hola', 'buenas',
+  'gracias', 'seria', 'tambien', 'solo', 'sola', 'ahora', 'ves', 'veo', 'oigo',
+  'suena', 'raro', 'rara', 'empieza', 'empezo', 'rato', 'veces', 'vez'
+]);
+
+// Raíz corta para que "frenar", "frenos" y "frenada" cuenten como la misma
+// palabra sin meter un stemmer completo.
+function tutorialTermStem(term) {
+  return term.length > 5 ? term.slice(0, 4) : term;
+}
+
+function tutorialMatchFields(tutorial) {
+  const join = value => fold(Array.isArray(value) ? value.join(' ') : (value || ''));
+  return {
+    dtcs: (Array.isArray(tutorial.dtcs) ? tutorial.dtcs : []).map(code => String(code).toUpperCase()),
+    title: fold(tutorial.title),
+    components: join(tutorial.components),
+    symptoms: join(tutorial.symptoms),
+    tags: `${join(tutorial.tags)} ${join(tutorial.systems)}`,
+    category: `${fold(tutorial.categoryName)} ${fold(tutorial.subcategoryName)}`,
+    description: fold(tutorial.description)
+  };
+}
+
+// Peso por campo: el título y la pieza mandan; la descripción solo desempata.
+function tutorialTermScore(fields, term) {
+  const stem = tutorialTermStem(term);
+  let score = 0;
+  if (fields.title.includes(stem)) score += fields.title.includes(term) ? 24 : 20;
+  if (fields.components.includes(stem)) score += 12;
+  if (fields.symptoms.includes(stem)) score += 10;
+  if (fields.tags.includes(stem)) score += 6;
+  if (fields.category.includes(stem)) score += 3;
+  if (fields.description.includes(stem)) score += 1;
+  return score;
+}
+
 function tutorialsForQuery(query, limit = 4) {
+  const max = Math.max(1, Math.min(8, Number(limit) || 4));
   const text = String(query || '');
-  const dtc = (text.match(/\b[PBCU][0-9A-F]{4}\b/i) || [])[0]?.toUpperCase() || '';
-  const stop = new Set([
-    'para', 'como', 'coche', 'coches', 'motor', 'fallo', 'fallos', 'codigo', 'averia',
-    'problema', 'tengo', 'hace', 'cuando', 'donde', 'porque', 'esta', 'este', 'unos',
-    'unas', 'del', 'las', 'los', 'con', 'sin', 'mas', 'menos', 'muy', 'que', 'por'
-  ]);
-  const terms = fold(text).split(/\W+/).filter(term => term.length >= 4 && !stop.has(term)).slice(0, 3);
-  const found = [];
-  try {
-    if (dtc) found.push(...listTutorials({ dtc, limit }).items);
-    if (!found.length && terms.length) found.push(...listTutorials({ q: terms.join(' '), limit }).items);
-    if (!found.length && terms.length) found.push(...listTutorials({ q: terms[0], limit }).items);
-  } catch (error) {
-    console.warn('[TUTORIALES] No se pudo enriquecer el contexto:', error.message);
+  const dtcs = [...new Set((text.toUpperCase().match(/\b[PBCU][0-9A-F]{4}\b/g) || []))].slice(0, 3);
+  const dtcSet = new Set(dtcs);
+  const terms = [...new Set(fold(text).split(/\W+/)
+    .filter(term => term.length >= 4 && !dtcSet.has(term.toUpperCase()) && !TUTORIAL_QUERY_STOP.has(term)))]
+    .slice(0, 4);
+
+  const candidates = new Map();
+  const search = params => {
+    try {
+      for (const item of listTutorials({ ...params, limit: max * 5 }).items) {
+        if (item && !candidates.has(item.id)) candidates.set(item.id, item);
+      }
+    } catch (error) {
+      console.warn('[TUTORIALES] No se pudo enriquecer el contexto:', error.message);
+    }
+  };
+
+  for (const dtc of dtcs) search({ dtc });
+  // Primero la frase y los pares (más precisos); los términos sueltos solo
+  // amplían candidatos, luego el umbral descarta los que no encajan.
+  if (terms.length >= 2) search({ q: terms.slice(0, 3).join(' ') });
+  if (terms.length >= 3) search({ q: `${terms[0]} ${terms[1]}` });
+  for (const term of terms) search({ q: term });
+  // "chirrian" no aparece en la ficha, pero "chirrido" sí: se busca también
+  // por la raíz para no perder el vídeo correcto por una conjugación.
+  for (const stem of new Set(terms.map(tutorialTermStem))) {
+    if (!terms.includes(stem)) search({ q: stem });
   }
-  const seen = new Set();
-  return found.filter(item => {
-    if (seen.has(item.id)) return false;
-    seen.add(item.id);
-    return true;
-  }).slice(0, limit).map(tutorialChatFields);
+
+  const required = terms.length >= 2 ? 2 : 1;
+  const minScore = terms.length >= 2 ? 12 : 6;
+  const ranked = [];
+  for (const item of candidates.values()) {
+    const fields = tutorialMatchFields(item);
+    const matchedDtcs = fields.dtcs.filter(code => dtcSet.has(code));
+    const hasDtc = matchedDtcs.length > 0;
+    let score = matchedDtcs.length * 250;
+    let matched = 0;
+    for (const term of terms) {
+      const termScore = tutorialTermScore(fields, term);
+      score += termScore;
+      if (termScore >= 6) matched += 1;
+    }
+    if (hasDtc || (terms.length && matched >= required && score >= minScore)) {
+      ranked.push({ item, score, hasDtc });
+    }
+  }
+
+  ranked.sort((a, b) => (Number(b.hasDtc) - Number(a.hasDtc)) || (b.score - a.score)
+    || (b.item.localViews || 0) - (a.item.localViews || 0)
+    || (b.item.viewCount || 0) - (a.item.viewCount || 0));
+
+  return ranked.slice(0, max).map(row => tutorialChatFields(row.item));
 }
 
 function resolveChatContext(query, inputContext = {}) {
@@ -2545,6 +2641,37 @@ router.post('/chat', rateLimit({ windowMs: 60_000, max: 30 }), (req, res) => {
     return res.status(413).json({ error: 'La consulta es demasiado larga (máximo 4000 caracteres).' });
   }
 
+  // Taller de agentes: una orden explícita («agente: ...») se encola; la web
+  // nunca ejecuta el comando. Solo la cuenta administradora puede usarlo.
+  const agentOrder = query.match(/^(?:agente|agentes|ordena a (?:los )?agentes|maya[, ]+agente)\s*:\s*([\s\S]+)$/i);
+  const agentStatus = /^(?:estado|como van)(?: de)?(?: los)? agentes$/i.test(query);
+  if (agentOrder || agentStatus) {
+    const admin = adminFromRequest(req);
+    if (!admin) return res.status(403).json({ error: 'Solo el administrador puede usar el taller de agentes.' });
+    if (agentStatus) {
+      const tasks = listAgentTasks(8);
+      const rows = tasks.map(task => `- **#${task.id}** · ${task.status} · ${task.instruction.slice(0, 90)}${task.commit ? ` · commit ${task.commit}` : ''}`);
+      return res.json({
+        reply: tasks.length ? `### Taller de agentes\n${rows.join('\n')}` : 'No hay órdenes en la cola.',
+        agent_tasks: tasks,
+        source: 'agent_queue',
+        ai_pending: false
+      });
+    }
+    try {
+      const task = createAgentTask(agentOrder[1], admin.id);
+      const ready = String(process.env.MAYA_AGENT_TOKEN || '').length >= 16;
+      return res.json({
+        reply: `Orden **#${task.id}** enviada al taller.\n\n${ready ? 'El worker local la recogerá, ejecutará OpenCode, pasará las pruebas y hará commit/push.' : '⚠️ Falta configurar MAYA_AGENT_TOKEN y arrancar el worker local; la orden queda en cola.'}\n\n_${task.instruction}_`,
+        agent_task: task,
+        source: 'agent_queue',
+        ai_pending: false
+      });
+    } catch (error) {
+      return res.status(error.status || 400).json({ error: error.message });
+    }
+  }
+
   const { context, vehicleRecord } = resolveChatContext(query, rawContext);
   const dtcList = readJSON('dtc.json');
   const safeDtcList = Array.isArray(dtcList) ? dtcList : [];
@@ -3250,5 +3377,5 @@ function buildObdFallbackReply(vehicleSummary, symptoms, dtcDetails, liveData) {
 }
 
 // Exportaciones para las pruebas del catálogo de Maya. El router no cambia.
-export { extraerMaya, accionesPorReglas, MAYA_VISTAS, normalizarAccionMaya };
+export { extraerMaya, accionesPorReglas, MAYA_VISTAS, normalizarAccionMaya, tutorialsForQuery };
 export default router;

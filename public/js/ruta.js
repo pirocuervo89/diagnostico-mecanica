@@ -1073,6 +1073,23 @@
     sincronizarPantallaDespierta();
   }
 
+  // Salida rápida de una navegación activa: cancela la ruta, cierra 3D/ADAS,
+  // deja el buscador a la vista y selecciona la dirección para corregirla.
+  function salirNavegacion() {
+    if (vistaArActiva && typeof detenerAr === 'function') detenerAr();
+    if (vista3dActiva && typeof detener3d === 'function') detener3d();
+    if (navegando) alternarNavegacion(true);
+    elPanel.hidden = !rutaActiva();
+    if (elResultados) elResultados.hidden = true;
+    if (elDestino) {
+      elDestino.focus();
+      elDestino.select();
+    }
+    avisar('Navegación cancelada. Escribe el nuevo destino.', 'info', 4500);
+    decir('Navegación cancelada. ¿A dónde vamos ahora?');
+    return true;
+  }
+
   // Final de trayecto: se apaga la cámara/3D, se sale de pantalla completa y
   // se deja un resumen claro. Sin esto la app seguía «navegando» para siempre
   // después de llegar y el botón de parar seguía en pantalla.
@@ -5574,11 +5591,12 @@
   document.getElementById('rutaParar')?.addEventListener('click', () => {
     if (navegando) alternarNavegacion();
   });
+  document.getElementById('rutaSalirNav')?.addEventListener('click', salirNavegacion);
 
   // Iniciar 3D automáticamente al iniciar navegación (salvo que ya esté AR).
   const _alternarNavOriginal = alternarNavegacion;
-  alternarNavegacion = function() {
-    _alternarNavOriginal();
+  alternarNavegacion = function(...args) {
+    _alternarNavOriginal(...args);
     if (navegando) {
       if (!vista3dActiva && !vistaArActiva) setTimeout(() => { if (!vista3dActiva && !vistaArActiva) iniciar3d(); }, 300);
     } else {
@@ -6148,6 +6166,8 @@
     // Control de navegación por voz/IA: arranca o detiene sin tocar botones.
     iniciarNavegacion: () => { if (!navegando) alternarNavegacion(); return navegando; },
     detenerNavegacion: () => { if (navegando) alternarNavegacion(); return navegando; },
+    salirNavegacion: () => salirNavegacion(),
+    cambiarDestino: () => salirNavegacion(),
     alternarNavegacion: () => { alternarNavegacion(); return navegando; },
     reportar: (kind) => reportar(kind),
     pantallaCompleta: () => alternarPantallaCompleta(),

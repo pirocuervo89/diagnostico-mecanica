@@ -18,6 +18,7 @@ import affiliatesRouter from './src/routes/affiliates.js';
 import proteccionRouter from './src/routes/proteccion.js';
 import ttsRouter from './src/routes/tts.js';
 import rutaRouter from './src/routes/ruta.js';
+import mayaAgentRouter from './src/routes/maya_agent.js';
 import { startPriceSync } from './src/lib/price_sync.js';
 import { installShutdownBackup, backupStatus } from './src/lib/db_persist.js';
 
@@ -89,6 +90,8 @@ app.use('/api/proteccion', proteccionRouter);
 app.use('/api/tts', ttsRouter);
 // Mapa, GPS, navegación giro a giro y radares de OpenStreetMap.
 app.use('/api/ruta', rutaRouter);
+// Taller de agentes: solo admin encola; el worker local ejecuta con su token.
+app.use('/api/maya-agent', mayaAgentRouter);
 app.use('/api', apiRouter);
 app.use('/api/sintomas', sintomasRouter);
 // Páginas con URL propia para buscadores. Va antes del estático porque también

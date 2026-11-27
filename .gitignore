@@ -37,6 +37,9 @@ data/garage/uploads/
 data/tutorials.sqlite
 data/tutorials.sqlite-shm
 data/tutorials.sqlite-wal
+data/maya-agent.sqlite
+data/maya-agent.sqlite-shm
+data/maya-agent.sqlite-wal
 
 # Android: clave de firma y proyecto generado por Bubblewrap (se regenera)
 android/android.keystore

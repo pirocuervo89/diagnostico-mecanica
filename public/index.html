@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="/css/omega.css?v=20261119a">
   <link rel="stylesheet" href="/css/aurora.css?v=20261119a">
   <link rel="stylesheet" href="/css/halo.css?v=20261120b">
-  <link rel="stylesheet" href="/css/ruta.css?v=20261126b6">
+  <link rel="stylesheet" href="/css/ruta.css?v=20261127b7">
   <link rel="stylesheet" href="/css/centinela.css?v=20261125a1">
   <link rel="stylesheet" href="/css/interfaz-animada.css?v=20261122c">
   <link rel="stylesheet" href="/css/movil-ligero.css?v=20261121a">
@@ -1996,6 +1996,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
         <button type="submit" class="btn primary" aria-label="Enviar consulta"><svg class="ic"><use href="#i-send"></use></svg> Enviar</button>
       </form>
     </div>
+    <div id="mayaAgentHint" class="panel recommended-panel" hidden style="margin:12px 14px;padding:12px 14px;font-size:13px;line-height:1.5"></div>
     <div id="chatForumRefs"></div>
     <div id="chatRecomendados"></div>
   </section>
@@ -2016,6 +2017,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
           </div>
           <div class="ruta-banner-eta" id="rutaBannerEta">-- min</div>
         </div>
+        <button id="rutaSalirNav" class="ruta-salir-nav" type="button" aria-label="Salir de la navegación y cambiar el destino" title="Salir y cambiar destino"><span aria-hidden="true">←</span> Cambiar destino</button>
         <form id="rutaBuscar" class="ruta-search" role="search">
           <input id="rutaDestino" type="search" autocomplete="off" placeholder="¿A dónde vas?" aria-label="Destino">
           <button type="button" id="rutaMicro" class="ruta-mic" aria-label="Decir el destino por voz" title="Decir el destino por voz"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
@@ -2592,7 +2594,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
 <script src="/js/visual-glow.js?v=20261116c"></script>
 <script src="/js/tienda.js?v=20261121c"></script>
 <script src="/js/planes.js?v=20261113a"></script>
-<script src="/js/app.js?v=20261127a4"></script>
+<script src="/js/app.js?v=20261127a6"></script>
 <script src="/js/centinela.js?v=20261127a3"></script>
 <script src="/js/scroll-debug.js?v=20261111a" defer></script>
 <script src="/js/lighting.js?v=20261105b"></script>
@@ -2671,7 +2673,7 @@ Pulsa «Simular secuencia» para ver la demo o conecta el adaptador.</pre>
     if ((location.hash || '').replace('#', '') === 'ruta') cargarRuta();
   })();
   </script>
-  <script src="/js/ruta.js?v=20261127b1"></script>
+  <script src="/js/ruta.js?v=20261127b2"></script>
   <script src="/js/maya-incidente.js?v=20261120c"></script>
 </body>
 </html>

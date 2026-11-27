@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { extraerMaya, accionesPorReglas, MAYA_VISTAS, normalizarAccionMaya } from '../src/routes/api.js';
+import { extraerMaya, accionesPorReglas, MAYA_VISTAS, normalizarAccionMaya, tutorialsForQuery } from '../src/routes/api.js';
 
 test('el catálogo de Maya cubre todas las vistas de la app', () => {
   for (const vista of ['inicio', 'chat', 'garaje', 'obd', 'dtc', 'testigos', 'luz', 'productos', 'tienda', 'tutoriales', 'tuning', 'vehiculos', 'diagnostico', 'ruta', 'planes', 'foro', 'informe', 'sala', 'compra', 'contacto', 'fiabilidad', 'neumaticos', 'centinela']) {
@@ -57,4 +57,25 @@ test('normalizarAccionMaya normaliza inicio/home y textos', () => {
   assert.deepEqual(normalizarAccionMaya({ hacer: 'abrir', donde: 'Home' }), { hacer: 'abrir', donde: 'home' });
   assert.deepEqual(normalizarAccionMaya({ hacer: 'buscar', que: '  filtro   de aceite  ' }), { hacer: 'buscar', que: 'filtro de aceite' });
   assert.equal(normalizarAccionMaya({ hacer: 'abrir' }), null);
+});
+
+test('los tutoriales de Maya priorizan el DTC exacto y la pieza probable', () => {
+  const results = tutorialsForQuery('P0299 turbo sin potencia', 4);
+  assert.ok(results.length > 0);
+  assert.ok(results[0].dtcs.includes('P0299'));
+  assert.ok(results.some(t => t.part));
+  assert.equal(new Set(results.map(t => t.id)).size, results.length);
+});
+
+test('los tutoriales de Maya no mezclan averías por una palabra suelta', () => {
+  const results = tutorialsForQuery('ruido al frenar', 4);
+  assert.ok(results.length > 0);
+  for (const t of results) {
+    const text = [t.title, ...(t.components || []), ...(t.symptoms || [])].join(' ').toLowerCase();
+    assert.match(text, /fren/, `tutorial poco relacionado con frenos: ${t.title}`);
+  }
+});
+
+test('los tutoriales de Maya descartan consultas sin coincidencias reales', () => {
+  assert.deepEqual(tutorialsForQuery('xyzzy plugh qwerty', 4), []);
 });
