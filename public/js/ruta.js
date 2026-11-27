@@ -1534,7 +1534,17 @@
       return out;
     }
     const base = segs[Math.max(0, Math.min(segs.length - 1, idxBase))];
-    const h0 = (base.heading || 0) * Math.PI / 180;
+    // Rumbo con look-ahead: la cámara gira hacia la vía que viene ~20 m por
+    // delante. Sin esto, un giro de 90° proyectaba el tramo lejano de canto
+    // como una cinta fina hasta el borde de la pantalla.
+    let hAhead = base.heading || 0;
+    let acumAhead = 0;
+    for (let i = idxBase; i < segs.length - 1; i += 1) {
+      acumAhead += segs[i].dist || 0;
+      if (acumAhead >= 20) { hAhead = segs[i].heading || hAhead; break; }
+    }
+    const giroAhead = normalizarGrados(hAhead - (base.heading || 0));
+    const h0 = ((base.heading || 0) + giroAhead * 0.6) * Math.PI / 180;
     const cosLat = Math.cos(base.lat * Math.PI / 180);
     let sAcum = 0;
     let cortar = false;
@@ -1547,9 +1557,12 @@
       const lateral = dx * Math.cos(h0) - dy * Math.sin(h0);
       if (s < 0.4) return;
       // Si la vía se abre de lado (giro cerrado o cambio de sentido), se corta
-      // en vez de dibujar una calzada atravesada sobre la escena.
-      if (Math.abs(lateral) > 60) { cortar = true; return; }
-      out.push(proyectar(s, lateral));
+      // antes de dibujar una calzada de canto. 24 m basta para ver el inicio
+      // del giro sin que el tramo lejano acabe como una línea fina.
+      if (Math.abs(lateral) > 24) { cortar = true; return; }
+      const p = proyectar(s, lateral);
+      if (p.x < -w * 0.6 || p.x > w * 1.6) { cortar = true; return; }
+      out.push(p);
     };
     out.push(proyectar(0, 0));
     for (let i = idxBase; i < segs.length - 1 && sAcum < MAX && !cortar; i += 1) {
@@ -2295,7 +2308,8 @@
   }
 
   function dibujarFlechasDetalle3d(w, h) {
-    for (let s = 10; s <= 86; s += 16) {
+    const sMax = Math.min(86, trazado3d[trazado3d.length - 1]?.s || 86);
+    for (let s = 10; s <= sMax; s += 16) {
       const p = puntoPorS3d(s);
       const q = puntoPorS3d(s + 5);
       if (!p || !q) continue;
