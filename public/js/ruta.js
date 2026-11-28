@@ -105,17 +105,27 @@
     return (Math.atan2(y, x) / rad + 360) % 360;
   }
 
+  function numeroSalida(s) {
+    const raw = s?.exit ?? s?.exits;
+    if (raw === null || raw === undefined || raw === '') return null;
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
   function instruccion(s) {
     if (!s) return 'Continúa';
     const m = s.modifier || '';
     const via = s.ref ? ` por la ${s.ref}` : '';
-    const salida = Number.isFinite(s.exit) ? ` (salida ${s.exit})` : '';
+    const nSalida = numeroSalida(s);
+    const salida = nSalida !== null ? ` (salida ${nSalida})` : '';
     const nombre = s.name ? ` en ${s.name}` : '';
     if (s.type === 'depart') return s.name ? `Sal por ${s.name}` : 'Comienza la ruta';
     if (s.type === 'arrive') return 'Llegas a tu destino';
     if (s.type === 'roundabout' || s.type === 'rotary') return `Toma la rotonda${salida}${nombre}`;
+    if (s.type === 'off ramp') return `Toma la salida${salida}${nombre}`;
+    if (s.type === 'on ramp') return `Incorpórate${via}${nombre}`;
     if (s.type === 'merge') return `Incorpórate${via}${nombre}`;
-    if (s.type === 'fork') return `Coge el desvío ${m === 'left' ? 'izquierdo' : 'derecho'}${via}${nombre}`;
+    if (s.type === 'fork') return `Coge el desvío ${m === 'left' ? 'izquierdo' : 'derecho'}${salida}${via}${nombre}`;
     if (s.type === 'end of road') return `Al final de la vía, ${m === 'left' ? 'izquierda' : 'derecha'}${nombre}`;
     if (s.type === 'continue' || s.type === 'new name') return `Continúa${via}${nombre}`;
     const giro = m === 'left' || m === 'slight left' || m === 'sharp left'
@@ -130,7 +140,8 @@
   function instruccionCorta(s) {
     if (!s) return 'Continúa';
     if (s.type === 'arrive') return 'Llegas a tu destino';
-    if (s.type === 'roundabout' || s.type === 'rotary') return 'Toma la rotonda';
+    if (s.type === 'roundabout' || s.type === 'rotary') return numeroSalida(s) !== null ? `Rotonda · salida ${numeroSalida(s)}` : 'Toma la rotonda';
+    if (s.type === 'off ramp') return numeroSalida(s) !== null ? `Salida ${numeroSalida(s)}` : 'Toma la salida';
     if (s.type === 'merge') return 'Incorpórate';
     if (s.type === 'fork') return String(s.modifier).includes('left') ? 'Desvío izquierdo' : 'Desvío derecho';
     if (s.type === 'end of road') return 'Al final, gira';
@@ -178,7 +189,7 @@
     if (!navegando || !s || !vozActiva || !Number.isFinite(d)) return;
     const esLlegada = s.type === 'arrive';
     const esGiro = /left|right|uturn/.test(String(s.modifier || ''));
-    const esEspecial = /roundabout|rotary|merge|fork|end of road/.test(String(s.type || ''));
+    const esEspecial = /roundabout|rotary|merge|fork|off ramp|on ramp|end of road/.test(String(s.type || ''));
     if (!esLlegada && !esGiro && !esEspecial) return;
     const bandas = esLlegada ? [300, 80] : (velocidad >= 75 ? [900, 250] : [500, 120]);
     if (!esLlegada && d <= 20) {
@@ -1479,6 +1490,10 @@
   let modoNoche3d = false;
   let tipoVia3d = 'carretera';
   let tipoVia3dAnterior = '';
+  let carrilGuiaOffset3d = 0.25;
+  let mostrarFlechasCarril3d = false;
+  let radarProximo3d = null;
+  let radarDistancia3d = Infinity;
   let avisoToast3d = '';
   let avisoToast3dHasta = 0;
   let ultimoExceso3d = 0;
@@ -1580,6 +1595,14 @@
   // es la misma escala que usan los límites simulados de la ruta larga.
   const LIMITE_REFERENCIA_3D = { autovia: 120, carretera: 90, comarcal: 80, montana: 60, pueblo: 50, ciudad: 30 };
   function limiteReferencia3d(tipo) { return LIMITE_REFERENCIA_3D[tipo] || 90; }
+
+  // Tiempo aproximado hasta la maniobra con la velocidad actual. Ayuda a saber
+  // si la salida llega a tiempo, no solo a cuántos metros está.
+  function segundosHasta3d(metros) {
+    const v = Number(velocidad) || 0;
+    if (v < 8 || !Number.isFinite(metros) || metros <= 0) return null;
+    return Math.max(1, Math.round(metros / (v / 3.6)));
+  }
 
   function puntoPorS3d(s) {
     if (!trazado3d.length) return null;
@@ -1744,17 +1767,71 @@
     ctx3d.restore();
   }
 
-  function perfil3d(w, horizonte, base, amplitud, fase, color) {
+  function perfil3d(w, horizonte, base, amplitud, fase, color, alpha = 1) {
+    ctx3d.save();
+    ctx3d.globalAlpha = alpha;
     ctx3d.fillStyle = color;
     ctx3d.beginPath();
     ctx3d.moveTo(-10, horizonte);
-    for (let x = -10; x <= w + 10; x += 12) {
-      const y = base - (Math.sin(x * 0.006 + fase) * amplitud + Math.sin(x * 0.017 + fase * 2) * amplitud * 0.42 + amplitud * 0.5);
+    for (let x = -10; x <= w + 10; x += 10) {
+      const y = base - (Math.sin(x * 0.006 + fase) * amplitud
+        + Math.sin(x * 0.017 + fase * 2) * amplitud * 0.42
+        + Math.sin(x * 0.031 + fase * 0.7) * amplitud * 0.12
+        + amplitud * 0.5);
       ctx3d.lineTo(x, Math.max(0, Math.min(horizonte, y)));
     }
     ctx3d.lineTo(w + 10, horizonte);
     ctx3d.closePath();
     ctx3d.fill();
+    ctx3d.restore();
+  }
+
+  // Nube suave por capas: evita el óvalo plano y no necesita blur de canvas,
+  // que en móviles de gama media cuesta más que dibujar cuatro elipses.
+  function dibujarNube3d(x, y, escala, alpha = 0.55) {
+    const alto = escala * 0.26;
+    const a = Math.max(0, Math.min(1, alpha));
+    ctx3d.save();
+    ctx3d.translate(x, y);
+    // Base ancha y baja: la nube se apoya en el aire, no flota como un globo.
+    const base = ctx3d.createLinearGradient(0, -alto, 0, alto * 1.2);
+    base.addColorStop(0, `rgba(250,253,255,${a * 0.34})`);
+    base.addColorStop(0.55, `rgba(238,247,252,${a * 0.22})`);
+    base.addColorStop(1, 'rgba(205,222,234,0)');
+    ctx3d.fillStyle = base;
+    ctx3d.beginPath();
+    ctx3d.ellipse(0, alto * 0.16, escala * 0.72, alto * 0.72, 0, 0, Math.PI * 2);
+    ctx3d.fill();
+    // Varias masas con degradado radial: bordes suaves y volumen interior.
+    const piezas = [
+      [-0.52, 0.12, 0.30, 0.62],
+      [-0.28, -0.10, 0.38, 0.92],
+      [0.02, -0.20, 0.44, 1.00],
+      [0.27, -0.02, 0.34, 0.78],
+      [0.50, 0.14, 0.26, 0.54]
+    ];
+    for (const [dx, dy, r, fuerza] of piezas) {
+      const px = dx * escala;
+      const py = dy * alto;
+      const rr = Math.max(4, r * escala);
+      const g = ctx3d.createRadialGradient(px - rr * 0.28, py - rr * 0.35, rr * 0.08, px, py, rr);
+      g.addColorStop(0, `rgba(255,255,255,${a * 0.62 * fuerza})`);
+      g.addColorStop(0.55, `rgba(247,252,255,${a * 0.34 * fuerza})`);
+      g.addColorStop(1, 'rgba(218,232,241,0)');
+      ctx3d.fillStyle = g;
+      ctx3d.beginPath();
+      ctx3d.ellipse(px, py, rr, rr * 0.66, 0, 0, Math.PI * 2);
+      ctx3d.fill();
+    }
+    // Luz superior muy tenue: redondea la silueta.
+    const luz = ctx3d.createLinearGradient(0, -alto * 1.2, 0, alto * 0.3);
+    luz.addColorStop(0, `rgba(255,255,255,${a * 0.30})`);
+    luz.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx3d.fillStyle = luz;
+    ctx3d.beginPath();
+    ctx3d.ellipse(-escala * 0.1, -alto * 0.24, escala * 0.45, alto * 0.62, 0, 0, Math.PI * 2);
+    ctx3d.fill();
+    ctx3d.restore();
   }
 
   function dibujarSkyline3d(w, horizonte, tipo) {
@@ -1767,9 +1844,30 @@
       const ancho = ciudad ? 22 + (i * 37 % 45) : 34 + (i * 19 % 38);
       const alto = ciudad ? 28 + (i * 53 % Math.max(35, horizonte * 0.48)) : 18 + (i * 31 % 30);
       const y = horizonte - alto;
-      ctx3d.fillStyle = ciudad ? (i % 2 ? '#263444' : '#1d2b39') : '#c9bda6';
+      const fachada = ctx3d.createLinearGradient(0, y, 0, horizonte);
+      if (modoNoche3d) {
+        fachada.addColorStop(0, i % 2 ? '#1b2938' : '#152230');
+        fachada.addColorStop(1, '#0b141e');
+      } else if (pueblo) {
+        fachada.addColorStop(0, i % 2 ? '#e2d3b8' : '#d4c4a7');
+        fachada.addColorStop(1, '#b8a98e');
+      } else {
+        fachada.addColorStop(0, i % 2 ? '#526a7c' : '#465d70');
+        fachada.addColorStop(1, '#334757');
+      }
+      ctx3d.fillStyle = fachada;
       ctx3d.fillRect(x, y, ancho, alto);
-      if (pueblo) {
+      // Retranqueo y azotea: la silueta deja de ser un bloque plano.
+      ctx3d.fillStyle = modoNoche3d ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.10)';
+      ctx3d.fillRect(x + ancho * 0.72, y, ancho * 0.28, alto);
+      if (ciudad) {
+        ctx3d.fillStyle = modoNoche3d ? '#0a121a' : '#2b3e4c';
+        ctx3d.fillRect(x + ancho * 0.16, y - Math.max(2, alto * 0.05), ancho * 0.18, Math.max(2, alto * 0.05));
+        ctx3d.fillStyle = modoNoche3d ? 'rgba(255,210,128,.52)' : 'rgba(224,244,255,.38)';
+        for (let f = 0; f < 9; f += 1) {
+          if ((i + f) % 3 === 0) ctx3d.fillRect(x + 5 + (f % 3) * (ancho - 10) / 3, y + 7 + Math.floor(f / 3) * (alto / 4), 2.6, 2.6);
+        }
+      } else {
         ctx3d.fillStyle = '#8f4b35';
         ctx3d.beginPath();
         ctx3d.moveTo(x - 3, y);
@@ -1777,60 +1875,97 @@
         ctx3d.lineTo(x + ancho + 3, y);
         ctx3d.closePath();
         ctx3d.fill();
-        ctx3d.fillStyle = 'rgba(40,55,70,.45)';
+        ctx3d.fillStyle = modoNoche3d ? 'rgba(255,205,120,.45)' : 'rgba(40,55,70,.45)';
         ctx3d.fillRect(x + ancho * 0.2, y + alto * 0.44, ancho * 0.16, alto * 0.18);
         ctx3d.fillRect(x + ancho * 0.62, y + alto * 0.44, ancho * 0.16, alto * 0.18);
-      } else {
-        ctx3d.fillStyle = 'rgba(255,220,145,.24)';
-        for (let f = 0; f < 8; f += 1) {
-          if ((i + f) % 3 === 0) ctx3d.fillRect(x + 5 + (f % 3) * (ancho - 10) / 3, y + 7 + Math.floor(f / 3) * (alto / 4), 3, 3);
-        }
       }
       x += ancho + 3 + (i * 11 % 10);
       i += 1;
     }
   }
 
-  // Franja de bosque lejano: pinos pequeños a lo largo del horizonte para que
-  // el paisaje no quede vacío y se parezca a la referencia de montaña.
-  function dibujarBosqueFondo3d(w, horizonte, tipo) {
-    if (tipo === 'ciudad' || tipo === 'pueblo') return;
-    const base = horizonte + 2;
-    const escalaW = Math.max(0.7, Math.min(1.6, w / 390));
-    const n = Math.max(30, Math.floor(w / 8));
-    for (let i = 0; i < n; i += 1) {
-      const x = (i / n) * (w + 24) - 12 + ((i * 37) % 9) - 4;
-      const alto = Math.max(7, (11 + (i * 13) % 13) * escalaW);
-      const ancho = alto * 0.52;
-      const tono = i % 3;
-      ctx3d.fillStyle = modoNoche3d
-        ? (tono === 0 ? '#0b2a22' : tono === 1 ? '#0f3329' : '#0a241d')
-        : (tono === 0 ? '#3c7a52' : tono === 1 ? '#2f6b45' : '#4a8a5a');
-      ctx3d.beginPath();
-      ctx3d.moveTo(x, base - alto);
-      ctx3d.lineTo(x + ancho / 2, base);
-      ctx3d.lineTo(x - ancho / 2, base);
-      ctx3d.closePath();
-      ctx3d.fill();
-    }
+  function dibujarPinoFondo3d(x, base, alto, color) {
+    const ancho = alto * 0.46;
+    ctx3d.fillStyle = color;
+    ctx3d.beginPath();
+    ctx3d.moveTo(x, base - alto);
+    ctx3d.lineTo(x + ancho * 0.46, base - alto * 0.30);
+    ctx3d.lineTo(x + ancho * 0.18, base - alto * 0.28);
+    ctx3d.lineTo(x + ancho * 0.5, base);
+    ctx3d.lineTo(x - ancho * 0.5, base);
+    ctx3d.lineTo(x - ancho * 0.18, base - alto * 0.28);
+    ctx3d.lineTo(x - ancho * 0.46, base - alto * 0.30);
+    ctx3d.closePath();
+    ctx3d.fill();
   }
 
-  // Suelo low-poly: facetas triangulares suaves que dan volumen al terreno
-  // sin tapar la calzada (que se pinta después, encima).
+  // Bosque lejano en tres capas: la más alta y desaturada se pierde en la
+  // bruma, la de delante tiene más contraste. Así el horizonte gana volumen
+  // sin convertir cada árbol en un triángulo plano.
+  function dibujarBosqueFondo3d(w, horizonte, tipo) {
+    if (tipo === 'ciudad' || tipo === 'pueblo') return;
+    const escalaW = Math.max(0.72, Math.min(1.7, w / 390));
+    const capas = modoNoche3d
+      ? [
+          { escala: 0.58, alpha: 0.36, color: '#153d31' },
+          { escala: 0.82, alpha: 0.58, color: '#103327' },
+          { escala: 1.08, alpha: 0.82, color: '#0a281e' }
+        ]
+      : [
+          { escala: 0.58, alpha: 0.36, color: '#7fa08b' },
+          { escala: 0.82, alpha: 0.58, color: '#527d5e' },
+          { escala: 1.08, alpha: 0.86, color: '#2f5e43' }
+        ];
+    capas.forEach((capa, capaIdx) => {
+      const base = horizonte + 2 + capaIdx * 1.5;
+      const n = Math.max(24, Math.floor(w / (9 - capaIdx)));
+      ctx3d.save();
+      ctx3d.globalAlpha = capa.alpha;
+      for (let i = 0; i < n; i += 1) {
+        const x = (i / n) * (w + 30) - 15 + ((i * 37 + capaIdx * 11) % 11) - 5;
+        const alto = Math.max(7, (10 + (i * 13 + capaIdx * 7) % 15) * escalaW * capa.escala);
+        dibujarPinoFondo3d(x, base, alto, capa.color);
+      }
+      ctx3d.restore();
+    });
+  }
+
+  // Suelo low-poly con luz lateral, colinas y parcelas en fuga. La calzada se
+  // pinta después, así que el terreno puede llegar hasta el centro sin taparla.
   function dibujarSueloLowPoly3d(w, h, horizonte, tipo) {
     if (tipo === 'ciudad' || tipo === 'pueblo') return;
     const paleta = modoNoche3d
-      ? ['#0d261f', '#102c24', '#0a1d17', '#12332a']
-      : ['#6f9459', '#7ea662', '#648a50', '#86ab6b'];
-    const cols = 6;
-    const filas = 5;
-    const x0 = -w * 0.12;
-    const x1 = w * 1.12;
-    const y0 = horizonte + (h - horizonte) * 0.04;
-    const y1 = h + 12;
+      ? ['#0c211b', '#0e261e', '#0a1e19', '#102a21', '#0d241c', '#112c23']
+      : ['#69845a', '#6e8a5f', '#638052', '#738e62', '#6b875a', '#668455'];
+
+    // Colinas suaves detrás del primer plano.
+    for (let k = 0; k < 3; k += 1) {
+      const cx = w * (0.12 + k * 0.39);
+      const cy = horizonte + h * (0.055 + k * 0.018);
+      const rx = w * (0.34 - k * 0.04);
+      const ry = h * (0.09 + k * 0.018);
+      const g = ctx3d.createRadialGradient(cx, cy - ry * 0.4, 0, cx, cy, rx);
+      g.addColorStop(0, modoNoche3d ? 'rgba(20,55,42,.55)' : 'rgba(126,153,104,.55)');
+      g.addColorStop(1, modoNoche3d ? 'rgba(10,26,20,0)' : 'rgba(95,124,78,0)');
+      ctx3d.fillStyle = g;
+      ctx3d.beginPath();
+      ctx3d.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx3d.fill();
+    }
+
+    const cols = 11;
+    const filas = 9;
+    const x0 = -w * 0.14;
+    const x1 = w * 1.14;
+    const y0 = horizonte + (h - horizonte) * 0.035;
+    const y1 = h + 14;
     const dx = (x1 - x0) / cols;
     const dy = (y1 - y0) / filas;
     let k = 0;
+    ctx3d.save();
+    // Facetas suaves, no un mosaico de triángulos planos: la transparencia deja
+    // pasar la luz del degradado del suelo y el contraste ya no parece de juguete.
+    ctx3d.globalAlpha = 0.42;
     for (let r = 0; r < filas; r += 1) {
       for (let c = 0; c < cols; c += 1) {
         k += 1;
@@ -1838,23 +1973,97 @@
         const ya = y0 + r * dy;
         const xb = xa + dx;
         const yb = ya + dy;
-        const jx = ((k * 53) % 15) - 7;
-        const jy = ((k * 29) % 11) - 5;
+        const jx = ((k * 53) % 19) - 9;
+        const jy = ((k * 29) % 15) - 7;
         ctx3d.fillStyle = paleta[k % paleta.length];
         ctx3d.beginPath();
         ctx3d.moveTo(xa + jx, ya + jy);
-        ctx3d.lineTo(xb, ya);
+        ctx3d.lineTo(xb + jx * 0.3, ya);
         ctx3d.lineTo(xa, yb);
         ctx3d.closePath();
         ctx3d.fill();
-        ctx3d.fillStyle = paleta[(k + 2) % paleta.length];
+        ctx3d.fillStyle = paleta[(k + 3) % paleta.length];
         ctx3d.beginPath();
-        ctx3d.moveTo(xb, ya);
+        ctx3d.moveTo(xb + jx * 0.3, ya);
         ctx3d.lineTo(xb, yb);
         ctx3d.lineTo(xa, yb);
         ctx3d.closePath();
         ctx3d.fill();
+        if (r > 0) {
+          ctx3d.strokeStyle = modoNoche3d ? 'rgba(80,120,95,.05)' : 'rgba(255,255,225,.07)';
+          ctx3d.lineWidth = 1;
+          ctx3d.beginPath();
+          ctx3d.moveTo(xa, yb);
+          ctx3d.lineTo(xb, yb);
+          ctx3d.stroke();
+        }
       }
+    }
+    ctx3d.restore();
+
+    // Parcelas que convergen al punto de fuga: dan sensación de profundidad.
+    const parcelas = modoNoche3d
+      ? ['rgba(25,58,43,.18)', 'rgba(44,78,53,.13)', 'rgba(18,47,38,.20)']
+      : ['rgba(184,190,119,.16)', 'rgba(139,173,100,.15)', 'rgba(205,194,133,.12)'];
+    const vx = w * 0.5;
+    for (let i = 0; i < 8; i += 1) {
+      const t0 = (i - 4) / 4;
+      const t1 = (i - 3) / 4;
+      const xt0 = vx + t0 * w * 0.055;
+      const xt1 = vx + t1 * w * 0.055;
+      const xb0 = vx + t0 * w * 0.55;
+      const xb1 = vx + t1 * w * 0.55;
+      ctx3d.fillStyle = parcelas[i % parcelas.length];
+      ctx3d.beginPath();
+      ctx3d.moveTo(xt0, horizonte + 3);
+      ctx3d.lineTo(xt1, horizonte + 3);
+      ctx3d.lineTo(xb1, h);
+      ctx3d.lineTo(xb0, h);
+      ctx3d.closePath();
+      ctx3d.fill();
+      ctx3d.strokeStyle = modoNoche3d ? 'rgba(90,125,101,.10)' : 'rgba(240,239,205,.12)';
+      ctx3d.lineWidth = 1;
+      ctx3d.beginPath();
+      ctx3d.moveTo(xt1, horizonte + 3);
+      ctx3d.lineTo(xb1, h);
+      ctx3d.stroke();
+    }
+
+    const luz = ctx3d.createRadialGradient(w * 0.74, horizonte, 0, w * 0.74, horizonte, h * 0.72);
+    luz.addColorStop(0, modoNoche3d ? 'rgba(94,151,181,.10)' : 'rgba(255,232,174,.20)');
+    luz.addColorStop(0.52, 'rgba(255,226,160,.05)');
+    luz.addColorStop(1, 'rgba(255,226,160,0)');
+    ctx3d.fillStyle = luz;
+    ctx3d.fillRect(0, horizonte, w, h - horizonte);
+  }
+
+  function dibujarPicosNieve3d(w, h, horizonte) {
+    const picos = [
+      [0.16, 0.14, 0.10],
+      [0.31, 0.10, 0.15],
+      [0.53, 0.12, 0.12],
+      [0.74, 0.09, 0.14]
+    ];
+    for (const [px, alto, ancho] of picos) {
+      const x = w * px;
+      const y = horizonte - h * 0.012;
+      const cima = y - h * alto * 0.95;
+      ctx3d.fillStyle = modoNoche3d ? 'rgba(202,222,232,.30)' : 'rgba(248,251,249,.84)';
+      ctx3d.beginPath();
+      ctx3d.moveTo(x, cima);
+      ctx3d.lineTo(x + w * ancho * 0.5, cima + (y - cima) * 0.36);
+      ctx3d.lineTo(x + w * ancho * 0.18, cima + (y - cima) * 0.30);
+      ctx3d.lineTo(x - w * ancho * 0.14, cima + (y - cima) * 0.34);
+      ctx3d.lineTo(x - w * ancho * 0.5, cima + (y - cima) * 0.36);
+      ctx3d.closePath();
+      ctx3d.fill();
+      ctx3d.fillStyle = modoNoche3d ? 'rgba(70,105,125,.28)' : 'rgba(174,198,204,.50)';
+      ctx3d.beginPath();
+      ctx3d.moveTo(x, cima);
+      ctx3d.lineTo(x + w * ancho * 0.5, cima + (y - cima) * 0.36);
+      ctx3d.lineTo(x + w * ancho * 0.10, cima + (y - cima) * 0.34);
+      ctx3d.closePath();
+      ctx3d.fill();
     }
   }
 
@@ -1863,62 +2072,83 @@
     const cielo = ctx3d.createLinearGradient(0, 0, 0, horizonte);
     if (noche) {
       cielo.addColorStop(0, '#02050c');
-      cielo.addColorStop(0.42, '#07162a');
-      cielo.addColorStop(0.78, '#123456');
-      cielo.addColorStop(1, '#36576e');
+      cielo.addColorStop(0.34, '#061222');
+      cielo.addColorStop(0.68, '#0d2942');
+      cielo.addColorStop(1, '#3c6378');
     } else {
-      cielo.addColorStop(0, '#4a8fc7');
-      cielo.addColorStop(0.45, '#83b9dd');
-      cielo.addColorStop(0.78, '#c8dfe5');
-      cielo.addColorStop(1, '#e9e2c7');
+      cielo.addColorStop(0, '#1f5f93');
+      cielo.addColorStop(0.34, '#4b8fba');
+      cielo.addColorStop(0.68, '#9bc8d7');
+      cielo.addColorStop(1, '#f0d9b9');
     }
     ctx3d.fillStyle = cielo;
     ctx3d.fillRect(0, 0, w, horizonte + 2);
 
     if (noche) {
-      ctx3d.fillStyle = 'rgba(255,255,255,.65)';
-      for (let i = 0; i < 36; i += 1) ctx3d.fillRect((i * 173 + 31) % w, (i * 67 + 13) % (horizonte * 0.64), (i % 3) + 1, (i % 3) + 1);
-      const lunaX = w * 0.74;
-      const lunaY = horizonte * 0.3;
-      ctx3d.fillStyle = 'rgba(230,240,255,.8)';
-      ctx3d.beginPath(); ctx3d.arc(lunaX, lunaY, Math.max(7, h * 0.024), 0, Math.PI * 2); ctx3d.fill();
-    } else {
-      const solX = w * 0.74;
-      const solY = horizonte * 0.3;
-      const halo = ctx3d.createRadialGradient(solX, solY, 0, solX, solY, h * 0.34);
-      halo.addColorStop(0, 'rgba(255,246,196,.9)');
-      halo.addColorStop(0.25, 'rgba(255,226,150,.42)');
-      halo.addColorStop(1, 'rgba(255,214,130,0)');
-      ctx3d.fillStyle = halo;
-      ctx3d.fillRect(0, 0, w, horizonte + 20);
-      ctx3d.fillStyle = '#fff4c8';
-      ctx3d.beginPath(); ctx3d.arc(solX, solY, Math.max(8, h * 0.026), 0, Math.PI * 2); ctx3d.fill();
-      ctx3d.fillStyle = 'rgba(255,255,255,.52)';
-      for (let i = 0; i < 5; i += 1) {
-        const cx0 = ((i * 0.24 + 0.08) * w + (ultimoFrame3d || 0) * 0.002 * (i + 1)) % (w + 150) - 70;
-        const cy0 = horizonte * (0.18 + i * 0.07);
-        ctx3d.beginPath();
-        ctx3d.ellipse(cx0, cy0, 42 + i * 18, 8 + i * 2, 0, 0, Math.PI * 2);
-        ctx3d.fill();
+      ctx3d.fillStyle = 'rgba(255,255,255,.62)';
+      for (let i = 0; i < 42; i += 1) {
+        const sx = (i * 173 + 31) % w;
+        const sy = (i * 67 + 13) % (horizonte * 0.62);
+        const tw = 0.55 + 0.45 * Math.sin((ultimoFrame3d || 0) * 0.001 + i);
+        ctx3d.globalAlpha = tw;
+        ctx3d.fillRect(sx, sy, (i % 3) + 1, (i % 3) + 1);
       }
+      ctx3d.globalAlpha = 1;
+      const lunaX = w * 0.75;
+      const lunaY = horizonte * 0.28;
+      const haloLuna = ctx3d.createRadialGradient(lunaX, lunaY, 0, lunaX, lunaY, h * 0.26);
+      haloLuna.addColorStop(0, 'rgba(205,228,255,.34)');
+      haloLuna.addColorStop(0.4, 'rgba(160,198,230,.12)');
+      haloLuna.addColorStop(1, 'rgba(120,170,210,0)');
+      ctx3d.fillStyle = haloLuna;
+      ctx3d.fillRect(0, 0, w, horizonte + 20);
+      ctx3d.fillStyle = '#e8f0fa';
+      ctx3d.beginPath(); ctx3d.arc(lunaX, lunaY, Math.max(7, h * 0.024), 0, Math.PI * 2); ctx3d.fill();
+      ctx3d.fillStyle = 'rgba(120,145,174,.26)';
+      ctx3d.beginPath(); ctx3d.arc(lunaX + h * 0.008, lunaY - h * 0.006, Math.max(2, h * 0.006), 0, Math.PI * 2); ctx3d.fill();
+    } else {
+      const solX = w * 0.76;
+      const solY = horizonte * 0.27;
+      const halo = ctx3d.createRadialGradient(solX, solY, 0, solX, solY, h * 0.42);
+      halo.addColorStop(0, 'rgba(255,248,210,.95)');
+      halo.addColorStop(0.18, 'rgba(255,230,158,.48)');
+      halo.addColorStop(0.52, 'rgba(255,205,128,.14)');
+      halo.addColorStop(1, 'rgba(255,196,112,0)');
+      ctx3d.fillStyle = halo;
+      ctx3d.fillRect(0, 0, w, horizonte + 24);
+      ctx3d.fillStyle = '#fff8d8';
+      ctx3d.beginPath(); ctx3d.arc(solX, solY, Math.max(8, h * 0.025), 0, Math.PI * 2); ctx3d.fill();
+    }
+
+    // Nubes con deriva lenta y varias alturas; nada de óvalos repetidos.
+    const nubes = [
+      [0.06, 0.13, 1.05, 0.48],
+      [0.32, 0.22, 0.72, 0.34],
+      [0.55, 0.11, 1.35, 0.40],
+      [0.82, 0.26, 0.90, 0.30]
+    ];
+    for (let i = 0; i < nubes.length; i += 1) {
+      const [px, py, esc, alpha] = nubes[i];
+      const drift = ((ultimoFrame3d || 0) * 0.0016 * (i + 1)) % (w + 220) - 110;
+      const x = ((px * w + drift) % (w + 220)) - 110;
+      dibujarNube3d(x, horizonte * py, w * 0.16 * esc, noche ? alpha * 0.45 : alpha);
     }
 
     if (tipo === 'montana') {
-      perfil3d(w, horizonte, horizonte - h * 0.01, h * 0.13, 1.4, noche ? '#0e2432' : '#6f8c83');
-      perfil3d(w, horizonte, horizonte + h * 0.005, h * 0.09, 2.8, noche ? '#0a1b28' : '#4f7566');
-      if (!noche) {
-        ctx3d.fillStyle = 'rgba(245,248,248,.82)';
-        ctx3d.beginPath();
-        ctx3d.moveTo(w * 0.18, horizonte - h * 0.13);
-        ctx3d.lineTo(w * 0.23, horizonte - h * 0.055);
-        ctx3d.lineTo(w * 0.13, horizonte - h * 0.055);
-        ctx3d.closePath(); ctx3d.fill();
-      }
+      perfil3d(w, horizonte, horizonte - h * 0.008, h * 0.15, 1.4, noche ? '#173240' : '#7d9aa0', 0.58);
+      perfil3d(w, horizonte, horizonte + h * 0.002, h * 0.115, 2.8, noche ? '#102936' : '#5f8378', 0.88);
+      perfil3d(w, horizonte, horizonte + h * 0.006, h * 0.085, 4.1, noche ? '#0a1e2b' : '#446d5d');
+      if (!noche) dibujarPicosNieve3d(w, h, horizonte);
     } else if (tipo === 'autovia') {
-      perfil3d(w, horizonte, horizonte, h * 0.045, 0.4, noche ? '#0a1b28' : '#7a9a78');
-      perfil3d(w, horizonte, horizonte + 1, h * 0.026, 2.2, noche ? '#0b1f2b' : '#5f845e');
+      perfil3d(w, horizonte, horizonte - h * 0.004, h * 0.055, 0.4, noche ? '#112632' : '#8da9a0', 0.52);
+      perfil3d(w, horizonte, horizonte, h * 0.040, 2.2, noche ? '#0d202b' : '#6f9077', 0.82);
+      perfil3d(w, horizonte, horizonte + 1, h * 0.024, 3.4, noche ? '#0b1e29' : '#527658');
+    } else if (tipo === 'carretera' || tipo === 'comarcal') {
+      perfil3d(w, horizonte, horizonte - h * 0.002, h * 0.060, 0.9, noche ? '#112632' : '#90a99f', 0.46);
+      perfil3d(w, horizonte, horizonte + 1, h * 0.046, 2.4, noche ? '#0c202a' : '#6f9077', 0.78);
+      perfil3d(w, horizonte, horizonte + 2, h * 0.030, 3.8, noche ? '#0a1c26' : '#557b5c');
     } else {
-      perfil3d(w, horizonte, horizonte, h * 0.038, 0.9, noche ? '#0b1c29' : '#7f9b82');
+      perfil3d(w, horizonte, horizonte, h * 0.035, 1.2, noche ? '#0e222d' : '#829d90', 0.55);
     }
 
     dibujarSkyline3d(w, horizonte, tipo);
@@ -1929,13 +2159,13 @@
       suelo.addColorStop(0.5, '#0c1a16');
       suelo.addColorStop(1, '#07110f');
     } else if (tipo === 'ciudad' || tipo === 'pueblo') {
-      suelo.addColorStop(0, '#7f8e75');
-      suelo.addColorStop(0.5, '#66745f');
-      suelo.addColorStop(1, '#4f5d4c');
+      suelo.addColorStop(0, '#88947b');
+      suelo.addColorStop(0.5, '#687560');
+      suelo.addColorStop(1, '#4b5749');
     } else {
-      suelo.addColorStop(0, '#8ca76c');
-      suelo.addColorStop(0.5, '#6f9459');
-      suelo.addColorStop(1, '#4f7445');
+      suelo.addColorStop(0, '#91a872');
+      suelo.addColorStop(0.5, '#6f8b58');
+      suelo.addColorStop(1, '#4d6c42');
     }
     ctx3d.fillStyle = suelo;
     ctx3d.fillRect(0, horizonte, w, h - horizonte);
@@ -1943,30 +2173,112 @@
     dibujarSueloLowPoly3d(w, h, horizonte, tipo);
     dibujarBosqueFondo3d(w, horizonte, tipo);
 
-    const bruma = ctx3d.createLinearGradient(0, horizonte - h * 0.06, 0, horizonte + 8);
-    bruma.addColorStop(0, 'rgba(210,230,235,0)');
-    bruma.addColorStop(1, noche ? 'rgba(18,42,60,.45)' : 'rgba(230,239,226,.45)');
+    // Bruma cálida en el horizonte y otra fría en la base de las montañas.
+    const bruma = ctx3d.createLinearGradient(0, horizonte - h * 0.08, 0, horizonte + 10);
+    bruma.addColorStop(0, 'rgba(230,240,238,0)');
+    bruma.addColorStop(0.55, noche ? 'rgba(45,85,108,.22)' : 'rgba(238,232,208,.24)');
+    bruma.addColorStop(1, noche ? 'rgba(20,48,64,.48)' : 'rgba(232,240,226,.48)');
     ctx3d.fillStyle = bruma;
-    ctx3d.fillRect(0, horizonte - h * 0.06, w, h * 0.06 + 8);
+    ctx3d.fillRect(0, horizonte - h * 0.08, w, h * 0.08 + 10);
+  }
+
+  function sombra3d(x, base, ancho, alpha = 0.22) {
+    const g = ctx3d.createRadialGradient(x, base, 0, x, base, Math.max(2, ancho));
+    g.addColorStop(0, `rgba(0,0,0,${alpha})`);
+    g.addColorStop(0.55, `rgba(0,0,0,${alpha * 0.45})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx3d.fillStyle = g;
+    ctx3d.beginPath();
+    ctx3d.ellipse(x, base, Math.max(2, ancho), Math.max(1, ancho * 0.22), 0, 0, Math.PI * 2);
+    ctx3d.fill();
+  }
+
+  function dibujarArbolHoja3d(x, base, alto, ancho, noche) {
+    const copa = ctx3d.createRadialGradient(
+      x - ancho * 0.18, base - alto * 0.66, ancho * 0.05,
+      x, base - alto * 0.55, ancho * 0.62
+    );
+    copa.addColorStop(0, noche ? '#2a6146' : '#79a95b');
+    copa.addColorStop(0.55, noche ? '#164a35' : '#4f8748');
+    copa.addColorStop(1, noche ? '#0a2a20' : '#2f6439');
+    ctx3d.fillStyle = copa;
+    for (const [dx, dy, r] of [[-0.22, 0.48, 0.34], [0.18, 0.44, 0.30], [0, 0.62, 0.40], [0.02, 0.34, 0.28]]) {
+      ctx3d.beginPath();
+      ctx3d.ellipse(x + dx * ancho, base - alto * dy, r * ancho, r * ancho * 0.82, 0, 0, Math.PI * 2);
+      ctx3d.fill();
+    }
+    ctx3d.fillStyle = noche ? 'rgba(128,190,146,.18)' : 'rgba(232,255,196,.28)';
+    ctx3d.beginPath();
+    ctx3d.ellipse(x - ancho * 0.16, base - alto * 0.72, ancho * 0.22, ancho * 0.14, -0.35, 0, Math.PI * 2);
+    ctx3d.fill();
   }
 
   function dibujarArbol3d(x, base, alto, tipo) {
-    const ancho = alto * (tipo === 'montana' ? 0.36 : 0.42);
-    ctx3d.fillStyle = '#4a2f1e';
-    ctx3d.fillRect(x - Math.max(1, ancho * 0.06), base - alto * 0.2, Math.max(2, ancho * 0.12), alto * 0.2);
-    const verde = modoNoche3d ? '#0d3228' : (tipo === 'montana' ? '#1f5a43' : '#2f6b45');
-    const verde2 = modoNoche3d ? '#123e2f' : '#4a8a52';
-    for (let i = 0; i < 3; i += 1) {
-      const y = base - alto * (0.18 + i * 0.25);
-      const a = ancho * (1 - i * 0.2);
-      ctx3d.fillStyle = i % 2 ? verde2 : verde;
-      ctx3d.beginPath();
-      ctx3d.moveTo(x, y - alto * 0.38);
-      ctx3d.lineTo(x + a / 2, y);
-      ctx3d.lineTo(x - a / 2, y);
-      ctx3d.closePath();
-      ctx3d.fill();
+    if (alto < 3) return;
+    const ancho = alto * (tipo === 'montana' ? 0.34 : 0.42);
+    const noche = modoNoche3d;
+    const hoja = tipo === 'ciudad' || (tipo === 'carretera' && Math.abs(Math.round(x * 0.29)) % 5 === 0);
+    sombra3d(x + ancho * 0.12, base + Math.max(1, alto * 0.015), ancho * 0.58, noche ? 0.28 : 0.18);
+
+    const tronco = ctx3d.createLinearGradient(x - ancho * 0.1, 0, x + ancho * 0.1, 0);
+    tronco.addColorStop(0, noche ? '#2b2119' : '#6b4a2e');
+    tronco.addColorStop(0.5, noche ? '#1e1712' : '#4d3522');
+    tronco.addColorStop(1, noche ? '#130f0c' : '#352517');
+    ctx3d.fillStyle = tronco;
+    ctx3d.beginPath();
+    ctx3d.moveTo(x - ancho * 0.055, base);
+    ctx3d.lineTo(x - ancho * 0.022, base - alto * 0.34);
+    ctx3d.lineTo(x + ancho * 0.028, base - alto * 0.34);
+    ctx3d.lineTo(x + ancho * 0.06, base);
+    ctx3d.closePath();
+    ctx3d.fill();
+
+    if (hoja) {
+      dibujarArbolHoja3d(x, base, alto, ancho * 1.15, noche);
+      return;
     }
+
+    // Conífera estilizada: cinco pisos con gradient lateral, no tres triángulos
+    // planos. La luz entra por la izquierda y la copa se estrecha con la altura.
+    const copa = ctx3d.createLinearGradient(x - ancho * 0.55, 0, x + ancho * 0.55, 0);
+    if (noche) {
+      copa.addColorStop(0, '#1c4d3b');
+      copa.addColorStop(0.35, '#10382c');
+      copa.addColorStop(0.72, '#0a2a21');
+      copa.addColorStop(1, '#061b16');
+    } else if (tipo === 'montana') {
+      copa.addColorStop(0, '#3f7a5a');
+      copa.addColorStop(0.35, '#286044');
+      copa.addColorStop(0.72, '#1c4b37');
+      copa.addColorStop(1, '#123326');
+    } else {
+      copa.addColorStop(0, '#5b9658');
+      copa.addColorStop(0.35, '#3f7d47');
+      copa.addColorStop(0.72, '#2b6439');
+      copa.addColorStop(1, '#1b4a2c');
+    }
+    ctx3d.fillStyle = copa;
+    ctx3d.beginPath();
+    for (let i = 0; i < 5; i += 1) {
+      const t = i / 4;
+      const y = base - alto * (0.20 + i * 0.152);
+      const a = ancho * (1 - t * 0.68);
+      const lean = (i % 2 ? 1 : -1) * ancho * 0.018;
+      ctx3d.moveTo(x + lean, y - alto * 0.29);
+      ctx3d.lineTo(x + a * 0.5, y);
+      ctx3d.lineTo(x + a * 0.20, y - alto * 0.012);
+      ctx3d.lineTo(x - a * 0.20, y - alto * 0.012);
+      ctx3d.lineTo(x - a * 0.5, y);
+      ctx3d.closePath();
+    }
+    ctx3d.fill();
+    ctx3d.fillStyle = noche ? 'rgba(135,195,168,.12)' : 'rgba(226,255,204,.22)';
+    ctx3d.beginPath();
+    ctx3d.moveTo(x - ancho * 0.06, base - alto * 0.94);
+    ctx3d.lineTo(x - ancho * 0.30, base - alto * 0.58);
+    ctx3d.lineTo(x - ancho * 0.10, base - alto * 0.60);
+    ctx3d.closePath();
+    ctx3d.fill();
   }
 
   function dibujarCasa3d(x, base, alto, ancho) {
@@ -2294,20 +2606,24 @@
     };
     if (tipo === 'ciudad' || tipo === 'pueblo') {
       banda(4.4, modoNoche3d ? 'rgba(75,84,83,.95)' : 'rgba(160,167,159,.98)');
-      banda(3.4, modoNoche3d ? 'rgba(47,56,57,.96)' : 'rgba(195,199,190,.98)');
+      banda(3.6, modoNoche3d ? 'rgba(47,56,57,.96)' : 'rgba(195,199,190,.98)');
+      banda(2.9, modoNoche3d ? 'rgba(39,47,49,.98)' : 'rgba(178,184,178,.98)');
     } else {
-      banda(2.6, modoNoche3d ? 'rgba(58,55,43,.96)' : 'rgba(190,174,133,.98)');
-      banda(1.7, modoNoche3d ? 'rgba(74,66,48,.96)' : 'rgba(153,135,96,.98)');
+      banda(3.2, modoNoche3d ? 'rgba(58,55,43,.96)' : 'rgba(190,174,133,.98)');
+      banda(2.2, modoNoche3d ? 'rgba(74,66,48,.96)' : 'rgba(153,135,96,.98)');
+      banda(1.5, modoNoche3d ? 'rgba(52,52,47,.98)' : 'rgba(126,131,113,.98)');
     }
     const asfalto = ctx3d.createLinearGradient(0, horizonte, 0, h);
     if (modoNoche3d) {
-      asfalto.addColorStop(0, '#34475c');
-      asfalto.addColorStop(0.45, '#24374b');
-      asfalto.addColorStop(1, '#142435');
+      asfalto.addColorStop(0, '#334a60');
+      asfalto.addColorStop(0.38, '#243a4d');
+      asfalto.addColorStop(0.78, '#182b3b');
+      asfalto.addColorStop(1, '#0f1d29');
     } else {
-      asfalto.addColorStop(0, '#5b6670');
-      asfalto.addColorStop(0.45, '#414b53');
-      asfalto.addColorStop(1, '#2c343a');
+      asfalto.addColorStop(0, '#66727b');
+      asfalto.addColorStop(0.34, '#4b565f');
+      asfalto.addColorStop(0.76, '#343f47');
+      asfalto.addColorStop(1, '#252d33');
     }
     banda(0, asfalto);
 
@@ -2325,11 +2641,13 @@
       }
     }
 
+    // Huellas y grano del asfalto: dos bandas oscuras donde apoyan los neumáticos
+    // y vetas claras muy suaves que siguen la perspectiva de la vía.
     for (const off of [-2.15, 2.15]) {
       for (let i = 1; i < pts.length; i += 1) {
         const a = pts[i - 1];
         const b = pts[i];
-        ctx3d.strokeStyle = 'rgba(5,10,16,.23)';
+        ctx3d.strokeStyle = 'rgba(5,10,16,.20)';
         ctx3d.lineWidth = Math.min(18, Math.max(1, 0.55 * b.escala));
         ctx3d.beginPath();
         ctx3d.moveTo(a.x + off * a.escala, a.y);
@@ -2337,6 +2655,18 @@
         ctx3d.stroke();
       }
     }
+    ctx3d.save();
+    ctx3d.strokeStyle = modoNoche3d ? 'rgba(160,190,210,.055)' : 'rgba(235,240,238,.075)';
+    for (let i = 4; i < pts.length; i += 3) {
+      const p = pts[i];
+      if (p.escala < 3) continue;
+      ctx3d.lineWidth = Math.max(0.6, p.escala * 0.018);
+      ctx3d.beginPath();
+      ctx3d.moveTo(p.x - p.ancho * 0.34, p.y);
+      ctx3d.lineTo(p.x + p.ancho * 0.34, p.y - Math.max(0.5, p.escala * 0.02));
+      ctx3d.stroke();
+    }
+    ctx3d.restore();
 
     const linea = (off, dash, color, ancho, alpha = 1) => {
       ctx3d.save();
@@ -2354,35 +2684,85 @@
       ctx3d.stroke();
       ctx3d.restore();
     };
-    const bordeAncho = Math.min(3.2, Math.max(1, 0.10 * pts[Math.min(8, pts.length - 1)].escala));
-    linea(-0.405, null, 'rgba(241,247,250,.92)', bordeAncho);
-    linea(0.405, null, 'rgba(241,247,250,.92)', bordeAncho);
+    const escalaRef = pts[Math.min(8, pts.length - 1)]?.escala || 1;
+    const bordeAncho = Math.min(3.4, Math.max(1, 0.10 * escalaRef));
+    // Halo exterior tenue en los bordes: de noche se leen sin deslumbrar.
+    linea(-0.405, null, modoNoche3d ? 'rgba(180,225,245,.20)' : 'rgba(255,255,240,.20)', bordeAncho * 2.6, 0.7);
+    linea(0.405, null, modoNoche3d ? 'rgba(180,225,245,.20)' : 'rgba(255,255,240,.20)', bordeAncho * 2.6, 0.7);
+    linea(-0.405, null, 'rgba(247,251,250,.96)', bordeAncho);
+    linea(0.405, null, 'rgba(247,251,250,.96)', bordeAncho);
     if (tipo === 'autovia') {
-      linea(-0.13, [18, 14], 'rgba(235,242,246,.72)', Math.max(1, bordeAncho * 0.72));
-      linea(0.13, [18, 14], 'rgba(235,242,246,.72)', Math.max(1, bordeAncho * 0.72));
+      linea(-0.13, [20, 15], 'rgba(247,251,250,.80)', Math.max(1, bordeAncho * 0.74));
+      linea(0.13, [20, 15], 'rgba(247,251,250,.80)', Math.max(1, bordeAncho * 0.74));
     } else {
-      linea(0, [17, 15], 'rgba(235,242,246,.7)', Math.max(1, bordeAncho * 0.72));
+      linea(0, [17, 15], 'rgba(247,251,250,.78)', Math.max(1, bordeAncho * 0.74));
     }
 
-    // Guía luminosa del carril derecho, como la referencia.
+    // Captafaros en los bordes: puntos que aparecen al acercarse.
+    for (let i = 6; i < pts.length; i += 5) {
+      const p = pts[i];
+      if (p.escala < 3.5) continue;
+      for (const off of [-0.405, 0.405]) {
+        const x = p.x + off * p.ancho;
+        const r = Math.max(0.7, Math.min(2.2, p.escala * 0.035));
+        ctx3d.fillStyle = modoNoche3d ? 'rgba(255,232,170,.88)' : 'rgba(255,255,244,.82)';
+        ctx3d.beginPath(); ctx3d.arc(x, p.y - Math.max(0.4, p.escala * 0.012), r, 0, Math.PI * 2); ctx3d.fill();
+      }
+    }
+
+    // Relleno tenue del carril derecho: refuerza que el coche va dentro de las
+    // dos líneas y no en el eje central de la calzada.
     ctx3d.save();
-    ctx3d.strokeStyle = 'rgba(41,196,235,.26)';
-    ctx3d.shadowColor = '#2cc8ee';
-    ctx3d.shadowBlur = 9;
-    ctx3d.lineWidth = Math.min(7, Math.max(2, 0.15 * pts[Math.min(8, pts.length - 1)].escala));
     ctx3d.beginPath();
     pts.forEach((p, i) => {
-      const x = p.x + 0.245 * p.ancho;
+      const x = p.x + 0.045 * p.ancho;
       if (i) ctx3d.lineTo(x, p.y); else ctx3d.moveTo(x, p.y);
     });
-    ctx3d.stroke();
+    for (let i = pts.length - 1; i >= 0; i -= 1) {
+      const p = pts[i];
+      ctx3d.lineTo(p.x + 0.455 * p.ancho, p.y);
+    }
+    ctx3d.closePath();
+    ctx3d.fillStyle = modoNoche3d ? 'rgba(51,211,242,.045)' : 'rgba(51,211,242,.035)';
+    ctx3d.fill();
     ctx3d.restore();
 
-    // Guardarraíl o bordillo.
+    // Guía luminosa exactamente por el centro del carril derecho. La línea va
+    // por la misma coordenada que el coche: si la calzada gira, la guía gira.
+    const guia = (ancho, color, blur, dash = null, alpha = 1) => {
+      ctx3d.save();
+      ctx3d.strokeStyle = color;
+      ctx3d.globalAlpha = alpha;
+      ctx3d.shadowColor = '#2cc8ee';
+      ctx3d.shadowBlur = blur;
+      ctx3d.lineWidth = Math.max(1, ancho);
+      ctx3d.lineCap = 'round';
+      ctx3d.lineJoin = 'round';
+      if (dash) {
+        ctx3d.setLineDash(dash);
+        ctx3d.lineDashOffset = -((performance.now() / 55) % (dash[0] + dash[1]));
+      }
+      ctx3d.beginPath();
+      pts.forEach((p, i) => {
+        const x = p.x + 0.25 * p.ancho;
+        if (i) ctx3d.lineTo(x, p.y); else ctx3d.moveTo(x, p.y);
+      });
+      ctx3d.stroke();
+      ctx3d.restore();
+    };
+    guia(Math.min(18, Math.max(7, escalaRef * 0.26)), 'rgba(34,211,238,.12)', 22, null, 0.9);
+    guia(Math.min(6, Math.max(2.2, escalaRef * 0.09)), 'rgba(97,235,255,.86)', 12, [19, 15], 0.95);
+    guia(Math.min(2.2, Math.max(1.1, escalaRef * 0.035)), 'rgba(235,253,255,.9)', 4, [19, 15], 0.9);
+
+    // Guardarraíl metálico con postes y placas reflectantes.
     if (tipo !== 'ciudad' && tipo !== 'pueblo') {
       for (const lado of [-1, 1]) {
-        ctx3d.strokeStyle = modoNoche3d ? 'rgba(145,162,170,.58)' : 'rgba(150,160,162,.76)';
-        ctx3d.lineWidth = Math.max(1, Math.min(3, 0.075 * (pts[0]?.escala || 1)));
+        const metal = ctx3d.createLinearGradient(0, h * 0.45, 0, h * 0.72);
+        metal.addColorStop(0, modoNoche3d ? 'rgba(175,190,198,.78)' : 'rgba(210,216,214,.92)');
+        metal.addColorStop(0.48, modoNoche3d ? 'rgba(100,120,130,.74)' : 'rgba(132,145,148,.86)');
+        metal.addColorStop(1, modoNoche3d ? 'rgba(45,60,69,.72)' : 'rgba(82,96,101,.82)');
+        ctx3d.strokeStyle = metal;
+        ctx3d.lineWidth = Math.max(1.2, Math.min(3.4, 0.085 * (pts[0]?.escala || 1)));
         ctx3d.beginPath();
         pts.forEach((p, i) => {
           const x = p.x + lado * (p.ancho / 2 + 0.22 * p.escala);
@@ -2392,38 +2772,79 @@
         for (let i = 8; i < pts.length; i += 10) {
           const p = pts[i];
           const x = p.x + lado * (p.ancho / 2 + 0.22 * p.escala);
-          ctx3d.strokeStyle = 'rgba(105,121,128,.52)';
+          const altoPoste = Math.max(1, 0.74 * p.escala);
+          ctx3d.strokeStyle = modoNoche3d ? 'rgba(90,108,118,.62)' : 'rgba(105,121,128,.58)';
           ctx3d.lineWidth = Math.max(1, 0.10 * p.escala);
           ctx3d.beginPath();
           ctx3d.moveTo(x, p.y);
-          ctx3d.lineTo(x, p.y - 0.74 * p.escala);
+          ctx3d.lineTo(x, p.y - altoPoste);
           ctx3d.stroke();
+          ctx3d.fillStyle = modoNoche3d ? 'rgba(255,222,148,.74)' : 'rgba(245,247,235,.72)';
+          ctx3d.beginPath();
+          ctx3d.arc(x, p.y - altoPoste * 0.78, Math.max(0.6, Math.min(1.8, p.escala * 0.026)), 0, Math.PI * 2);
+          ctx3d.fill();
         }
       }
     }
     ctx3d.restore();
 
+    // Flechas de carril recomendado: solo se pintan cuando la próxima maniobra
+    // exige un cambio de carril, para no saturar el asfalto en recto.
+    if (mostrarFlechasCarril3d) {
+      for (let i = 8; i < pts.length; i += 6) {
+        const p = pts[i];
+        if (p.escala < 4) continue;
+        const x = p.x + carrilGuiaOffset3d * p.ancho;
+        const y = p.y;
+        const size = Math.max(4, Math.min(14, p.escala * 0.18));
+        ctx3d.save();
+        ctx3d.strokeStyle = 'rgba(255,255,255,.82)';
+        ctx3d.lineWidth = Math.max(1.2, size * 0.12);
+        ctx3d.lineCap = 'round';
+        ctx3d.beginPath();
+        ctx3d.moveTo(x, y + size * 0.65);
+        ctx3d.lineTo(x, y - size * 0.65);
+        ctx3d.moveTo(x - size * 0.4, y - size * 0.25);
+        ctx3d.lineTo(x, y - size * 0.65);
+        ctx3d.lineTo(x + size * 0.4, y - size * 0.25);
+        ctx3d.stroke();
+        ctx3d.restore();
+      }
+    }
+
     dibujarFlechasDetalle3d(w, h);
   }
 
   function dibujarFlechasDetalle3d(w, h) {
-    const sMax = Math.min(86, trazado3d[trazado3d.length - 1]?.s || 86);
-    for (let s = 10; s <= sMax; s += 16) {
+    const sMax = Math.min(96, trazado3d[trazado3d.length - 1]?.s || 96);
+    const pulso = 0.72 + 0.28 * Math.sin((ultimoFrame3d || performance.now()) * 0.003);
+    for (let s = 9; s <= sMax; s += 14) {
       const p = puntoPorS3d(s);
       const q = puntoPorS3d(s + 5);
-      if (!p || !q) continue;
+      if (!p || !q || p.escala < 1.6) continue;
       const ang = Math.atan2(q.x - p.x, -(q.y - p.y));
-      const half = Math.min(22, Math.max(4, p.ancho * 0.11));
-      const len = Math.min(30, Math.max(6, p.ancho * 0.14));
+      const half = Math.min(24, Math.max(3.4, p.ancho * 0.105));
+      const len = Math.min(32, Math.max(5, p.ancho * 0.14));
+      const cerca = Math.min(1, Math.max(0.32, p.escala / 18));
       ctx3d.save();
-      ctx3d.translate(p.x + p.ancho * 0.245, p.y);
+      ctx3d.translate(p.x + p.ancho * 0.25, p.y);
       ctx3d.rotate(ang);
-      ctx3d.strokeStyle = modoNoche3d ? 'rgba(90,226,255,.9)' : 'rgba(36,205,241,.92)';
+      ctx3d.globalAlpha = (0.28 + cerca * 0.68) * pulso;
+      // Halo exterior y trazo interior: se ve sobre asfalto claro y oscuro.
+      ctx3d.strokeStyle = 'rgba(34,211,238,.22)';
       ctx3d.shadowColor = '#20c9f0';
-      ctx3d.shadowBlur = Math.max(2, p.ancho * 0.025);
-      ctx3d.lineWidth = Math.min(5, Math.max(2.2, p.ancho * 0.025));
+      ctx3d.shadowBlur = Math.max(2, p.ancho * 0.035);
+      ctx3d.lineWidth = Math.min(9, Math.max(4, p.ancho * 0.045));
       ctx3d.lineCap = 'round';
       ctx3d.lineJoin = 'round';
+      ctx3d.beginPath();
+      ctx3d.moveTo(-half, len * 0.55);
+      ctx3d.lineTo(0, -len * 0.45);
+      ctx3d.lineTo(half, len * 0.55);
+      ctx3d.stroke();
+      ctx3d.shadowBlur = 0;
+      ctx3d.strokeStyle = modoNoche3d ? 'rgba(151,244,255,.98)' : 'rgba(222,253,255,.98)';
+      ctx3d.lineWidth = Math.min(4.4, Math.max(1.8, p.ancho * 0.022));
       ctx3d.beginPath();
       ctx3d.moveTo(-half, len * 0.55);
       ctx3d.lineTo(0, -len * 0.45);
@@ -2444,9 +2865,7 @@
       if (!st || !Number.isFinite(st.lat)) continue;
       const tipo = String(st.type || '').toLowerCase();
       const nombre = String(st.name || '');
-      const num = Number.isFinite(Number(st.exit)) && st.exit !== null && st.exit !== ''
-        ? Number(st.exit)
-        : (Number.isFinite(Number(st.exits)) ? Number(st.exits) : null);
+      const num = numeroSalida(st);
       const esSalida = num !== null || /off ramp|fork|end of road/.test(tipo) || /^sal(ida|ir|e)\b/i.test(nombre);
       if (!esSalida) {
         if (i === desde && !/continue|depart|new name/.test(tipo)) return null;
@@ -2465,50 +2884,89 @@
     const info = salidaCercana3d(260);
     if (!info || info.d < 25) return;
     const d = info.d;
-    const a = puntoPorS3d(Math.max(16, d - 70));
-    const b = puntoPorS3d(Math.max(18, d - 32));
-    const c = puntoPorS3d(Math.max(20, d - 2));
+    const pulsoSalida = 0.5 + 0.5 * Math.sin((ultimoFrame3d || performance.now()) * 0.0045);
+    const urgenciaSalida = Math.max(0, Math.min(1, (70 - d) / 70));
+    // La franja de deceleración empieza bastante antes de la salida: si se
+    // abría a 70 m, a 150 m del ramal quedaba escondida en el horizonte.
+    // Cerca del coche la escala de la perspectiva es mucho mayor: si la cuña
+    // nace a 30 m, queda pegada al horizonte. Se abre antes para que se lea.
+    const a = puntoPorS3d(Math.max(0, d - 140));
+    const b = puntoPorS3d(Math.max(20, d - 55));
+    const c = puntoPorS3d(Math.max(30, d - 2));
     if (!a || !b || !c) return;
-    const borde = (p, extra = 0) => p.x + p.ancho / 2 + extra * p.escala;
+    const borde = (p) => p.x + p.ancho / 2;
+    // La franja se dibuja en píxeles de pantalla: en perspectiva, 6 m junto al
+    // horizonte son solo 2 px y la salida desaparecía. Así siempre se lee.
+    const anchoRampa = (p) => Math.max(14, Math.min(38, p.ancho * 0.16));
+    const bordeRampa = (p) => borde(p) + anchoRampa(p);
     ctx3d.save();
     ctx3d.beginPath();
+    // La cuña se abre desde el borde derecho de la calzada hacia fuera: el
+    // ancho crece al acercarse al coche, igual que una salida real.
     ctx3d.moveTo(borde(a), a.y);
-    ctx3d.lineTo(borde(b, 2.0), b.y);
-    ctx3d.lineTo(borde(c, 4.0), c.y);
-    ctx3d.lineTo(borde(c), c.y);
     ctx3d.lineTo(borde(b), b.y);
-    ctx3d.lineTo(borde(a), a.y);
+    ctx3d.lineTo(borde(c), c.y);
+    ctx3d.lineTo(bordeRampa(c), c.y);
+    ctx3d.lineTo(bordeRampa(b), b.y);
+    ctx3d.lineTo(bordeRampa(a), a.y);
     ctx3d.closePath();
-    ctx3d.fillStyle = modoNoche3d ? '#22303d' : '#3d474f';
+    const rampa = ctx3d.createLinearGradient(0, a.y, 0, c.y);
+    if (modoNoche3d) {
+      rampa.addColorStop(0, '#263947');
+      rampa.addColorStop(1, '#172733');
+    } else {
+      rampa.addColorStop(0, '#3d4b55');
+      rampa.addColorStop(1, '#2f3b44');
+    }
+    ctx3d.fillStyle = rampa;
     ctx3d.fill();
-    ctx3d.strokeStyle = 'rgba(241,247,250,.92)';
-    ctx3d.lineWidth = Math.max(1.4, 0.14 * b.escala);
+    // Pulso cian sobre la franja: la salida respira y se marca cuando queda
+    // menos de ~70 m, sin cambiar el color base del asfalto.
+    ctx3d.fillStyle = `rgba(34, 211, 238, ${0.05 + 0.10 * urgenciaSalida + 0.04 * pulsoSalida})`;
+    ctx3d.fill();
+    // Elytra/cian tenue dentro de la franja: distingue la salida del arcén.
+    ctx3d.strokeStyle = modoNoche3d ? 'rgba(34,211,238,.18)' : 'rgba(34,211,238,.12)';
+    ctx3d.lineWidth = Math.max(3, 0.38 * b.escala);
+    ctx3d.beginPath();
+    ctx3d.moveTo(borde(a) + (bordeRampa(a) - borde(a)) * 0.5, a.y);
+    ctx3d.lineTo(borde(b) + (bordeRampa(b) - borde(b)) * 0.5, b.y);
+    ctx3d.lineTo(borde(c) + (bordeRampa(c) - borde(c)) * 0.5, c.y);
+    ctx3d.stroke();
+    ctx3d.strokeStyle = 'rgba(241,247,250,.96)';
+    ctx3d.lineWidth = Math.max(1.4, 0.16 * b.escala);
+    ctx3d.beginPath();
+    ctx3d.moveTo(bordeRampa(a), a.y);
+    ctx3d.lineTo(bordeRampa(b), b.y);
+    ctx3d.lineTo(bordeRampa(c), c.y);
+    ctx3d.stroke();
+    ctx3d.strokeStyle = 'rgba(241,247,250,.75)';
+    ctx3d.lineWidth = Math.max(1.1, 0.09 * b.escala);
     ctx3d.beginPath();
     ctx3d.moveTo(borde(a), a.y);
-    ctx3d.lineTo(borde(b, 2.0), b.y);
-    ctx3d.lineTo(borde(c, 4.0), c.y);
+    ctx3d.lineTo(borde(b), b.y);
+    ctx3d.lineTo(borde(c), c.y);
     ctx3d.stroke();
     // Cuña de divergencia: rayas blancas gruesas entre la vía y el ramal.
-    ctx3d.strokeStyle = 'rgba(241,247,250,.9)';
-    ctx3d.lineWidth = Math.max(2.4, 0.16 * b.escala);
-    for (let i = 1; i <= 5; i += 1) {
-      const t = i / 6;
-      const xe = borde(a) + (borde(c, 4.0) - borde(a)) * t;
-      const ye = a.y + (c.y - a.y) * t;
-      const xi = borde(a) + (borde(c) - borde(a)) * t;
-      const yi = a.y + (c.y - a.y) * t;
+    ctx3d.strokeStyle = 'rgba(241,247,250,.92)';
+    ctx3d.lineWidth = Math.max(2.4, 0.18 * b.escala);
+    for (let i = 1; i <= 4; i += 1) {
+      const t = 0.30 + i * 0.14;
+      const xe = bordeRampa(b) + (bordeRampa(c) - bordeRampa(b)) * t;
+      const ye = b.y + (c.y - b.y) * t;
+      const xi = borde(b) + (borde(c) - borde(b)) * t;
+      const yi = b.y + (c.y - b.y) * t;
       ctx3d.beginPath();
-      ctx3d.moveTo(xi + (xe - xi) * 0.15, yi + (ye - yi) * 0.15);
+      ctx3d.moveTo(xi, yi);
       ctx3d.lineTo(xe, ye);
       ctx3d.stroke();
     }
     // Flecha blanca sobre el ramal, en el sentido de la salida.
-    const pa = puntoPorS3d(Math.max(5, d - 38));
-    const qa = puntoPorS3d(Math.max(8, d - 26));
+    const pa = puntoPorS3d(Math.max(18, d - 82));
+    const qa = puntoPorS3d(Math.max(22, d - 62));
     if (pa && qa) {
       const ang = Math.atan2(qa.x - pa.x, -(qa.y - pa.y));
       ctx3d.save();
-      ctx3d.translate(pa.x + pa.ancho / 2 + 2.2 * pa.escala, pa.y);
+      ctx3d.translate(pa.x + pa.ancho / 2 + anchoRampa(pa) * 0.5, pa.y);
       ctx3d.rotate(ang);
       ctx3d.strokeStyle = 'rgba(245,250,252,.9)';
       ctx3d.lineWidth = Math.max(1.4, pa.escala * 0.18);
@@ -2521,6 +2979,52 @@
       ctx3d.stroke();
       ctx3d.restore();
     }
+
+    // La guía cian abandona el carril principal y entra en el ramal en el mismo
+    // tramo en que se abre la cuña: la indicación y el asfalto dicen lo mismo.
+    const centroRampa = (p) => borde(p) + anchoRampa(p) * 0.5;
+    const guiaA = { x: a.x + a.ancho * 0.25, y: a.y };
+    const guiaB = { x: centroRampa(b), y: b.y };
+    const guiaC = { x: centroRampa(c), y: c.y };
+    ctx3d.save();
+    ctx3d.lineCap = 'round';
+    ctx3d.lineJoin = 'round';
+    const trazaSalida = () => {
+      ctx3d.beginPath();
+      ctx3d.moveTo(guiaA.x, guiaA.y);
+      ctx3d.quadraticCurveTo(b.x + b.ancho * 0.30, b.y, guiaB.x, guiaB.y);
+      ctx3d.lineTo(guiaC.x, guiaC.y);
+    };
+    trazaSalida();
+    ctx3d.strokeStyle = 'rgba(34,211,238,.20)';
+    ctx3d.lineWidth = 11 + 5 * pulsoSalida + 8 * urgenciaSalida;
+    ctx3d.stroke();
+    trazaSalida();
+    ctx3d.strokeStyle = '#73efff';
+    ctx3d.lineWidth = 3.2 + 1.4 * pulsoSalida + 2.2 * urgenciaSalida;
+    ctx3d.stroke();
+    // Dashes animados que corren hacia la salida.
+    trazaSalida();
+    ctx3d.setLineDash([12, 9]);
+    ctx3d.lineDashOffset = -((performance.now() / 50) % 21);
+    ctx3d.strokeStyle = 'rgba(224, 252, 255, .92)';
+    ctx3d.lineWidth = 1.5 + 0.8 * pulsoSalida;
+    ctx3d.stroke();
+    ctx3d.setLineDash([]);
+    // Una sola flecha grande en el ramal: sin amontonar chevrones en la curva.
+    const ang = Math.atan2(guiaC.x - guiaB.x, -(guiaC.y - guiaB.y));
+    const r = (Math.max(5, Math.min(14, b.escala * 0.16))) * (1 + 0.22 * pulsoSalida + 0.35 * urgenciaSalida);
+    ctx3d.save();
+    ctx3d.translate(guiaB.x + (guiaC.x - guiaB.x) * 0.55, guiaB.y + (guiaC.y - guiaB.y) * 0.55);
+    ctx3d.rotate(ang);
+    ctx3d.strokeStyle = 'rgba(240,254,255,.98)';
+    ctx3d.lineWidth = Math.max(1.8, r * 0.26);
+    ctx3d.beginPath();
+    ctx3d.moveTo(-r, r * 0.55);
+    ctx3d.lineTo(0, -r * 0.60);
+    ctx3d.lineTo(r, r * 0.55);
+    ctx3d.stroke();
+    ctx3d.restore();
     ctx3d.restore();
   }
 
@@ -2530,7 +3034,15 @@
     // vía para que la señal exista siempre y no quede el HUD en «?».
     const kmhReal = ultimaPos ? limiteActual(ultimaPos.lat, ultimaPos.lon) : null;
     const kmh = kmhReal ?? (ruta ? limiteReferencia3d(tipoVia3d) : null);
-    if (kmh) {
+    // La salida que toca coger puede estar varios pasos por delante del giro
+    // inmediato: se busca la primera salida real y se usa esa para el cartel.
+    const salidaInfo = salidaCercana3d(560);
+    const salida = Boolean(salidaInfo);
+    const numSalida = salidaInfo?.num ?? null;
+    const distSalida = salidaInfo?.d ?? 0;
+    // Cuando hay cartel de salida, la señal de límite del arcén se omite: el
+    // límite sigue en el HUD y así el cartel y el ramal no se tapan.
+    if (kmh && !salida) {
       const p = puntoPorS3d(34);
       if (p) {
         const r = Math.max(15, Math.min(29, p.ancho * 0.12));
@@ -2552,27 +3064,29 @@
       }
     }
 
-    // La salida que toca coger puede estar varios pasos por delante del giro
-    // inmediato: se busca la primera salida real y se usa esa para el cartel.
-    const salidaInfo = salidaCercana3d(560);
-    const salida = Boolean(salidaInfo);
-    const numSalida = salidaInfo?.num ?? null;
-    const distSalida = salidaInfo?.d ?? 0;
     // El cartel entra en escena cuando la salida está cerca; a 400 m no puede
     // estar ya plantado delante del coche.
     if (salida && (!ultimaPos || distSalida <= 520)) {
       const z = Math.max(28, Math.min(150, distSalida || 88));
       const p = puntoPorS3d(z);
       if (p) {
-        const an = Math.max(96, Math.min(178, w * 0.30));
-        const al = Math.max(32, an * 0.31);
+        const urgenciaCartel = Math.max(0, Math.min(1, (80 - distSalida) / 80));
+        const pulsoCartel = 0.5 + 0.5 * Math.sin((ultimoFrame3d || performance.now()) * 0.0045);
+        const an = Math.max(104, Math.min(190, w * 0.32));
+        const al = Math.max(38, an * 0.38);
         // Deja libre la columna de botones de la derecha (27u + radio).
         const x = Math.max(10, w - an - 54);
-        const y = Math.max(horizonte + 10, Math.min(h * 0.62, p.y - al - 5.5 * p.escala));
+        // Por encima del ramal y de la línea de edificios: el cartel no tapa
+        // la salida que está anunciando. Se usa una altura de gantry, no la
+        // proyección exacta del punto, que lo dejaba justo sobre la cuña.
+        const y = Math.max(136, Math.min(h * 0.30, horizonte - al - 6));
         const poste = Math.max(10, Math.min(h * 0.14, 4.5 * p.escala));
         ctx3d.fillStyle = 'rgba(120,134,140,.8)';
         ctx3d.fillRect(x + an * 0.14, y + al, Math.max(2, an * 0.017), poste);
         ctx3d.fillRect(x + an * 0.83, y + al, Math.max(2, an * 0.017), poste);
+        ctx3d.save();
+        ctx3d.shadowColor = '#4ade80';
+        ctx3d.shadowBlur = 6 + 14 * urgenciaCartel + 8 * pulsoCartel;
         ctx3d.fillStyle = '#0b5c3b';
         ctx3d.beginPath();
         if (ctx3d.roundRect) ctx3d.roundRect(x, y, an, al, Math.max(3, an * 0.035));
@@ -2581,6 +3095,7 @@
         ctx3d.strokeStyle = 'rgba(235,250,242,.95)';
         ctx3d.lineWidth = Math.max(1.4, an * 0.012);
         ctx3d.strokeRect(x, y, an, al);
+        ctx3d.restore();
         // Flecha de salida a la derecha, blanca y grande.
         ctx3d.save();
         ctx3d.translate(x + an * 0.19, y + al * 0.52);
@@ -2596,11 +3111,20 @@
         ctx3d.fillStyle = '#f4fff8';
         ctx3d.textAlign = 'left';
         ctx3d.textBaseline = 'middle';
-        ctx3d.font = `900 ${Math.max(11, al * 0.33)}px system-ui, sans-serif`;
+        ctx3d.font = `900 ${Math.max(11, al * 0.27)}px system-ui, sans-serif`;
         const salidaTxt = numSalida !== null ? `SALIDA ${numSalida}` : 'SALIDA';
-        ctx3d.fillText(salidaTxt, x + an * 0.29, y + al * 0.34);
-        ctx3d.font = `600 ${Math.max(7, al * 0.19)}px system-ui, sans-serif`;
-        ctx3d.fillText(textoCorto3d(salidaInfo.s.name || salidaInfo.s.ref || '', an * 0.72), x + an * 0.29, y + al * 0.66);
+        ctx3d.fillText(salidaTxt, x + an * 0.29, y + al * 0.28);
+        const nombreSalida = String(salidaInfo.s.name || salidaInfo.s.ref || '');
+        // Si el nombre ya empieza por «Salida 12», no se repite debajo.
+        const nombreLimpio = /^salida\b/i.test(nombreSalida) ? '' : nombreSalida;
+        if (nombreLimpio) {
+          ctx3d.font = `600 ${Math.max(7, al * 0.16)}px system-ui, sans-serif`;
+          ctx3d.fillText(textoCorto3d(nombreLimpio, an * 0.72), x + an * 0.29, y + al * 0.53);
+        }
+        const segSalida = segundosHasta3d(distSalida);
+        ctx3d.fillStyle = '#d1fae5';
+        ctx3d.font = `800 ${Math.max(7, al * 0.15)}px system-ui, sans-serif`;
+        ctx3d.fillText(`EN ${metros(distSalida)}${segSalida ? ` · ${segSalida} s` : ''}`, x + an * 0.29, y + al * 0.79);
       }
     }
 
@@ -2775,7 +3299,9 @@
     // cercano de la cámara, con escala enorme).
     const p0 = trazado3d.find(p => p.s >= 0) || trazado3d[0];
     const anchoVia0 = p0?.ancho || (w * 0.34);
-    const cw = Math.max(62, Math.min(anchoVia0 * 0.40, w * 0.38, h * 0.36));
+    // 0,335 del ancho total deja un margen visible a cada lado dentro del
+    // carril derecho (0,5 del ancho). Antes el coche casi tocaba las líneas.
+    const cw = Math.max(50, Math.min(anchoVia0 * 0.27, w * 0.27, h * 0.25));
     const ch = cw * 0.54;
     // El carril derecho está centrado en pantalla por construcción: el coche
     // va exactamente en ese eje, plano y sin balanceo lateral.
@@ -2791,9 +3317,14 @@
     ctx3d.translate(x, base + rebote);
     const X = (v) => v * cw;
     const Y = (v) => v * ch;
-    ctx3d.fillStyle = 'rgba(0,0,0,.38)';
+    // Sombra de contacto suave: apoya el coche en el asfalto y no en el aire.
+    const sombraCoche = ctx3d.createRadialGradient(0, 2, 0, 0, 2, cw * 0.48);
+    sombraCoche.addColorStop(0, 'rgba(0,0,0,.58)');
+    sombraCoche.addColorStop(0.48, 'rgba(0,0,0,.30)');
+    sombraCoche.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx3d.fillStyle = sombraCoche;
     ctx3d.beginPath();
-    ctx3d.ellipse(0, 2, cw * 0.31, Math.max(3, ch * 0.07), 0, 0, Math.PI * 2);
+    ctx3d.ellipse(0, 2, cw * 0.48, Math.max(4, ch * 0.10), 0, 0, Math.PI * 2);
     ctx3d.fill();
     ctx3d.rotate(tilt * Math.PI / 180);
 
@@ -3293,6 +3824,24 @@
     const kmh = kmhReal ?? (ruta ? limiteReferencia3d(tipoVia3d) : null);
     const kmhAprox = kmhReal === null && kmh !== null;
     const calle = s?.name || ruta?.name || 'Calle o carretera';
+    // Radar/cámara más cercana por delante.
+    radarProximo3d = null; radarDistancia3d = Infinity;
+    if (navegando && ultimaPos && Array.isArray(avisos)) {
+      for (const a of avisos) {
+        if (a.kind !== 'radar' && a.kind !== 'camara') continue;
+        const dd = distancia(ultimaPos.lat, ultimaPos.lon, a.lat, a.lon);
+        if (dd < radarDistancia3d) { radarDistancia3d = dd; radarProximo3d = a; }
+      }
+    }
+    // Carril recomendado para la próxima maniobra: se refleja en el texto y
+    // en las flechas pintadas sobre el asfalto.
+    const modManiobra = String(s?.modifier || '');
+    let carrilTxt = 'Carril central';
+    mostrarFlechasCarril3d = false;
+    if (/left/.test(modManiobra)) { carrilTxt = 'Carril izquierdo'; carrilGuiaOffset3d = -0.25; mostrarFlechasCarril3d = true; }
+    else if (/right/.test(modManiobra)) { carrilTxt = 'Carril derecho'; carrilGuiaOffset3d = 0.25; mostrarFlechasCarril3d = true; }
+    else if (s?.type === 'off ramp' || s?.type === 'exit' || s?.type === 'fork') { carrilTxt = 'Carril de salida'; carrilGuiaOffset3d = 0.25; mostrarFlechasCarril3d = true; }
+    else { carrilGuiaOffset3d = 0.25; }
 
     // Tarjeta superior: solo cuando la ruta ya está en marcha.
     if (navegando && ruta) {
@@ -3312,15 +3861,16 @@
       ctx3d.textBaseline = 'middle';
       ctx3d.fillStyle = '#f8fafc';
       ctx3d.font = `800 ${15.5 * u}px system-ui, sans-serif`;
-      ctx3d.fillText(textoCorto3d(textoGiro3d(s), cw - 74 * u), x + 58 * u, y + 42 * u);
+      ctx3d.fillText(textoCorto3d(`${textoGiro3d(s)} · ${carrilTxt}`, cw - 74 * u), x + 58 * u, y + 42 * u);
       ctx3d.fillStyle = '#e2e8f0';
       ctx3d.font = `900 ${19 * u}px system-ui, sans-serif`;
-      ctx3d.fillText(`en ${metros(distM)}`, x + 58 * u, y + 65 * u);
+      const segM = segundosHasta3d(distM);
+      ctx3d.fillText(textoCorto3d(`en ${metros(distM)}${segM ? ` · ${segM} s` : ''}`, cw - 74 * u), x + 58 * u, y + 65 * u);
       ctx3d.fillStyle = '#94a3b8';
       ctx3d.font = `500 ${11 * u}px system-ui, sans-serif`;
       ctx3d.fillText(textoCorto3d(calle, cw - 74 * u), x + 58 * u, y + 90 * u);
-      if (Number.isFinite(s?.exit)) {
-        const et = `SALIDA ${s.exit}`;
+      if (numeroSalida(s) !== null) {
+        const et = `SALIDA ${numeroSalida(s)}`;
         ctx3d.font = `800 ${10.5 * u}px system-ui, sans-serif`;
         const ew = ctx3d.measureText(et).width + 14 * u;
         const ex = x + cw - ew - 10 * u;
@@ -3334,6 +3884,31 @@
         ctx3d.textAlign = 'center';
         ctx3d.fillText(et, ex + ew / 2, ey + 10 * u);
       }
+    }
+
+    // Aviso de cámara/radar próximo: se coloca justo debajo de la tarjeta de
+    // maniobra para no tapar la carretera.
+    if (navegando && ruta && radarProximo3d && radarDistancia3d <= 900) {
+      const tw = Math.min(w - 24 * u, 300 * u);
+      const th = 30 * u;
+      const tx = 12 * u;
+      const ty = 12 * u + 106 * u + 8 * u;
+      const limiteRadar = parseInt(String(radarProximo3d.maxspeed || '').match(/(\d+)/)?.[1] || '', 10) || null;
+      const exceso = limiteRadar && velocidad > limiteRadar;
+      ctx3d.fillStyle = exceso ? 'rgba(127,29,29,.94)' : 'rgba(6,95,70,.94)';
+      ctx3d.beginPath();
+      if (ctx3d.roundRect) ctx3d.roundRect(tx, ty, tw, th, 10 * u);
+      else ctx3d.rect(tx, ty, tw, th);
+      ctx3d.fill();
+      ctx3d.strokeStyle = exceso ? 'rgba(248,113,113,.8)' : 'rgba(74,222,128,.8)';
+      ctx3d.lineWidth = 1.2 * u;
+      ctx3d.stroke();
+      ctx3d.fillStyle = '#f8fafc';
+      ctx3d.textAlign = 'left';
+      ctx3d.textBaseline = 'middle';
+      ctx3d.font = `800 ${11.5 * u}px system-ui, sans-serif`;
+      const txt = `🚨 Cámara a ${metros(radarDistancia3d)}${limiteRadar ? ` · límite ${limiteRadar}` : ''}`;
+      ctx3d.fillText(textoCorto3d(txt, tw - 16 * u), tx + 10 * u, ty + th / 2);
     }
 
     // Velocidad real del GPS y límite de la vía.
@@ -3537,7 +4112,9 @@
   function textoGiro3d(s) {
     if (!s) return 'Continúa recto';
     if (s.type === 'arrive') return 'Llegada al destino';
-    if (s.type === 'roundabout' || s.type === 'rotary') return 'Toma la rotonda';
+    if (s.type === 'roundabout' || s.type === 'rotary') return numeroSalida(s) !== null ? `Toma la rotonda, salida ${numeroSalida(s)}` : 'Toma la rotonda';
+    if (s.type === 'off ramp') return numeroSalida(s) !== null ? `Toma la salida ${numeroSalida(s)}` : 'Toma la salida';
+    if (s.type === 'on ramp') return 'Incorpórate a la vía';
     if (s.type === 'merge') return 'Incorpórate a la vía';
     if (s.type === 'fork') return 'Coge el desvío';
     if (s.type === 'end of road') return 'Al final de la vía';
@@ -3549,6 +4126,9 @@
   }
 
   function dibujar3d() {
+    // El 3D sigue el mismo criterio de día/noche que el mapa: así la vista
+    // nocturna no se queda siempre en modo día.
+    modoNoche3d = temaInicial();
     if (!ctx3d || !canvas3d) return;
     const cw = canvas3d.clientWidth || window.innerWidth;
     const ch = canvas3d.clientHeight || window.innerHeight;
@@ -3587,8 +4167,10 @@
     dibujarFondoDetalle3d(w, h, horizonte, tipo);
     dibujarEntornoDetalle3d(w, h, horizonte, tipo);
     dibujarCalzadaDetalle3d(w, h, horizonte, tipo);
-    dibujarRamalSalida3d(w, h);
+    // El mobiliario urbano se pinta antes que el ramal: los bloques de la
+    // derecha no deben tapar la salida cuando la calzada se abre.
     dibujarMobiliarioUrbano3d(w, h, tipo);
+    dibujarRamalSalida3d(w, h);
     dibujarSenalesDetalle3d(w, h, horizonte);
     dibujarCocheGt4Detalle3d(w, h);
     dibujarHud3d(w, h);
@@ -3609,6 +4191,7 @@
   }
 
   function iniciar3d() {
+    modoNoche3d = temaInicial();
     if (!init3d()) return;
     // Un solo modo de vista a la vez: si AR está abierto, se cierra.
     if (typeof vistaArActiva !== 'undefined' && vistaArActiva && typeof detenerAr === 'function') detenerAr(true);

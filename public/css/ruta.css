@@ -3279,6 +3279,16 @@ body.viendo-ruta .pwa-install { display: none !important; }
 .ruta-shell.ruta-navegando #rutaSalirNav,
 .ruta-shell.ruta-3d-activo #rutaSalirNav,
 .ruta-shell.ruta-ar-activo #rutaSalirNav { display: inline-flex !important; }
+/* En 3D la tarjeta de maniobra ocupa la esquina superior: la salida rápida
+   se coloca debajo para que no tape la distancia ni el tiempo. */
+.ruta-shell.ruta-3d-activo #rutaSalirNav {
+  top: calc(max(10px, env(safe-area-inset-top, 0px)) + 132px);
+  /* Sobre el canvas el blur de fondo puede fallar en algunos móviles y dejar
+     un rectángulo negro; aquí basta con un fondo sólido. */
+  background: rgba(8, 10, 14, .92);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 
 @media (max-width: 430px) {
   .ruta-salir-nav { font-size: 12px; padding: 8px 12px; }
